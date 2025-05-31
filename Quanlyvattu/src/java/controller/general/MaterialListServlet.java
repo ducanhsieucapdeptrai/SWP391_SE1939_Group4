@@ -1,4 +1,4 @@
-package controller.general;
+ package controller.general;
 
 import DAO.MaterialDAO;
 import jakarta.servlet.ServletException;
@@ -9,6 +9,11 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 import model.Material;
+
+import jakarta.servlet.annotation.WebServlet;
+
+import jakarta.servlet.annotation.WebServlet;
+
 
 @WebServlet(name = "MaterialList", urlPatterns = {"/materiallist"})
 public class MaterialListServlet extends HttpServlet {
@@ -25,7 +30,9 @@ public class MaterialListServlet extends HttpServlet {
         if (pageParam != null) {
             try {
                 page = Integer.parseInt(pageParam);
-                if (page < 1) page = 1;
+                if (page < 1) {
+                    page = 1;
+                }
             } catch (NumberFormatException e) {
                 page = 1;
             }
@@ -45,7 +52,11 @@ public class MaterialListServlet extends HttpServlet {
         request.setAttribute("totalPage", totalPage);
 
         // Forward sang trang hiển thị
-        request.getRequestDispatcher("MaterialList.jsp").forward(request, response);
+// Truyền thêm biến để layout.jsp biết cần include materiallist.jsp
+        request.setAttribute("pageContent", "/MaterialList.jsp");
+
+// Forward sang layout chung
+        request.getRequestDispatcher("/layout/layout.jsp").forward(request, response);
     }
 
     @Override
