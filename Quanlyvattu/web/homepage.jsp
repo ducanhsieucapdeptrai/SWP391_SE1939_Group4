@@ -64,7 +64,7 @@
                                     </a>
                                 </li>
                                 <li class="mb-1">
-                                    <a href="materiallist" class="sidebar-item block px-4 py-2 rounded text-white" data-page="inventory">
+                                    <a href="${pageContext.request.contextPath}/materiallist" class="sidebar-item block px-4 py-2 rounded text-white" data-page="inventory">
                                         <i class="fas fa-boxes mr-2"></i> Inventory
                                     </a>
                                 </li>
@@ -83,12 +83,12 @@
                                     <!-- Submenu -->
                                     <ul id="userManagerSubmenu" class="hidden ml-4 mt-1">
                                         <li class="mb-1">
-                                            <a href="userlist" class="sidebar-item block px-3 py-2 rounded text-gray-300 hover:text-white hover:bg-gray-600" data-page="userlist">
+                                            <a href="${pageContext.request.contextPath}/userlist" class="sidebar-item block px-3 py-2 rounded text-gray-300 hover:text-white hover:bg-gray-600" data-page="userlist">
                                                 <i class="fas fa-list mr-2"></i> UserList
                                             </a>
                                         </li>
                                         <li class="mb-1">
-                                            <a href="user-matrix" class="sidebar-item block px-3 py-2 rounded text-gray-300 hover:text-white hover:bg-gray-600" data-page="userauthorization">
+                                            <a href="${pageContext.request.contextPath}/user-matrix" class="sidebar-item block px-3 py-2 rounded text-gray-300 hover:text-white hover:bg-gray-600" data-page="userauthorization">
                                                 <i class="fas fa-key mr-2"></i> UserAuthorization
                                             </a>
                                         </li>
@@ -151,7 +151,7 @@
                                         </a>
                                     </li>
                                     <li class="mb-1">
-                                        <a href="#" class="sidebar-item block px-4 py-2 rounded text-white" data-page="inventory">
+                                        <a href="${pageContext.request.contextPath}/materiallist" class="sidebar-item block px-4 py-2 rounded text-white" data-page="inventory">
                                             <i class="fas fa-boxes mr-2"></i> Inventory
                                         </a>
                                     </li>

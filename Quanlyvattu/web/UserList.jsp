@@ -7,6 +7,7 @@
         <a href="homepage.jsp" class="text-sm bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Back to HomePage</a>
     </div>
 
+    <!-- Thông báo -->
     <c:if test="${param.message != null}">
         <div class="mb-4">
             <c:choose>
@@ -26,6 +27,7 @@
         </div>
     </c:if>
 
+    <!-- Bảng danh sách -->
     <div class="overflow-x-auto">
         <table class="min-w-full border text-sm">
             <thead class="bg-gray-200 text-gray-600">
