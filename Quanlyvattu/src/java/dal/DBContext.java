@@ -14,7 +14,7 @@ public class DBContext {
         try {
             String url = "jdbc:mysql://localhost:3306/quan_ly_vat_tu?useSSL=false&serverTimezone=UTC";
             String user = "root";
-            String password = "Phuoc9899@.com"; // sửa theo đúng mật khẩu MySQL
+            String password = "123456"; // sửa theo đúng mật khẩu MySQL
 
             Class.forName("com.mysql.cj.jdbc.Driver");
             connection = DriverManager.getConnection(url, user, password);
