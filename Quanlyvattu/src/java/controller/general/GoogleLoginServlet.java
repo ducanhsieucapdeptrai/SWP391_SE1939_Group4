@@ -1,4 +1,4 @@
-package controller;
+package controller.general;
 
 import DAO.UsersDAO;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeTokenRequest;
