@@ -1,0 +1,23 @@
+# Ignore compiled Java classes
+*.class
+
+# Ignore NetBeans build directories
+build/
+dist/
+nbproject/private/
+nbbuild/
+nbdist/
+
+# Ignore packaged files
+*.jar
+*.war
+*.ear
+
+# IDE-specific
+.idea/
+*.iml
+.vscode/
+
+# OS-specific
+.DS_Store
+Thumbs.db
