@@ -24,13 +24,13 @@ public class ChangePasswordServlet extends HttpServlet {
         if (email == null || currentPassword == null || newPassword == null || confirmPassword == null
                 || email.isEmpty() || currentPassword.isEmpty() || newPassword.isEmpty() || confirmPassword.isEmpty()) {
             request.setAttribute("error", "Please fill in all fields.");
-            request.getRequestDispatcher("change_password_with_email.jsp").forward(request, response);
+            request.getRequestDispatcher("change_password.jsp").forward(request, response);
             return;
         }
 
         if (!newPassword.equals(confirmPassword)) {
             request.setAttribute("error", "New passwords do not match.");
-            request.getRequestDispatcher("change_password_with_email.jsp").forward(request, response);
+            request.getRequestDispatcher("change_password.jsp").forward(request, response);
             return;
         }
 
@@ -39,14 +39,14 @@ public class ChangePasswordServlet extends HttpServlet {
 
         if (user == null) {
             request.setAttribute("error", "Email not found.");
-            request.getRequestDispatcher("change_password_with_email.jsp").forward(request, response);
+            request.getRequestDispatcher("change_password.jsp").forward(request, response);
             return;
         }
 
         String hashedCurrentPassword = HashUtil.hashPassword(currentPassword);
         if (!hashedCurrentPassword.equals(user.getPassword())) {
             request.setAttribute("error", "Current password is incorrect.");
-            request.getRequestDispatcher("/change_password_with_email.jsp").forward(request, response);
+            request.getRequestDispatcher("change_password.jsp").forward(request, response);
             return;
         }
 
@@ -60,6 +60,6 @@ public class ChangePasswordServlet extends HttpServlet {
             request.setAttribute("error", "Failed to update password.");
         }
 
-        request.getRequestDispatcher("/change_password_with_email.jsp").forward(request, response);
+        request.getRequestDispatcher("change_password.jsp").forward(request, response);
     }
 }

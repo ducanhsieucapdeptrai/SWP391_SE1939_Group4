@@ -152,11 +152,14 @@ public class UserDAO extends DBContext {
     return null;
 }
 public boolean updatePassword(int userId, String newHashedPassword) {
-    String sql = "UPDATE Users SET Password = ? WHERE UserId = ?";
+    String sql = "UPDATE UsersList SET Password = ? WHERE UserId = ?";
+
     try (PreparedStatement ps = connection.prepareStatement(sql)) {
         ps.setString(1, newHashedPassword);
         ps.setInt(2, userId);
-        return ps.executeUpdate() > 0;
+        int rows = ps.executeUpdate();
+        System.out.println(" UPDATE ảnh hưởng dòng: " + rows);
+        return rows > 0;
     } catch (SQLException e) {
         e.printStackTrace();
         return false;
@@ -164,4 +167,6 @@ public boolean updatePassword(int userId, String newHashedPassword) {
 }
 
 }
+
+
 
