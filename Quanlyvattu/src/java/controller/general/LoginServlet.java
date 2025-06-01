@@ -84,6 +84,7 @@ public class LoginServlet extends HttpServlet {
             e.printStackTrace();
             request.setAttribute("errorMsg", "System error: " + e.getMessage());
             request.getRequestDispatcher("login.jsp").forward(request, response);
+            
         }
     }
 

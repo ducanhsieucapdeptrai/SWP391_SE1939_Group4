@@ -4,10 +4,30 @@
  */
 package model;
 
-/**
- *
- * @author anhdu
- */
 public class FunctionDetail {
+    private int roleId;
+    private int functionId;
     
+    public FunctionDetail() {}
+    
+    public FunctionDetail(int roleId, int functionId) {
+        this.roleId = roleId;
+        this.functionId = functionId;
+    }
+    
+    public int getRoleId() {
+        return roleId;
+    }
+    
+    public void setRoleId(int roleId) {
+        this.roleId = roleId;
+    }
+    
+    public int getFunctionId() {
+        return functionId;
+    }
+    
+    public void setFunctionId(int functionId) {
+        this.functionId = functionId;
+    }
 }

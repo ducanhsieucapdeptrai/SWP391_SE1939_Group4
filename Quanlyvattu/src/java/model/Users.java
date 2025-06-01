@@ -9,7 +9,7 @@ package model;
  * @author Admin
  */
 
-import java.sql.Timestamp;
+
 
 public class Users {
     private int userId;
@@ -19,13 +19,13 @@ public class Users {
     private String password;
     private int roleId;
     private boolean isActive;
-//    private Timestamp createdAt;
+
 
     // Constructors
     public Users() {
     }
 
-    public Users(int userId, String fullName, String email, String phone, String password, int roleId, boolean isActive, Timestamp createdAt) {
+    public Users(int userId, String fullName, String email, String phone, String password, int roleId, boolean isActive) {
         this.userId = userId;
         this.fullName = fullName;
         this.email = email;
@@ -33,7 +33,6 @@ public class Users {
         this.password = password;
         this.roleId = roleId;
         this.isActive = isActive;
-//        this.createdAt = createdAt;
     }
 
     // Getters & Setters
@@ -92,14 +91,5 @@ public class Users {
     public void setIsActive(boolean isActive) {
         this.isActive = isActive;
     }
-//
-//    public Timestamp getCreatedAt() {
-//        return createdAt;
-//    }
-//
-//    public void setCreatedAt(Timestamp createdAt) {
-//        this.createdAt = createdAt;
-//    }
-
     
 }
