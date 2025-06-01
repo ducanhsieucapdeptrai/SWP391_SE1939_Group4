@@ -80,9 +80,15 @@
                         </select>
                     </div>
 
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-primary">Send Request</button>
+                    <div class="row g-2">
+                        <div class="col-6 d-grid">
+                            <button type="submit" class="btn btn-primary">Send Request</button>
+                        </div>
+                        <div class="col-6 d-grid">
+                            <a href="${pageContext.request.contextPath}/login" class="btn btn-outline-secondary">Back to Home</a>
+                        </div>
                     </div>
+
                 </form>
             </div>
         </div>
