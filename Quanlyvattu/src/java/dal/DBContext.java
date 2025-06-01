@@ -15,7 +15,7 @@ public class DBContext {
             String url = "jdbc:mysql://localhost:3306/quan_ly_vat_tu?useSSL=false&serverTimezone=UTC";
             String user = "root";
 
-            String password = "Taahuyydatt"; // sửa theo đúng mật khẩu MySQL
+            String password = "1234"; // sửa theo đúng mật khẩu MySQL
 
 
 

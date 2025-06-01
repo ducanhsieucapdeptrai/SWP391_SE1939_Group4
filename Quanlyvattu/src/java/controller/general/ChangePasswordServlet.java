@@ -46,7 +46,7 @@ public class ChangePasswordServlet extends HttpServlet {
         String hashedCurrentPassword = HashUtil.hashPassword(currentPassword);
         if (!hashedCurrentPassword.equals(user.getPassword())) {
             request.setAttribute("error", "Current password is incorrect.");
-            request.getRequestDispatcher("change_password_with_email.jsp").forward(request, response);
+            request.getRequestDispatcher("/change_password_with_email.jsp").forward(request, response);
             return;
         }
 
@@ -60,6 +60,6 @@ public class ChangePasswordServlet extends HttpServlet {
             request.setAttribute("error", "Failed to update password.");
         }
 
-        request.getRequestDispatcher("change_password_with_email.jsp").forward(request, response);
+        request.getRequestDispatcher("/change_password_with_email.jsp").forward(request, response);
     }
 }
