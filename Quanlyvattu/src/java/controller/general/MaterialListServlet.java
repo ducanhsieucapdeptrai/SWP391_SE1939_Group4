@@ -25,7 +25,9 @@ public class MaterialListServlet extends HttpServlet {
         if (pageParam != null) {
             try {
                 page = Integer.parseInt(pageParam);
-                if (page < 1) page = 1;
+                if (page < 1) {
+                    page = 1;
+                }
             } catch (NumberFormatException e) {
                 page = 1;
             }
@@ -44,8 +46,9 @@ public class MaterialListServlet extends HttpServlet {
         request.setAttribute("currentPage", page);
         request.setAttribute("totalPage", totalPage);
 
-        // Forward sang trang hiển thị
-        request.getRequestDispatcher("MaterialList.jsp").forward(request, response);
+        request.setAttribute("pageContent", "/MaterialList.jsp");
+        request.getRequestDispatcher("/layout/layout.jsp").forward(request, response);
+
     }
 
     @Override
