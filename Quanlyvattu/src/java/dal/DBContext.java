@@ -12,21 +12,21 @@ public class DBContext {
 
     public DBContext() {
         try {
-            String url = "jdbc:mysql://localhost:3306/quan_ly_vat_tu?useSSL=false&serverTimezone=UTC";
+            // ✅ BỔ SUNG allowPublicKeyRetrieval=true để tránh lỗi xác thực MySQL 8+
+            String url = "jdbc:mysql://localhost:3306/quan_ly_vat_tu?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true";
             String user = "root";
-            String password = "1234"; // sửa theo đúng mật khẩu MySQL
+            String password = "123456"; // Đảm bảo đúng mật khẩu MySQL
 
             Class.forName("com.mysql.cj.jdbc.Driver");
             connection = DriverManager.getConnection(url, user, password);
 
-            System.out.println("Connected successfully!");
+            System.out.println("✅ Connected successfully!");
 
         } catch (ClassNotFoundException | SQLException ex) {
             Logger.getLogger(DBContext.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
-    // Optional: thêm method để lấy connection
     public Connection getConnection() {
         return connection;
     }
@@ -38,11 +38,11 @@ public class DBContext {
 
             if (conn != null) {
                 System.out.println("✅ Kết nối thành công tới cơ sở dữ liệu.");
+                conn.close();
             } else {
                 System.out.println("❌ Kết nối thất bại.");
             }
 
-            conn.close(); // Đóng kết nối sau khi kiểm tra
         } catch (Exception e) {
             System.out.println("❌ Lỗi kết nối database: " + e.getMessage());
             e.printStackTrace();
