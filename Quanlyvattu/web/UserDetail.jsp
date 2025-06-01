@@ -1,70 +1,55 @@
-<%-- 
-    Document   : UserDetail
-    Created on : May 27, 2025, 10:15:07 PM
-    Author     : Admin
---%>
-
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>User Detail</title>
-        <style>
-            .user-detail-form {
-                width: 50%;
-                margin: 20px auto;
-                padding: 20px;
-                border: 1px solid #ddd;
-                border-radius: 5px;
-            }
-            .form-group {
-                margin-bottom: 15px;
-            }
-            .form-label {
-                display: inline-block;
-                width: 100px;
-                font-weight: bold;
-            }
-            .form-value {
-                margin-left: 10px;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="user-detail-form">
-            <h2>User Details</h2>
-            <div class="form-group">
-                <span class="form-label">ID:</span>
-                <span class="form-value">${user.id}</span>
-            </div>
-            <div class="form-group">
-                <span class="form-label">Name:</span>
-                <span class="form-value">${user.name}</span>
-            </div>
-            <div class="form-group">
-                <span class="form-label">Gender:</span>
-                <span class="form-value">${user.gender}</span>
-            </div>
-            <div class="form-group">
-                <span class="form-label">Phone:</span>
-                <span class="form-value">${user.phone}</span>
-            </div>
-            <div class="form-group">
-                <span class="form-label">Email:</span>
-                <span class="form-value">${user.email}</span>
-            </div>
-            <div class="form-group">
-                <span class="form-label">Role:</span>
-                <span class="form-value">${user.role}</span>
-            </div>
-            <div class="form-group">
-                <span class="form-label">Status:</span>
-                <span class="form-value">${user.isactive}</span>
-            </div>
-            <div class="form-group">
-                <a href="javascript:history.back()">Back to List</a>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+
+<div class="user-detail-container bg-white p-6 rounded shadow-md w-full max-w-3xl mx-auto">
+    <h1 class="text-2xl font-semibold text-gray-800 mb-6">User Details</h1>
+
+    <div class="info-section mb-8">
+        <h2 class="text-xl font-medium text-gray-700 border-b pb-2 mb-4">Basic Information</h2>
+
+        <div class="info-row mb-4 flex">
+            <div class="info-label w-40 font-semibold text-gray-600">Full Name:</div>
+            <div class="info-value text-gray-800">${user.fullName}</div>
+        </div>
+
+        <div class="info-row mb-4 flex">
+            <div class="info-label w-40 font-semibold text-gray-600">Email:</div>
+            <div class="info-value text-gray-800">${user.email}</div>
+        </div>
+
+        <div class="info-row mb-4 flex">
+            <div class="info-label w-40 font-semibold text-gray-600">Phone:</div>
+            <div class="info-value text-gray-800">${user.phone}</div>
+        </div>
+
+        <div class="info-row mb-4 flex">
+            <div class="info-label w-40 font-semibold text-gray-600">Role:</div>
+            <div class="info-value text-gray-800">
+                <c:forEach items="${roleList}" var="role">
+                    <c:if test="${role.roleId == user.roleId}">
+                        ${role.roleName}
+                    </c:if>
+                </c:forEach>
             </div>
         </div>
-    </body>
-</html>
+
+        <div class="info-row mb-4 flex">
+            <div class="info-label w-40 font-semibold text-gray-600">Status:</div>
+            <div class="info-value">
+                <c:choose>
+                    <c:when test="${user.isActive}">
+                        <span class="bg-green-500 text-white px-3 py-1 rounded">Active</span>
+                    </c:when>
+                    <c:otherwise>
+                        <span class="bg-red-500 text-white px-3 py-1 rounded">Inactive</span>
+                    </c:otherwise>
+                </c:choose>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <a href="userlist" class="inline-block bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded mr-2 text-sm">Back to List</a>
+        <a href="user-edit?id=${user.userId}" class="inline-block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm">Edit</a>
+    </div>
+</div>

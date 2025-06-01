@@ -1,4 +1,6 @@
 /Quanlyvattu/dist/
 /nhap/nbproject/private/
 Quanlyvattu/build/web/WEB-INF/classes/dal/DBContext.class
-*.jar
+Quanlyvattu/build/web/WEB-INF/lib/jakarta.activation-2.0.1.jar
+Quanlyvattu/build/web/WEB-INF/lib/jakarta.mail-api-2.1.2.jar
+Quanlyvattu/build/web/WEB-INF/lib/jakarta.activation-2.0.1.jar
