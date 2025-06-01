@@ -58,28 +58,9 @@ public class LoginServlet extends HttpServlet {
                 response.addCookie(cookie);
             }
 
-//            String redirectUrl = switch (user.getRoleId()) {
-//                case 1 ->
-//                    "admin/dashboard.jsp";
-//                case 2 ->
-//                    "staff/dashboard.jsp";
-//                case 3 ->
-//                    "director/dashboard.jsp";
-//                case 4 ->
-//                    "company/home.jsp";
-//                default ->
-//                    null;
-//            };
+            // ✅ Redirect đến HomepageServlet
+            response.sendRedirect("dashboard");
 
-//            if (redirectUrl != null) {
-//                response.sendRedirect(redirectUrl);
-//            } else {
-//                session.invalidate();
-//                request.setAttribute("errorMsg", "Unrecognized user role. Please contact the administrator.");
-//                request.getRequestDispatcher("login.jsp").forward(request, response);
-//            }
-
-            response.sendRedirect("homepage.jsp");
         } catch (Exception e) {
             e.printStackTrace();
             request.setAttribute("errorMsg", "System error: " + e.getMessage());
@@ -89,6 +70,6 @@ public class LoginServlet extends HttpServlet {
 
     @Override
     public String getServletInfo() {
-        return "Handles user login and role-based redirection.";
+        return "Handles user login and redirects to dashboard.";
     }
 }

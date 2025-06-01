@@ -34,7 +34,7 @@
                                 <i class="fas fa-chevron-down"></i>
                             </button>
                             <div id="userMenu" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 hidden">
-                                <a href="${pageContext.request.contextPath}/profile.jsp" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</a>
+                                <a href="${pageContext.request.contextPath}/user-detail" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</a>
                                 <a href="${pageContext.request.contextPath}/changepassword.jsp" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Change password</a>
                             </div>
                         </div>
@@ -46,7 +46,7 @@
                     <nav>
                         <ul>
                             <li class="mb-1">
-                                <a href="${pageContext.request.contextPath}/homepage.jsp" class="block px-4 py-2 rounded hover:bg-gray-700">
+                                <a href="${pageContext.request.contextPath}/dashboard" class="block px-4 py-2 rounded hover:bg-gray-700">
                                     <i class="fas fa-tachometer-alt mr-2"></i> Dashboard
                                 </a>
                             </li>
@@ -93,7 +93,14 @@
                     </nav>
                 </aside>
                 <main class="flex-1 bg-gray-100 p-6 overflow-auto">
-                    <jsp:include page="${pageContent}" />
+                    <%-- Nếu dùng JSTL --%>
+                    <c:if test="${not empty pageContent}">
+                        <jsp:include page="${pageContent}" />
+                    </c:if>
+
+
+
+
                 </main>
             </div>
             <div class="md:hidden fixed bottom-4 right-4 z-50">
@@ -141,5 +148,34 @@
                 document.getElementById("userMenu").classList.toggle("hidden");
             });
         </script>
+        <!-- Popup hiển thị ảnh lớn -->
+        <div id="image-popup" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+            <img id="popup-img" class="max-w-full max-h-full rounded-lg shadow-lg" />
+        </div>
+        <script>
+            function showImage(src) {
+                const popup = document.getElementById("image-popup");
+                const img = document.getElementById("popup-img");
+                img.src = src;
+                popup.classList.remove("hidden");
+            }
+
+            function closeImage() {
+                document.getElementById("image-popup").classList.add("hidden");
+            }
+
+            // Đóng popup khi click ra ngoài ảnh
+            document.addEventListener("DOMContentLoaded", function () {
+                const popup = document.getElementById("image-popup");
+                if (popup) {
+                    popup.addEventListener("click", function (e) {
+                        if (e.target.id === "image-popup") {
+                            closeImage();
+                        }
+                    });
+                }
+            });
+        </script>
+
     </body>
 </html>

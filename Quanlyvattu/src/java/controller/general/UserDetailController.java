@@ -2,7 +2,6 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
  */
-
 package controller.general;
 
 import DAO.UserDAO;
@@ -18,21 +17,22 @@ import model.Users;
 
 @WebServlet(name = "UserDetailController", urlPatterns = {"/user-detail"})
 public class UserDetailController extends HttpServlet {
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String id = request.getParameter("id");
-        
+
         if (id != null && !id.isEmpty()) {
             UserDAO dao = new UserDAO();
             Users user = dao.getUserById(id);
-             List<Role> roleList = dao.getAllRoles();
+            List<Role> roleList = dao.getAllRoles();
             if (user != null) {
                 request.setAttribute("user", user);
                 request.setAttribute("roleList", roleList);
                 request.setAttribute("pageContent", "/UserDetail.jsp");
                 request.getRequestDispatcher("/layout/layout.jsp").forward(request, response);
-                
+
             } else {
                 response.sendRedirect("userlist");
             }
@@ -40,7 +40,7 @@ public class UserDetailController extends HttpServlet {
             response.sendRedirect("userlist");
         }
     }
-    
+
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {

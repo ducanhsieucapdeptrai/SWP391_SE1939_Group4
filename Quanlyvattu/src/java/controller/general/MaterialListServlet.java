@@ -1,4 +1,4 @@
- package controller.general;
+package controller.general;
 
 import DAO.MaterialDAO;
 import jakarta.servlet.ServletException;
@@ -14,7 +14,6 @@ import jakarta.servlet.annotation.WebServlet;
 
 import jakarta.servlet.annotation.WebServlet;
 
-
 @WebServlet(name = "MaterialList", urlPatterns = {"/materiallist"})
 public class MaterialListServlet extends HttpServlet {
 
@@ -25,14 +24,11 @@ public class MaterialListServlet extends HttpServlet {
         int page = 1;
         int pageSize = 10;
 
-        // Lấy số trang nếu có
         String pageParam = request.getParameter("page");
         if (pageParam != null) {
             try {
                 page = Integer.parseInt(pageParam);
-                if (page < 1) {
-                    page = 1;
-                }
+                if (page < 1) page = 1;
             } catch (NumberFormatException e) {
                 page = 1;
             }
@@ -40,34 +36,47 @@ public class MaterialListServlet extends HttpServlet {
 
         int offset = (page - 1) * pageSize;
 
-        // Gọi DAO
+        // Lấy dữ liệu tìm kiếm
+        String category = request.getParameter("category");
+        String subcategory = request.getParameter("subcategory");
+        String name = request.getParameter("name");
+
         MaterialDAO dao = new MaterialDAO();
-        List<Material> materials = dao.getMaterialsByPage(offset, pageSize);
-        int totalCount = dao.getTotalMaterialCount();
+        List<Material> materials;
+        int totalCount;
+
+        if ((category != null && !category.isEmpty())
+                || (subcategory != null && !subcategory.isEmpty())
+                || (name != null && !name.isEmpty())) {
+
+            // Nếu có điều kiện tìm kiếm → lọc
+            materials = dao.searchMaterials(category, subcategory, name);
+            totalCount = materials.size();  // Không phân trang khi tìm kiếm
+            request.setAttribute("isSearching", true); // Để JSP biết không hiển thị phân trang
+        } else {
+            // Nếu không tìm kiếm → phân trang
+            materials = dao.getMaterialsByPage(offset, pageSize);
+            totalCount = dao.getTotalMaterialCount();
+        }
+
         int totalPage = (int) Math.ceil((double) totalCount / pageSize);
 
-        // Truyền dữ liệu sang JSP
         request.setAttribute("materials", materials);
         request.setAttribute("currentPage", page);
         request.setAttribute("totalPage", totalPage);
-
-        // Forward sang trang hiển thị
-// Truyền thêm biến để layout.jsp biết cần include materiallist.jsp
         request.setAttribute("pageContent", "/MaterialList.jsp");
 
-// Forward sang layout chung
         request.getRequestDispatcher("/layout/layout.jsp").forward(request, response);
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // Không xử lý POST ở đây
         response.sendRedirect("materiallist");
     }
 
     @Override
     public String getServletInfo() {
-        return "Hiển thị danh sách vật tư có phân trang";
+        return "Hiển thị danh sách vật tư có phân trang và tìm kiếm";
     }
 }

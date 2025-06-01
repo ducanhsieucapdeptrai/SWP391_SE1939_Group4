@@ -346,91 +346,54 @@ VALUES
 INSERT INTO MaterialStatus (StatusName)
 VALUES ('New'), ('Used'), ('Damaged'); -- 1, 2, 3
 
+
 INSERT INTO Materials (MaterialName, SubCategoryId, StatusId, Image, Description, Quantity, MinQuantity, Price)
 VALUES
--- SubCategoryId = 1 (Concrete)
-('Reinforced Concrete', 1, 1, NULL, 'High strength concrete with steel reinforcement', 100, 20, 1200000),
-('Lightweight Concrete', 1, 1, NULL, 'Concrete with low density for non-load-bearing walls', 50, 10, 950000),
+('Reinforced Concrete', 1, 1, 'img/materials/reinforced-concrete.png', 'High strength concrete with steel reinforcement', 100, 20, 1200000),
+('Lightweight Concrete', 1, 1, 'img/materials/lightweight-concrete.png', 'Concrete with low density for non-load-bearing walls', 50, 10, 950000),
+('I-Beam 200x100', 2, 1, 'img/materials/i-beam-200x100.png', 'Standard structural steel I-beam', 200, 30, 1800000),
+('H-Beam 300x300', 2, 1, 'img/materials/h-beam-300x300.png', 'Heavy-duty H-beam', 150, 20, 3500000),
+('Red Clay Brick', 3, 1, 'img/materials/red-clay-brick.png', 'Traditional fired clay brick', 10000, 1000, 1200),
+('Non-fired Brick', 3, 1, 'img/materials/non-fired-brick.png', 'Eco-friendly construction brick', 8000, 800, 1500),
+('Granite Stone', 4, 1, 'img/materials/granite-stone.png', 'Used for flooring and wall cladding', 300, 30, 450000),
+('Limestone Block', 4, 1, 'img/materials/limestone-block.png', 'For foundation and support walls', 250, 25, 400000),
+('Pine Timber', 5, 1, 'img/materials/pine-timber.png', 'Used in structural framing', 500, 50, 700000),
+('Oak Beam', 5, 1, 'img/materials/oak-beam.png', 'Heavy-duty wood for decorative structure', 200, 20, 1100000),
+('Ceramic Tile 60x60', 6, 1, 'img/materials/ceramic-tile-60x60.png', 'Matte finish ceramic tile', 1000, 200, 80000),
+('Laminate Flooring', 6, 1, 'img/materials/laminate-flooring.png', 'Wood-pattern laminate', 600, 100, 120000),
+('Wall Tile 30x60', 7, 1, 'img/materials/wall-tile-30x60.png', 'Glossy finish wall tile', 800, 100, 65000),
+('Wallpaper Roll', 7, 1, 'img/materials/wallpaper-roll.png', 'Modern style wallpaper', 300, 50, 95000),
+('Water-based Paint (White)', 8, 1, 'img/materials/water-based-paint-white.png', 'High coverage, interior paint', 500, 50, 60000),
+('Exterior Paint (Blue)', 8, 1, 'img/materials/exterior-paint-blue.png', 'Weather-resistant paint', 300, 30, 75000),
+('Gypsum Ceiling Board', 9, 1, 'img/materials/gypsum-ceiling-board.png', 'Used for suspended ceilings', 400, 40, 120000),
+('Aluminum Ceiling Panel', 9, 1, 'img/materials/aluminum-ceiling-panel.png', 'Waterproof, reflective surface', 200, 20, 250000),
+('Glass Wool Roll', 10, 1, 'img/materials/glass-wool-roll.png', 'For thermal and acoustic insulation', 100, 10, 130000),
+('EPS Foam Sheet', 10, 1, 'img/materials/eps-foam-sheet.png', 'Lightweight insulation board', 300, 30, 95000),
+('Waterproof Membrane', 11, 1, 'img/materials/waterproof-membrane.png', 'Used for basement and roof waterproofing', 150, 15, 185000),
+('Bituminous Coating', 11, 1, 'img/materials/bituminous-coating.png', 'Used in underground waterproofing', 100, 10, 160000),
+('Acoustic Foam Panel', 12, 1, 'img/materials/acoustic-foam-panel.png', 'Used in studios and meeting rooms', 250, 25, 95000),
+('Insulated Wallboard', 12, 1, 'img/materials/insulated-wallboard.png', 'Double-layer board with insulation', 150, 15, 125000),
+('Copper Cable 2x2.5mm', 13, 1, 'img/materials/copper-cable-2x2.5mm.png', 'Used for home wiring', 1000, 100, 12000),
+('PVC Conduit Pipe 20mm', 13, 1, 'img/materials/pvc-conduit-pipe-20mm.png', 'Protects electrical wires', 800, 80, 18000),
+('PPR Pipe 25mm', 14, 1, 'img/materials/ppr-pipe-25mm.png', 'For hot water supply', 600, 60, 35000),
+('PVC Elbow 90°', 14, 1, 'img/materials/pvc-elbow-90.png', 'Connector for plumbing lines', 1000, 100, 5000),
+('Flexible Air Duct', 15, 1, 'img/materials/flexible-air-duct.png', 'Air distribution ducting', 300, 30, 78000),
+('Ceiling Exhaust Fan', 15, 1, 'img/materials/ceiling-exhaust-fan.png', 'Ventilation device for small rooms', 150, 15, 220000),
+('Wooden Cabinet', 16, 1, 'img/materials/wooden-cabinet.png', 'Wall-hung kitchen cabinet', 100, 10, 1800000),
+('Office Desk', 16, 1, 'img/materials/office-desk.png', 'Standard 1.2m desk', 150, 15, 1250000),
+('3D Wall Panel', 17, 1, 'img/materials/3d-wall-panel.png', 'PVC decorative wall panel', 200, 20, 145000),
+('Crown Moulding (3m)', 17, 1, 'img/materials/crown-moulding-3m.png', 'Polystyrene decorative trim', 300, 30, 25000),
+('Toilet Bowl Set', 18, 1, 'img/materials/toilet-bowl-set.png', 'Flush toilet + seat + tank', 80, 8, 1450000),
+('Wash Basin Ceramic', 18, 1, 'img/materials/wash-basin-ceramic.png', 'White ceramic basin', 120, 12, 550000),
+('Concrete Pile 300x300', 19, 1, 'img/materials/concrete-pile-300x300.png', 'Used for deep foundations', 200, 20, 950000),
+('River Sand', 19, 1, 'img/materials/river-sand.png', 'Fine sand for concrete mix', 1000, 100, 450000),
+('Clay Roof Tile', 20, 1, 'img/materials/clay-roof-tile.png', 'Traditional curved tile', 1500, 150, 15000),
+('Metal Roofing Sheet', 20, 1, 'img/materials/metal-roofing-sheet.png', 'Zinc-aluminum coated', 500, 50, 180000),
+('Aluminum Sliding Door', 21, 1, 'img/materials/aluminum-sliding-door.png', '2-panel glass door', 100, 10, 2450000),
+('uPVC Window 1x1m', 21, 1, 'img/materials/upvc-window-1x1m.png', 'White-framed tilt window', 120, 12, 1350000);
+UPDATE Materials
+SET Image = CONCAT('assets/images/materials/', REPLACE(LOWER(SUBSTRING_INDEX(Image, '/', -1)), ' ', '_'));
 
--- SubCategoryId = 2 (Structural Steel)
-('I-Beam 200x100', 2, 1, NULL, 'Standard structural steel I-beam', 200, 30, 1800000),
-('H-Beam 300x300', 2, 1, NULL, 'Heavy-duty H-beam', 150, 20, 3500000),
-
--- SubCategoryId = 3 (Bricks)
-('Red Clay Brick', 3, 1, NULL, 'Traditional fired clay brick', 10000, 1000, 1200),
-('Non-fired Brick', 3, 1, NULL, 'Eco-friendly construction brick', 8000, 800, 1500),
-
--- SubCategoryId = 4 (Building Stone)
-('Granite Stone', 4, 1, NULL, 'Used for flooring and wall cladding', 300, 30, 450000),
-('Limestone Block', 4, 1, NULL, 'For foundation and support walls', 250, 25, 400000),
-
--- SubCategoryId = 5 (Structural Timber)
-('Pine Timber', 5, 1, NULL, 'Used in structural framing', 500, 50, 700000),
-('Oak Beam', 5, 1, NULL, 'Heavy-duty wood for decorative structure', 200, 20, 1100000),
-
--- SubCategoryId = 6 (Flooring Materials)
-('Ceramic Tile 60x60', 6, 1, NULL, 'Matte finish ceramic tile', 1000, 200, 80000),
-('Laminate Flooring', 6, 1, NULL, 'Wood-pattern laminate', 600, 100, 120000),
-
--- SubCategoryId = 7 (Wall Coverings)
-('Wall Tile 30x60', 7, 1, NULL, 'Glossy finish wall tile', 800, 100, 65000),
-('Wallpaper Roll', 7, 1, NULL, 'Modern style wallpaper', 300, 50, 95000),
-
--- SubCategoryId = 8 (Paints and Coatings)
-('Water-based Paint (White)', 8, 1, NULL, 'High coverage, interior paint', 500, 50, 60000),
-('Exterior Paint (Blue)', 8, 1, NULL, 'Weather-resistant paint', 300, 30, 75000),
-
--- SubCategoryId = 9 (Ceiling Materials)
-('Gypsum Ceiling Board', 9, 1, NULL, 'Used for suspended ceilings', 400, 40, 120000),
-('Aluminum Ceiling Panel', 9, 1, NULL, 'Waterproof, reflective surface', 200, 20, 250000),
-
--- SubCategoryId = 10 (Thermal Insulation)
-('Glass Wool Roll', 10, 1, NULL, 'For thermal and acoustic insulation', 100, 10, 130000),
-('EPS Foam Sheet', 10, 1, NULL, 'Lightweight insulation board', 300, 30, 95000),
-
--- SubCategoryId = 11 (Waterproofing)
-('Waterproof Membrane', 11, 1, NULL, 'Used for basement and roof waterproofing', 150, 15, 185000),
-('Bituminous Coating', 11, 1, NULL, 'Used in underground waterproofing', 100, 10, 160000),
-
--- SubCategoryId = 12 (Sound Insulation)
-('Acoustic Foam Panel', 12, 1, NULL, 'Used in studios and meeting rooms', 250, 25, 95000),
-('Insulated Wallboard', 12, 1, NULL, 'Double-layer board with insulation', 150, 15, 125000),
-
--- SubCategoryId = 13 (Electrical)
-('Copper Cable 2x2.5mm', 13, 1, NULL, 'Used for home wiring', 1000, 100, 12000),
-('PVC Conduit Pipe 20mm', 13, 1, NULL, 'Protects electrical wires', 800, 80, 18000),
-
--- SubCategoryId = 14 (Plumbing)
-('PPR Pipe 25mm', 14, 1, NULL, 'For hot water supply', 600, 60, 35000),
-('PVC Elbow 90°', 14, 1, NULL, 'Connector for plumbing lines', 1000, 100, 5000),
-
--- SubCategoryId = 15 (HVAC)
-('Flexible Air Duct', 15, 1, NULL, 'Air distribution ducting', 300, 30, 78000),
-('Ceiling Exhaust Fan', 15, 1, NULL, 'Ventilation device for small rooms', 150, 15, 220000),
-
--- SubCategoryId = 16 (Furniture)
-('Wooden Cabinet', 16, 1, NULL, 'Wall-hung kitchen cabinet', 100, 10, 1800000),
-('Office Desk', 16, 1, NULL, 'Standard 1.2m desk', 150, 15, 1250000),
-
--- SubCategoryId = 17 (Decorative)
-('3D Wall Panel', 17, 1, NULL, 'PVC decorative wall panel', 200, 20, 145000),
-('Crown Moulding (3m)', 17, 1, NULL, 'Polystyrene decorative trim', 300, 30, 25000),
-
--- SubCategoryId = 18 (Sanitary)
-('Toilet Bowl Set', 18, 1, NULL, 'Flush toilet + seat + tank', 80, 8, 1450000),
-('Wash Basin Ceramic', 18, 1, NULL, 'White ceramic basin', 120, 12, 550000),
-
--- SubCategoryId = 19 (Foundation)
-('Concrete Pile 300x300', 19, 1, NULL, 'Used for deep foundations', 200, 20, 950000),
-('River Sand', 19, 1, NULL, 'Fine sand for concrete mix', 1000, 100, 450000),
-
--- SubCategoryId = 20 (Roofing)
-('Clay Roof Tile', 20, 1, NULL, 'Traditional curved tile', 1500, 150, 15000),
-('Metal Roofing Sheet', 20, 1, NULL, 'Zinc-aluminum coated', 500, 50, 180000),
-
--- SubCategoryId = 21 (Doors & Windows)
-('Aluminum Sliding Door', 21, 1, NULL, '2-panel glass door', 100, 10, 2450000),
-('uPVC Window 1x1m', 21, 1, NULL, 'White-framed tilt window', 120, 12, 1350000);
 
 
 INSERT INTO ImportType (ImportTypeName)
@@ -524,6 +487,25 @@ VALUES
 (9, 1, 'Request bricks for wall construction', 'Pending'),                -- Export
 (8, 2, 'Request to return unused tiles to warehouse', 'Pending');         -- Import
 
+-- Tổng số vật tư
+SELECT COUNT(*) AS TotalMaterials FROM Materials;
+
+-- Số lượt nhập kho trong tháng này
+SELECT COUNT(*) AS TotalImportsThisMonth
+FROM ImportList
+WHERE MONTH(ImportDate) = MONTH(CURDATE())
+  AND YEAR(ImportDate) = YEAR(CURDATE());
+
+-- Số lượt xuất kho trong tháng này
+SELECT COUNT(*) AS TotalExportsThisMonth
+FROM ExportList
+WHERE MONTH(ExportDate) = MONTH(CURDATE())
+  AND YEAR(ExportDate) = YEAR(CURDATE());
+
+-- Số yêu cầu đang chờ xử lý
+SELECT COUNT(*) AS PendingRequests
+FROM RequestList
+WHERE Status = 'Pending';
 
 
 

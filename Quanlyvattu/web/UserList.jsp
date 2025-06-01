@@ -4,7 +4,7 @@
 <div class="max-w-7xl mx-auto bg-white p-6 rounded-lg shadow-md">
     <div class="flex justify-between items-center mb-4">
         <h1 class="text-2xl font-bold text-gray-800">User List</h1>
-        <a href="homepage.jsp" class="text-sm bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Back to HomePage</a>
+        <a href="/layout/layout.jsp" class="text-sm bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Back to HomePage</a>
     </div>
 
     <!-- Thông báo -->

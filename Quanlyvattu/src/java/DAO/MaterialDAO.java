@@ -93,6 +93,69 @@ public class MaterialDAO extends DBContext {
         }
         return 0;
     }
+    public List<Material> searchMaterials(String category, String subcategory, String name) {
+    List<Material> list = new ArrayList<>();
+
+    String sql = """
+        SELECT m.*, c.CategoryName, sc.SubCategoryName, s.StatusName
+        FROM Materials m
+        JOIN SubCategories sc ON m.SubCategoryId = sc.SubCategoryId
+        JOIN Categories c ON sc.CategoryId = c.CategoryId
+        JOIN MaterialStatus s ON m.StatusId = s.StatusId
+        WHERE 1=1
+    """;
+
+    if (category != null && !category.isEmpty()) {
+        sql += " AND c.CategoryName LIKE ?";
+    }
+    if (subcategory != null && !subcategory.isEmpty()) {
+        sql += " AND sc.SubCategoryName LIKE ?";
+    }
+    if (name != null && !name.isEmpty()) {
+        sql += " AND m.MaterialName LIKE ?";
+    }
+
+    try {
+        PreparedStatement ps = connection.prepareStatement(sql);
+
+        int idx = 1;
+        if (category != null && !category.isEmpty()) {
+            ps.setString(idx++, "%" + category + "%");
+        }
+        if (subcategory != null && !subcategory.isEmpty()) {
+            ps.setString(idx++, "%" + subcategory + "%");
+        }
+        if (name != null && !name.isEmpty()) {
+            ps.setString(idx++, "%" + name + "%");
+        }
+
+        ResultSet rs = ps.executeQuery();
+        while (rs.next()) {
+            Material m = new Material();
+            m.setMaterialId(rs.getInt("MaterialId"));
+            m.setMaterialName(rs.getString("MaterialName"));
+            m.setSubCategoryId(rs.getInt("SubCategoryId"));
+            m.setStatusId(rs.getInt("StatusId"));
+            m.setImage(rs.getString("Image"));
+            m.setDescription(rs.getString("Description"));
+            m.setQuantity(rs.getInt("Quantity"));
+            m.setMinQuantity(rs.getInt("MinQuantity"));
+            m.setPrice(rs.getDouble("Price"));
+            m.setCreatedAt(rs.getTimestamp("CreatedAt"));
+            m.setUpdatedAt(rs.getTimestamp("UpdatedAt"));
+            m.setCategoryName(rs.getString("CategoryName"));
+            m.setSubCategoryName(rs.getString("SubCategoryName"));
+            m.setStatusName(rs.getString("StatusName"));
+            list.add(m);
+        }
+
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+
+    return list;
+}
+    
 
     // Có thể thêm: insertMaterial(), updateMaterial(), deleteMaterialById(), searchMaterialByName()
 }
