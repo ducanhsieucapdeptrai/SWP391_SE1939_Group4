@@ -1,5 +1,6 @@
 package controller.general;
 
+import DAO.HomepageDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
@@ -10,23 +11,26 @@ import java.io.IOException;
 @WebServlet(name = "HomepageServlet", urlPatterns = {"/dashboard"})
 public class HomepageServlet extends HttpServlet {
 
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+   @Override
+protected void doGet(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException {
 
-        HttpSession session = request.getSession(false);
-        Users currentUser = (session != null) ? (Users) session.getAttribute("currentUser") : null;
+    HttpSession session = request.getSession(false);
+    Users currentUser = (session != null) ? (Users) session.getAttribute("currentUser") : null;
 
-        if (currentUser == null) {
-            response.sendRedirect("login");
-            return;
-        }
-
-        // Có thể load dữ liệu dashboard theo role nếu cần
-
-        request.setAttribute("pageContent", "/homepage.jsp");
-        request.getRequestDispatcher("/layout/layout.jsp").forward(request, response);
+    if (currentUser == null) {
+        response.sendRedirect("login");
+        return;
     }
+
+    HomepageDAO dao = new HomepageDAO();
+    request.setAttribute("totalCategory", dao.getTotalMaterialCategory());
+    request.setAttribute("totalImport", dao.getTotalImport());
+    request.setAttribute("totalExport", dao.getTotalExport());
+    request.setAttribute("pendingRequest", dao.getPendingRequests());
+
+    request.setAttribute("pageContent", "/homepage.jsp");
+    request.getRequestDispatcher("/layout/layout.jsp").forward(request, response);}
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)

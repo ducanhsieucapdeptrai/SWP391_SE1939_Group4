@@ -3,17 +3,25 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
+            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/web/userauthorization.jsp</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/dal/DBContext.java</file>
+            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/controller/general/HomepageServlet.java</file>
+            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/web/index.jsp</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/controller/general/LoginServlet.java</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/controller/general/UserDetailController.java</file>
+            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/DAO/RoleFunctionDAO.java</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/controller/general/UserListController.java</file>
+            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/model/Users.java</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/controller/general/RequestNewPasswordServlet.java</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/web/WEB-INF/web.xml</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/web/MaterialList.jsp</file>
+            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/DAO/HomepageDAO.java</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/web/inventory.jsp</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/web/layout/layout.jsp</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/web/homepage.jsp</file>
+            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/model/Role.java</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/web/request-new-password.jsp</file>
+            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/DAO/UsersDAO.java</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/web/login.jsp</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/web/UserList.jsp</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/web/UserDetail.jsp</file>

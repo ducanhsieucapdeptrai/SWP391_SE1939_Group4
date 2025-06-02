@@ -81,7 +81,7 @@
 
                     <!-- Image thumbnail -->
                     <td class="py-2 px-4">
-                        <img src="<%= request.getContextPath() + "/" + ((m.getImage() == null || m.getImage().isEmpty()) ? "assets/img/materials/default.png" : m.getImage())%>"
+                        <img src="<%= request.getContextPath() + "/" + ((m.getImage() == null || m.getImage().isEmpty()) ? "assets/images/materials/default.png" : m.getImage())%>"
                              alt="<%= m.getMaterialName()%>"
                              class="h-12 w-12 object-cover rounded cursor-pointer transition-transform hover:scale-110"
                              onclick="showImage(this.src)" />
