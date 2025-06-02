@@ -2,15 +2,12 @@ package controller.general;
 
 import DAO.MaterialDAO;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 import model.Material;
-
-import jakarta.servlet.annotation.WebServlet;
 
 import jakarta.servlet.annotation.WebServlet;
 
@@ -28,7 +25,9 @@ public class MaterialListServlet extends HttpServlet {
         if (pageParam != null) {
             try {
                 page = Integer.parseInt(pageParam);
-                if (page < 1) page = 1;
+                if (page < 1) {
+                    page = 1;
+                }
             } catch (NumberFormatException e) {
                 page = 1;
             }
@@ -60,6 +59,12 @@ public class MaterialListServlet extends HttpServlet {
         }
 
         int totalPage = (int) Math.ceil((double) totalCount / pageSize);
+// Lấy danh sách category và subcategory để hiển thị trong dropdown filter
+    //    List<String> allCategories = dao.getAllCategories();
+     //   List<String> allSubcategories = dao.getAllSubcategories();
+
+   //     request.setAttribute("allCategories", allCategories);
+    //    request.setAttribute("allSubcategories", allSubcategories);
 
         request.setAttribute("materials", materials);
         request.setAttribute("currentPage", page);
