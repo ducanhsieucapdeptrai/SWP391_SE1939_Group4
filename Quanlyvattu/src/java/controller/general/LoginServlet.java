@@ -45,8 +45,12 @@ public class LoginServlet extends HttpServlet {
                 return;
             }
 
+            // 👉 Lưu session sau khi đăng nhập thành công
             HttpSession session = request.getSession();
             session.setAttribute("currentUser", user);
+            session.setAttribute("userId", user.getUserId()); // ✅ Thêm dòng này
+            session.setAttribute("userName", user.getFullName());
+            session.setAttribute("userRole", user.getRole().getRoleName());
 
             if ("on".equals(request.getParameter("remember"))) {
                 Cookie cookie = new Cookie("rememberedEmail", email);
@@ -58,7 +62,7 @@ public class LoginServlet extends HttpServlet {
                 response.addCookie(cookie);
             }
 
-            // ✅ Redirect đến HomepageServlet
+            // ✅ Chuyển đến dashboard
             response.sendRedirect("dashboard");
 
         } catch (Exception e) {

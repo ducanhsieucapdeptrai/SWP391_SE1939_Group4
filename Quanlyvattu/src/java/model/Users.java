@@ -19,7 +19,16 @@ public class Users {
     private String password;
     private int roleId;
     private boolean isActive;
+    private Role role;
 //    private Timestamp createdAt;
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
 
     // Constructors
     public Users() {

@@ -3,8 +3,11 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 
-<div class="p-6">
-    <h1 class="text-2xl font-bold text-blue-600 mb-4">Authorization Matrix</h1>
+<div class="max-w-7xl mx-auto bg-white p-6 rounded-lg shadow-md">
+    <div class="flex justify-between items-center mb-4">
+        <h1 class="text-2xl font-bold text-gray-800">User Authorization</h1>
+        <a href="${pageContext.request.contextPath}/dashboard" class="text-sm bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Back to HomePage</a>
+    </div>
 
     <form method="post" action="user-matrix" class="space-y-8">
         <c:forEach var="module" items="${modules}">
@@ -15,9 +18,9 @@
                     <thead class="bg-gray-100 text-gray-700">
                         <tr>
                             <th class="p-2 text-left">Function</th>
-                            <c:forEach var="role" items="${roles}">
+                                <c:forEach var="role" items="${roles}">
                                 <th class="p-2 text-left">${role.roleName}</th>
-                            </c:forEach>
+                                </c:forEach>
                         </tr>
                     </thead>
                     <tbody>
@@ -34,7 +37,7 @@
                                                    class="form-checkbox"
                                                    <c:if test="${roleFunctionPairs.contains(permissionKey)}">checked</c:if>
                                                    <c:if test="${role.roleId == 1 && func.functionId == 34}">disabled</c:if> />
-                                        </td>
+                                            </td>
                                     </c:forEach>
                                 </tr>
                             </c:if>

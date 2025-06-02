@@ -19,27 +19,32 @@ import model.Users;
 public class UserDetailController extends HttpServlet {
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        String id = request.getParameter("id");
+protected void doGet(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException {
+    String id = request.getParameter("id");
 
-        if (id != null && !id.isEmpty()) {
-            UserDAO dao = new UserDAO();
-            Users user = dao.getUserById(id);
-            List<Role> roleList = dao.getAllRoles();
-            if (user != null) {
-                request.setAttribute("user", user);
-                request.setAttribute("roleList", roleList);
-                request.setAttribute("pageContent", "/UserDetail.jsp");
-                request.getRequestDispatcher("/layout/layout.jsp").forward(request, response);
+    // Nếu id không có từ URL, lấy từ session
+    if (id == null || id.isEmpty()) {
+        id = (String) request.getSession().getAttribute("userId");
+    }
 
-            } else {
-                response.sendRedirect("userlist");
-            }
+    if (id != null && !id.isEmpty()) {
+        UserDAO dao = new UserDAO();
+        Users user = dao.getUserById(id);
+        List<Role> roleList = dao.getAllRoles();
+        if (user != null) {
+            request.setAttribute("user", user);
+            request.setAttribute("roleList", roleList);
+            request.setAttribute("pageContent", "/UserDetail.jsp");
+            request.getRequestDispatcher("/layout/layout.jsp").forward(request, response);
         } else {
             response.sendRedirect("userlist");
         }
+    } else {
+        response.sendRedirect("userlist");
     }
+}
+
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)

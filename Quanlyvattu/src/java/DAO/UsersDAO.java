@@ -11,26 +11,35 @@ import java.util.List;
 public class UsersDAO {
 
     public static Users getUserByEmailAndPassword(String email, String password) {
-        Users user = null;
-        String sql = "SELECT * FROM Users WHERE Email = ? AND Password = ?";
+    Users user = null;
+    String sql = "SELECT u.*, r.RoleName " +
+                 "FROM Users u " +
+                 "JOIN Roles r ON u.RoleId = r.RoleId " +
+                 "WHERE u.Email = ? AND u.Password = ?";
 
-        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+    try (Connection conn = new DBContext().getConnection(); 
+         PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(1, email);
-            ps.setString(2, password);
+        ps.setString(1, email);
+        ps.setString(2, password);
 
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    user = extractUserFromResultSet(rs);
-                }
+        try (ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                user = extractUserFromResultSet(rs);  // đã có RoleName
+                Role role = new Role();
+                role.setRoleId(user.getRoleId());  // đã có sẵn trong user
+                role.setRoleName(rs.getString("RoleName"));  // từ JOIN
+                user.setRole(role);  // gán đối tượng Role vào user
             }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
 
-        return user;
+    } catch (SQLException e) {
+        e.printStackTrace();
     }
+
+    return user;
+}
+
 
     public static Users getUserByEmail(String email) {
         Users user = null;
