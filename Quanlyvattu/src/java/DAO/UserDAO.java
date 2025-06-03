@@ -10,23 +10,44 @@ import java.util.List;
 
 public class UserDAO extends DBContext {
 
+    private final Connection conn;
+
+    public UserDAO() {
+        DBContext db = new DBContext();
+        this.conn = db.getConnection();
+    }
+
     // Get user by email & password (for login)
     public Users getUserByEmailAndPassword(String email, String password) {
         Users user = null;
-        String sql = "SELECT u.*, r.RoleName FROM Users u JOIN Roles r ON u.RoleId = r.RoleId WHERE u.Email = ? AND u.Password = ?";
+        String sql = "SELECT u.*, r.RoleName FROM Users u JOIN Roles r ON u.RoleId = r.RoleId WHERE u.Email = ?";
 
         try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, email);
-            ps.setString(2, password);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    user = extractUserFromResultSet(rs);
-                    Role role = new Role();
-                    role.setRoleId(user.getRoleId());
-                    role.setRoleName(rs.getString("RoleName"));
-                    user.setUserImage(rs.getString("UserImage")); // ✅ avatar từ DB
+                    String dbPassword = rs.getString("Password");
+                    boolean isMatch = false;
 
-                    user.setRole(role);
+                    // Nếu trùng trực tiếp (password gốc)
+                    if (password.equals(dbPassword)) {
+                        isMatch = true;
+                    } else {
+                        // Nếu là mật khẩu băm, so sánh với mật khẩu sau khi băm
+                        String hashedInput = utils.HashUtil.hashPassword(password);
+                        if (hashedInput.equals(dbPassword)) {
+                            isMatch = true;
+                        }
+                    }
+
+                    if (isMatch) {
+                        user = extractUserFromResultSet(rs);
+                        Role role = new Role();
+                        role.setRoleId(user.getRoleId());
+                        role.setRoleName(rs.getString("RoleName"));
+                        user.setUserImage(rs.getString("UserImage"));
+                        user.setRole(role);
+                    }
                 }
             }
         } catch (SQLException e) {
@@ -65,11 +86,9 @@ public class UserDAO extends DBContext {
                 user.setUserId(rs.getInt("userId"));
                 user.setFullName(rs.getString("fullName"));
                 user.setEmail(rs.getString("email"));
-                user.setUserImage(rs.getString("userImage")); // Dòng này bắt buộc có!
-
+                user.setUserImage(rs.getString("userImage"));
                 user.setRoleId(rs.getInt("roleId"));
                 user.setIsActive(rs.getBoolean("isActive"));
-                // thêm các trường khác nếu có
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -77,8 +96,6 @@ public class UserDAO extends DBContext {
         return user;
     }
 
-    // Get all users
-    // Get all users (with RoleName attached)
     public List<Users> getAllUsers() {
         List<Users> list = new ArrayList<>();
         try {
@@ -100,7 +117,6 @@ public class UserDAO extends DBContext {
         return list;
     }
 
-    // Delete user
     public boolean deleteUserById(int userId) {
         String sql = "DELETE FROM Users WHERE UserId = ?";
         try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -112,7 +128,6 @@ public class UserDAO extends DBContext {
         }
     }
 
-    // Get all roles
     public List<Role> getAllRoles() {
         List<Role> list = new ArrayList<>();
         try {
@@ -131,7 +146,6 @@ public class UserDAO extends DBContext {
         return list;
     }
 
-    // Get role name
     public String getRoleName(int roleId) {
         String sql = "SELECT RoleName FROM Roles WHERE RoleId = ?";
         try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -146,14 +160,14 @@ public class UserDAO extends DBContext {
         return "Unknown";
     }
 
-    // Update password
-    public boolean updatePassword(String email, String newPassword) {
+    public boolean updatePassword(String email, String hashedPassword) {
         String sql = "UPDATE Users SET Password = ? WHERE Email = ?";
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, newPassword);
-            ps.setString(2, email);
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, hashedPassword);
+            ps.setString(2, email.trim());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
+            System.out.println("Lỗi khi update mật khẩu cho email: " + email);
             e.printStackTrace();
             return false;
         }
@@ -192,6 +206,10 @@ public class UserDAO extends DBContext {
     public static void main(String[] args) {
         UserDAO dao = new UserDAO();
         Users u = dao.getUserByEmailAndPassword("giamdoc@example.com", "giamdoc123");
-        System.out.println(u.getEmail());
+        if (u != null) {
+            System.out.println("Đăng nhập thành công: " + u.getEmail());
+        } else {
+            System.out.println("Sai email hoặc mật khẩu");
+        }
     }
 }

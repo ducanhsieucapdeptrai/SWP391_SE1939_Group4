@@ -513,6 +513,8 @@ JOIN Roles r ON u.RoleId = r.RoleId
 WHERE u.Email = 'giamdoc@example.com' AND u.Password = 'giamdoc123';
 
 
+SELECT password FROM users WHERE email = 'quanlyvattu4@gmail.com';
+
 
 
 

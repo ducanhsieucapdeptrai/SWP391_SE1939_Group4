@@ -42,10 +42,12 @@ public class DBContext {
                 System.out.println("❌ Kết nối thất bại.");
             }
 
-            conn.close(); // Đóng kết nối sau khi kiểm tra
+            // ❌ KHÔNG đóng connection ở đây nếu bạn muốn dùng lại trong servlet
+            // conn.close(); ← bỏ dòng này
         } catch (Exception e) {
             System.out.println("❌ Lỗi kết nối database: " + e.getMessage());
             e.printStackTrace();
         }
     }
+
 }

@@ -42,7 +42,7 @@
                 </div>
                 <div class="d-grid gap-2">
                     <button type="submit" class="btn btn-primary">Change Password</button>
-                    <a href="homepage.jsp" class="btn btn-secondary">Back</a>
+                    <a href="${pageContext.request.contextPath}/dashboard" class="btn btn-secondary">Back</a>
                 </div>
 
                 <c:if test="${not empty error}">

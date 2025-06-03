@@ -15,10 +15,12 @@ public class ChangePasswordServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        String email = request.getParameter("email");
+        String email = request.getParameter("email").trim();
         String oldPassword = request.getParameter("oldPassword");
         String newPassword = request.getParameter("newPassword");
         String confirmPassword = request.getParameter("confirmPassword");
+
+        System.out.println(">>> Email nhập: " + email);
 
         if (email == null || oldPassword == null || newPassword == null || confirmPassword == null
                 || email.isEmpty() || oldPassword.isEmpty() || newPassword.isEmpty() || confirmPassword.isEmpty()) {
@@ -36,8 +38,22 @@ public class ChangePasswordServlet extends HttpServlet {
             return;
         }
 
-        String hashedOldPassword = HashUtil.sha256(oldPassword);
-        if (!hashedOldPassword.equals(user.getPassword())) {
+        // So sánh mật khẩu cũ (có thể là hash hoặc plain text trong DB)
+        String storedPassword = user.getPassword();
+        boolean isOldPasswordCorrect = false;
+
+        if (storedPassword.length() == 64 && storedPassword.matches("[0-9a-fA-F]+")) {
+            String hashedOldPassword = HashUtil.hashPassword(oldPassword);
+            if (hashedOldPassword.equals(storedPassword)) {
+                isOldPasswordCorrect = true;
+            }
+        } else {
+            if (oldPassword.equals(storedPassword)) {
+                isOldPasswordCorrect = true;
+            }
+        }
+
+        if (!isOldPasswordCorrect) {
             request.setAttribute("error", "Mật khẩu cũ không đúng.");
             request.getRequestDispatcher("change_password.jsp").forward(request, response);
             return;
@@ -55,15 +71,17 @@ public class ChangePasswordServlet extends HttpServlet {
             return;
         }
 
-        // Băm mật khẩu mới
-        String hashedNewPassword = HashUtil.sha256(newPassword);
-
-        boolean success = dao.updatePassword(user.getUserId(), hashedNewPassword);
+        // Băm mật khẩu mới và cập nhật vào DB
+        String hashedNewPassword = HashUtil.hashPassword(newPassword);
+        boolean success = dao.updatePassword(email, hashedNewPassword);
+     
         if (success) {
             request.setAttribute("message", "Đổi mật khẩu thành công!");
         } else {
             request.setAttribute("error", "Đã xảy ra lỗi khi cập nhật mật khẩu.");
         }
+
         request.getRequestDispatcher("change_password.jsp").forward(request, response);
     }
+
 }
