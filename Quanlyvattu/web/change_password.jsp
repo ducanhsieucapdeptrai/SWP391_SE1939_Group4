@@ -1,9 +1,3 @@
-<%-- 
-    Document   : change_password
-    Created on : Jun 1, 2025, 12:12:36 AM
-    Author     : Lenovo
---%>
-
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
@@ -24,16 +18,6 @@
             border: 1px solid #ccc;
             border-radius: 6px;
         }
-        label {
-            font-weight: 500;
-        }
-        .btn-submit {
-            background-color: #007bff;
-            border: none;
-        }
-        .btn-submit:hover {
-            background-color: #0056b3;
-        }
     </style>
 </head>
 <body>
@@ -41,22 +25,25 @@
     <h4 class="text-center mb-4">Change Password</h4>
     <form method="post" action="change-password">
         <div class="mb-3">
-            <label for="email">Email:</label>
-            <input type="email" class="form-control" id="email" name="email" required>
+            <label for="email">Email address:</label>
+            <input type="email" class="form-control" id="email" name="email" value="${param.email}" required>
         </div>
         <div class="mb-3">
-            <label for="currentPassword">Current Password:</label>
-            <input type="password" class="form-control" id="currentPassword" name="currentPassword" required>
+            <label for="currentPassword">Current password:</label>
+            <input type="password" class="form-control" id="currentPassword" name="oldPassword" required>
         </div>
         <div class="mb-3">
-            <label for="newPassword">New Password:</label>
+            <label for="newPassword">New password:</label>
             <input type="password" class="form-control" id="newPassword" name="newPassword" required>
         </div>
         <div class="mb-3">
-            <label for="confirmPassword">Confirm Password:</label>
+            <label for="confirmPassword">Confirm new password:</label>
             <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
         </div>
-        <button type="submit" class="btn btn-primary w-100 btn-submit">Change Password</button>
+        <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-primary">Change Password</button>
+            <a href="homepage.jsp" class="btn btn-secondary">Back</a>
+        </div>
 
         <c:if test="${not empty error}">
             <div class="alert alert-danger mt-3">${error}</div>
@@ -68,5 +55,3 @@
 </div>
 </body>
 </html>
-
-

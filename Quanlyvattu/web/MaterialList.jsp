@@ -30,49 +30,49 @@
             </thead>
             <tbody>
                 <% for (Material m : materials) {
-                       /* format lại mã vật tư */
-                       String code = "VT" + String.format("%04d", m.getMaterialId());
-                       int inStock = m.getQuantity();      // tồn kho hiện tại
-                %>
+                        /* format lại mã vật tư */
+                        String code = "VT" + String.format("%04d", m.getMaterialId());
+                        int inStock = m.getQuantity();      // tồn kho hiện tại
+%>
                 <tr class="border-t hover:bg-gray-50">
                     <!-- Category name -->
-                    <td class="py-2 px-4"><%= m.getCategoryName() %></td>
+                    <td class="py-2 px-4"><%= m.getCategoryName()%></td>
 
                     <!-- Sub-category name -->
-                    <td class="py-2 px-4"><%= m.getSubCategoryName() %></td>
+                    <td class="py-2 px-4"><%= m.getSubCategoryName()%></td>
 
                     <!-- Material code -->
-                    <td class="py-2 px-4 font-medium"><%= code %></td>
+                    <td class="py-2 px-4 font-medium"><%= code%></td>
 
                     <!-- Image thumbnail -->
                     <td class="py-2 px-4">
-                        <img src="<%= (m.getImage() == null || m.getImage().isEmpty()) ? "img/default.png" : m.getImage() %>"
-                             alt="<%= m.getMaterialName() %>"
+                        <img src="<%= (m.getImage() == null || m.getImage().isEmpty()) ? "img/default.png" : m.getImage()%>"
+                             alt="<%= m.getMaterialName()%>"
                              class="h-12 w-12 object-cover rounded" />
                     </td>
 
                     <!-- Material name -->
-                    <td class="py-2 px-4"><%= m.getMaterialName() %></td>
+                    <td class="py-2 px-4"><%= m.getMaterialName()%></td>
 
                     <!-- Status name -->
                     <td class="py-2 px-4">
-                        <span class="<%= "New".equals(m.getStatusName()) ? "text-green-600" : ("Damaged".equals(m.getStatusName()) ? "text-red-600" : "text-yellow-600") %>">
-                            <%= m.getStatusName() %>
+                        <span class="<%= "New".equals(m.getStatusName()) ? "text-green-600" : ("Damaged".equals(m.getStatusName()) ? "text-red-600" : "text-yellow-600")%>">
+                            <%= m.getStatusName()%>
                         </span>
                     </td>
 
                     <!-- Quantity in stock -->
-                    <td class="py-2 px-4"><%= inStock %></td>
+                    <td class="py-2 px-4"><%= inStock%></td>
 
                     <!-- Price -->
-                    <td class="py-2 px-4"><%= String.format("%,.0f", m.getPrice()) %> đ</td>
+                    <td class="py-2 px-4"><%= String.format("%,.0f", m.getPrice())%> đ</td>
 
                     <!-- View detail link -->
                     <td class="py-2 px-4">
-                        <a href="materialDetail?id=<%= m.getMaterialId() %>" class="text-blue-600 hover:underline">View</a>
+                        <a href="materialdetail?id=<%= m.getMaterialId()%>" class="text-blue-600 hover:underline">View</a>
                     </td>
                 </tr>
-                <% } %>
+                <% }%>
             </tbody>
         </table>
     </div>
@@ -80,15 +80,15 @@
     <!-- Simple pagination (giữ tạm, có thể thay JS/AJAX sau) -->
     <div class="flex justify-between items-center mt-4">
         <div class="text-sm text-gray-600">
-            Showing <%= request.getAttribute("currentPage") %> / <%= request.getAttribute("totalPage") %> page
+            Showing <%= request.getAttribute("currentPage")%> / <%= request.getAttribute("totalPage")%> page
         </div>
         <div class="space-x-1">
             <!-- thêm logic active/disable nếu cần -->
             <a href="materiallist?page=1" class="px-3 py-1 border rounded">«</a>
-            <a href="materiallist?page=<%= request.getAttribute("currentPage") %>" class="px-3 py-1 border rounded bg-blue-600 text-white">
-                <%= request.getAttribute("currentPage") %>
+            <a href="materiallist?page=<%= request.getAttribute("currentPage")%>" class="px-3 py-1 border rounded bg-blue-600 text-white">
+                <%= request.getAttribute("currentPage")%>
             </a>
-            <a href="materiallist?page=<%= ((int)request.getAttribute("currentPage")) + 1 %>" class="px-3 py-1 border rounded">»</a>
+            <a href="materiallist?page=<%= ((int) request.getAttribute("currentPage")) + 1%>" class="px-3 py-1 border rounded">»</a>
         </div>
     </div>
 </div>

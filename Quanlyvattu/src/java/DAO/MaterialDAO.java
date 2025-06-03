@@ -94,5 +94,67 @@ public class MaterialDAO extends DBContext {
         return 0;
     }
 
+    public Material getMaterialById(String materialId) {
+        Material material = null;
+        try {
+            String sql = "SELECT * FROM Material WHERE materialId = ?";
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setString(1, materialId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                material = new Material();
+                material.setMaterialId(rs.getInt("materialId"));
+                material.setMaterialName(rs.getString("materialName"));
+                material.setImage(rs.getString("image"));
+                material.setPrice(rs.getDouble("price"));
+                material.setQuantity(rs.getInt("quantity"));
+                material.setMinQuantity(rs.getInt("minQuantity"));
+                material.setCreatedAt(rs.getTimestamp("createdAt"));
+                material.setUpdatedAt(rs.getTimestamp("updatedAt"));
+                material.setStatusName(rs.getString("status"));
+                material.setCategoryName(rs.getString("categoryName"));
+                material.setSubCategoryName(rs.getString("subCategoryName"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return material;
+    }
+
     // Có thể thêm: insertMaterial(), updateMaterial(), deleteMaterialById(), searchMaterialByName()
+    public Material getMaterialById(int materialId) {
+        Material material = null;
+        try {
+            String sql = "SELECT m.*, c.categoryName, sc.subCategoryName, s.statusName "
+                    + "FROM materials m "
+                    + "JOIN subcategories sc ON m.subCategoryId = sc.subCategoryId "
+                    + "JOIN categories c ON sc.categoryId = c.categoryId "
+                    + "JOIN materialstatus s ON m.statusId = s.statusId "
+                    + "WHERE m.materialId = ?";
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, materialId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                material = new Material();
+                material.setMaterialId(rs.getInt("materialId"));
+                material.setMaterialName(rs.getString("materialName"));
+                material.setImage(rs.getString("image"));
+                material.setPrice(rs.getDouble("price"));
+                material.setQuantity(rs.getInt("quantity"));
+                material.setMinQuantity(rs.getInt("minQuantity"));
+                material.setDescription(rs.getString("description"));
+                material.setCreatedAt(rs.getTimestamp("createdAt"));
+                material.setUpdatedAt(rs.getTimestamp("updatedAt"));
+                material.setStatusId(rs.getInt("statusId"));
+                material.setSubCategoryId(rs.getInt("subCategoryId"));
+                material.setStatusName(rs.getString("statusName"));
+                material.setCategoryName(rs.getString("categoryName"));
+                material.setSubCategoryName(rs.getString("subCategoryName"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return material;
+    }
+
 }
