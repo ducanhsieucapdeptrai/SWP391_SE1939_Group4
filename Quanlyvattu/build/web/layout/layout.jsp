@@ -85,7 +85,7 @@
                             </li>
 
                             <li class="mb-1">
-                                <a href="#" class="block px-4 py-2 rounded hover:bg-gray-700">
+                                <a href="advanced-dashboard" class="block px-4 py-2 rounded hover:bg-gray-700">
                                     <i class="fas fa-clipboard-list mr-2"></i> More
                                 </a>
                             </li>
