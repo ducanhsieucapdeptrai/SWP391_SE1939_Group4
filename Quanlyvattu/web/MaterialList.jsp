@@ -106,7 +106,7 @@
 
                     <!-- View detail link -->
                     <td class="py-2 px-4">
-                        <a href="materialDetail?id=<%= m.getMaterialId()%>" class="text-blue-600 hover:underline">View</a>
+                        <a href="materialdetail?id=<%= m.getMaterialId()%>" class="text-blue-600 hover:underline">View</a>
                     </td>
                 </tr>
                 <% }%>

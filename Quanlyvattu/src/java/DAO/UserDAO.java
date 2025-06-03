@@ -59,7 +59,7 @@ public class UserDAO extends DBContext {
     // Get user by email
     public Users getUserByEmail(String email) {
         Users user = null;
-        String sql = "SELECT * FROM Users WHERE Email = ?";
+        String sql = "SELECT u.*, r.RoleName FROM Users u JOIN Roles r ON u.RoleID = r.RoleID WHERE u.Email = ?";
         try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, email);
             try (ResultSet rs = ps.executeQuery()) {
@@ -191,14 +191,21 @@ public class UserDAO extends DBContext {
     // Extract user from ResultSet
     private Users extractUserFromResultSet(ResultSet rs) throws SQLException {
         Users user = new Users();
-        user.setUserId(rs.getInt("UserId"));
+        user.setUserId(rs.getInt("UserID"));
         user.setFullName(rs.getString("FullName"));
         user.setUserImage(rs.getString("UserImage"));
         user.setEmail(rs.getString("Email"));
         user.setPhone(rs.getString("Phone"));
         user.setPassword(rs.getString("Password"));
-        user.setRoleId(rs.getInt("RoleId"));
+        user.setRoleId(rs.getInt("RoleID"));
         user.setIsActive(rs.getBoolean("IsActive"));
+
+        // Gán role
+        Role role = new Role();
+        role.setRoleId(rs.getInt("RoleID")); // lấy từ bảng Users
+        role.setRoleName(rs.getString("RoleName")); // lấy từ bảng Roles
+        user.setRole(role);
+
         return user;
     }
 
