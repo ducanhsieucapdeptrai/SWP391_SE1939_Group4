@@ -21,6 +21,7 @@
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/controller/general/ChangePasswordForm.java</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/DAO/MaterialDAO.java</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/utils/HashUtil.java</file>
+            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/DAO/DashboardDAO.java</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/dal/DBContext.java</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/web/index.jsp</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/controller/general/UserDetailController.java</file>
@@ -33,6 +34,7 @@
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/utils/HashTool.java</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/web/request-new-password.jsp</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/DAO/UsersDAO.java</file>
+            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/web/UserEditRole_Status.jsp</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/web/UserList.jsp</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/DAO/UserDAO.java</file>
         </group>
