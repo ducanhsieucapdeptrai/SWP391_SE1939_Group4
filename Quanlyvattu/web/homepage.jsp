@@ -66,6 +66,13 @@
         <canvas id="materialChart" width="400" height="200"></canvas>
     </div>
 
+    <!-- Advanced Dashboard Button -->
+    <div class="text-center mb-6">
+        <a href="${pageContext.request.contextPath}/advanced-dashboard" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg inline-flex items-center transition duration-300">
+            <i class="fas fa-chart-line mr-2"></i> More Advanced Features
+        </a>
+    </div>
+
     <!-- Ví dụ: Bảng dữ liệu -->
     <div class="bg-white rounded-lg shadow-md p-4">
         <h3 class="text-lg font-semibold mb-2">Recent Material Entries</h3>
