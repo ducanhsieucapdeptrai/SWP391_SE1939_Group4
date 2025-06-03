@@ -1,6 +1,6 @@
 package controller.general;
 
-import DAO.UsersDAO;
+import DAO.UserDAO;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeTokenRequest;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
@@ -51,6 +51,7 @@ public class GoogleLoginServlet extends HttpServlet {
 
         String expectedState = (String) session.getAttribute("oauth2_state");
         if (expectedState == null || !expectedState.equals(state)) {
+            session.invalidate();
             request.setAttribute("errorMsg", "Invalid state parameter (potential CSRF attack).");
             request.getRequestDispatcher("login.jsp").forward(request, response);
             return;
@@ -79,7 +80,8 @@ public class GoogleLoginServlet extends HttpServlet {
                 GoogleIdToken.Payload payload = idToken.getPayload();
                 String email = payload.getEmail();
 
-                Users user = UsersDAO.getUserByEmail(email);
+                UserDAO dao = new UserDAO();
+                Users user = dao.getUserByEmail(email);
                 if (user == null) {
                     session.invalidate();
                     request.setAttribute("errorMsg", "Your Gmail is not registered in the system!");
@@ -95,27 +97,6 @@ public class GoogleLoginServlet extends HttpServlet {
                 }
 
                 session.setAttribute("currentUser", user);
-
-//                String redirectUrl = switch (user.getRoleId()) {
-//                    case 1 ->
-//                        "admin/dashboard.jsp";
-//                    case 2 ->
-//                        "staff/dashboard.jsp";
-//                    case 3 ->
-//                        "director/dashboard.jsp";
-//                    case 4 ->
-//                        "company/home.jsp";
-//                    default ->
-//                        null;
-//                };
-//
-//                if (redirectUrl != null) {
-//                    response.sendRedirect(redirectUrl);
-//                } else {
-//                    session.invalidate();
-//                    request.setAttribute("errorMsg", "Unrecognized user role. Please contact the administrator.");
-//                    request.getRequestDispatcher("login.jsp").forward(request, response);
-//                }
                 response.sendRedirect("homepage.jsp");
 
             } else {

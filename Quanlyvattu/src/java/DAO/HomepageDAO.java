@@ -7,7 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * DAO class for retrieving dashboard statistics
+ * DAO class for retrieving homepage statistics
  */
 public class HomepageDAO {
 
@@ -41,7 +41,6 @@ public class HomepageDAO {
      */
     public int getTotalImportCount() {
         int count = 0;
-        // Adjust the query based on your actual table name
         String sql = "SELECT COUNT(*) FROM ImportList";
 
         try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
@@ -65,7 +64,6 @@ public class HomepageDAO {
      */
     public int getTotalExportCount() {
         int count = 0;
-        // Adjust the query based on your actual table name
         String sql = "SELECT COUNT(*) FROM ExportList";
 
         try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
@@ -105,5 +103,9 @@ public class HomepageDAO {
         return count;
     }
 
-    
+    /**
+     * Get today's sales count
+     *
+     * @return today's sales count
+     */
 }

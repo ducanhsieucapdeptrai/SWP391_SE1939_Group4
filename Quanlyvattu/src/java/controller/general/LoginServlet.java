@@ -1,6 +1,6 @@
 package controller.general;
 
-import DAO.UsersDAO;
+import DAO.UserDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
@@ -31,7 +31,8 @@ public class LoginServlet extends HttpServlet {
         }
 
         try {
-            Users user = UsersDAO.getUserByEmailAndPassword(email, password);
+            UserDAO dao = new UserDAO();
+            Users user = dao.getUserByEmailAndPassword(email, password);
 
             if (user == null) {
                 request.setAttribute("errorMsg", "Incorrect email or password.");
@@ -45,12 +46,12 @@ public class LoginServlet extends HttpServlet {
                 return;
             }
 
-            // 👉 Lưu session sau khi đăng nhập thành công
             HttpSession session = request.getSession();
             session.setAttribute("currentUser", user);
-            session.setAttribute("userId", user.getUserId()); // ✅ Thêm dòng này
+            session.setAttribute("userId", user.getUserId());
             session.setAttribute("userName", user.getFullName());
-            session.setAttribute("userRole", user.getRole().getRoleName());
+            session.setAttribute("userRole", user.getRole() != null ? user.getRole().getRoleName() : "Unknown");
+            session.setAttribute("userImage", user.getUserImage());
 
             if ("on".equals(request.getParameter("remember"))) {
                 Cookie cookie = new Cookie("rememberedEmail", email);
@@ -62,7 +63,6 @@ public class LoginServlet extends HttpServlet {
                 response.addCookie(cookie);
             }
 
-            // ✅ Chuyển đến dashboard
             response.sendRedirect("dashboard");
 
         } catch (Exception e) {

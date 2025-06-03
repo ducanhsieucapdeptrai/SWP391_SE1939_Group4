@@ -12,6 +12,7 @@ CREATE TABLE Modules (
 CREATE TABLE Users (
     UserId INT PRIMARY KEY AUTO_INCREMENT,
     FullName VARCHAR(100),
+  UserImage VARCHAR(100),
     Email VARCHAR(100) UNIQUE,
     Phone VARCHAR(20),
     Password VARCHAR(100),
@@ -184,35 +185,35 @@ VALUES
   ('Statistics & Reports');
 
 
-INSERT INTO Users (FullName, Email, Phone, Password, RoleId, IsActive)
+INSERT INTO Users (FullName, UserImage, Email, Phone, Password, RoleId, IsActive)
 VALUES
 -- Quản lý kho (1 người)
-('Trần Quản Lý', 'quanlyvattu4@gmail.com', '0900000000', 'quanly123', 1, TRUE),
+('Trần Quản Lý', 'warehousemanager.png','quanlyvattu4@gmail.com', '0900000000', 'quanly123', 1, TRUE),
 
 -- Giám đốc công ty (1 người)
-('Nguyễn Giám Đốc', 'giamdoc@example.com', '0911111111', 'giamdoc123', 3, TRUE),
+('Nguyễn Giám Đốc',  'director.png','giamdoc@example.com', '0911111111', 'giamdoc123', 3, TRUE),
 
 -- Nhân viên kho (8 người)
-('Nguyễn Văn A', 'a1@example.com', '0900000001', 'pass1', 2, TRUE),
-('Nguyễn Văn B', 'a2@example.com', '0900000002', 'pass2', 2, TRUE),
-('Nguyễn Văn C', 'a3@example.com', '0900000003', 'pass3', 2, TRUE),
-('Trần Thị D', 'a4@example.com', '0900000004', 'pass4', 2, TRUE),
-('Lê Văn E', 'a5@example.com', '0900000005', 'pass5', 2, TRUE),
-('Hoàng Văn F', 'a6@example.com', '0900000006', 'pass6', 2, TRUE),
-('Lý Thị G', 'a7@example.com', '0900000007', 'pass7', 2, TRUE),
-('Đào Văn H', 'a8@example.com', '0900000008', 'pass8', 2, TRUE),
+('Nguyễn Văn A', 'warehousestaff.png', 'a1@example.com', '0900000001', 'pass1', 2, TRUE),
+('Nguyễn Văn B',  'warehousestaff.png','a2@example.com', '0900000002', 'pass2', 2, TRUE),
+('Nguyễn Văn C', 'warehousestaff.png', 'a3@example.com', '0900000003', 'pass3', 2, TRUE),
+('Trần Thị D',  'warehousestaff.png','a4@example.com', '0900000004', 'pass4', 2, TRUE),
+('Lê Văn E',  'warehousestaff.png','a5@example.com', '0900000005', 'pass5', 2, TRUE),
+('Hoàng Văn F', 'warehousestaff.png', 'a6@example.com', '0900000006', 'pass6', 2, TRUE),
+('Lý Thị G', 'warehousestaff.png', 'a7@example.com', '0900000007', 'pass7', 2, TRUE),
+('Đào Văn H', 'warehousestaff.png', 'a8@example.com', '0900000008', 'pass8', 2, TRUE),
 
 -- Nhân viên công ty (10 người)
-('Ngô Thị I', 'b1@example.com', '0900000011', 'pass11', 4, TRUE),
-('Phạm Văn J', 'b2@example.com', '0900000012', 'pass12', 4, TRUE),
-('Đặng Thị K', 'b3@example.com', '0900000013', 'pass13', 4, TRUE),
-('Vũ Văn L', 'b4@example.com', '0900000014', 'pass14', 4, TRUE),
-('Cao Thị M', 'b5@example.com', '0900000015', 'pass15', 4, TRUE),
-('Bùi Văn N', 'b6@example.com', '0900000016', 'pass16', 4, TRUE),
-('Đỗ Thị O', 'b7@example.com', '0900000017', 'pass17', 4, TRUE),
-('Tống Văn P', 'b8@example.com', '0900000018', 'pass18', 4, TRUE),
-('Mai Thị Q', 'b9@example.com', '0900000019', 'pass19', 4, TRUE),
-('Lương Văn R', 'b10@example.com', '0900000020', 'pass20', 4, TRUE);
+('Ngô Thị I', 'companystaff.png', 'b1@example.com', '0900000011', 'pass11', 4, TRUE),
+('Phạm Văn J', 'companystaff.png', 'b2@example.com', '0900000012', 'pass12', 4, TRUE),
+('Đặng Thị K', 'companystaff.png', 'b3@example.com', '0900000013', 'pass13', 4, TRUE),
+('Vũ Văn L', 'companystaff.png', 'b4@example.com', '0900000014', 'pass14', 4, TRUE),
+('Cao Thị M', 'companystaff.png', 'b5@example.com', '0900000015', 'pass15', 4, TRUE),
+('Bùi Văn N', 'companystaff.png', 'b6@example.com', '0900000016', 'pass16', 4, TRUE),
+('Đỗ Thị O', 'companystaff.png', 'b7@example.com', '0900000017', 'pass17', 4, TRUE),
+('Tống Văn P', 'companystaff.png', 'b8@example.com', '0900000018', 'pass18', 4, TRUE),
+('Mai Thị Q', 'companystaff.png', 'b9@example.com', '0900000019', 'pass19', 4, TRUE),
+('Lương Văn R', 'companystaff.png', 'b10@example.com', '0900000020', 'pass20', 4, TRUE);
 
 
 INSERT INTO Functions (FunctionName)

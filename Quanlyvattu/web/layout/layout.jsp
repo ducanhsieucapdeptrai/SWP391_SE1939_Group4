@@ -17,9 +17,9 @@
             <header class="bg-blue-900 text-white shadow-md">
                 <div class="container mx-auto px-4 py-3 flex justify-between items-center">
                     <div class="flex items-center">
-                        <i class="fas fa-warehouse mr-2"></i>
-                        <h1 class="text-xl font-bold">Material Management</h1>
+                        <img src="${pageContext.request.contextPath}/assets/images/logo.png" alt="Logo" class="w-8 h-8 mr-2">
                     </div>
+
                     <div class="flex items-center">
                         <div class="mr-4 hidden md:block">
                             <span>${sessionScope.userName}</span>
@@ -28,10 +28,10 @@
                         </div>
                         <div class="relative">
                             <button id="userMenuBtn" class="flex items-center focus:outline-none">
-                                <div class="w-8 h-8 rounded-full bg-blue-700 text-white flex items-center justify-center font-bold mr-2">
-                                    ${fn:substring(sessionScope.userName, 0, 1)}
-                                </div>
-                                <i class="fas fa-chevron-down"></i>
+                                <img src="${pageContext.request.contextPath}/assets/images/UserImage/${sessionScope.userImage}"
+                                     alt="Avatar"
+                                     class="w-16 aspect-square rounded-full object-cover shadow-md border border-white" />
+
                             </button>
                             <div id="userMenu" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 hidden">
                                 <a href="${pageContext.request.contextPath}/user-detail?id=${sessionScope.userId}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</a>
