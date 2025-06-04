@@ -150,6 +150,17 @@ public class Material {
     public void setStatusName(String statusName) {
         this.statusName = statusName;
     }
+    // Alias methods for JSP compatibility
+    public Timestamp getCreatedDate() {
+        return getCreatedAt();
+}
+
+    public Timestamp getLastUpdatedDate() {
+        return getUpdatedAt();
+}
+
 
    
 }
+
+

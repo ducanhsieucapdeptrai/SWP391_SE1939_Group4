@@ -14,6 +14,7 @@ import java.sql.Timestamp;
 public class Users {
     private int userId;
     private String fullName;
+    private String UserImage;
     private String email;
     private String phone;
     private String password;
@@ -34,18 +35,28 @@ public class Users {
     public Users() {
     }
 
-    public Users(int userId, String fullName, String email, String phone, String password, int roleId, boolean isActive, Timestamp createdAt) {
+    
+//
+//    public Timestamp getCreatedAt() {
+//        return createdAt;
+//    }
+//
+//    public void setCreatedAt(Timestamp createdAt) {
+//        this.createdAt = createdAt;
+//    }
+
+    public Users(int userId, String fullName, String UserImage, String email, String phone, String password, int roleId, boolean isActive, Role role) {
         this.userId = userId;
         this.fullName = fullName;
+        this.UserImage = UserImage;
         this.email = email;
         this.phone = phone;
         this.password = password;
         this.roleId = roleId;
         this.isActive = isActive;
-//        this.createdAt = createdAt;
+        this.role = role;
     }
 
-    // Getters & Setters
     public int getUserId() {
         return userId;
     }
@@ -60,6 +71,14 @@ public class Users {
 
     public void setFullName(String fullName) {
         this.fullName = fullName;
+    }
+
+    public String getUserImage() {
+        return UserImage;
+    }
+
+    public void setUserImage(String UserImage) {
+        this.UserImage = UserImage;
     }
 
     public String getEmail() {
@@ -101,14 +120,6 @@ public class Users {
     public void setIsActive(boolean isActive) {
         this.isActive = isActive;
     }
-//
-//    public Timestamp getCreatedAt() {
-//        return createdAt;
-//    }
-//
-//    public void setCreatedAt(Timestamp createdAt) {
-//        this.createdAt = createdAt;
-//    }
 
     
 }

@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
- */
 package controller.general;
 
 import DAO.UserDAO;
@@ -19,32 +15,37 @@ import model.Users;
 public class UserDetailController extends HttpServlet {
 
     @Override
-protected void doGet(HttpServletRequest request, HttpServletResponse response)
-        throws ServletException, IOException {
-    String id = request.getParameter("id");
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String idParam = request.getParameter("id");
 
-    // Nếu id không có từ URL, lấy từ session
-    if (id == null || id.isEmpty()) {
-        id = (String) request.getSession().getAttribute("userId");
-    }
-
-    if (id != null && !id.isEmpty()) {
-        UserDAO dao = new UserDAO();
-        Users user = dao.getUserById(id);
-        List<Role> roleList = dao.getAllRoles();
-        if (user != null) {
-            request.setAttribute("user", user);
-            request.setAttribute("roleList", roleList);
-            request.setAttribute("pageContent", "/UserDetail.jsp");
-            request.getRequestDispatcher("/layout/layout.jsp").forward(request, response);
-        } else {
-            response.sendRedirect("userlist");
+        // Nếu id không có từ URL, lấy từ session
+        if (idParam == null || idParam.isEmpty()) {
+            idParam = (String) request.getSession().getAttribute("userId");
         }
-    } else {
-        response.sendRedirect("userlist");
-    }
-}
 
+        if (idParam != null && !idParam.isEmpty()) {
+            try {
+                int userId = Integer.parseInt(idParam);
+                UserDAO dao = new UserDAO();
+                Users user = dao.getUserById(userId);
+                List<Role> roleList = dao.getAllRoles();
+
+                if (user != null) {
+                    request.setAttribute("user", user);
+                    request.setAttribute("roleList", roleList);
+                    request.setAttribute("pageContent", "/UserDetail.jsp");
+                    request.getRequestDispatcher("/layout/layout.jsp").forward(request, response);
+                } else {
+                    response.sendRedirect("userlist?message=user_not_found");
+                }
+            } catch (NumberFormatException e) {
+                response.sendRedirect("userlist?message=invalid_id_format");
+            }
+        } else {
+            response.sendRedirect("userlist?message=missing_id");
+        }
+    }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)

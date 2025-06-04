@@ -1,6 +1,8 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
+
+
 <div class="container mx-auto">
     <h2 class="text-2xl font-semibold mb-6">Dashboard</h2>
 
@@ -53,7 +55,7 @@
             <div class="bg-yellow-50 p-4 rounded-lg shadow flex items-center">
                 <div class="mr-4">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                 </div>
                 <div>
@@ -64,6 +66,13 @@
         </div>
         
         <canvas id="materialChart" width="400" height="200"></canvas>
+    </div>
+
+    <!-- Advanced Dashboard Button -->
+    <div class="text-center mb-6">
+        <a href="${pageContext.request.contextPath}/advanced-dashboard" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg inline-flex items-center transition duration-300">
+            <i class="fas fa-chart-line mr-2"></i> More Advanced Features
+        </a>
     </div>
 
     <!-- Ví dụ: Bảng dữ liệu -->
@@ -130,7 +139,7 @@
                     backgroundColor: 'rgba(54, 162, 235, 0.6)'
                 }]
             },
-            options: {
+           options: {
                 responsive: true,
                 scales: {
                     y: {

@@ -1,6 +1,6 @@
 package controller.general;
 
-import DAO.UsersDAO;
+import DAO.UserDAO;
 import jakarta.mail.Message;
 import jakarta.mail.Transport;
 import jakarta.servlet.ServletException;
@@ -24,7 +24,8 @@ public class RequestNewPasswordServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        List<Role> roles = UsersDAO.getAllRoles();
+        UserDAO dao = new UserDAO();
+        List<Role> roles = dao.getAllRoles();
         request.setAttribute("roles", roles);
         request.getRequestDispatcher("request-new-password.jsp").forward(request, response);
     }
@@ -38,7 +39,8 @@ public class RequestNewPasswordServlet extends HttpServlet {
         String phone = request.getParameter("phone");
         String roleIdStr = request.getParameter("roleId");
 
-        List<Role> roles = UsersDAO.getAllRoles();
+        UserDAO dao = new UserDAO();
+        List<Role> roles = dao.getAllRoles();
         request.setAttribute("roles", roles);
 
         if (fullName == null || fullName.trim().isEmpty()
@@ -59,7 +61,7 @@ public class RequestNewPasswordServlet extends HttpServlet {
             return;
         }
 
-        Users user = UsersDAO.getUserByEmail(email);
+        Users user = dao.getUserByEmail(email);
         if (user == null || !user.getFullName().equalsIgnoreCase(fullName)
                 || !user.getPhone().equals(phone) || user.getRoleId() != roleId) {
             request.setAttribute("error", "Incorrect user information.");
@@ -68,7 +70,7 @@ public class RequestNewPasswordServlet extends HttpServlet {
         }
 
         String newPassword = generateRandomPassword();
-        boolean updateSuccess = UsersDAO.updatePassword(email, newPassword);
+        boolean updateSuccess = dao.updatePassword(email, newPassword);
 
         if (updateSuccess) {
             boolean mailSent = sendPasswordEmail(email, newPassword);
