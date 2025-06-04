@@ -17,7 +17,7 @@
             <header class="bg-blue-900 text-white shadow-md">
                 <div class="container mx-auto px-4 py-3 flex justify-between items-center">
                     <div class="flex items-center">
-                        <img src="${pageContext.request.contextPath}/assets/images/logo.png" alt="Logo" class="w-8 h-8 mr-2">
+                        <img src="${pageContext.request.contextPath}/assets/images/LogoSlogan.png" alt="Logo" class="w-8 h-8 mr-2">
                     </div>
 
                     <div class="flex items-center">

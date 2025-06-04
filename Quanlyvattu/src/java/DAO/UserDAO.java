@@ -64,7 +64,7 @@ public class UserDAO extends DBContext {
             ps.setString(1, email);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    user = extractUserFromResultSet(rs);
+                    user = extractUserFromResultSet(rs);  // Đảm bảo hàm này có xử lý RoleName
                 }
             }
         } catch (SQLException e) {
@@ -86,6 +86,8 @@ public class UserDAO extends DBContext {
                 user.setUserId(rs.getInt("userId"));
                 user.setFullName(rs.getString("fullName"));
                 user.setEmail(rs.getString("email"));
+                user.setPhone(rs.getString("phone"));
+
                 user.setUserImage(rs.getString("userImage"));
                 user.setRoleId(rs.getInt("roleId"));
                 user.setIsActive(rs.getBoolean("isActive"));
@@ -218,5 +220,8 @@ public class UserDAO extends DBContext {
         } else {
             System.out.println("Sai email hoặc mật khẩu");
         }
+
+        System.out.println(u.getEmail());
     }
+
 }

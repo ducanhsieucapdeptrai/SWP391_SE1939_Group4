@@ -57,7 +57,7 @@ CREATE TABLE MaterialStatus (
 
 CREATE TABLE Materials (
     MaterialId INT AUTO_INCREMENT PRIMARY KEY,
-    MaterialName VARCHAR(255),
+    MaterialName VARCHAR(300),
     SubCategoryId INT,
     StatusId INT,
     Image VARCHAR(255),
@@ -202,6 +202,9 @@ VALUES
 ('Hoàng Văn F', 'warehousestaff.png', 'a6@example.com', '0900000006', 'pass6', 2, TRUE),
 ('Lý Thị G', 'warehousestaff.png', 'a7@example.com', '0900000007', 'pass7', 2, TRUE),
 ('Đào Văn H', 'warehousestaff.png', 'a8@example.com', '0900000008', 'pass8', 2, TRUE),
+
+ ('Nguyễn Nhân Viên', 'companystaff.png', 'nhanvienkho8686@gmail.com', '0912345678', 'nhanvien123', 2, TRUE),
+
 
 -- Nhân viên công ty (10 người)
 ('Ngô Thị I', 'companystaff.png', 'b1@example.com', '0900000011', 'pass11', 4, TRUE),
