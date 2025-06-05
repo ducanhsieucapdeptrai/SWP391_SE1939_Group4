@@ -1,3 +1,9 @@
+<%-- 
+    Document   : MaterialDetail.jsp
+    Created on : Jun 4, 2025, 4:11:41 AM
+    Author     : anhdu
+--%>
+
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
@@ -11,15 +17,14 @@
             margin: 0;
             background: #f4f6fc;
         }
-        .container {
-            padding: 40px;
-        }
+
         .header {
             background: linear-gradient(90deg, #7b2ff7, #f107a3);
             color: white;
             padding: 30px;
             border-radius: 10px 10px 0 0;
         }
+
         .header h1 {
             margin: 0;
             font-size: 30px;
@@ -27,6 +32,7 @@
             align-items: center;
             gap: 10px;
         }
+
         .detail-grid {
             display: grid;
             grid-template-columns: 1fr 1.5fr;
@@ -36,6 +42,7 @@
             padding: 40px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
+
         .image-box {
             background: #f5f5f5;
             border-radius: 10px;
@@ -46,11 +53,13 @@
             font-size: 50px;
             color: #ccc;
         }
+
         .info-box h2 {
             margin: 0;
             font-size: 26px;
             color: #2c3e50;
         }
+
         .tag-new {
             background: #ffeaa7;
             color: #d35400;
@@ -60,24 +69,29 @@
             font-size: 13px;
             margin-left: 10px;
         }
+
         .info-table {
             margin-top: 20px;
         }
+
         .info-table p {
             margin: 10px 0;
             font-size: 16px;
         }
+
         .label {
             font-weight: bold;
             color: #555;
             width: 160px;
             display: inline-block;
         }
+
         .price {
             color: green;
             font-weight: bold;
             font-size: 18px;
         }
+
         .stock-dot {
             height: 10px;
             width: 10px;
@@ -86,6 +100,7 @@
             display: inline-block;
             margin-right: 6px;
         }
+
         .btn-back {
             display: inline-block;
             margin-top: 20px;
@@ -94,6 +109,17 @@
             padding: 10px 20px;
             text-decoration: none;
             border-radius: 8px;
+        }
+
+        .btn-edit {
+            display: inline-block;
+            margin-top: 20px;
+            background-color: #0984e3;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 8px;
+            margin-left: 10px;
         }
     </style>
 </head>
@@ -133,11 +159,15 @@
                 <p><span class="label">Minimum Stock:</span> ${m.minQuantity} units</p>
                 <p><span class="label">Created Date:</span> <fmt:formatDate value="${m.createdAt}" pattern="dd/MM/yyyy HH:mm"/></p>
                 <p><span class="label">Last Updated:</span> <fmt:formatDate value="${m.updatedAt}" pattern="dd/MM/yyyy HH:mm"/></p>
-
                 <p><span class="label">Status:</span> ${m.statusName}</p>
-                </p>
             </div>
-                <a href="${pageContext.request.contextPath}/materiallist" class="btn-back">&larr; Back to Materials</a>        </div>
+
+            <!-- Nút Back và Edit -->
+            <div>
+                <a href="${pageContext.request.contextPath}/materiallist" class="btn-back">&larr; Back to Materials</a>
+                <a href="${pageContext.request.contextPath}/editmaterial?materialId=${m.materialId}" class="btn-edit">✏️ Edit</a>
+            </div>
+        </div>
     </div>
 </div>
 </body>

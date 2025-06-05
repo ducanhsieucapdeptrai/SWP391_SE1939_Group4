@@ -14,11 +14,7 @@ public class DBContext {
         try {
             String url = "jdbc:mysql://localhost:3306/quan_ly_vat_tu?useSSL=false&serverTimezone=UTC";
             String user = "root";
-
             String password = "Taahuyydatt"; // sửa theo đúng mật khẩu MySQL
-
-
-
 
             Class.forName("com.mysql.cj.jdbc.Driver");
             connection = DriverManager.getConnection(url, user, password);
@@ -46,10 +42,12 @@ public class DBContext {
                 System.out.println("❌ Kết nối thất bại.");
             }
 
-            conn.close(); // Đóng kết nối sau khi kiểm tra
+            // ❌ KHÔNG đóng connection ở đây nếu bạn muốn dùng lại trong servlet
+            // conn.close(); ← bỏ dòng này
         } catch (Exception e) {
             System.out.println("❌ Lỗi kết nối database: " + e.getMessage());
             e.printStackTrace();
         }
     }
+
 }

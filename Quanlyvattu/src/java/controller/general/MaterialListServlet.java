@@ -2,13 +2,14 @@ package controller.general;
 
 import DAO.MaterialDAO;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 import model.Material;
+
+import jakarta.servlet.annotation.WebServlet;
 
 @WebServlet(name = "MaterialList", urlPatterns = {"/materiallist"})
 public class MaterialListServlet extends HttpServlet {
@@ -20,7 +21,6 @@ public class MaterialListServlet extends HttpServlet {
         int page = 1;
         int pageSize = 10;
 
-        // Lấy số trang nếu có
         String pageParam = request.getParameter("page");
         if (pageParam != null) {
             try {
@@ -35,31 +35,53 @@ public class MaterialListServlet extends HttpServlet {
 
         int offset = (page - 1) * pageSize;
 
-        // Gọi DAO
-        MaterialDAO dao = new MaterialDAO();
-        List<Material> materials = dao.getMaterialsByPage(offset, pageSize);
-        int totalCount = dao.getTotalMaterialCount();
-        int totalPage = (int) Math.ceil((double) totalCount / pageSize);
+        // Lấy dữ liệu tìm kiếm
+        String category = request.getParameter("category");
+        String subcategory = request.getParameter("subcategory");
+        String name = request.getParameter("name");
 
-        // Truyền dữ liệu sang JSP
+        MaterialDAO dao = new MaterialDAO();
+        List<Material> materials;
+        int totalCount;
+
+        if ((category != null && !category.isEmpty())
+                || (subcategory != null && !subcategory.isEmpty())
+                || (name != null && !name.isEmpty())) {
+
+            // Nếu có điều kiện tìm kiếm → lọc
+            materials = dao.searchMaterials(category, subcategory, name);
+            totalCount = materials.size();  // Không phân trang khi tìm kiếm
+            request.setAttribute("isSearching", true); // Để JSP biết không hiển thị phân trang
+        } else {
+            // Nếu không tìm kiếm → phân trang
+            materials = dao.getMaterialsByPage(offset, pageSize);
+            totalCount = dao.getTotalMaterialCount();
+        }
+
+        int totalPage = (int) Math.ceil((double) totalCount / pageSize);
+// Lấy danh sách category và subcategory để hiển thị trong dropdown filter
+    //    List<String> allCategories = dao.getAllCategories();
+     //   List<String> allSubcategories = dao.getAllSubcategories();
+
+   //     request.setAttribute("allCategories", allCategories);
+    //    request.setAttribute("allSubcategories", allSubcategories);
+
         request.setAttribute("materials", materials);
         request.setAttribute("currentPage", page);
         request.setAttribute("totalPage", totalPage);
-
         request.setAttribute("pageContent", "/MaterialList.jsp");
-        request.getRequestDispatcher("/layout/layout.jsp").forward(request, response);
 
+        request.getRequestDispatcher("/layout/layout.jsp").forward(request, response);
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // Không xử lý POST ở đây
         response.sendRedirect("materiallist");
     }
 
     @Override
     public String getServletInfo() {
-        return "Hiển thị danh sách vật tư có phân trang";
+        return "Hiển thị danh sách vật tư có phân trang và tìm kiếm";
     }
 }

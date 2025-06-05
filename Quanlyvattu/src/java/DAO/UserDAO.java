@@ -1,174 +1,216 @@
 package DAO;
 
 import dal.DBContext;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
 import model.Users;
 import model.Role;
 
-/**
- *
- * @author Admin
- */
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+
 public class UserDAO extends DBContext {
-    public Users getUserById(String id) {
-        String sql = "SELECT u.UserId, u.FullName, u.Email, u.Phone, u.Password, u.RoleId, u.IsActive FROM Users u " +
-                    "JOIN Roles r ON u.RoleId = r.RoleId " +
-                    "WHERE u.UserId = ?";
-        try {
-            PreparedStatement st = connection.prepareStatement(sql);
-            st.setString(1, id);
-            ResultSet rs = st.executeQuery();
-            if (rs.next()) {
-                Users user = new Users();
-                user.setUserId(rs.getInt("UserId"));
-                user.setFullName(rs.getString("FullName"));
-                user.setPhone(rs.getString("Phone"));
-                user.setEmail(rs.getString("Email"));
-                user.setPassword(rs.getString("Password"));
-                user.setRoleId(rs.getInt("RoleId"));
-                
-                user.setIsActive(rs.getBoolean("IsActive"));
-                
-                return user;
+
+    private final Connection conn;
+
+    public UserDAO() {
+        DBContext db = new DBContext();
+        this.conn = db.getConnection();
+    }
+
+    // Get user by email & password (for login)
+    public Users getUserByEmailAndPassword(String email, String password) {
+        Users user = null;
+        String sql = "SELECT u.*, r.RoleName FROM Users u JOIN Roles r ON u.RoleId = r.RoleId WHERE u.Email = ?";
+
+        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, email);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    String dbPassword = rs.getString("Password");
+                    boolean isMatch = false;
+
+                    // Nếu trùng trực tiếp (password gốc)
+                    if (password.equals(dbPassword)) {
+                        isMatch = true;
+                    } else {
+                        // Nếu là mật khẩu băm, so sánh với mật khẩu sau khi băm
+                        String hashedInput = utils.HashUtil.hashPassword(password);
+                        if (hashedInput.equals(dbPassword)) {
+                            isMatch = true;
+                        }
+                    }
+
+                    if (isMatch) {
+                        user = extractUserFromResultSet(rs);
+                        Role role = new Role();
+                        role.setRoleId(user.getRoleId());
+                        role.setRoleName(rs.getString("RoleName"));
+                        user.setUserImage(rs.getString("UserImage"));
+                        user.setRole(role);
+                    }
+                }
             }
         } catch (SQLException e) {
-            System.out.println("Error: " + e.getMessage());
+            e.printStackTrace();
         }
-        return null;
+        return user;
     }
-    
-    public List<Users> getAllUsers() {
-        List<Users> userList = new ArrayList<>();
-        String sql = "SELECT u.UserId, u.FullName, u.Email, u.Phone,r.RoleId, u.IsActive FROM Users u " +
-                    "JOIN Roles r ON u.RoleId = r.RoleId";
+
+    // Get user by email
+    public Users getUserByEmail(String email) {
+        Users user = null;
+        String sql = "SELECT * FROM Users WHERE Email = ?";
+        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, email);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    user = extractUserFromResultSet(rs);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return user;
+    }
+
+    // Get user by ID
+    public Users getUserById(int id) {
+        Users user = null;
         try {
-            PreparedStatement st = connection.prepareStatement(sql);
-            ResultSet rs = st.executeQuery();
+            String sql = "SELECT * FROM users WHERE userId = ?";
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                user = new Users();
+                user.setUserId(rs.getInt("userId"));
+                user.setFullName(rs.getString("fullName"));
+                user.setEmail(rs.getString("email"));
+                user.setUserImage(rs.getString("userImage"));
+                user.setPhone(rs.getString("phone"));
+                user.setRoleId(rs.getInt("roleId"));
+                user.setIsActive(rs.getBoolean("isActive"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return user;
+    }
+
+    public List<Users> getAllUsers() {
+        List<Users> list = new ArrayList<>();
+        try {
+            String sql = "SELECT * FROM users";
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 Users user = new Users();
-                user.setUserId(rs.getInt("UserId"));
-                user.setFullName(rs.getString("FullName"));
-                user.setEmail(rs.getString("Email"));
-                user.setPhone(rs.getString("Phone"));
-                user.setRoleId(rs.getInt("RoleId"));
-                
-                user.setIsActive(rs.getBoolean("IsActive"));
-                
-                userList.add(user);
+                user.setUserId(rs.getInt("userId"));
+                user.setFullName(rs.getString("fullName"));
+                user.setEmail(rs.getString("email"));
+                user.setRoleId(rs.getInt("roleId"));
+                user.setIsActive(rs.getBoolean("isActive"));
+                list.add(user);
             }
-        } catch (SQLException e) {
-            System.out.println("Error: " + e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        return userList;
+        return list;
     }
-    
-    public boolean deleteUserById(int userId) {
-    String sql = "DELETE FROM Users WHERE UserId = ?";
-    try (PreparedStatement st = connection.prepareStatement(sql)) {
-        st.setInt(1, userId);
-        int rows = st.executeUpdate();
-        return rows > 0;
-    } catch (SQLException e) {
-        System.err.println("Error deleting user by ID: " + e.getMessage());
-        return false;
-    }
-}
 
-    
+    public boolean deleteUserById(int userId) {
+        String sql = "DELETE FROM Users WHERE UserId = ?";
+        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     public List<Role> getAllRoles() {
-        List<Role> roleList = new ArrayList<>();
-        String sql = "SELECT RoleId, RoleName FROM Roles";
+        List<Role> list = new ArrayList<>();
         try {
-            PreparedStatement st = connection.prepareStatement(sql);
-            ResultSet rs = st.executeQuery();
+            String sql = "SELECT * FROM roles";
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 Role role = new Role();
-                role.setRoleId(rs.getInt("RoleId"));
-                role.setRoleName(rs.getString("RoleName"));
-                roleList.add(role);
+                role.setRoleId(rs.getInt("roleId"));
+                role.setRoleName(rs.getString("roleName"));
+                list.add(role);
             }
-        } catch (SQLException e) {
-            System.out.println("Error: " + e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        return roleList;
+        return list;
     }
-    
+
     public String getRoleName(int roleId) {
         String sql = "SELECT RoleName FROM Roles WHERE RoleId = ?";
-        try {
-            PreparedStatement st = connection.prepareStatement(sql);
-            st.setInt(1, roleId);
-            ResultSet rs = st.executeQuery();
+        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, roleId);
+            ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 return rs.getString("RoleName");
             }
         } catch (SQLException e) {
-            System.out.println("Error: " + e.getMessage());
+            e.printStackTrace();
         }
         return "Unknown";
     }
-    
-    public boolean updateUserRoleAndStatus(int userId, int roleId, boolean isActive) {
-    String sql = "UPDATE Users SET RoleId = ?, IsActive = ? WHERE UserId = ?";
-    
-    try (PreparedStatement st = connection.prepareStatement(sql)) {
-        st.setInt(1, roleId);
-        st.setBoolean(2, isActive);
-        st.setInt(3, userId);
-        
-        int rowsAffected = st.executeUpdate();
-        return rowsAffected > 0;
-        
-    } catch (SQLException e) {
-        System.err.println("Error updating user role/status: " + e.getMessage());
-        return false;
-    }
-    
-    }
-    public Users getUserByEmail(String email) {
-    String sql = "SELECT UserId, FullName, Email, Phone, Password, RoleId, IsActive FROM Users WHERE Email = ?";
-    try (PreparedStatement st = connection.prepareStatement(sql)) {
-        st.setString(1, email);
-        ResultSet rs = st.executeQuery();
-        if (rs.next()) {
-            Users user = new Users();
-            user.setUserId(rs.getInt("UserId"));
-            user.setFullName(rs.getString("FullName"));
-            user.setEmail(rs.getString("Email"));
-            user.setPhone(rs.getString("Phone"));
-            user.setPassword(rs.getString("Password"));
-            user.setRoleId(rs.getInt("RoleId"));
-            user.setIsActive(rs.getBoolean("IsActive"));
-            return user;
+
+    public boolean updatePassword(String email, String hashedPassword) {
+        String sql = "UPDATE Users SET Password = ? WHERE Email = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, hashedPassword);
+            ps.setString(2, email.trim());
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.out.println("Lỗi khi update mật khẩu cho email: " + email);
+            e.printStackTrace();
+            return false;
         }
-    } catch (SQLException e) {
-        System.out.println("Error in getUserByEmail: " + e.getMessage());
     }
-    return null;
-}
-public boolean updatePassword(int userId, String newHashedPassword) {
-    String sql = "UPDATE Users SET Password = ? WHERE UserId = ?";
-    try (PreparedStatement ps = connection.prepareStatement(sql)) {
-        ps.setString(1, newHashedPassword);
-        ps.setInt(2, userId);
-        int rows = ps.executeUpdate();
-        System.out.println("Update rows affected: " + rows);
-        System.out.println("SQL: UPDATE Users SET Password = '" + newHashedPassword + "' WHERE UserId = " + userId);
-        return rows > 0;
-    } catch (SQLException e) {
-        e.printStackTrace();
+
+    // Update role and status
+    public boolean updateUserRoleAndStatus(int userId, int roleId, boolean isActive) {
+        try {
+            String sql = "UPDATE users SET roleId = ?, isActive = ? WHERE userId = ?";
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, roleId);
+            ps.setBoolean(2, isActive);
+            ps.setInt(3, userId);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return false;
     }
-}
 
+    // Extract user from ResultSet
+    private Users extractUserFromResultSet(ResultSet rs) throws SQLException {
+        Users user = new Users();
+        user.setUserId(rs.getInt("UserId"));
+        user.setFullName(rs.getString("FullName"));
+        user.setUserImage(rs.getString("UserImage"));
+        user.setEmail(rs.getString("Email"));
+        user.setPhone(rs.getString("Phone"));
+        user.setPassword(rs.getString("Password"));
+        user.setRoleId(rs.getInt("RoleId"));
+        user.setIsActive(rs.getBoolean("IsActive"));
+        return user;
     }
 
-
-
-
-
+    // Main for testing
+    public static void main(String[] args) {
+        UserDAO dao = new UserDAO();
+        Users u = dao.getUserByEmailAndPassword("giamdoc@example.com", "giamdoc123");
+        if (u != null) {
+            System.out.println("Đăng nhập thành công: " + u.getEmail());
+        } else {
+            System.out.println("Sai email hoặc mật khẩu");
+        }
+    }
+}

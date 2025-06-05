@@ -8,8 +8,9 @@ import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.WebServlet;
 import java.io.IOException;
 
-@WebServlet("/materialdetail")
+@WebServlet("/materialDetail")
 public class MaterialDetailServlet extends HttpServlet {
+
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String idParam = request.getParameter("id");
@@ -25,8 +26,8 @@ public class MaterialDetailServlet extends HttpServlet {
 
             if (material != null) {
                 request.setAttribute("m", material);
-request.setAttribute("pageContent", "/MaterialDetail.jsp");
-        request.getRequestDispatcher("/layout/layout.jsp").forward(request, response);
+                request.setAttribute("pageContent", "/MaterialDetail.jsp");
+                request.getRequestDispatcher("/layout/layout.jsp").forward(request, response);
             } else {
                 request.setAttribute("error", "Material not found.");
                 request.getRequestDispatcher("materiallist").forward(request, response);

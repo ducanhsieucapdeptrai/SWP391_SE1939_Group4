@@ -1,111 +1,40 @@
-<%-- 
-    Document   : UserDetail
-    Created on : May 30, 2025
-    Author     : Admin
---%>
-
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>User Details</title>
-        <style>
-            body {
-                font-family: Arial, sans-serif;
-                margin: 0;
-                padding: 20px;
-            }
-            .user-detail-container {
-                width: 60%;
-                margin: 0 auto;
-                padding: 20px;
-                border: 1px solid #ddd;
-                border-radius: 5px;
-                box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            }
-            h1 {
-                color: #333;
-                margin-bottom: 20px;
-            }
-            .info-section {
-                margin-bottom: 30px;
-            }
-            .info-section h2 {
-                border-bottom: 1px solid #eee;
-                padding-bottom: 10px;
-                margin-bottom: 20px;
-                color: #444;
-            }
-            .info-row {
-                display: flex;
-                margin-bottom: 15px;
-            }
-            .info-label {
-                font-weight: bold;
-                width: 150px;
-                color: #555;
-            }
-            .info-value {
-                flex: 1;
-            }
-            .status-active {
-                background-color: #28a745;
-                color: white;
-                padding: 5px 10px;
-                border-radius: 4px;
-                display: inline-block;
-            }
-            .status-inactive {
-                background-color: #dc3545;
-                color: white;
-                padding: 5px 10px;
-                border-radius: 4px;
-                display: inline-block;
-            }
-            .btn {
-                display: inline-block;
-                padding: 8px 15px;
-                background-color: #6c757d;
-                color: white;
-                text-decoration: none;
-                border-radius: 4px;
-                margin-right: 10px;
-                font-size: 14px;
-            }
-            .btn:hover {
-                background-color: #5a6268;
-            }
-            .btn-edit {
-                background-color: #007bff;
-            }
-            .btn-edit:hover {
-                background-color: #0069d9;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="user-detail-container">
-            <h1>User Details</h1>
 
-            <div class="info-section">
-                <h2>Basic Information</h2>
-                <div class="info-row">
-                    <div class="info-label">Full Name:</div>
-                    <div class="info-value">${user.fullName}</div>
+<div class="user-detail-container bg-white p-6 rounded shadow-md w-full max-w-3xl mx-auto">
+    <h1 class="text-2xl font-semibold text-gray-800 mb-6">User Details</h1>
+
+    <div class="info-section mb-8">
+        <h2 class="text-xl font-medium text-gray-700 border-b pb-2 mb-4">Basic Information</h2>
+
+        <div class="flex flex-col md:flex-row gap-10 items-start">
+            <!-- Khung ảnh chữ nhật -->
+            <div class="w-52 h-60 bg-gray-100 rounded-md overflow-hidden shadow border border-gray-300">
+                <img src="${pageContext.request.contextPath}/assets/images/UserImage/${user.userImage}" 
+                     alt="Avatar"
+                     class="w-full h-full object-cover transition-transform duration-300 hover:scale-105">
+            </div>
+
+            <!-- Thông tin người dùng -->
+            <div class="flex-1 space-y-4">
+                <div class="info-row flex">
+                    <div class="info-label w-40 font-semibold text-gray-600">Full Name:</div>
+                    <div class="info-value text-gray-800">${user.fullName}</div>
                 </div>
-                <div class="info-row">
-                    <div class="info-label">Email:</div>
-                    <div class="info-value">${user.email}</div>
+
+                <div class="info-row flex">
+                    <div class="info-label w-40 font-semibold text-gray-600">Email:</div>
+                    <div class="info-value text-gray-800">${user.email}</div>
                 </div>
-                <div class="info-row">
-                    <div class="info-label">Phone:</div>
-                    <div class="info-value">${user.phone}</div>
+
+                <div class="info-row flex">
+                    <div class="info-label w-40 font-semibold text-gray-600">Phone:</div>
+                    <div class="info-value text-gray-800">${user.phone}</div>
                 </div>
-                <div class="info-row">
-                    <div class="info-label">Role:</div>
-                    <div class="info-value">
+
+                <div class="info-row flex">
+                    <div class="info-label w-40 font-semibold text-gray-600">Role:</div>
+                    <div class="info-value text-gray-800">
                         <c:forEach items="${roleList}" var="role">
                             <c:if test="${role.roleId == user.roleId}">
                                 ${role.roleName}
@@ -114,25 +43,25 @@
                     </div>
                 </div>
 
-                <div class="info-row">
-                    <div class="info-label">Status:</div>
+                <div class="info-row flex">
+                    <div class="info-label w-40 font-semibold text-gray-600">Status:</div>
                     <div class="info-value">
                         <c:choose>
                             <c:when test="${user.isActive}">
-                                <span class="status-active">Active</span>
+                                <span class="bg-green-500 text-white px-3 py-1 rounded">Active</span>
                             </c:when>
                             <c:otherwise>
-                                <span class="status-inactive">Inactive</span>
+                                <span class="bg-red-500 text-white px-3 py-1 rounded">Inactive</span>
                             </c:otherwise>
                         </c:choose>
                     </div>
                 </div>
             </div>
-
-            <div>
-                <a href="userlist" class="btn">Back to List</a>
-                <a href="user-edit?id=${user.userId}" class="btn btn-edit">Edit</a>
-            </div>
         </div>
-    </body>
-</html>
+
+        <div class="mt-6">
+            <a href="userlist" class="inline-block bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded mr-2 text-sm">Back to List</a>
+            <a href="user-edit?id=${user.userId}" class="inline-block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm">Edit</a>
+        </div>
+    </div>
+</div>

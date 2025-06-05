@@ -98,8 +98,8 @@
         <div class="container d-flex justify-content-center align-items-center min-vh-100">
             <div class="card shadow-lg">
                 <div class="text-center mb-4">
-                    <img src="${pageContext.request.contextPath}/assets/images/logo.png" height="150" alt="logo">
-                    <h4 class="mt-3 mb-1">Inventory Management Sollution</h4>
+                    <img src="${pageContext.request.contextPath}/assets/images/logo.png" height="80" alt="logo">
+                    <h4 class="mt-3 mb-1">Material Management System</h4>
                 </div>
 
                 <c:if test="${not empty errorMsg}">
