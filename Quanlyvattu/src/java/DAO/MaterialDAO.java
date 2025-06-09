@@ -198,5 +198,33 @@ public class MaterialDAO extends DBContext {
         return null;
     }
 
+    public boolean updateMaterial(Material m) {
+        String sql = """
+        UPDATE Materials
+        SET MaterialName = ?, SubCategoryId = ?, StatusId = ?, Image = ?, 
+            Description = ?, Quantity = ?, MinQuantity = ?, Price = ?, 
+            UpdatedAt = CURRENT_TIMESTAMP
+        WHERE MaterialId = ?
+    """;
+
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setString(1, m.getMaterialName());
+            st.setInt(2, m.getSubCategoryId());
+            st.setInt(3, m.getStatusId());
+            st.setString(4, m.getImage());
+            st.setString(5, m.getDescription());
+            st.setInt(6, m.getQuantity());
+            st.setInt(7, m.getMinQuantity());
+            st.setDouble(8, m.getPrice());
+            st.setInt(9, m.getMaterialId());
+
+            return st.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
     // Có thể thêm: insertMaterial(), updateMaterial(), deleteMaterialById(), searchMaterialByName()
 }
