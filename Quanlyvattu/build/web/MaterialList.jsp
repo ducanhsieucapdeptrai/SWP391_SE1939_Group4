@@ -1,3 +1,5 @@
+<%@page import="model.SubCategory"%>
+<%@page import="model.Category"%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="java.util.List" %>
 <%@ page import="model.Material" %>
@@ -13,15 +15,42 @@
         <form method="get" action="materiallist" class="grid grid-cols-4 gap-4 items-center mb-4">
             <h2 class="col-span-4 text-2xl font-bold text-gray-800">Material List</h2>
 
-            <!-- Category search -->
-            <input type="text" name="category" placeholder="Search category..." 
-                   value="<%= request.getParameter("category") != null ? request.getParameter("category") : ""%>"
-                   class="border px-3 py-2 rounded-lg shadow-sm" />
+            <select name="category" class="border px-3 py-2 rounded-lg shadow-sm">
+                <option value="">-- All Categories --</option>
+                <%
+                    List<Category> allCategories = (List<Category>) request.getAttribute("allCategories");
+                    String selectedCategory = request.getParameter("category");
+                    if (allCategories != null) {
+                        for (Category c : allCategories) {
+                %>
+                <option value="<%= c.getCategoryName()%>" <%= c.getCategoryName().equals(selectedCategory) ? "selected" : ""%>>
+                    <%= c.getCategoryName()%>
+                </option>
+                <%
+                        }
+                    }
+                %>
+            </select>
 
-            <!-- SubCategory search -->
-            <input type="text" name="subcategory" placeholder="Search subcategory..." 
-                   value="<%= request.getParameter("subcategory") != null ? request.getParameter("subcategory") : ""%>"
-                   class="border px-3 py-2 rounded-lg shadow-sm" />
+
+            <select name="subcategory" class="border px-3 py-2 rounded-lg shadow-sm">
+                <option value="">-- All Subcategories --</option>
+                <%
+                    List<SubCategory> allSubcategories = (List<SubCategory>) request.getAttribute("allSubcategories");
+                    String selectedSubcategory = request.getParameter("subcategory");
+                    if (allSubcategories != null) {
+                        for (SubCategory sc : allSubcategories) {
+                %>
+                <option value="<%= sc.getSubCategoryName()%>" <%= sc.getSubCategoryName().equals(selectedSubcategory) ? "selected" : ""%>>
+                    <%= sc.getSubCategoryName()%>
+                </option>
+                <%
+                        }
+                    }
+                %>
+            </select>
+
+
 
             <!-- Name search -->
             <input type="text" name="name" placeholder="Search name..." 
@@ -29,12 +58,12 @@
                    class="border px-3 py-2 rounded-lg shadow-sm" />
 
             <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Search</button>
-        
+
         </form>
-                   
-                   <form action="materiallist" method="get" style="display:inline;">
-                       <a href="materiallist" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Xem tất cả</a>
-                   </form>
+
+        <form action="materiallist" method="get" style="display:inline;">
+            <a href="materiallist" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Xem tất cả</a>
+        </form>
 
     </div>
 

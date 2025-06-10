@@ -3,7 +3,9 @@ package DAO;
 import dal.DBContext;
 import java.sql.*;
 import java.util.*;
+import model.Category;
 import model.Material;
+import model.SubCategory;
 
 public class MaterialDAO extends DBContext {
 
@@ -225,6 +227,44 @@ public class MaterialDAO extends DBContext {
 
         return false;
     }
+
+    public List<Category> getAllCategories() {
+        List<Category> list = new ArrayList<>();
+        String sql = "SELECT * FROM Categories";
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            ResultSet rs = st.executeQuery();
+            while (rs.next()) {
+                Category c = new Category();
+                c.setCategoryId(rs.getInt("CategoryId"));
+                c.setCategoryName(rs.getString("CategoryName"));
+                list.add(c);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public List<SubCategory> getAllSubCategories() {
+        List<SubCategory> list = new ArrayList<>();
+        String sql = "SELECT * FROM SubCategories";
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            ResultSet rs = st.executeQuery();
+            while (rs.next()) {
+                SubCategory s = new SubCategory();
+                s.setSubCategoryId(rs.getInt("SubCategoryId"));
+                s.setSubCategoryName(rs.getString("SubCategoryName"));
+                s.setCategoryId(rs.getInt("CategoryId"));
+                list.add(s);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+// MaterialDAO.java
+
+    
 
     // Có thể thêm: insertMaterial(), updateMaterial(), deleteMaterialById(), searchMaterialByName()
 }
