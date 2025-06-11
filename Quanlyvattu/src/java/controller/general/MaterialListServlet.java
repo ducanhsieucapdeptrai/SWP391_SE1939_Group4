@@ -10,6 +10,8 @@ import java.util.List;
 import model.Material;
 
 import jakarta.servlet.annotation.WebServlet;
+import model.Category;
+import model.SubCategory;
 
 @WebServlet(name = "MaterialList", urlPatterns = {"/materiallist"})
 public class MaterialListServlet extends HttpServlet {
@@ -60,11 +62,11 @@ public class MaterialListServlet extends HttpServlet {
 
         int totalPage = (int) Math.ceil((double) totalCount / pageSize);
 // Lấy danh sách category và subcategory để hiển thị trong dropdown filter
-    //    List<String> allCategories = dao.getAllCategories();
-     //   List<String> allSubcategories = dao.getAllSubcategories();
+        List<Category> allCategories = dao.getAllCategories();
+        List<SubCategory> allSubcategories = dao.getAllSubCategories();
 
-   //     request.setAttribute("allCategories", allCategories);
-    //    request.setAttribute("allSubcategories", allSubcategories);
+        request.setAttribute("allCategories", allCategories);
+        request.setAttribute("allSubcategories", allSubcategories);
 
         request.setAttribute("materials", materials);
         request.setAttribute("currentPage", page);

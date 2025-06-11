@@ -15,6 +15,7 @@
         <form method="get" action="materiallist" class="grid grid-cols-4 gap-4 items-center mb-4">
             <h2 class="col-span-4 text-2xl font-bold text-gray-800">Material List</h2>
 
+            <!-- Category dropdown -->
             <select name="category" class="border px-3 py-2 rounded-lg shadow-sm">
                 <option value="">-- All Categories --</option>
                 <%
@@ -33,6 +34,7 @@
             </select>
 
 
+            <!-- SubCategory dropdown -->
             <select name="subcategory" class="border px-3 py-2 rounded-lg shadow-sm">
                 <option value="">-- All Subcategories --</option>
                 <%
@@ -52,6 +54,8 @@
 
 
 
+
+
             <!-- Name search -->
             <input type="text" name="name" placeholder="Search name..." 
                    value="<%= request.getParameter("name") != null ? request.getParameter("name") : ""%>"
@@ -67,6 +71,12 @@
 
     </div>
 
+
+    <div class="mt-2">
+        <a href="catalogmanager" class="inline-block bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+            + Add Material
+        </a>
+    </div>
 
 
     <div class="overflow-x-auto bg-white rounded-lg shadow">
@@ -97,7 +107,7 @@
                         /* format lại mã vật tư */
                         String code = "VT" + String.format("%04d", m.getMaterialId());
                         int inStock = m.getQuantity();      // tồn kho hiện tại
-                %>
+%>
                 <tr class="border-t hover:bg-gray-50">
                     <!-- Category name -->
                     <td class="py-2 px-4"><%= m.getCategoryName()%></td>
@@ -110,10 +120,11 @@
 
                     <!-- Image thumbnail -->
                     <td class="py-2 px-4">
-                        <img src="<%= request.getContextPath() + "/" + ((m.getImage() == null || m.getImage().isEmpty()) ? "assets/images/materials/default.png" : m.getImage())%>"
+                        <img src="<%= request.getContextPath() + "/assets/images/materials/" + (m.getImage() == null || m.getImage().isEmpty() ? "default.png" : m.getImage())%>"
                              alt="<%= m.getMaterialName()%>"
                              class="h-12 w-12 object-cover rounded cursor-pointer transition-transform hover:scale-110"
                              onclick="showImage(this.src)" />
+
 
                     </td>
 

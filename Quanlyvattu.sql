@@ -146,7 +146,10 @@ CREATE TABLE RequestList (
     FOREIGN KEY (RequestTypeId) REFERENCES RequestType(RequestTypeId),
     FOREIGN KEY (ApprovedBy) REFERENCES Users(UserId)
 );
-
+ALTER TABLE RequestList 
+MODIFY COLUMN Status VARCHAR(20),
+ADD CONSTRAINT FK_Request_Status 
+FOREIGN KEY (Status) REFERENCES RequestStatus(StatusCode);
 
 INSERT INTO RequestStatus (StatusCode, Description)
 VALUES 
@@ -154,10 +157,7 @@ VALUES
 ('Approved', 'Approved by director'),
 ('Rejected', 'Request has been rejected');
 
-ALTER TABLE RequestList 
-MODIFY COLUMN Status VARCHAR(20),
-ADD CONSTRAINT FK_Request_Status 
-FOREIGN KEY (Status) REFERENCES RequestStatus(StatusCode);
+
 
 CREATE TABLE RequestDetail (
     RequestId INT,
@@ -353,48 +353,48 @@ VALUES ('New'), ('Used'), ('Damaged'); -- 1, 2, 3
 
 INSERT INTO Materials (MaterialName, SubCategoryId, StatusId, Image, Description, Quantity, MinQuantity, Price)
 VALUES
-('Reinforced Concrete', 1, 1, 'assets/images/materials/reinforced-concrete.png', 'High strength concrete with steel reinforcement', 100, 20, 1200000),
-('Lightweight Concrete', 1, 1, 'assets/images/materials/lightweight-concrete.png', 'Concrete with low density for non-load-bearing walls', 50, 10, 950000),
-('I-Beam 200x100', 2, 1, 'assets/images/materials/i-beam-200x100.png', 'Standard structural steel I-beam', 200, 30, 1800000),
-('H-Beam 300x300', 2, 1, 'assets/images/materials/h-beam-300x300.png', 'Heavy-duty H-beam', 150, 20, 3500000),
-('Red Clay Brick', 3, 1, 'assets/images/materials/red-clay-brick.png', 'Traditional fired clay brick', 10000, 1000, 1200),
-('Non-fired Brick', 3, 1, 'assets/images/materials/non-fired-brick.png', 'Eco-friendly construction brick', 8000, 800, 1500),
-('Granite Stone', 4, 1, 'assets/images/materials/granite-stone.png', 'Used for flooring and wall cladding', 300, 30, 450000),
-('Limestone Block', 4, 1, 'assets/images/materials/limestone-block.png', 'For foundation and support walls', 250, 25, 400000),
-('Pine Timber', 5, 1, 'assets/images/materials/pine-timber.png', 'Used in structural framing', 500, 50, 700000),
-('Oak Beam', 5, 1, 'assets/images/materials/oak-beam.png', 'Heavy-duty wood for decorative structure', 200, 20, 1100000),
-('Ceramic Tile 60x60', 6, 1, 'assets/images/materials/ceramic-tile-60x60.png', 'Matte finish ceramic tile', 1000, 200, 80000),
-('Laminate Flooring', 6, 1, 'assets/images/materials/laminate-flooring.png', 'Wood-pattern laminate', 600, 100, 120000),
-('Wall Tile 30x60', 7, 1, 'assets/images/materials/wall-tile-30x60.png', 'Glossy finish wall tile', 800, 100, 65000),
-('Wallpaper Roll', 7, 1, 'assets/images/materials/wallpaper-roll.png', 'Modern style wallpaper', 300, 50, 95000),
-('Water-based Paint (White)', 8, 1, 'assets/images/materials/water-based-paint-white.png', 'High coverage, interior paint', 500, 50, 60000),
-('Exterior Paint (Blue)', 8, 1, 'assets/images/materials/exterior-paint-blue.png', 'Weather-resistant paint', 300, 30, 75000),
-('Gypsum Ceiling Board', 9, 1, 'assets/images/materials/gypsum-ceiling-board.png', 'Used for suspended ceilings', 400, 40, 120000),
-('Aluminum Ceiling Panel', 9, 1, 'assets/images/materials/aluminum-ceiling-panel.png', 'Waterproof, reflective surface', 200, 20, 250000),
-('Glass Wool Roll', 10, 1, 'assets/images/materials/glass-wool-roll.png', 'For thermal and acoustic insulation', 100, 10, 130000),
-('EPS Foam Sheet', 10, 1, 'assets/images/materials/eps-foam-sheet.png', 'Lightweight insulation board', 300, 30, 95000),
-('Waterproof Membrane', 11, 1, 'assets/images/materials/waterproof-membrane.png', 'Used for basement and roof waterproofing', 150, 15, 185000),
-('Bituminous Coating', 11, 1, 'assets/images/materials/bituminous-coating.png', 'Used in underground waterproofing', 100, 10, 160000),
-('Acoustic Foam Panel', 12, 1, 'assets/images/materials/acoustic-foam-panel.png', 'Used in studios and meeting rooms', 250, 25, 95000),
-('Insulated Wallboard', 12, 1, 'assets/images/materials/insulated-wallboard.png', 'Double-layer board with insulation', 150, 15, 125000),
-('Copper Cable 2x2.5mm', 13, 1, 'assets/images/materials/copper-cable-2x2.5mm.png', 'Used for home wiring', 1000, 100, 12000),
-('PVC Conduit Pipe 20mm', 13, 1, 'assets/images/materials/pvc-conduit-pipe-20mm.png', 'Protects electrical wires', 800, 80, 18000),
-('PPR Pipe 25mm', 14, 1, 'assets/images/materials/ppr-pipe-25mm.png', 'For hot water supply', 600, 60, 35000),
-('PVC Elbow 90°', 14, 1, 'assets/images/materials/pvc-elbow-90.png', 'Connector for plumbing lines', 1000, 100, 5000),
-('Flexible Air Duct', 15, 1, 'assets/images/materials/flexible-air-duct.png', 'Air distribution ducting', 300, 30, 78000),
-('Ceiling Exhaust Fan', 15, 1, 'assets/images/materials/ceiling-exhaust-fan.png', 'Ventilation device for small rooms', 150, 15, 220000),
-('Wooden Cabinet', 16, 1, 'assets/images/materials/wooden-cabinet.png', 'Wall-hung kitchen cabinet', 100, 10, 1800000),
-('Office Desk', 16, 1, 'assets/images/materials/office-desk.png', 'Standard 1.2m desk', 150, 15, 1250000),
-('3D Wall Panel', 17, 1, 'assets/images/materials/3d-wall-panel.png', 'PVC decorative wall panel', 200, 20, 145000),
-('Crown Moulding (3m)', 17, 1, 'assets/images/materials/crown-moulding-3m.png', 'Polystyrene decorative trim', 300, 30, 25000),
-('Toilet Bowl Set', 18, 1, 'assets/images/materials/toilet-bowl-set.png', 'Flush toilet + seat + tank', 80, 8, 1450000),
-('Wash Basin Ceramic', 18, 1, 'assets/images/materials/wash-basin-ceramic.png', 'White ceramic basin', 120, 12, 550000),
-('Concrete Pile 300x300', 19, 1, 'assets/images/materials/concrete-pile-300x300.png', 'Used for deep foundations', 200, 20, 950000),
-('River Sand', 19, 1, 'assets/images/materials/river-sand.png', 'Fine sand for concrete mix', 1000, 100, 450000),
-('Clay Roof Tile', 20, 1, 'assets/images/materials/clay-roof-tile.png', 'Traditional curved tile', 1500, 150, 15000),
-('Metal Roofing Sheet', 20, 1, 'assets/images/materials/metal-roofing-sheet.png', 'Zinc-aluminum coated', 500, 50, 180000),
-('Aluminum Sliding Door', 21, 1, 'assets/images/materials/aluminum-sliding-door.png', '2-panel glass door', 100, 10, 2450000),
-('uPVC Window 1x1m', 21, 1, 'assets/images/materials/upvc-window-1x1m.png', 'White-framed tilt window', 120, 12, 1350000);
+('Reinforced Concrete', 1, 1, 'reinforced-concrete.png', 'High strength concrete with steel reinforcement', 100, 20, 1200000),
+('Lightweight Concrete', 1, 1, 'lightweight-concrete.png', 'Concrete with low density for non-load-bearing walls', 50, 10, 950000),
+('I-Beam 200x100', 2, 1, 'i-beam-200x100.png', 'Standard structural steel I-beam', 200, 30, 1800000),
+('H-Beam 300x300', 2, 1, 'h-beam-300x300.png', 'Heavy-duty H-beam', 150, 20, 3500000),
+('Red Clay Brick', 3, 1, 'red-clay-brick.png', 'Traditional fired clay brick', 10000, 1000, 1200),
+('Non-fired Brick', 3, 1, 'non-fired-brick.png', 'Eco-friendly construction brick', 8000, 800, 1500),
+('Granite Stone', 4, 1, 'granite-stone.png', 'Used for flooring and wall cladding', 300, 30, 450000),
+('Limestone Block', 4, 1, 'limestone-block.png', 'For foundation and support walls', 250, 25, 400000),
+('Pine Timber', 5, 1, 'pine-timber.png', 'Used in structural framing', 500, 50, 700000),
+('Oak Beam', 5, 1, 'oak-beam.png', 'Heavy-duty wood for decorative structure', 200, 20, 1100000),
+('Ceramic Tile 60x60', 6, 1, 'ceramic-tile-60x60.png', 'Matte finish ceramic tile', 1000, 200, 80000),
+('Laminate Flooring', 6, 1, 'laminate-flooring.png', 'Wood-pattern laminate', 600, 100, 120000),
+('Wall Tile 30x60', 7, 1, 'wall-tile-30x60.png', 'Glossy finish wall tile', 800, 100, 65000),
+('Wallpaper Roll', 7, 1, 'wallpaper-roll.png', 'Modern style wallpaper', 300, 50, 95000),
+('Water-based Paint (White)', 8, 1, 'water-based-paint-white.png', 'High coverage, interior paint', 500, 50, 60000),
+('Exterior Paint (Blue)', 8, 1, 'exterior-paint-blue.png', 'Weather-resistant paint', 300, 30, 75000),
+('Gypsum Ceiling Board', 9, 1, 'gypsum-ceiling-board.png', 'Used for suspended ceilings', 400, 40, 120000),
+('Aluminum Ceiling Panel', 9, 1, 'aluminum-ceiling-panel.png', 'Waterproof, reflective surface', 200, 20, 250000),
+('Glass Wool Roll', 10, 1, 'glass-wool-roll.png', 'For thermal and acoustic insulation', 100, 10, 130000),
+('EPS Foam Sheet', 10, 1, 'eps-foam-sheet.png', 'Lightweight insulation board', 300, 30, 95000),
+('Waterproof Membrane', 11, 1, 'waterproof-membrane.png', 'Used for basement and roof waterproofing', 150, 15, 185000),
+('Bituminous Coating', 11, 1, 'bituminous-coating.png', 'Used in underground waterproofing', 100, 10, 160000),
+('Acoustic Foam Panel', 12, 1, 'acoustic-foam-panel.png', 'Used in studios and meeting rooms', 250, 25, 95000),
+('Insulated Wallboard', 12, 1, 'insulated-wallboard.png', 'Double-layer board with insulation', 150, 15, 125000),
+('Copper Cable 2x2.5mm', 13, 1, 'copper-cable-2x2.5mm.png', 'Used for home wiring', 1000, 100, 12000),
+('PVC Conduit Pipe 20mm', 13, 1, 'pvc-conduit-pipe-20mm.png', 'Protects electrical wires', 800, 80, 18000),
+('PPR Pipe 25mm', 14, 1, 'ppr-pipe-25mm.png', 'For hot water supply', 600, 60, 35000),
+('PVC Elbow 90°', 14, 1, 'pvc-elbow-90.png', 'Connector for plumbing lines', 1000, 100, 5000),
+('Flexible Air Duct', 15, 1, 'flexible-air-duct.png', 'Air distribution ducting', 300, 30, 78000),
+('Ceiling Exhaust Fan', 15, 1, 'ceiling-exhaust-fan.png', 'Ventilation device for small rooms', 150, 15, 220000),
+('Wooden Cabinet', 16, 1, 'wooden-cabinet.png', 'Wall-hung kitchen cabinet', 100, 10, 1800000),
+('Office Desk', 16, 1, 'office-desk.png', 'Standard 1.2m desk', 150, 15, 1250000),
+('3D Wall Panel', 17, 1, '3d-wall-panel.png', 'PVC decorative wall panel', 200, 20, 145000),
+('Crown Moulding (3m)', 17, 1, 'crown-moulding-3m.png', 'Polystyrene decorative trim', 300, 30, 25000),
+('Toilet Bowl Set', 18, 1, 'toilet-bowl-set.png', 'Flush toilet + seat + tank', 80, 8, 1450000),
+('Wash Basin Ceramic', 18, 1, 'wash-basin-ceramic.png', 'White ceramic basin', 120, 12, 550000),
+('Concrete Pile 300x300', 19, 1, 'concrete-pile-300x300.png', 'Used for deep foundations', 200, 20, 950000),
+('River Sand', 19, 1, 'river-sand.png', 'Fine sand for concrete mix', 1000, 100, 450000),
+('Clay Roof Tile', 20, 1, 'clay-roof-tile.png', 'Traditional curved tile', 1500, 150, 15000),
+('Metal Roofing Sheet', 20, 1, 'metal-roofing-sheet.png', 'Zinc-aluminum coated', 500, 50, 180000),
+('Aluminum Sliding Door', 21, 1, 'aluminum-sliding-door.png', '2-panel glass door', 100, 10, 2450000),
+('uPVC Window 1x1m', 21, 1, 'upvc-window-1x1m.png', 'White-framed tilt window', 120, 12, 1350000);
 
 
 
