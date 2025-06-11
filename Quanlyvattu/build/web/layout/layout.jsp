@@ -17,11 +17,7 @@
             <header class="bg-blue-900 text-white shadow-md">
                 <div class="container mx-auto px-4 py-3 flex justify-between items-center">
                     <div class="flex items-center">
-<<<<<<< HEAD
                         <img src="${pageContext.request.contextPath}/assets/images/logo.png" alt="Logo" class="w-8 h-8 mr-2">
-=======
-                        <img src="${pageContext.request.contextPath}/assets/images/LogoSlogan.png" alt="Logo" class="w-8 h-8 mr-2">
->>>>>>> 42f42e462b572ce24598a0e945660367605ba88b
                     </div>
 
                     <div class="flex items-center">
@@ -40,10 +36,7 @@
                             <div id="userMenu" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 hidden">
                                 <a href="${pageContext.request.contextPath}/user-detail?id=${sessionScope.userId}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</a>
                                 <a href="${pageContext.request.contextPath}/change_password.jsp" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Change password</a>
-<<<<<<< HEAD
                                 <a href="${pageContext.request.contextPath}/logout.jsp" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Logout</a>
-=======
->>>>>>> 42f42e462b572ce24598a0e945660367605ba88b
                             </div>
                         </div>
                     </div>

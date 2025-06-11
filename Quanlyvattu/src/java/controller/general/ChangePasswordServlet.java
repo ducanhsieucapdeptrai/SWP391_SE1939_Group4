@@ -31,13 +31,6 @@ public class ChangePasswordServlet extends HttpServlet {
 
         UserDAO dao = new UserDAO();
         Users user = dao.getUserByEmail(email);
-<<<<<<< HEAD
-=======
-        // Gán lại role vào session để layout hiển thị
-        HttpSession session = request.getSession();
-        session.setAttribute("userName", user.getFullName()); // hoặc user.getEmail() tùy bạn
-        session.setAttribute("userRole", user.getRole().getRoleName());
->>>>>>> 42f42e462b572ce24598a0e945660367605ba88b
 
         if (user == null) {
             request.setAttribute("error", "Email không tồn tại.");
@@ -81,11 +74,7 @@ public class ChangePasswordServlet extends HttpServlet {
         // Băm mật khẩu mới và cập nhật vào DB
         String hashedNewPassword = HashUtil.hashPassword(newPassword);
         boolean success = dao.updatePassword(email, hashedNewPassword);
-<<<<<<< HEAD
      
-=======
-
->>>>>>> 42f42e462b572ce24598a0e945660367605ba88b
         if (success) {
             request.setAttribute("message", "Đổi mật khẩu thành công!");
         } else {
