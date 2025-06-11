@@ -106,7 +106,11 @@
 
                     <!-- View detail link -->
                     <td class="py-2 px-4">
+<<<<<<< HEAD
                         <a href="materialDetail?id=<%= m.getMaterialId()%>" class="text-blue-600 hover:underline">View</a>
+=======
+                        <a href="materialdetail?id=<%= m.getMaterialId()%>" class="text-blue-600 hover:underline">View</a>
+>>>>>>> 42f42e462b572ce24598a0e945660367605ba88b
                     </td>
                 </tr>
                 <% }%>

@@ -8,7 +8,11 @@ import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.WebServlet;
 import java.io.IOException;
 
+<<<<<<< HEAD
 @WebServlet("/materialDetail")
+=======
+@WebServlet("/materialdetail")
+>>>>>>> 42f42e462b572ce24598a0e945660367605ba88b
 public class MaterialDetailServlet extends HttpServlet {
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response)

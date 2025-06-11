@@ -16,7 +16,11 @@ public class EditMaterialServlet extends HttpServlet {
             throws ServletException, IOException {
 
         String idRaw = request.getParameter("materialId");
+<<<<<<< HEAD
         
+=======
+
+>>>>>>> 42f42e462b572ce24598a0e945660367605ba88b
         if (idRaw == null || idRaw.trim().isEmpty()) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Thiếu tham số materialId");
             return;
@@ -31,7 +35,11 @@ public class EditMaterialServlet extends HttpServlet {
                 request.setAttribute("material", material);
                 request.setAttribute("pageContent", "/EditMaterial.jsp");
                 request.getRequestDispatcher("/layout/layout.jsp").forward(request, response);
+<<<<<<< HEAD
                 
+=======
+
+>>>>>>> 42f42e462b572ce24598a0e945660367605ba88b
             } else {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND, "Không tìm thấy vật tư với ID: " + id);
             }
@@ -42,4 +50,8 @@ public class EditMaterialServlet extends HttpServlet {
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Lỗi hệ thống");
         }
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 42f42e462b572ce24598a0e945660367605ba88b
