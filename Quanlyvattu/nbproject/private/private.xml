@@ -2,19 +2,6 @@
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
-        <group>
-            <file>file:/C:/Users/Lenovo/Downloads/SWP391_SE1939_Group4-Phuoc/SWP391_SE1939_Group4-Phuoc/Quanlyvattu/web/UserDetail.jsp</file>
-            <file>file:/C:/Users/Lenovo/Downloads/SWP391_SE1939_Group4-Phuoc/SWP391_SE1939_Group4-Phuoc/Quanlyvattu/web/layout/layout.jsp</file>
-            <file>file:/C:/Users/Lenovo/Downloads/SWP391_SE1939_Group4-Phuoc/SWP391_SE1939_Group4-Phuoc/Quanlyvattu/src/java/controller/general/EditMaterialServlet.java</file>
-            <file>file:/C:/Users/Lenovo/Downloads/SWP391_SE1939_Group4-Phuoc/SWP391_SE1939_Group4-Phuoc/Quanlyvattu/src/java/DAO/UserDAO.java</file>
-            <file>file:/C:/Users/Lenovo/Downloads/SWP391_SE1939_Group4-Phuoc/SWP391_SE1939_Group4-Phuoc/Quanlyvattu/web/login.jsp</file>
-            <file>file:/C:/Users/Lenovo/Downloads/SWP391_SE1939_Group4-Phuoc/SWP391_SE1939_Group4-Phuoc/Quanlyvattu/src/java/controller/general/DashboardServlet.java</file>
-            <file>file:/C:/Users/Lenovo/Downloads/SWP391_SE1939_Group4-Phuoc/SWP391_SE1939_Group4-Phuoc/Quanlyvattu/web/dashboard.jsp</file>
-            <file>file:/C:/Users/Lenovo/Downloads/SWP391_SE1939_Group4-Phuoc/SWP391_SE1939_Group4-Phuoc/Quanlyvattu/web/homepage.jsp</file>
-            <file>file:/C:/Users/Lenovo/Downloads/SWP391_SE1939_Group4-Phuoc/SWP391_SE1939_Group4-Phuoc/Quanlyvattu/web/EditMaterial.jsp</file>
-            <file>file:/C:/Users/Lenovo/Downloads/SWP391_SE1939_Group4-Phuoc/SWP391_SE1939_Group4-Phuoc/Quanlyvattu/web/logout.jsp</file>
-            <file>file:/C:/Users/Lenovo/Downloads/SWP391_SE1939_Group4-Phuoc/SWP391_SE1939_Group4-Phuoc/Quanlyvattu/src/java/controller/general/UserDetailController.java</file>
-            <file>file:/C:/Users/Lenovo/Downloads/SWP391_SE1939_Group4-Phuoc/SWP391_SE1939_Group4-Phuoc/Quanlyvattu/src/java/controller/general/LogoutServlet.java</file>
-        </group>
+        <group/>
     </open-files>
 </project-private>

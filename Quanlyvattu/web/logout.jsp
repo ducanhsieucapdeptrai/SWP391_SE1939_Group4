@@ -379,6 +379,97 @@
             display: none; /* Ẩn debug info trong production */
         }
 
+        /* Confirmation Modal Styles */
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.7) !important;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            background: white;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #ff6b6b, #ffd93d);
+            color: white;
+            border-bottom: none;
+            padding: 2rem 2rem 1rem;
+            text-align: center;
+        }
+
+        .modal-body {
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .modal-footer {
+            border-top: 1px solid #e9ecef;
+            padding: 1rem 2rem 2rem;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .confirm-modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .confirm-modal-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .confirm-modal-message {
+            font-size: 1.1rem;
+            color: #6c757d;
+            line-height: 1.6;
+            margin-bottom: 0;
+        }
+
+        .btn-confirm-yes {
+            background: linear-gradient(135deg, var(--danger-color), #c82333);
+            border: none;
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+            min-width: 100px;
+        }
+
+        .btn-confirm-yes:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(220, 53, 69, 0.4);
+            color: white;
+        }
+
+        .btn-confirm-no {
+            background: white;
+            border: 2px solid #6c757d;
+            color: #6c757d;
+            padding: 0.75rem 2rem;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            min-width: 100px;
+        }
+
+        .btn-confirm-no:hover {
+            background: #6c757d;
+            color: white;
+            transform: translateY(-2px);
+        }
+
         @media (max-width: 576px) {
             .logout-card {
                 padding: 2rem 1.5rem;
@@ -417,6 +508,11 @@
                 height: 80px;
                 font-size: 2rem;
             }
+
+            .modal-header, .modal-body, .modal-footer {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
         }
     </style>
 </head>
@@ -445,7 +541,6 @@
             </div>
 
             <h2 class="logout-title">Sign Out</h2>
-            <p class="logout-message">Are you sure you want to sign out of your account?</p>
 
             <!-- Debug Information (ẩn trong production) -->
             <div class="debug-info" id="debugInfo">
@@ -519,16 +614,14 @@
             </div>
 
             <!-- Action Buttons -->
-            <form method="post" action="${pageContext.request.contextPath}/logout">
-                <div class="logout-buttons">
-                    <button type="submit" name="action" value="cancel" class="btn btn-cancel">
-                        <i class="fas fa-arrow-left me-2"></i>Stay Signed In
-                    </button>
-                    <button type="submit" name="action" value="confirm" class="btn btn-logout">
-                        <i class="fas fa-sign-out-alt me-2"></i>Sign Out
-                    </button>
-                </div>
-            </form>
+            <div class="logout-buttons">
+                <button type="button" class="btn btn-cancel" onclick="goBack()">
+                    <i class="fas fa-arrow-left me-2"></i>Stay Signed In
+                </button>
+                <button type="button" class="btn btn-logout" onclick="showConfirmation()">
+                    <i class="fas fa-sign-out-alt me-2"></i>Sign Out
+                </button>
+            </div>
 
             <!-- Session Info -->
             <div class="session-info">
@@ -547,16 +640,50 @@
         </div>
     </div>
 
+    <!-- Confirmation Modal -->
+    <div class="modal fade" id="confirmLogoutModal" tabindex="-1" aria-labelledby="confirmLogoutModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="confirm-modal-title" id="confirmLogoutModalLabel">
+                        <i class="fas fa-exclamation-triangle confirm-modal-icon"></i>
+                        Confirm Sign Out
+                    </h5>
+                </div>
+                <div class="modal-body">
+                    <p class="confirm-modal-message">Are you sure you want to sign out of your account?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-confirm-no" onclick="closeConfirmation()">
+                        <i class="fas fa-times me-2"></i>No
+                    </button>
+                    <button type="button" class="btn btn-confirm-yes" onclick="confirmLogout()">
+                        <i class="fas fa-check me-2"></i>Yes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden Form for Logout -->
+    <form id="hiddenLogoutForm" method="post" action="${pageContext.request.contextPath}/logout" style="display: none;">
+        <input type="hidden" name="action" value="confirm">
+    </form>
+
     <!-- Bootstrap JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     
     <script>
         // Development mode flag - set to false in production
         const isDevelopment = false; // Thay đổi thành true để bật debug mode
+        let confirmModal;
 
         document.addEventListener('DOMContentLoaded', function() {
             updateCurrentTime();
             setInterval(updateCurrentTime, 1000);
+            
+            // Initialize confirmation modal
+            confirmModal = new bootstrap.Modal(document.getElementById('confirmLogoutModal'));
             
             // Show debug toggle button in development mode
             if (isDevelopment) {
@@ -590,6 +717,35 @@
                 toggleBtn.textContent = 'Show Debug Info';
             }
         }
+
+        function goBack() {
+            // Go back to dashboard or previous page
+            window.location.href = '${pageContext.request.contextPath}/dashboard';
+        }
+
+        function showConfirmation() {
+            // Show confirmation modal
+            confirmModal.show();
+        }
+
+        function closeConfirmation() {
+            // Close confirmation modal
+            confirmModal.hide();
+        }
+
+        function confirmLogout() {
+            // Close modal and proceed with logout
+            confirmModal.hide();
+            
+            // Show loading overlay
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            document.getElementById('successMessage').style.display = 'block';
+            
+            // Submit the hidden form after a short delay
+            setTimeout(function() {
+                document.getElementById('hiddenLogoutForm').submit();
+            }, 500);
+        }
         
         // 3D hover effect for the card
         document.querySelector('.logout-card').addEventListener('mousemove', function(e) {
@@ -609,15 +765,6 @@
 
         document.querySelector('.logout-card').addEventListener('mouseleave', function() {
             this.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg)';
-        });
-
-        // Show loading when form is submitted
-        document.querySelector('form').addEventListener('submit', function(e) {
-            const action = e.submitter.value;
-            if (action === 'confirm') {
-                document.getElementById('loadingOverlay').style.display = 'flex';
-                document.getElementById('successMessage').style.display = 'block';
-            }
         });
 
         // Image error handling
