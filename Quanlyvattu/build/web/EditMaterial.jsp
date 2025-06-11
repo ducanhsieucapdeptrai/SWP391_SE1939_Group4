@@ -114,8 +114,7 @@
             <!-- Material Image -->
             <div>
                 <img src="${material.image}" alt="Material Image" />
-                <label for="image">Image URL</label>
-                <input type="text" id="image" name="image" value="${material.image}" />
+               
             </div>
 
             <!-- Material Info Form -->

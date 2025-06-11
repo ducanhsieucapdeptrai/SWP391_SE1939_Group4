@@ -23,6 +23,7 @@
                 </div>
 
                 <div class="info-row flex">
+                    <a href="UserDetail.jsp"></a>
                     <div class="info-label w-40 font-semibold text-gray-600">Email:</div>
                     <div class="info-value text-gray-800">${user.email}</div>
                 </div>
