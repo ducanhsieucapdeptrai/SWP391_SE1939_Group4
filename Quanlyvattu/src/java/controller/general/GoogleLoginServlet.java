@@ -21,7 +21,7 @@ public class GoogleLoginServlet extends HttpServlet {
 
     private static final String CLIENT_ID = "465186853940-n9tq656f08eojf173dcmjhh7gvkcfar3.apps.googleusercontent.com";
     private static final String CLIENT_SECRET = "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";
-    private static final String REDIRECT_URI = "http://localhost:8080/Quanlyvattu/google-login";
+    private static final String REDIRECT_URI = "http://localhost:9999/Quanlyvattu/google-login";
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
