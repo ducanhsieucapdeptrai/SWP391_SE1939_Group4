@@ -28,6 +28,14 @@
         <servlet-name>CatalogServlet</servlet-name>
         <servlet-class>controller.general.CatalogServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>PendingRequestServlet</servlet-name>
+        <servlet-class>controller.general.PendingRequestServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>RequestDetailServlet</servlet-name>
+        <servlet-class>controller.general.RequestDetailServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>LoginServlet</servlet-name>
         <url-pattern>/login</url-pattern>
@@ -56,9 +64,15 @@
         <servlet-name>CatalogServlet</servlet-name>
         <url-pattern>/catalog-management</url-pattern>
     </servlet-mapping>
-    
+    <servlet-mapping>
+        <servlet-name>PendingRequestServlet</servlet-name>
+        <url-pattern>/pending-requests</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>RequestDetailServlet</servlet-name>
+        <url-pattern>/request-detail</url-pattern>
+    </servlet-mapping>
     <welcome-file-list>
         <welcome-file>index.jsp</welcome-file>
     </welcome-file-list>
-
 </web-app>

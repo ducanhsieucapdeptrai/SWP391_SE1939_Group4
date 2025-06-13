@@ -11,6 +11,12 @@
         <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
         <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
+        <style>
+            a {
+                text-decoration: none !important;
+            }
+        </style>
+
     </head>
     <body>
         <div id="app" class="min-h-screen flex flex-col">
@@ -61,6 +67,14 @@
                                     <i class="fas fa-tachometer-alt mr-2"></i> Dashboard
                                 </a>
                             </li>
+
+                            <c:if test="${sessionScope.userRole == 'Director'}">
+                                <li class="mb-1">
+                                    <a href="${pageContext.request.contextPath}/pending-requests" class="block px-4 py-2 rounded hover:bg-gray-700">
+                                        <i class="fas fa-clipboard-list mr-2"></i> List Request
+                                    </a>
+                                </li>
+                            </c:if>
 
                             <c:if test="${sessionScope.userRole == 'Warehouse Manager' || sessionScope.userRole == 'Warehouse Staff'}">
                                 <li class="mb-1">

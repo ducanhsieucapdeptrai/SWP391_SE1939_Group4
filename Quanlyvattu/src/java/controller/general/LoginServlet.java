@@ -75,7 +75,7 @@ public class LoginServlet extends HttpServlet {
             session.setAttribute("currentUser", user);
             session.setAttribute("userId", user.getUserId());
             session.setAttribute("userName", user.getFullName());
-            session.setAttribute("userRole", user.getRole() != null ? user.getRole().getRoleName() : "Unknown");
+            session.setAttribute("userRole", user.getRole() != null ? user.getRole().getRoleName().trim() : "Unknown");
             session.setAttribute("userImage", user.getUserImage());
 
             if ("on".equals(request.getParameter("remember"))) {
@@ -95,8 +95,7 @@ public class LoginServlet extends HttpServlet {
             request.setAttribute("errorMsg", "System error: " + e.getMessage());
             request.getRequestDispatcher("login.jsp").forward(request, response);
         }
-        
-        
+
     }
 
     @Override
