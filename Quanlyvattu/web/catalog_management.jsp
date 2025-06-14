@@ -24,12 +24,33 @@
         </div>
     </c:if>
     
-    <!-- Add New Catalog Item Button -->
-    <div class="mb-6">
-        <button type="button" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition duration-300" 
-                onclick="openAddModal()">
-            <i class="fas fa-plus mr-2"></i> Add New Catalog Item
-        </button>
+    <!-- Search and Sort Section -->
+    <div class="flex justify-between items-center mb-6">
+        <div class="flex-grow mr-4">
+            <form action="${pageContext.request.contextPath}/catalog-management" method="get" class="flex">
+                <input type="text" name="search" placeholder="Search catalog items" 
+                       value="${searchTerm}" 
+                       class="w-full px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-r-md">
+                    <i class="fas fa-search"></i>
+                </button>
+            </form>
+        </div>
+        
+        <div>
+            <select onchange="location.href='${pageContext.request.contextPath}/catalog-management?sortBy=' + this.value" 
+                    class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                <option value="CategoryId" ${sortBy == 'CategoryId' ? 'selected' : ''}>Sort by ID</option>
+                <option value="CategoryName" ${sortBy == 'CategoryName' ? 'selected' : ''}>Sort by Name</option>
+            </select>
+        </div>
+        
+        <div class="ml-4">
+            <button type="button" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition duration-300" 
+                    onclick="openAddModal()">
+                <i class="fas fa-plus mr-2"></i> Add New Catalog Item
+            </button>
+        </div>
     </div>
     
     <!-- Catalog Items Table -->
@@ -37,8 +58,22 @@
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
                 <tr>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <a href="${pageContext.request.contextPath}/catalog-management?sortBy=CategoryId" class="flex items-center">
+                            ID 
+                            <c:if test="${sortBy == 'CategoryId'}">
+                                <i class="fas fa-sort-down ml-2"></i>
+                            </c:if>
+                        </a>
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <a href="${pageContext.request.contextPath}/catalog-management?sortBy=CategoryName" class="flex items-center">
+                            Name 
+                            <c:if test="${sortBy == 'CategoryName'}">
+                                <i class="fas fa-sort-down ml-2"></i>
+                            </c:if>
+                        </a>
+                    </th>
                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
