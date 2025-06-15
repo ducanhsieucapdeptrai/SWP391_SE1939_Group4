@@ -84,6 +84,22 @@
                                 </li>
                             </c:if>
 
+                            <c:if test="${sessionScope.userRole =='Company Staff'}">
+                                <li class="mb-1">
+                                    <a href="${pageContext.request.contextPath}/createrequest" class="block px-4 py-2 rounded hover:bg-gray-700">
+                                        <i class="fas fa-file-import mr-2"></i> CreateRequest
+                                    </a>
+                                </li>
+                            </c:if>
+                                
+                            <c:if test="${sessionScope.userRole =='Warehouse Staff'}">
+                                <li class="mb-1">
+                                    <a href="${pageContext.request.contextPath}/submitwarehousereport" class="block px-4 py-2 rounded hover:bg-gray-700">
+                                        <i class="fas fa-file-import mr-2"></i> SubmitReport
+                                    </a>
+                                </li>
+                            </c:if>
+
                             <c:if test="${sessionScope.userRole != 'Director'}">
                                 <li class="mb-1">
                                     <a href="${pageContext.request.contextPath}/requestlist.jsp" class="block px-4 py-2 rounded hover:bg-gray-700">

@@ -105,10 +105,78 @@ public class RequestDAO {
         return list;
     }
 
-    public static void approveRequest(int requestId, int approverId) {
-        String sql = "UPDATE RequestList SET Status = 'Approved', ApprovedBy = ?, ApprovedDate = NOW() WHERE RequestId = ?";
-        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+    public static void approveRequest(int requestId, int approverId, String note,
+            String[] materialIds, String[] quantities) {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        try {
+            conn = new DBContext().getConnection();
+            conn.setAutoCommit(false);
+
+            // 1) Cập nhật trạng thái request
+            String sqlUpdate = "UPDATE RequestList "
+                    + "SET Status='Approved', ApprovedBy=?, ApprovedDate=NOW(), ApprovalNote=? "
+                    + "WHERE RequestId=?";
+            ps = conn.prepareStatement(sqlUpdate);
             ps.setInt(1, approverId);
+            ps.setString(2, note);
+            ps.setInt(3, requestId);
+            ps.executeUpdate();
+            ps.close();
+
+            // 2) Xóa chi tiết cũ
+            String sqlDelete = "DELETE FROM RequestDetail WHERE RequestId=?";
+            ps = conn.prepareStatement(sqlDelete);
+            ps.setInt(1, requestId);
+            ps.executeUpdate();
+            ps.close();
+
+            // 3) Insert lại theo mảng materialIds/quantities
+            String sqlInsert = "INSERT INTO RequestDetail(RequestId, MaterialId, Quantity) VALUES(?,?,?)";
+            ps = conn.prepareStatement(sqlInsert);
+            for (int i = 0; i < materialIds.length; i++) {
+                int mid = Integer.parseInt(materialIds[i]);
+                int qty = Integer.parseInt(quantities[i]);
+                ps.setInt(1, requestId);
+                ps.setInt(2, mid);
+                ps.setInt(3, qty);
+                ps.addBatch();
+            }
+            ps.executeBatch();
+            conn.commit();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        } finally {
+            try {
+                if (ps != null) {
+                    ps.close();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            try {
+                if (conn != null) {
+                    conn.setAutoCommit(true);
+                }
+                conn.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static void updateRequesterName(int requestId, String newName) {
+        String sql = "UPDATE Users SET FullName = ? WHERE UserId = (SELECT RequestedBy FROM RequestList WHERE RequestId = ?)";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, newName);
             ps.setInt(2, requestId);
             ps.executeUpdate();
         } catch (SQLException e) {

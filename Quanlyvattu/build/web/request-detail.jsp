@@ -1,18 +1,17 @@
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html>
-<html>
+<html lang="vi">
     <head>
         <meta charset="UTF-8">
         <title>Request Detail</title>
         <script src="https://cdn.tailwindcss.com"></script>
-        <!-- SweetAlert2 CDN -->
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     </head>
     <body class="bg-gray-100">
+
         <div class="container mx-auto px-6 py-4 bg-white rounded shadow mt-6">
             <h2 class="text-2xl font-semibold mb-4">Request Detail</h2>
-
             <div class="mb-4">
                 <p><strong>Request Date:</strong> ${requestInfo.requestDate}</p>
                 <p><strong>Requester:</strong> ${requestInfo.requester.fullName}</p>
@@ -39,65 +38,173 @@
             </table>
 
             <div class="mt-6 flex gap-4">
-                <!-- Approve form -->
-                <form id="approveForm" action="request-detail" method="post">
-                    <input type="hidden" name="action" value="approve" />
-                    <input type="hidden" name="id" value="${requestInfo.requestId}" />
-                    <button type="button" onclick="confirmApprove()"
-                            class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow">
-                        Approve
-                    </button>
-                </form>
+                <!-- Approve button: điều kiện Material Purchase -->
+                <c:choose>
+                    <c:when test="${requestInfo.requestType.requestTypeName == 'Material Purchase'}">
+                        <button
+                            class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
+                            onclick="openApproveModal()">
+                            Approve
+                        </button>
+                    </c:when>
+                    <c:otherwise>
+                        <button
+                            class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
+                            onclick="simpleApprove()">
+                            Approve
+                        </button>
+                    </c:otherwise>
+                </c:choose>
 
-                <!-- Reject form -->
-                <form id="rejectForm" action="request-detail" method="post">
-                    <input type="hidden" name="action" value="reject" />
-                    <input type="hidden" name="id" value="${requestInfo.requestId}" />
-                    <input type="hidden" name="reason" id="rejectReason" />
-                    <button type="button" onclick="confirmReject()"
-                            class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded shadow">
-                        Reject
-                    </button>
-                </form>
+                <!-- Reject: luôn xài SweetAlert nhập lý do -->
+                <button
+                    class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
+                    onclick="openRejectDialog()">
+                    Reject
+                </button>
+            </div>
+        </div>
 
+        <!-- Modal chỉ cho Material Purchase -->
+        <div id="approveModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+            <div class="bg-white rounded shadow-lg w-3/4 max-w-2xl p-6">
+                <h3 class="text-xl font-semibold mb-4">Approve &amp; Edit Request</h3>
+                <form id="approveForm" action="request-detail" method="post" class="space-y-4">
+                    <input type="hidden" name="action" value="approve"/>
+                    <input type="hidden" name="id" value="${requestInfo.requestId}"/>
+
+                    <table class="w-full border">
+                        <thead class="bg-gray-200">
+                            <tr>
+                                <th class="border px-2 py-1">Material</th>
+                                <th class="border px-2 py-1">Quantity</th>
+                            </tr>
+                        </thead>
+                        <tbody id="approveTableBody">
+                            <c:forEach var="item" items="${details}">
+                                <tr class="border-b">
+                                    <td class="border px-2 py-1">
+                                        <select name="materialIds" class="w-full">
+                                            <c:forEach var="m" items="${materialList}">
+                                                <option value="${m.materialId}"
+                                                        ${m.materialId == item.material.materialId ? 'selected' : ''}>
+                                                    ${m.materialName}
+                                                </option>
+                                            </c:forEach>
+                                        </select>
+                                    </td>
+                                    <td class="border px-2 py-1">
+                                        <input type="number" name="quantities" min="1" value="${item.quantity}"
+                                               class="w-full border rounded px-1 py-0.5"/>
+                                    </td>
+                                </tr>
+                            </c:forEach>
+                        </tbody>
+                    </table>
+
+                    <button type="button" class="mt-2 text-blue-600 hover:underline" onclick="addRow()">
+                        + Add Material
+                    </button>
+
+                    <div>
+                        <label class="block font-medium mb-1">Approval Note</label>
+                        <textarea name="approveNote" rows="3"
+                                  class="w-full border rounded px-2 py-1"
+                                  placeholder="Enter any note..."></textarea>
+                    </div>
+
+                    <div class="text-right space-x-2">
+                        <button type="button"
+                                class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                                onclick="closeApproveModal()">
+                            Cancel
+                        </button>
+                        <button type="submit"
+                                class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+                            Confirm Approve
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
 
         <script>
-            function confirmApprove() {
+            // Modal Approve
+            function openApproveModal() {
+                document.getElementById('approveModal').classList.remove('hidden');
+                document.getElementById('approveModal').classList.add('flex');
+            }
+            function closeApproveModal() {
+                document.getElementById('approveModal').classList.remove('flex');
+                document.getElementById('approveModal').classList.add('hidden');
+            }
+            function addRow() {
+                const tbody = document.getElementById('approveTableBody');
+                const row = document.createElement('tr');
+                row.className = 'border-b';
+                row.innerHTML = `
+                    <td class="border px-2 py-1">
+                      <select name="materialIds" class="w-full">
+            <c:forEach var="m" items="${materialList}">
+                          <option value="${m.materialId}">${m.materialName}</option>
+            </c:forEach>
+                      </select>
+                    </td>
+                    <td class="border px-2 py-1">
+                      <input type="number" name="quantities" min="1" value="1"
+                             class="w-full border rounded px-1 py-0.5"/>
+                    </td>`;
+                tbody.appendChild(row);
+            }
+
+            // Nếu không phải Material Purchase: xài SweetAlert để nhập note rồi submit
+            function simpleApprove() {
                 Swal.fire({
                     title: 'Approve this request?',
-                    icon: 'question',
+                    input: 'textarea',
+                    inputLabel: 'Approval Note',
+                    inputPlaceholder: 'Enter any note...',
                     showCancelButton: true,
-                    confirmButtonColor: '#16a34a',
-                    cancelButtonColor: '#d1d5db',
-                    confirmButtonText: 'Yes, approve it!'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        document.getElementById('approveForm').submit();
+                    confirmButtonText: 'Approve',
+                    cancelButtonText: 'Cancel',
+                    confirmButtonColor: '#16a34a'
+                }).then((res) => {
+                    if (res.isConfirmed) {
+                        const form = document.createElement('form');
+                        form.method = 'post';
+                        form.action = 'request-detail';
+                        form.innerHTML = `
+                            <input type="hidden" name="action" value="approve"/>
+                            <input type="hidden" name="id"     value="${requestInfo.requestId}"/>
+                            <input type="hidden" name="approveNote" value="${res.value || ''}"/>`;
+                        document.body.appendChild(form);
+                        form.submit();
                     }
                 });
             }
 
-            function confirmReject() {
+            // Reject dialog
+            function openRejectDialog() {
                 Swal.fire({
                     title: 'Reject this request?',
                     input: 'text',
                     inputLabel: 'Reason for rejection',
                     inputPlaceholder: 'Enter reason here...',
-                    inputValidator: (value) => {
-                        if (!value.trim()) {
-                            return 'You must enter a reason!';
-                        }
-                    },
                     showCancelButton: true,
-                    confirmButtonColor: '#dc2626',
-                    cancelButtonColor: '#d1d5db',
-                    confirmButtonText: 'Reject'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        document.getElementById('rejectReason').value = result.value;
-                        document.getElementById('rejectForm').submit();
+                    confirmButtonText: 'Reject',
+                    cancelButtonText: 'Cancel',
+                    confirmButtonColor: '#dc2626'
+                }).then((res) => {
+                    if (res.isConfirmed) {
+                        const form = document.createElement('form');
+                        form.method = 'post';
+                        form.action = 'request-detail';
+                        form.innerHTML = `
+                            <input type="hidden" name="action" value="reject"/>
+                            <input type="hidden" name="id"     value="${requestInfo.requestId}"/>
+                            <input type="hidden" name="reason" value="${res.value}"/>`;
+                        document.body.appendChild(form);
+                        form.submit();
                     }
                 });
             }

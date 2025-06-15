@@ -1,107 +1,67 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
- */
 package controller.general;
 
 import DAO.RequestDAO;
+import DAO.MaterialDAO;
 import java.io.IOException;
-import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.*;
 import java.util.List;
+import model.Material;
 import model.RequestDetail;
 import model.RequestList;
 
-/**
- *
- * @author thinh
- */
 public class RequestDetailServlet extends HttpServlet {
 
-    /**
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
-     * methods.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet RequestDetailServlet</title>");
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet RequestDetailServlet at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
-        }
-    }
-
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
-    /**
-     * Handles the HTTP <code>GET</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
         int requestId = Integer.parseInt(request.getParameter("id"));
         RequestList info = RequestDAO.getRequestById(requestId);
         List<RequestDetail> details = RequestDAO.getRequestDetails(requestId);
 
+        MaterialDAO materialDao = new MaterialDAO();
+        List<Material> materialList = materialDao.getAllMaterials();
+
         request.setAttribute("requestInfo", info);
         request.setAttribute("details", details);
-
-        // đường dẫn page con cần include trong layout.jsp
+        request.setAttribute("materialList", materialList);
         request.setAttribute("pageContent", "/request-detail.jsp");
-
-        // ✅ đường dẫn chính xác đến layout.jsp
         request.getRequestDispatcher("/layout/layout.jsp").forward(request, response);
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
         String action = request.getParameter("action");
         int requestId = Integer.parseInt(request.getParameter("id"));
         HttpSession session = request.getSession();
         int approverId = (int) session.getAttribute("userId");
 
         if ("approve".equals(action)) {
-            RequestDAO.approveRequest(requestId, approverId);
+            // Lấy mảng materialIds và quantities do user chỉnh sửa
+            String[] materialIds = request.getParameterValues("materialIds");
+            String[] quantities = request.getParameterValues("quantities");
+            String approveNote = request.getParameter("approveNote");
+
+            // Gọi DAO xử lý duyệt và lưu chi tiết mới
+            RequestDAO.approveRequest(
+                    requestId,
+                    approverId,
+                    approveNote,
+                    materialIds,
+                    quantities
+            );
+
         } else if ("reject".equals(action)) {
             String reason = request.getParameter("reason");
             RequestDAO.rejectRequest(requestId, approverId, reason);
         }
 
-        response.sendRedirect("pending-requests");
+        response.sendRedirect(request.getContextPath() + "/pending-requests");
     }
 
-    /**
-     * Returns a short description of the servlet.
-     *
-     * @return a String containing servlet description
-     */
     @Override
     public String getServletInfo() {
-        return "Short description";
-    }// </editor-fold>
-
+        return "RequestDetailServlet handles viewing, approving and rejecting material requests";
+    }
 }
