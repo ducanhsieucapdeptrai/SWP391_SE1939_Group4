@@ -11,56 +11,95 @@
         <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
         <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
+        <style>
+            a {
+                text-decoration: none !important;
+            }
+        </style>
+
     </head>
-    <body>
-        <div id="app" class="min-h-screen flex flex-col">
-            <header class="bg-blue-900 text-white shadow-md">
-                <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-                    <div class="flex items-center">
-                        <img src="${pageContext.request.contextPath}/assets/images/LogoSlogan.png" alt="Logo" class="w-8 h-8 mr-2">
+<body>
+    <div id="app" class="min-h-screen flex flex-col">
+        <header class="bg-blue-900 text-white shadow-md">
+            <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+                <div class="flex items-center">
+                    <img src="${pageContext.request.contextPath}/assets/images/LogoSlogan.png" alt="Logo" class="w-8 h-8 mr-2">
+                </div>
+
+                <div class="flex items-center">
+                    <div class="mr-4 hidden md:block">
+                        <span>${sessionScope.userName}</span>
+                        <span class="mx-2">|</span>
+                        <span class="bg-blue-700 px-2 py-1 rounded text-xs">${sessionScope.userRole}</span>
                     </div>
 
-                    <div class="flex items-center">
-                        <div class="mr-4 hidden md:block">
-                            <span>${sessionScope.userName}</span>
-                            <span class="mx-2">|</span>
-                            <span class="bg-blue-700 px-2 py-1 rounded text-xs">${sessionScope.userRole}</span>
+                    <!-- Notification icon for Director -->
+                    <c:if test="${sessionScope.userRole == 'Director'}">
+                        <div class="mr-4 relative">
+                            <a href="${pageContext.request.contextPath}/pending-requests" class="relative">
+                                <i class="fas fa-bell text-white text-xl"></i>
+                                <span class="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full px-1">!</span>
+                            </a>
                         </div>
-                        <div class="relative">
-                            <button id="userMenuBtn" class="flex items-center focus:outline-none">
-                                <img src="${pageContext.request.contextPath}/assets/images/UserImage/${sessionScope.userImage}"
-                                     alt="Avatar"
-                                     class="w-16 aspect-square rounded-full object-cover shadow-md border border-white" />
+                    </c:if>
 
-                            </button>
-                            <div id="userMenu" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 hidden">
-                                <a href="${pageContext.request.contextPath}/user-detail?id=${sessionScope.userId}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</a>
-                                <a href="${pageContext.request.contextPath}/change_password.jsp" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Change password</a>
-                            </div>
+                    <div class="relative">
+                        <button id="userMenuBtn" class="flex items-center focus:outline-none">
+                            <img src="${pageContext.request.contextPath}/assets/images/UserImage/${sessionScope.userImage}"
+                                 alt="Avatar"
+                                 class="w-16 aspect-square rounded-full object-cover shadow-md border border-white" />
+                        </button>
+                        <div id="userMenu" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 hidden">
+                            <a href="${pageContext.request.contextPath}/user-detail?id=${sessionScope.userId}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</a>
+                            <a href="${pageContext.request.contextPath}/change_password.jsp" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Change password</a>
                         </div>
                     </div>
                 </div>
-            </header>
-            <div class="flex flex-1">
-                <aside class="bg-blue-800 text-white w-64 min-h-screen p-4 hidden md:block">
-                    <nav>
-                        <ul>
+            </div>
+        </header>
+
+        <div class="flex flex-1">
+            <aside class="bg-blue-800 text-white w-64 min-h-screen p-4 hidden md:block">
+                <nav>
+                    <ul>
+                        <li class="mb-1">
+                            <a href="${pageContext.request.contextPath}/dashboard" class="block px-4 py-2 rounded hover:bg-gray-700">
+                                <i class="fas fa-tachometer-alt mr-2"></i> Dashboard
+                            </a>
+                        </li>
+
+                        <c:if test="${sessionScope.userRole == 'Director'}">
                             <li class="mb-1">
-                                <a href="${pageContext.request.contextPath}/dashboard" class="block px-4 py-2 rounded hover:bg-gray-700">
-                                    <i class="fas fa-tachometer-alt mr-2"></i> Dashboard
+                                <a href="${pageContext.request.contextPath}/pending-requests" class="block px-4 py-2 rounded hover:bg-gray-700">
+                                    <i class="fas fa-clipboard-list mr-2"></i> List Request
                                 </a>
                             </li>
+                        </c:if>
+
+                        <c:if test="${sessionScope.userRole == 'Warehouse Manager' || sessionScope.userRole == 'Warehouse Staff'}">
                             <li class="mb-1">
                                 <a href="${pageContext.request.contextPath}/materiallist" class="block px-4 py-2 rounded hover:bg-gray-700">
                                     <i class="fas fa-boxes mr-2"></i> Inventory
                                 </a>
-
                             </li>
+                        </c:if>
+
+                        <c:if test="${sessionScope.userRole =='Company Staff'}">
                             <li class="mb-1">
-                                <a href="${pageContext.request.contextPath}/requestlist.jsp" class="block px-4 py-2 rounded hover:bg-gray-700">
-                                    <i class="fas fa-file-import mr-2"></i> Request
+                                <a href="${pageContext.request.contextPath}/createrequest" class="block px-4 py-2 rounded hover:bg-gray-700">
+                                    <i class="fas fa-file-import mr-2"></i> CreateRequest
                                 </a>
                             </li>
+                        </c:if>
+                        <c:if test="${sessionScope.userRole =='Warehouse Staff'}">
+                            <li class="mb-1">
+                                <a href="${pageContext.request.contextPath}/submitwarehousereport" class="block px-4 py-2 rounded hover:bg-gray-700">
+                                    <i class="fas fa-file-import mr-2"></i> SubmitReport
+                                </a>
+                            </li>
+                        </c:if>
+
+                        <c:if test="${sessionScope.userRole == 'Warehouse Manager'}">
                             <li class="mb-1">
                                 <a href="#" onclick="toggleSubmenu('userManagerSubmenu')" class="block px-4 py-2 rounded hover:bg-gray-700">
                                     <i class="fas fa-users mr-2"></i> User Manager
@@ -83,7 +122,7 @@
                                     </li>
                                 </ul>
                             </li>
-
+                        </c:if>
                             <li class="mb-1">
                                 <a href="advanced-dashboard" class="block px-4 py-2 rounded hover:bg-gray-700">
                                     <i class="fas fa-clipboard-list mr-2"></i> More
@@ -180,4 +219,3 @@
     </body>
 </html>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-
