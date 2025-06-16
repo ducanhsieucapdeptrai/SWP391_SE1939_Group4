@@ -1,28 +1,28 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package model;
 
 /**
- *
- * @author anhdu
+ * Model class representing a SubCategory in the system
  */
 public class SubCategory {
-
     private int subCategoryId;
     private String subCategoryName;
     private int categoryId;
+    private String description;
+    private String categoryName; // For display purposes
 
+    // Default constructor
     public SubCategory() {
     }
 
-    public SubCategory(int subCategoryId, String subCategoryName, int categoryId) {
+    // Parameterized constructor
+    public SubCategory(int subCategoryId, String subCategoryName, int categoryId, String description) {
         this.subCategoryId = subCategoryId;
         this.subCategoryName = subCategoryName;
         this.categoryId = categoryId;
+        this.description = description;
     }
 
+    // Getters and Setters
     public int getSubCategoryId() {
         return subCategoryId;
     }
@@ -47,4 +47,31 @@ public class SubCategory {
         this.categoryId = categoryId;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getCategoryName() {
+        return categoryName;
+    }
+
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
+    }
+
+
+    @Override
+    public String toString() {
+        return "SubCategory{" +
+                "subCategoryId=" + subCategoryId +
+                ", subCategoryName='" + subCategoryName + '\'' +
+                ", categoryId=" + categoryId +
+                ", description='" + description + '\'' +
+                ", categoryName='" + categoryName + '\'' +
+                '}';
+    }
 }

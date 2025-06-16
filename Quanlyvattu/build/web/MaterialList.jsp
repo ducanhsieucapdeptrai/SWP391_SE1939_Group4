@@ -1,5 +1,3 @@
-<%@page import="model.SubCategory"%>
-<%@page import="model.Category"%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="java.util.List" %>
 <%@ page import="model.Material" %>
@@ -10,73 +8,43 @@
 %>
 <!-- Material List Page -->
 <div id="materiallist-page" class="page">
-    <div class="flex justify-between items-center mb-4">
-
-        <form method="get" action="materiallist" class="grid grid-cols-4 gap-4 items-center mb-4">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
+        <div class="flex-1 w-full">
+            <form method="get" action="materiallist" class="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 items-center">
             <h2 class="col-span-4 text-2xl font-bold text-gray-800">Material List</h2>
 
-            <!-- Category dropdown -->
-            <select name="category" class="border px-3 py-2 rounded-lg shadow-sm">
-                <option value="">-- All Categories --</option>
-                <%
-                    List<Category> allCategories = (List<Category>) request.getAttribute("allCategories");
-                    String selectedCategory = request.getParameter("category");
-                    if (allCategories != null) {
-                        for (Category c : allCategories) {
-                %>
-                <option value="<%= c.getCategoryName()%>" <%= c.getCategoryName().equals(selectedCategory) ? "selected" : ""%>>
-                    <%= c.getCategoryName()%>
-                </option>
-                <%
-                        }
-                    }
-                %>
-            </select>
+            <!-- Category search -->
+            <input type="text" name="category" placeholder="Search category..." 
+                   value="<%= request.getParameter("category") != null ? request.getParameter("category") : ""%>"
+                   class="border px-3 py-2 rounded-lg shadow-sm" />
 
-
-            <!-- SubCategory dropdown -->
-            <select name="subcategory" class="border px-3 py-2 rounded-lg shadow-sm">
-                <option value="">-- All Subcategories --</option>
-                <%
-                    List<SubCategory> allSubcategories = (List<SubCategory>) request.getAttribute("allSubcategories");
-                    String selectedSubcategory = request.getParameter("subcategory");
-                    if (allSubcategories != null) {
-                        for (SubCategory sc : allSubcategories) {
-                %>
-                <option value="<%= sc.getSubCategoryName()%>" <%= sc.getSubCategoryName().equals(selectedSubcategory) ? "selected" : ""%>>
-                    <%= sc.getSubCategoryName()%>
-                </option>
-                <%
-                        }
-                    }
-                %>
-            </select>
-
-
-
-
+            <!-- SubCategory search -->
+            <input type="text" name="subcategory" placeholder="Search subcategory..." 
+                   value="<%= request.getParameter("subcategory") != null ? request.getParameter("subcategory") : ""%>"
+                   class="border px-3 py-2 rounded-lg shadow-sm" />
 
             <!-- Name search -->
             <input type="text" name="name" placeholder="Search name..." 
                    value="<%= request.getParameter("name") != null ? request.getParameter("name") : ""%>"
                    class="border px-3 py-2 rounded-lg shadow-sm" />
 
-            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Search</button>
-
-        </form>
-
-        <form action="materiallist" method="get" style="display:inline;">
-            <a href="materiallist" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Xem tất cả</a>
-        </form>
+                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
+                    <i class="fas fa-search mr-1"></i> Search
+                </button>
+            </form>
+        </div>
+        <div class="w-full md:w-auto">
+            <a href="material-add" class="block w-full md:w-auto text-center px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors">
+                <i class="fas fa-plus mr-1"></i> Add New Material
+            </a>
+        </div>
+                   
+                   <form action="materiallist" method="get" style="display:inline;">
+                       <a href="materiallist" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Xem tất cả</a>
+                   </form>
 
     </div>
 
-
-    <div class="mt-2">
-        <a href="catalogmanager" class="inline-block bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-            + Add Material
-        </a>
-    </div>
 
 
     <div class="overflow-x-auto bg-white rounded-lg shadow">
@@ -107,7 +75,7 @@
                         /* format lại mã vật tư */
                         String code = "VT" + String.format("%04d", m.getMaterialId());
                         int inStock = m.getQuantity();      // tồn kho hiện tại
-%>
+                %>
                 <tr class="border-t hover:bg-gray-50">
                     <!-- Category name -->
                     <td class="py-2 px-4"><%= m.getCategoryName()%></td>
@@ -120,11 +88,10 @@
 
                     <!-- Image thumbnail -->
                     <td class="py-2 px-4">
-                        <img src="<%= request.getContextPath() + "/assets/images/materials/" + (m.getImage() == null || m.getImage().isEmpty() ? "default.png" : m.getImage())%>"
+                        <img src="<%= request.getContextPath() + "/" + ((m.getImage() == null || m.getImage().isEmpty()) ? "assets/images/materials/default.png" : m.getImage())%>"
                              alt="<%= m.getMaterialName()%>"
                              class="h-12 w-12 object-cover rounded cursor-pointer transition-transform hover:scale-110"
                              onclick="showImage(this.src)" />
-
 
                     </td>
 

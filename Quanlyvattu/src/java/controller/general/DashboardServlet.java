@@ -7,8 +7,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import model.Users;
+import DAO.MaterialDAO;
+import model.Material;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Servlet for handling the advanced dashboard page
@@ -30,6 +33,19 @@ public class DashboardServlet extends HttpServlet {
             return;
         }
         
+        // Fetch recent material entries
+        MaterialDAO materialDAO = new MaterialDAO();
+        try {
+            List<Material> recentImports = materialDAO.getRecentImportMaterials();
+            List<Material> recentExports = materialDAO.getRecentExportMaterials();
+            
+            request.setAttribute("recentImports", recentImports);
+            request.setAttribute("recentExports", recentExports);
+        } catch (Exception e) {
+            e.printStackTrace();
+            request.setAttribute("errorMessage", "Error loading recent material entries: " + e.getMessage());
+        }
+        
         // Set the page content and forward to the layout
         request.setAttribute("pageContent", "/dashboard.jsp");
         request.getRequestDispatcher("/layout/layout.jsp").forward(request, response);
@@ -43,6 +59,6 @@ public class DashboardServlet extends HttpServlet {
 
     @Override
     public String getServletInfo() {
-        return "Handles the advanced dashboard display with links to Audit Log, Statistics, and Catalog Management";
+        return "Handles the advanced dashboard display with recent material entries";
     }
 }
