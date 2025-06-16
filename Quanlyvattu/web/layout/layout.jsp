@@ -57,7 +57,7 @@
 
                             </li>
                             <li class="mb-1">
-                                <a href="${pageContext.request.contextPath}/requestlist.jsp" class="block px-4 py-2 rounded hover:bg-gray-700">
+                                <a href="${pageContext.request.contextPath}/reqlist" class="block px-4 py-2 rounded hover:bg-gray-700">
                                     <i class="fas fa-file-import mr-2"></i> Request
                                 </a>
                             </li>

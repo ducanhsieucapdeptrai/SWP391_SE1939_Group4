@@ -71,56 +71,17 @@ CREATE TABLE Materials (
     FOREIGN KEY (StatusId) REFERENCES MaterialStatus(StatusId)
 );
 
--- NHẬP KHO
 CREATE TABLE ImportType (
     ImportTypeId INT AUTO_INCREMENT PRIMARY KEY,
     ImportTypeName VARCHAR(100) NOT NULL
 );
 
-CREATE TABLE ImportList (
-    ImportId INT AUTO_INCREMENT PRIMARY KEY,
-    ImportDate DATETIME DEFAULT CURRENT_TIMESTAMP,
-    ImportedBy INT,
-    ImportTypeId INT,                  -- Thêm trường này
-    Note TEXT,
-    FOREIGN KEY (ImportedBy) REFERENCES Users(UserId),
-    FOREIGN KEY (ImportTypeId) REFERENCES ImportType(ImportTypeId)
+CREATE TABLE ExportType (
+    ExportTypeId INT PRIMARY KEY AUTO_INCREMENT,
+    ExportTypeName VARCHAR(255) NOT NULL,
+    Description TEXT
 );
 
-
-
-CREATE TABLE ImportDetail (
-    ImportDetailId INT AUTO_INCREMENT PRIMARY KEY,      -- Khóa chính riêng biệt
-    ImportId INT,
-    MaterialId INT,
-    Quantity INT,
-    Price DOUBLE,
-    FOREIGN KEY (ImportId) REFERENCES ImportList(ImportId),
-    FOREIGN KEY (MaterialId) REFERENCES Materials(MaterialId)
-);
-
-
-
-CREATE TABLE ExportList (
-    ExportId INT AUTO_INCREMENT PRIMARY KEY,
-    ExportDate DATETIME DEFAULT CURRENT_TIMESTAMP,
-    ExportedBy INT,
-    Note TEXT,
-    FOREIGN KEY (ExportedBy) REFERENCES Users(UserId)
-);
-
-
-CREATE TABLE ExportDetail (
-    ExportDetailId INT AUTO_INCREMENT PRIMARY KEY,       -- Khóa chính riêng
-    ExportId INT,
-    MaterialId INT,
-    Quantity INT,
-    FOREIGN KEY (ExportId) REFERENCES ExportList(ExportId),
-    FOREIGN KEY (MaterialId) REFERENCES Materials(MaterialId)
-);
-
-
--- YÊU CẦU VẬT TƯ
 CREATE TABLE RequestType (
     RequestTypeId INT AUTO_INCREMENT PRIMARY KEY,
     RequestTypeName VARCHAR(100)
@@ -144,18 +105,10 @@ CREATE TABLE RequestList (
     ApprovalNote TEXT,
     FOREIGN KEY (RequestedBy) REFERENCES Users(UserId),
     FOREIGN KEY (RequestTypeId) REFERENCES RequestType(RequestTypeId),
-    FOREIGN KEY (ApprovedBy) REFERENCES Users(UserId)
+    FOREIGN KEY (ApprovedBy) REFERENCES Users(UserId),
+    FOREIGN KEY (Status) REFERENCES RequestStatus(StatusCode)
 );
-ALTER TABLE RequestList 
-MODIFY COLUMN Status VARCHAR(20),
-ADD CONSTRAINT FK_Request_Status 
-FOREIGN KEY (Status) REFERENCES RequestStatus(StatusCode);
 
-INSERT INTO RequestStatus (StatusCode, Description)
-VALUES 
-('Pending', 'Waiting for approval'),
-('Approved', 'Approved by director'),
-('Rejected', 'Request has been rejected');
 
 
 
@@ -167,6 +120,69 @@ CREATE TABLE RequestDetail (
     FOREIGN KEY (RequestId) REFERENCES RequestList(RequestId),
     FOREIGN KEY (MaterialId) REFERENCES Materials(MaterialId)
 );
+-- NHẬP KHO
+
+
+CREATE TABLE ImportList (
+    ImportId INT AUTO_INCREMENT PRIMARY KEY,
+    ImportDate DATETIME DEFAULT CURRENT_TIMESTAMP,
+    ImportedBy INT,
+    ImportTypeId INT,
+    Note TEXT,
+    RequestId INT,              -- FK liên kết với Request
+    FOREIGN KEY (ImportedBy) REFERENCES Users(UserId),
+    FOREIGN KEY (ImportTypeId) REFERENCES ImportType(ImportTypeId),
+    FOREIGN KEY (RequestId) REFERENCES RequestList(RequestId)
+);
+
+
+
+CREATE TABLE ImportDetail (
+    ImportDetailId INT AUTO_INCREMENT PRIMARY KEY,
+    ImportId INT,
+    MaterialId INT,
+    Quantity INT,
+    Price DOUBLE,
+    FOREIGN KEY (ImportId) REFERENCES ImportList(ImportId),
+    FOREIGN KEY (MaterialId) REFERENCES Materials(MaterialId)
+);
+
+-- XUẤT KHO
+
+
+CREATE TABLE ExportList (
+    ExportId INT AUTO_INCREMENT PRIMARY KEY,
+    ExportDate DATETIME DEFAULT CURRENT_TIMESTAMP,
+    ExportedBy INT,
+    ExportTypeId INT,
+    Note TEXT,
+    RequestId INT,              -- FK liên kết với Request
+    FOREIGN KEY (ExportedBy) REFERENCES Users(UserId),
+    FOREIGN KEY (ExportTypeId) REFERENCES ExportType(ExportTypeId),
+    FOREIGN KEY (RequestId) REFERENCES RequestList(RequestId)
+);
+
+
+
+CREATE TABLE ExportDetail (
+    ExportDetailId INT AUTO_INCREMENT PRIMARY KEY,
+    ExportId INT,
+    MaterialId INT,
+    Quantity INT,
+    FOREIGN KEY (ExportId) REFERENCES ExportList(ExportId),
+    FOREIGN KEY (MaterialId) REFERENCES Materials(MaterialId)
+);
+
+
+
+
+
+
+
+
+
+
+
 
 
 INSERT INTO Roles (RoleId, RoleName)
@@ -397,6 +413,24 @@ VALUES
 ('uPVC Window 1x1m', 21, 1, 'upvc-window-1x1m.png', 'White-framed tilt window', 120, 12, 1350000);
 
 
+INSERT INTO RequestStatus (StatusCode, Description)
+VALUES 
+('Pending', 'Waiting for approval'),
+('Approved', 'Approved by director'),
+('Rejected', 'Request has been rejected');
+
+
+INSERT INTO ExportType (ExportTypeName, Description)
+VALUES
+('For Construction', 'Export materials for ongoing construction projects'),
+('For Maintenance', 'Export for maintenance of company facilities'),
+('For Equipment Repair', 'Export parts/materials for repairing machines and tools'),
+('Internal Transfer', 'Export to move materials internally between warehouses or departments'),
+('Sample Testing', 'Export material samples for testing or quality inspection'),
+('Return Due to Error', 'Export items to return due to incorrect import or damage'),
+('Clearance / Liquidation', 'Export leftover or obsolete materials');
+
+
 
 
 INSERT INTO ImportType (ImportTypeName)
@@ -405,90 +439,119 @@ VALUES
 ('Returned from repair'),     -- 2
 ('Returned from usage');      -- 3
 
-INSERT INTO ImportList (ImportDate, ImportedBy, ImportTypeId, Note)
-VALUES
-('2025-05-20 09:00:00', 3, 1, 'Imported structural materials for Project A'),         -- Mua vật tư xây thô
-('2025-05-21 10:30:00', 4, 1, 'Imported finishing materials for model house'),        -- Mua vật tư hoàn thiện
-('2025-05-22 14:00:00', 3, 2, 'Returned from repair after external servicing'),       -- Vật tư sửa chữa mang về
-('2025-05-23 08:45:00', 5, 3, 'Returned borrowed materials from field work'),         -- Vật tư mượn trả lại
-('2025-05-24 11:15:00', 4, 1, 'Purchased additional MEP items');                      -- Mua vật tư điện nước
-
-
-INSERT INTO ImportDetail (ImportId, MaterialId, Quantity, Price)
-VALUES
--- ImportId = 1: Structural materials
-(1, 1, 50, 1200000),     -- Reinforced Concrete
-(1, 2, 30, 950000),      -- Lightweight Concrete
-(1, 3, 20, 1800000),     -- I-Beam
-(1, 5, 1000, 1200),      -- Red Brick
-
--- ImportId = 2: Finishing materials
-(2, 11, 500, 80000),     -- Ceramic Tile
-(2, 13, 100, 60000),     -- Water-based Paint
-(2, 15, 100, 120000),    -- Gypsum Ceiling Board
-
--- ImportId = 3: Returned from repair
-(3, 21, 10, 220000),     -- Ceiling Exhaust Fan
-(3, 18, 30, 550000),     -- Wash Basin
-
--- ImportId = 4: Returned from usage
-(4, 8, 20, 450000),      -- Granite Stone
-(4, 10, 50, 700000),     -- Pine Timber
-
--- ImportId = 5: Electrical & plumbing
-(5, 25, 100, 12000),     -- Copper Cable
-(5, 27, 80, 35000);      -- PPR Pipe
-
-INSERT INTO ExportList (ExportDate, ExportedBy, Note)
-VALUES
-('2025-05-25 09:00:00', 3, 'Export for concrete foundation of Building A'),            -- Xuất vật tư móng
-('2025-05-26 10:45:00', 4, 'Export finishing materials to site B'),                    -- Xuất vật tư hoàn thiện
-('2025-05-27 14:20:00', 3, 'Tools exported for maintenance'),                          -- Xuất vật tư bảo trì
-('2025-05-28 08:30:00', 5, 'Returned materials issued for trial build'),               -- Xuất thử nghiệm
-('2025-05-29 11:00:00', 4, 'Daily dispatch of electrical supplies');                   -- Xuất thiết bị điện
-
 INSERT INTO RequestType (RequestTypeName)
 VALUES 
-('Material Export'),        -- 1
-('Material Import'),        -- 2
-('Material Purchase'),      -- 3
-('Material Repair');        -- 4
+('Export'),
+('Import'),
+('Purchase'),
+('Repair');
 
-INSERT INTO RequestList (RequestedBy, RequestTypeId, Note, Status)
-VALUES
-(10, 1, 'Request cement and steel for foundation', 'Pending'),            -- xuất kho
-(12, 3, 'Propose purchase of ceiling fans', 'Pending'),                   -- đề nghị mua
-(11, 4, 'Request repair of broken water pump', 'Pending'),                -- đề nghị sửa
-(9, 1, 'Request bricks for wall construction', 'Pending'),                -- xuất kho
-(8, 2, 'Request to return unused floor tiles to warehouse', 'Pending');   -- nhập kho
 
-INSERT INTO RequestDetail (RequestId, MaterialId, Quantity)
-VALUES
-(1, 1, 20),     -- Reinforced Concrete
-(1, 3, 10),     -- I-Beam
 
-(2, 21, 5),     -- Ceiling Exhaust Fan
 
-(3, 27, 1),     -- PPR Pipe (giả định hỏng)
 
-(4, 5, 1000),   -- Red Brick
+-- RequestList (các yêu cầu)
+INSERT INTO RequestList 
+(RequestId, RequestedBy, RequestDate, RequestTypeId, Note, Status, ApprovedBy, ApprovedDate, ApprovalNote) VALUES
+(1, 10, '2025-05-20 08:00:00', 2, 'Request to import materials for Project A', 'Approved', 2, '2025-05-20 08:30:00', 'Approved - match delivery note.'),
+(2, 11, '2025-05-21 09:30:00', 2, 'Returned items after repair', 'Approved', 2, '2025-05-21 10:00:00', 'Valid receipt'),
+(3, 12, '2025-05-25 07:30:00', 1, 'Export for foundation of Building A', 'Approved', 2, '2025-05-25 08:00:00', 'Approved on schedule'),
+(4, 13, '2025-05-26 08:30:00', 1, 'Export finishing materials to site B', 'Approved', 2, '2025-05-26 09:00:00', 'Export approved.'),
+(5, 4, NOW(), 4, 'Purchase office air conditioners', 'Approved', 2, NOW(), 'Approved within budget.'),
+(6, 5, NOW(), 1, 'Export leftover cement', 'Rejected', 2, NOW(), 'Not needed. Keep for future use.'),
+(7, 6, NOW(), 3, 'Repair broken drill machine', 'Rejected', 2, NOW(), 'Request denied. Out of budget.'),
+(8, 7, NOW(), 2, 'Import bricks for building site', 'Pending', NULL, NULL, NULL),
+(9, 8, NOW(), 3, 'Repair water leakage at storage', 'Pending', NULL, NULL, NULL),
+(10, 14, '2025-05-29 10:00:00', 3, 'Propose purchase of office chairs', 'Pending', NULL, NULL, NULL);
 
-(5, 11, 150);   -- Ceramic Tile
+-- RequestDetail (chi tiết yêu cầu)
+INSERT INTO RequestDetail (RequestId, MaterialId, Quantity) VALUES
+(1, 1, 50),
+(1, 2, 30),
+(2, 21, 10),
+(3, 1, 20),
+(3, 3, 10),
+(4, 11, 100),
+(4, 13, 50),
+(10, 25, 5);
 
-INSERT INTO RequestType (RequestTypeName)
-VALUES 
-('Material Export'),        -- 1
-('Material Import'),        -- 2
-('Material Purchase'),      -- 3
-('Material Repair');        -- 4
+-- ImportList (danh sách nhập)
+INSERT INTO ImportList (ImportId, ImportDate, ImportedBy, ImportTypeId, Note, RequestId) VALUES
+(1, '2025-05-20 09:00:00', 3, 1, 'Imported materials for Project A', 1),
+(2, '2025-05-21 10:30:00', 4, 2, 'Returned after external repair', 2),
+(3, NOW(), 3, 1, '500 steel bars for new project', 8);
 
-INSERT INTO RequestList (RequestedBy, RequestTypeId, Note, Status)
-VALUES
-(10, 1, 'Request cement and steel for foundation', 'Pending'),            -- Export
-(12, 3, 'Propose purchase of ceiling fans', 'Pending'),                   -- Purchase
-(11, 4, 'Request repair of broken water pump', 'Pending'),                -- Repair
-(9, 1, 'Request bricks for wall construction', 'Pending'),                -- Export
-(8, 2, 'Request to return unused tiles to warehouse', 'Pending');         -- Import
+-- ImportDetail (chi tiết nhập)
+INSERT INTO ImportDetail (ImportId, MaterialId, Quantity, Price) VALUES
+(1, 1, 50, 1200000),
+(1, 2, 30, 950000),
+(1, 3, 20, 1800000),
+(2, 21, 10, 220000),
+(2, 18, 30, 550000);
+
+-- ExportList (danh sách xuất)
+INSERT INTO ExportList (ExportId, ExportDate, ExportedBy, ExportTypeId, Note, RequestId) VALUES
+(1, '2025-05-25 09:00:00', 3, 1, 'Export for foundation of Building A', 3),
+(2, '2025-05-26 10:45:00', 4, 1, 'Export finishing materials to site B', 4),
+(3, NOW(), 5, 5, 'Leftover cement not needed, export for clearance', 6);
+
+-- ExportDetail (chi tiết xuất)
+INSERT INTO ExportDetail (ExportId, MaterialId, Quantity) VALUES
+(1, 1, 20),
+(1, 3, 10),
+(2, 11, 100),
+(2, 13, 50);
+
+        SELECT 
+    r.RequestId,
+    r.RequestDate,
+    r.Note,
+    rt.RequestTypeName AS RequestType,
+    rs.Description AS Status,
+    u1.FullName AS RequestedBy,
+    u2.FullName AS ApprovedBy,
+    r.ApprovedDate,
+    r.ApprovalNote,
+    it.ImportTypeName AS ImportType,
+    et.ExportTypeName AS ExportType
+FROM RequestList r
+JOIN RequestType rt ON r.RequestTypeId = rt.RequestTypeId
+JOIN RequestStatus rs ON r.Status = rs.StatusCode
+JOIN Users u1 ON r.RequestedBy = u1.UserId
+LEFT JOIN Users u2 ON r.ApprovedBy = u2.UserId
+LEFT JOIN ImportList il ON r.RequestId = il.ImportId
+LEFT JOIN ImportType it ON il.ImportTypeId = it.ImportTypeId
+LEFT JOIN ExportList el ON r.RequestId = el.ExportId
+LEFT JOIN ExportType et ON el.ExportTypeId = et.ExportTypeId
+ORDER BY r.RequestId;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+SELECT r.RequestId, r.RequestDate, r.Note, 
+       rt.RequestTypeName, rs.Description AS StatusDescription, 
+       u1.FullName AS RequestedByName, 
+       u2.FullName AS ApprovedByName, r.ApprovedDate, r.ApprovalNote, 
+       it.ImportTypeName, et.ExportTypeName 
+FROM RequestList r 
+JOIN RequestType rt ON r.RequestTypeId = rt.RequestTypeId 
+JOIN RequestStatus rs ON r.Status = rs.StatusCode 
+JOIN Users u1 ON r.RequestedBy = u1.UserId 
+LEFT JOIN Users u2 ON r.ApprovedBy = u2.UserId 
+LEFT JOIN ImportList il ON r.RequestId = il.ImportId 
+LEFT JOIN ImportType it ON il.ImportTypeId = it.ImportTypeId 
+LEFT JOIN ExportList el ON r.RequestId = el.ExportId 
+LEFT JOIN ExportType et ON el.ExportTypeId = et.ExportTypeId;
 
 -- Tổng số vật tư
 SELECT COUNT(*) AS TotalMaterials FROM Materials;
@@ -510,15 +573,33 @@ SELECT COUNT(*) AS PendingRequests
 FROM RequestList
 WHERE Status = 'Pending';
 
-SELECT u.*, r.RoleName
-FROM Users u
-JOIN Roles r ON u.RoleId = r.RoleId
-WHERE u.Email = 'giamdoc@example.com' AND u.Password = 'giamdoc123';
+SELECT 
+  r.RequestId, r.RequestDate, r.Note,
+  rt.RequestTypeName, rs.Description AS StatusDescription,
+  u1.FullName AS RequestedByName,
+  u2.FullName AS ApprovedByName, r.ApprovedDate, r.ApprovalNote,
+  
+  -- Lấy ImportTypeName nếu có, ưu tiên lấy ImportType đầu tiên
+  (SELECT it.ImportTypeName 
+   FROM ImportList il 
+   JOIN ImportType it ON il.ImportTypeId = it.ImportTypeId 
+   WHERE il.RequestId = r.RequestId 
+   LIMIT 1) AS ImportTypeName,
+
+  -- Lấy ExportTypeName nếu có, ưu tiên lấy ExportType đầu tiên
+  (SELECT et.ExportTypeName 
+   FROM ExportList el 
+   JOIN ExportType et ON el.ExportTypeId = et.ExportTypeId 
+   WHERE el.RequestId = r.RequestId 
+   LIMIT 1) AS ExportTypeName
+
+FROM RequestList r
+JOIN RequestType rt ON r.RequestTypeId = rt.RequestTypeId
+JOIN RequestStatus rs ON r.Status = rs.StatusCode
+JOIN Users u1 ON r.RequestedBy = u1.UserId
+LEFT JOIN Users u2 ON r.ApprovedBy = u2.UserId
+ORDER BY r.RequestDate DESC;
 
 
-SELECT password FROM users WHERE email = 'quanlyvattu4@gmail.com';
-
-
-
-
+SELECT * FROM RequestType;
 
