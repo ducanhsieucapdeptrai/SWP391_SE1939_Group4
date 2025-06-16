@@ -10,7 +10,7 @@
     </servlet>
     <servlet>
         <servlet-name>RequestPasswordServlet</servlet-name>
-        <servlet-class>controller.RequestPasswordServlet</servlet-class>
+        <servlet-class>controller.general.RequestPasswordServlet</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>DashboardServlet</servlet-name>
@@ -30,11 +30,27 @@
     </servlet>
     <servlet>
         <servlet-name>PendingRequestServlet</servlet-name>
-        <servlet-class>controller.general.PendingRequestServlet</servlet-class>
+        <servlet-class>controller.purchase.PendingRequestServlet</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>RequestDetailServlet</servlet-name>
-        <servlet-class>controller.general.RequestDetailServlet</servlet-class>
+        <servlet-class>controller.purchase.RequestDetailServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>EmployeeRequestListServlet</servlet-name>
+        <servlet-class>controller.purchase.EmployeeRequestListServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>PurchaseOrderServlet</servlet-name>
+        <servlet-class>controller.purchase.PurchaseOrderServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>RequestPurchaseOrderServlet</servlet-name>
+        <servlet-class>controller.purchase.RequestPurchaseOrderServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>PendingPurchaseOrderServlet</servlet-name>
+        <servlet-class>controller.purchase.PendingPurchaseOrderServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>LoginServlet</servlet-name>
@@ -71,6 +87,22 @@
     <servlet-mapping>
         <servlet-name>RequestDetailServlet</servlet-name>
         <url-pattern>/request-detail</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>EmployeeRequestListServlet</servlet-name>
+        <url-pattern>/employee-requests</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>PurchaseOrderServlet</servlet-name>
+        <url-pattern>/create-po</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>RequestPurchaseOrderServlet</servlet-name>
+        <url-pattern>/my-requests</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>PendingPurchaseOrderServlet</servlet-name>
+        <url-pattern>/pending-po</url-pattern>
     </servlet-mapping>
     <welcome-file-list>
         <welcome-file>index.jsp</welcome-file>

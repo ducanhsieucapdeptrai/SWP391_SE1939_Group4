@@ -77,7 +77,7 @@ public class LoginServlet extends HttpServlet {
             session.setAttribute("userName", user.getFullName());
             session.setAttribute("userRole", user.getRole() != null ? user.getRole().getRoleName().trim() : "Unknown");
             session.setAttribute("userImage", user.getUserImage());
-
+            
             if ("on".equals(request.getParameter("remember"))) {
                 Cookie cookie = new Cookie("rememberedEmail", email);
                 cookie.setMaxAge(7 * 24 * 60 * 60);

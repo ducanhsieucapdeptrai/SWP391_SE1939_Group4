@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
  */
-package controller.general;
+package controller.purchase;
 
 import DAO.RequestDAO;
 import java.io.IOException;
@@ -11,6 +11,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import java.util.List;
 import model.RequestList;
 
@@ -18,7 +19,7 @@ import model.RequestList;
  *
  * @author thinh
  */
-public class PendingRequestServlet extends HttpServlet {
+public class EmployeeRequestListServlet extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -37,10 +38,10 @@ public class PendingRequestServlet extends HttpServlet {
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet PendingRequestServlet</title>");
+            out.println("<title>Servlet EmployeeRequestListServlet</title>");
             out.println("</head>");
             out.println("<body>");
-            out.println("<h1>Servlet PendingRequestServlet at " + request.getContextPath() + "</h1>");
+            out.println("<h1>Servlet EmployeeRequestListServlet at " + request.getContextPath() + "</h1>");
             out.println("</body>");
             out.println("</html>");
         }
@@ -58,13 +59,21 @@ public class PendingRequestServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // Lấy danh sách request có trạng thái "Pending"
-        List<RequestList> pendingRequests = RequestDAO.getPendingRequests();
 
-        request.setAttribute("pendingRequests", pendingRequests);
-        request.setAttribute("pageContent", "/DirectorRequestView.jsp"); // nếu giữ nguyên
-        request.getRequestDispatcher("layout/layout.jsp").forward(request, response);
+        HttpSession session = request.getSession();
+        int userId = (int) session.getAttribute("userId");
 
+        String statusFilter = request.getParameter("status");
+        if (statusFilter == null || statusFilter.trim().isEmpty()) {
+            statusFilter = "All";
+        }
+
+        List<RequestList> requests = RequestDAO.getRequestsByUserAndStatus(userId, statusFilter);
+        request.setAttribute("requestList", requests);
+        request.setAttribute("selectedStatus", statusFilter);
+
+        request.setAttribute("pageContent", "/View/CompanyStaff/employee-request-list.jsp");
+        request.getRequestDispatcher("/layout/layout.jsp").forward(request, response);
     }
 
     /**

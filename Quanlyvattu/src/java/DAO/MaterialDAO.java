@@ -226,5 +226,19 @@ public class MaterialDAO extends DBContext {
         return false;
     }
 
+    public static double getMaterialPrice(int materialId) {
+        String sql = "SELECT Price FROM Materials WHERE MaterialId = ?";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, materialId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getDouble("Price");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
     // Có thể thêm: insertMaterial(), updateMaterial(), deleteMaterialById(), searchMaterialByName()
 }

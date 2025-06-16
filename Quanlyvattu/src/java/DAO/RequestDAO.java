@@ -173,6 +173,49 @@ public class RequestDAO {
         }
     }
 
+    public static List<RequestList> getRequestsByUserAndStatus(int userId, String statusFilter) {
+        List<RequestList> list = new ArrayList<>();
+
+        String sql = "SELECT rl.RequestId, rl.RequestDate, rl.Note, rl.Status, rl.ApprovalNote, "
+                + "rt.RequestTypeId, rt.RequestTypeName "
+                + "FROM RequestList rl "
+                + "JOIN RequestType rt ON rl.RequestTypeId = rt.RequestTypeId "
+                + "WHERE rl.RequestedBy = ? ";
+        if (!"All".equalsIgnoreCase(statusFilter)) {
+            sql += "AND rl.Status = ? ";
+        }
+        sql += "ORDER BY (rl.Status = 'Pending') DESC, rl.RequestId DESC";
+
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, userId);
+            if (!"All".equalsIgnoreCase(statusFilter)) {
+                ps.setString(2, statusFilter);
+            }
+
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                RequestList req = new RequestList();
+                req.setRequestId(rs.getInt("RequestId"));
+                req.setRequestDate(rs.getTimestamp("RequestDate"));
+                req.setNote(rs.getString("Note"));
+                req.setStatus(rs.getString("Status"));
+                req.setApprovalNote(rs.getString("ApprovalNote"));
+
+                RequestType type = new RequestType();
+                type.setRequestTypeId(rs.getInt("RequestTypeId"));
+                type.setRequestTypeName(rs.getString("RequestTypeName"));
+                req.setRequestType(type);
+
+                list.add(req);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
     public static void updateRequesterName(int requestId, String newName) {
         String sql = "UPDATE Users SET FullName = ? WHERE UserId = (SELECT RequestedBy FROM RequestList WHERE RequestId = ?)";
         try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {

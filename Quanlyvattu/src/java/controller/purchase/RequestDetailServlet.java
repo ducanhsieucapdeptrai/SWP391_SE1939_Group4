@@ -1,4 +1,4 @@
-package controller.general;
+package controller.purchase;
 
 import DAO.RequestDAO;
 import DAO.MaterialDAO;
