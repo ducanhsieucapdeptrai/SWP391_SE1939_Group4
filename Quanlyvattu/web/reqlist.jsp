@@ -13,18 +13,62 @@
         <div class="p-6">
             <h1 class="text-2xl font-bold mb-6">Request List</h1>
 
-            <table class="min-w-full bg-white border border-gray-300 shadow-sm">
+            <form action="reqlist" method="get" class="mb-4 space-x-4">
+                <label>Loại yêu cầu:
+                    <select name="requestType">
+                        <option value="">Tất cả</option>
+                        <c:forEach var="type" items="${requestTypes}">
+                            <option value="${type}" ${type == filterType ? 'selected' : ''}>${type}</option>
+                        </c:forEach>
+                    </select>
+                </label>
+
+                <label>Status:
+                    <select name="status">
+                        <option value="">All</option>
+                        <option value="Pending" ${filterStatus == 'Pending' ? 'selected' : ''}>Pending</option>
+                        <option value="Approved" ${filterStatus == 'Approved' ? 'selected' : ''}>Approved</option>
+                        <option value="Rejected" ${filterStatus == 'Rejected' ? 'selected' : ''}>Rejected</option>
+                    </select>
+                </label>
+
+                <label>Tên người gửi:
+                    <input type="text" name="requestedBy" value="${filterRequestedBy != null ? filterRequestedBy : ''}" />
+                </label>
+
+                <label>Created At:
+                    <input type="date" name="requestDate"
+                           value="${filterRequestDate != null ? filterRequestDate : ''}" />
+                </label>
+
+
+                <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Lọc</button>
+            </form>
+
+            <div class="mb-4">
+                <a href="createrequest.jsp" class="inline-block px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors">
+                    + Create Request
+                </a>
+            </div>
+            <div class="mb-4">
+                <form action="reqlist" method="get">
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                        Show All Requests
+                    </button>
+                </form>
+            </div>
+
+            <!-- BẢNG -->
+            <table class="w-full table-auto border-collapse bg-white shadow-md">
                 <thead class="bg-gray-200">
                     <tr>
                         <th class="border border-gray-300 px-3 py-2">No.</th>
                         <th class="border border-gray-300 px-3 py-2">Requested By</th>
                         <th class="border border-gray-300 px-3 py-2">Date</th>
                         <th class="border border-gray-300 px-3 py-2">Request Type</th>
-
                         <th class="border border-gray-300 px-3 py-2">Note</th>
                         <th class="border border-gray-300 px-3 py-2">Status</th>
                         <th class="border border-gray-300 px-3 py-2">Approved By</th>
-
                         <th class="border border-gray-300 px-3 py-2">Approval Note</th>
                         <th class="border border-gray-300 px-3 py-2">Action</th>
                     </tr>
@@ -45,17 +89,17 @@
                                 </c:if>
                             </td>
                             <td class="border border-gray-300 px-3 py-2">${r.note}</td>
-                            <td class="border border-gray-300 px-3 py-2">${r.statusDescription}</td>
+                            <td class="border border-gray-300 px-3 py-2">${r.status}</td>
+
                             <td class="border border-gray-300 px-3 py-2">${r.approvedByName}</td>
                             <td class="border border-gray-300 px-3 py-2">${r.approvalNote}</td>
-
-                            <td class="py-2 px-4">
-                                <a href="materialdetail?id=<%= m.getMaterialId()%>" class="text-blue-600 hover:underline">View</a>
+                            <td class="border border-gray-300 px-3 py-2">
+                                <a href="requestdetail?id=${r.requestId}" class="text-blue-600 hover:underline">Detail</a>
                             </td>
                         </tr>
                     </c:forEach>
                 </tbody>
-            </table>
+            </table>    
         </div>
 
     </body>

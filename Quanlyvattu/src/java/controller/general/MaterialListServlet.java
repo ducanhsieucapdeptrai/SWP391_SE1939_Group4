@@ -63,7 +63,7 @@ public class MaterialListServlet extends HttpServlet {
         int totalPage = (int) Math.ceil((double) totalCount / pageSize);
 // Lấy danh sách category và subcategory để hiển thị trong dropdown filter
         List<Category> allCategories = dao.getAllCategories();
-        List<SubCategory> allSubcategories = dao.getAllSubCategories();
+        List<SubCategory> allSubcategories = dao.getAllSubcategories();
 
         request.setAttribute("allCategories", allCategories);
         request.setAttribute("allSubcategories", allSubcategories);

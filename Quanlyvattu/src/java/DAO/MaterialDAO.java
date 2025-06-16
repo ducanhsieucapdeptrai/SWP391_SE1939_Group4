@@ -3,10 +3,12 @@ package DAO;
 import dal.DBContext;
 import java.sql.*;
 import java.util.*;
+import model.Category;
 import model.Material;
+import model.SubCategory;
 
-public class MaterialDAO  extends DBContext{
-    
+public class MaterialDAO extends DBContext {
+
     public List<Material> getAllMaterials() {
         List<Material> list = new ArrayList<>();
         String sql = "SELECT * FROM Materials";
@@ -225,7 +227,7 @@ public class MaterialDAO  extends DBContext{
 
         return false;
     }
-    
+
     /**
      * Helper method to close database resources
      */
@@ -245,8 +247,6 @@ public class MaterialDAO  extends DBContext{
         }
     }
 
-    
-    
     // ✅ Add new material with proper connection handling and return generated ID
     public boolean addMaterial(Material material) {
         String sql = """
@@ -257,8 +257,8 @@ public class MaterialDAO  extends DBContext{
             """;
 
         try (
-             PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            
+                PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
             ps.setString(1, material.getMaterialName());
             ps.setInt(2, material.getSubCategoryId());
             ps.setInt(3, material.getStatusId());
@@ -267,9 +267,9 @@ public class MaterialDAO  extends DBContext{
             ps.setInt(6, material.getQuantity());
             ps.setInt(7, material.getMinQuantity());
             ps.setDouble(8, material.getPrice());
-            
+
             int rowsAffected = ps.executeUpdate();
-            
+
             if (rowsAffected > 0) {
                 try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
                     if (generatedKeys.next()) {
@@ -279,14 +279,59 @@ public class MaterialDAO  extends DBContext{
                 }
             }
             return false;
-            
+
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
     }
 
-    
+    public List<Category> getAllCategories() {
+        List<Category> categories = new ArrayList<>();
+        String sql = "SELECT CategoryId, CategoryName FROM Categories ORDER BY CategoryName";
+
+        try {
+            DBContext db = new DBContext();
+            try (Connection conn = db.getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+
+                while (rs.next()) {
+                    Category c = new Category();
+                    c.setCategoryId(rs.getInt("CategoryId"));
+                    c.setCategoryName(rs.getString("CategoryName"));
+                    categories.add(c);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return categories;
+    }
+
+  public List<SubCategory> getAllSubcategories() {
+        List<SubCategory> subcategories = new ArrayList<>();
+        String sql = "SELECT SubCategoryId, SubCategoryName, CategoryId FROM SubCategories ORDER BY SubCategoryName";
+
+        try {
+            DBContext db = new DBContext();
+            try (Connection conn = db.getConnection();
+                 PreparedStatement ps = conn.prepareStatement(sql);
+                 ResultSet rs = ps.executeQuery()) {
+
+                while (rs.next()) {
+                    SubCategory sub = new SubCategory();
+                    sub.setSubCategoryId(rs.getInt("SubCategoryId"));
+                    sub.setSubCategoryName(rs.getString("SubCategoryName"));
+                    sub.setCategoryId(rs.getInt("CategoryId"));
+                    subcategories.add(sub);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return subcategories;
+    }
 
     public List<Material> getRecentImportMaterials() {
         List<Material> imports = new ArrayList<>();
@@ -301,11 +346,11 @@ public class MaterialDAO  extends DBContext{
             ORDER BY i.ImportDate DESC
             LIMIT 5
             """;
-            
+
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
-        
+
         try {
             conn = connection;
             ps = conn.prepareStatement(sql);
@@ -328,7 +373,7 @@ public class MaterialDAO  extends DBContext{
         }
         return imports;
     }
-    
+
     public List<Material> getRecentExportMaterials() {
         List<Material> exports = new ArrayList<>();
         String sql = """
@@ -342,11 +387,11 @@ public class MaterialDAO  extends DBContext{
             ORDER BY e.ExportDate DESC
             LIMIT 5
             """;
-            
+
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
-        
+
         try {
             conn = connection;
             ps = conn.prepareStatement(sql);
@@ -369,10 +414,6 @@ public class MaterialDAO  extends DBContext{
         }
         return exports;
     }
-    
-   
-    
-    
 
     // Có thể thêm: deleteMaterialById()
 }
