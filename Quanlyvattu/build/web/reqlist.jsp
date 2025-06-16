@@ -14,9 +14,9 @@
             <h1 class="text-2xl font-bold mb-6">Request List</h1>
 
             <form action="reqlist" method="get" class="mb-4 space-x-4">
-                <label>Loại yêu cầu:
+                <label>Request Type:
                     <select name="requestType">
-                        <option value="">Tất cả</option>
+                        <option value="">All</option>
                         <c:forEach var="type" items="${requestTypes}">
                             <option value="${type}" ${type == filterType ? 'selected' : ''}>${type}</option>
                         </c:forEach>
@@ -32,7 +32,7 @@
                     </select>
                 </label>
 
-                <label>Tên người gửi:
+                <label>Request By:
                     <input type="text" name="requestedBy" value="${filterRequestedBy != null ? filterRequestedBy : ''}" />
                 </label>
 
