@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<web-app version="6.0" xmlns="https://jakarta.ee/xml/ns/jakartaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd">
+<web-app version="2.5" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee                               http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
     <servlet>
         <servlet-name>LoginServlet</servlet-name>
         <servlet-class>controller.general.LoginServlet</servlet-class>
@@ -27,6 +27,10 @@
     <servlet>
         <servlet-name>CatalogServlet</servlet-name>
         <servlet-class>controller.general.CatalogServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>UpdateRequestServlet</servlet-name>
+        <servlet-class>controller.general.UpdateRequestServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>LoginServlet</servlet-name>
@@ -56,9 +60,11 @@
         <servlet-name>CatalogServlet</servlet-name>
         <url-pattern>/catalog-management</url-pattern>
     </servlet-mapping>
-    
+    <servlet-mapping>
+        <servlet-name>UpdateRequestServlet</servlet-name>
+        <url-pattern>/UpdateRequestServlet</url-pattern>
+    </servlet-mapping>
     <welcome-file-list>
         <welcome-file>index.jsp</welcome-file>
     </welcome-file-list>
-
 </web-app>
