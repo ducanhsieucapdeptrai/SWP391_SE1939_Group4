@@ -1,49 +1,62 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+
+<!DOCTYPE html>
 <html>
-<head>
-    <title>Request List</title>
-    
-</head>
-<body>
+    <head>
+        <meta charset="UTF-8">
+        <title>Request List</title>
+        <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    </head>
+    <body class="bg-gray-100 p-0 m-0">
 
-<h2>Request List</h2>
+        <div class="p-6">
+            <h1 class="text-2xl font-bold mb-6">Request List</h1>
 
-<table>
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Request Date</th>
-            <th>Note</th>
-            <th>Type</th>
-            <th>Status</th>
-            <th>Requested By</th>
-            <th>Approved By</th>
-            <th>Approved Date</th>
-            <th>Approval Note</th>
-            <th>Action</th> <!-- ✅ Cột mới -->
-        </tr>
-    </thead>
-    <tbody>
-        <c:forEach var="request" items="${requestList}">
-            <tr>
-                <td>${request.id}</td>
-                <td>${request.requestDate}</td>
-                <td>${request.note}</td>
-                <td>${request.typeName}</td>
-                <td>${request.status}</td>
-                <td>${request.requestedBy}</td>
-                <td>${request.approvedBy}</td>
-                <td>${request.approvedDate}</td>
-                <td>${request.approvalNote}</td>
-                <td>
-                    <!-- ✅ Link Detail -->
-                    <a href="requestdetail.jsp?id=${request.id}" class="detail-link">Detail</a>
-                </td>
-            </tr>
-        </c:forEach>
-    </tbody>
-</table>
+            <table class="min-w-full bg-white border border-gray-300 shadow-sm">
+                <thead class="bg-gray-200">
+                    <tr>
+                        <th class="border border-gray-300 px-3 py-2">No.</th>
+                        <th class="border border-gray-300 px-3 py-2">Requested By</th>
+                        <th class="border border-gray-300 px-3 py-2">Date</th>
+                        <th class="border border-gray-300 px-3 py-2">Request Type</th>
 
-</body>
+                        <th class="border border-gray-300 px-3 py-2">Note</th>
+                        <th class="border border-gray-300 px-3 py-2">Status</th>
+                        <th class="border border-gray-300 px-3 py-2">Approved By</th>
+
+                        <th class="border border-gray-300 px-3 py-2">Approval Note</th>
+                        <th class="border border-gray-300 px-3 py-2">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <c:forEach var="r" items="${requestList}" varStatus="loop">
+                        <tr class="hover:bg-gray-100">
+                            <td class="border border-gray-300 px-3 py-2">${loop.index + 1}</td>
+                            <td class="border border-gray-300 px-3 py-2">${r.requestedByName}</td>
+                            <td class="border border-gray-300 px-3 py-2">${r.requestDate}</td>
+                            <td class="border border-gray-300 px-3 py-2">
+                                ${r.requestTypeName}
+                                <c:if test="${r.requestTypeName == 'Export'}">
+                                    (<i>${r.exportTypeName}</i>)
+                                </c:if>
+                                <c:if test="${r.requestTypeName == 'Import'}">
+                                    (<i>${r.importTypeName}</i>)
+                                </c:if>
+                            </td>
+                            <td class="border border-gray-300 px-3 py-2">${r.note}</td>
+                            <td class="border border-gray-300 px-3 py-2">${r.statusDescription}</td>
+                            <td class="border border-gray-300 px-3 py-2">${r.approvedByName}</td>
+                            <td class="border border-gray-300 px-3 py-2">${r.approvalNote}</td>
+
+                            <td class="py-2 px-4">
+                                <a href="materialdetail?id=<%= m.getMaterialId()%>" class="text-blue-600 hover:underline">View</a>
+                            </td>
+                        </tr>
+                    </c:forEach>
+                </tbody>
+            </table>
+        </div>
+
+    </body>
 </html>
