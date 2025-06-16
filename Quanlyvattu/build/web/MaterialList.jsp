@@ -8,9 +8,9 @@
 %>
 <!-- Material List Page -->
 <div id="materiallist-page" class="page">
-    <div class="flex justify-between items-center mb-4">
-
-        <form method="get" action="materiallist" class="grid grid-cols-4 gap-4 items-center mb-4">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
+        <div class="flex-1 w-full">
+            <form method="get" action="materiallist" class="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 items-center">
             <h2 class="col-span-4 text-2xl font-bold text-gray-800">Material List</h2>
 
             <!-- Category search -->
@@ -28,9 +28,16 @@
                    value="<%= request.getParameter("name") != null ? request.getParameter("name") : ""%>"
                    class="border px-3 py-2 rounded-lg shadow-sm" />
 
-            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Search</button>
-        
-        </form>
+                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
+                    <i class="fas fa-search mr-1"></i> Search
+                </button>
+            </form>
+        </div>
+        <div class="w-full md:w-auto">
+            <a href="material-add" class="block w-full md:w-auto text-center px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors">
+                <i class="fas fa-plus mr-1"></i> Add New Material
+            </a>
+        </div>
                    
                    <form action="materiallist" method="get" style="display:inline;">
                        <a href="materiallist" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Xem tất cả</a>
