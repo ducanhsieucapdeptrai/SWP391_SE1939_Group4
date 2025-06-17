@@ -173,6 +173,60 @@ CREATE TABLE ExportDetail (
     FOREIGN KEY (MaterialId) REFERENCES Materials(MaterialId)
 );
 
+CREATE TABLE Notifications (
+    NotificationId INT AUTO_INCREMENT PRIMARY KEY,
+    UserId INT NOT NULL,
+    Message VARCHAR(255) NOT NULL,
+    IsRead BOOLEAN DEFAULT FALSE,
+    CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    RequestId INT,
+    FOREIGN KEY (UserId) REFERENCES Users(UserId),
+    FOREIGN KEY (RequestId) REFERENCES RequestList(RequestId)
+);
+
+CREATE TABLE PurchaseOrderStatus (
+    StatusCode VARCHAR(20) PRIMARY KEY,
+    Description VARCHAR(100)
+);
+
+INSERT INTO PurchaseOrderStatus (StatusCode, Description) VALUES
+('Pending', 'Waiting for director approval'),
+('Approved', 'Approved by director'),
+('Rejected', 'Rejected by director');
+
+-- ========================================
+-- 3. TẠO BẢNG PURCHASE ORDER LIST
+-- ========================================
+CREATE TABLE PurchaseOrderList (
+    POId INT AUTO_INCREMENT PRIMARY KEY,
+    RequestId INT NOT NULL,
+    CreatedBy INT NOT NULL,
+    CreatedDate DATETIME DEFAULT CURRENT_TIMESTAMP,
+    TotalPrice DOUBLE,
+    Status VARCHAR(20) DEFAULT 'Pending',
+    ApprovedBy INT,
+    ApprovedDate DATETIME,
+    Note TEXT,
+    FOREIGN KEY (RequestId) REFERENCES RequestList(RequestId),
+    FOREIGN KEY (CreatedBy) REFERENCES Users(UserId),
+    FOREIGN KEY (ApprovedBy) REFERENCES Users(UserId),
+    FOREIGN KEY (Status) REFERENCES PurchaseOrderStatus(StatusCode)
+);
+
+-- ========================================
+-- 4. TẠO BẢNG PURCHASE ORDER DETAIL
+-- ========================================
+CREATE TABLE PurchaseOrderDetail (
+    POId INT,
+    MaterialId INT,
+    Quantity INT,
+    UnitPrice DOUBLE,
+    Total DOUBLE,
+    PRIMARY KEY (POId, MaterialId),
+    FOREIGN KEY (POId) REFERENCES PurchaseOrderList(POId),
+    FOREIGN KEY (MaterialId) REFERENCES Materials(MaterialId)
+);
+
 
 
 
@@ -502,6 +556,34 @@ INSERT INTO ExportDetail (ExportId, MaterialId, Quantity) VALUES
 (2, 11, 100),
 (2, 13, 50);
 
+
+
+-- 5. THÊM DỮ LIỆU CHUẨN VÀ ĐẦY ĐỦ
+-- ========================================
+
+-- ========== POId = 1 ==========
+-- Cho RequestId = 2 (Ceiling Exhaust Fan), RequestedBy = 12
+-- MaterialId = 21, Giá 220.000, Số lượng 5
+INSERT INTO PurchaseOrderList (RequestId, CreatedBy, CreatedDate, TotalPrice, Status, Note)
+VALUES
+(2, 12, NOW(), 1100000, 'Pending', 'Đề nghị mua Ceiling Exhaust Fan');
+
+INSERT INTO PurchaseOrderDetail (POId, MaterialId, Quantity, UnitPrice, Total)
+VALUES
+(1, 21, 5, 220000, 1100000);
+
+-- ========== POId = 2 ==========
+-- Cho RequestId = 5 (Ceramic Tile), RequestedBy = 8
+-- MaterialId = 11, Giá 80.000, Số lượng 150
+INSERT INTO PurchaseOrderList (RequestId, CreatedBy, CreatedDate, TotalPrice, Status, Note)
+VALUES
+(5, 8, NOW(), 12000000, 'Pending', 'Đề nghị mua gạch lát nền');
+
+INSERT INTO PurchaseOrderDetail (POId, MaterialId, Quantity, UnitPrice, Total)
+VALUES
+(2, 11, 150, 80000, 12000000);
+
+
         SELECT 
     r.RequestId,
     r.RequestDate,
@@ -553,6 +635,8 @@ LEFT JOIN ImportType it ON il.ImportTypeId = it.ImportTypeId
 LEFT JOIN ExportList el ON r.RequestId = el.ExportId 
 LEFT JOIN ExportType et ON el.ExportTypeId = et.ExportTypeId;
 
+
+delete 
 -- Tổng số vật tư
 SELECT COUNT(*) AS TotalMaterials FROM Materials;
 
