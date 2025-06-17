@@ -6,8 +6,9 @@ import java.util.List;
 import model.RequestList;
 import model.RequestDetail;
 import dal.DBContext;
+import model.*;
 
-public class RequestDAO {
+public class RequestDAO extend DBContext {
 
     public List<RequestList> getAllRequests() {
         List<RequestList> list = new ArrayList<>();
@@ -186,5 +187,175 @@ public class RequestDAO {
         }
         return list;
     }
+//======================================================================================================================================================================================
+    // Create Request 
+    // 1. Load all request types
+    public List<RequestType> getAllRequestType() {
+        List<RequestType> list = new ArrayList<>();
+        String sql = "SELECT RequestTypeId, RequestTypeName FROM requesttype";
+        try (PreparedStatement st = connection.prepareStatement(sql); ResultSet rs = st.executeQuery()) {
+            while (rs.next()) {
+                list.add(new RequestType(
+                        rs.getInt("RequestTypeId"),
+                        rs.getString("RequestTypeName")
+                ));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
 
+    // 2. Load all categories
+    public List<Category> getAllCategories() {
+        List<Category> list = new ArrayList<>();
+        String sql = "SELECT CategoryId, CategoryName FROM categories";
+        try (PreparedStatement st = connection.prepareStatement(sql); ResultSet rs = st.executeQuery()) {
+            while (rs.next()) {
+                list.add(new Category(
+                        rs.getInt("CategoryId"),
+                        rs.getString("CategoryName")
+                ));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    // 3. Load all sub‑categories (optionally filterable by category)
+    public List<SubCategory> getAllSubCategories() {
+        List<SubCategory> list = new ArrayList<>();
+        String sql = "SELECT SubCategoryId, SubCategoryName, CategoryId FROM subcategories";
+        try (PreparedStatement st = connection.prepareStatement(sql); ResultSet rs = st.executeQuery()) {
+            while (rs.next()) {
+                list.add(new SubCategory(
+                        rs.getInt("SubCategoryId"),
+                        rs.getString("SubCategoryName"),
+                        rs.getInt("CategoryId")
+                ));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    // 4. Load sub‑categories by CategoryId
+    public List<SubCategory> getSubCategoriesByCategory(int categoryId) {
+        List<SubCategory> list = new ArrayList<>();
+        String sql = "SELECT SubCategoryId, SubCategoryName FROM subcategories WHERE CategoryId = ?";
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setInt(1, categoryId);
+            try (ResultSet rs = st.executeQuery()) {
+                while (rs.next()) {
+                    SubCategory sc = new SubCategory();
+                    sc.setSubCategoryId(rs.getInt("SubCategoryId"));
+                    sc.setSubCategoryName(rs.getString("SubCategoryName"));
+                    sc.setCategoryId(categoryId);
+                    list.add(sc);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    // 5. Load all active materials (with Category/SubCategory names joined)
+    public List<Material> getAllMaterials() {
+        List<Material> list = new ArrayList<>();
+        String sql
+                = "SELECT\n"
+                + "    m.MaterialId, m.MaterialName, m.SubCategoryId, m.StatusId,\n"
+                + "    m.Image, m.Description, m.Quantity, m.MinQuantity,\n"
+                + "    m.Price, m.CreatedAt, m.UpdatedAt,\n"
+                + "    c.CategoryName, sc.SubCategoryName, ms.StatusName\n"
+                + "FROM Materials m\n"
+                + "JOIN SubCategories sc     ON m.SubCategoryId = sc.SubCategoryId\n"
+                + "JOIN Categories c         ON sc.CategoryId    = c.CategoryId\n"
+                + "JOIN MaterialStatus ms    ON m.StatusId       = ms.StatusId\n"
+                + "WHERE m.StatusId = 1"; // only active materials
+
+        try (PreparedStatement st = connection.prepareStatement(sql); ResultSet rs = st.executeQuery()) {
+            while (rs.next()) {
+                Material m = new Material();
+                m.setMaterialId(rs.getInt("MaterialId"));
+                m.setMaterialName(rs.getString("MaterialName"));
+                m.setSubCategoryId(rs.getInt("SubCategoryId"));
+                m.setStatusId(rs.getInt("StatusId"));
+                m.setImage(rs.getString("Image"));
+                m.setDescription(rs.getString("Description"));
+                m.setQuantity(rs.getInt("Quantity"));
+                m.setMinQuantity(rs.getInt("MinQuantity"));
+                m.setPrice(rs.getDouble("Price"));
+                m.setCreatedAt(rs.getTimestamp("CreatedAt"));
+                m.setUpdatedAt(rs.getTimestamp("UpdatedAt"));
+                m.setCategoryName(rs.getString("CategoryName"));
+                m.setSubCategoryName(rs.getString("SubCategoryName"));
+                m.setStatusName(rs.getString("StatusName"));
+                list.add(m);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    // 6. Optionally: load materials by SubCategoryId
+    public List<Material> getMaterialsBySubCategory(int subCategoryId) {
+        // same join as above, plus WHERE m.SubCategoryId = ?
+        // ...
+        return getAllMaterials().stream()
+                .filter(m -> m.getSubCategoryId() == subCategoryId)
+                .toList();
+    }
+
+    // 7. Create a new request with details (unchanged)
+    public boolean createRequest(int requestedBy, int requestTypeId, String note, List<RequestDetail> details) {
+        String sqlReq = "INSERT INTO requestlist (RequestedBy, RequestDate, RequestTypeId, Note, Status) "
+                + "VALUES (?, NOW(), ?, ?, 'Pending')";
+        String sqlDetail = "INSERT INTO requestdetail (RequestId, MaterialId, Quantity) VALUES (?, ?, ?)";
+
+        try {
+            connection.setAutoCommit(false);
+            // insert request
+            PreparedStatement stReq = connection.prepareStatement(sqlReq, Statement.RETURN_GENERATED_KEYS);
+            stReq.setInt(1, requestedBy);
+            stReq.setInt(2, requestTypeId);
+            stReq.setString(3, note);
+            stReq.executeUpdate();
+
+            ResultSet rs = stReq.getGeneratedKeys();
+            if (!rs.next()) {
+                throw new SQLException("Failed to retrieve RequestId.");
+            }
+            int requestId = rs.getInt(1);
+
+            // insert details
+            PreparedStatement stDet = connection.prepareStatement(sqlDetail);
+            for (RequestDetail d : details) {
+                stDet.setInt(1, requestId);
+                stDet.setInt(2, d.getMaterialId());
+                stDet.setInt(3, d.getQuantity());
+                stDet.addBatch();
+            }
+            stDet.executeBatch();
+
+            connection.commit();
+            return true;
+        } catch (SQLException e) {
+            try {
+                connection.rollback();
+            } catch (SQLException ignore) {
+            }
+            e.printStackTrace();
+            return false;
+        } finally {
+            try {
+                connection.setAutoCommit(true);
+            } catch (SQLException ignore) {
+            }
+        }
+    }
 }
