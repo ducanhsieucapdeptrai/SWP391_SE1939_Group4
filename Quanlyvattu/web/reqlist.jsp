@@ -52,7 +52,7 @@
 
             <!-- NÚT CREATE + SHOW ALL TRÊN CÙNG 1 DÒNG -->
             <div class="flex items-center justify-between mb-4">
-                <a href="createrequest.jsp" class="inline-block px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors">
+                <a href="${pageContext.request.contextPath}/createrequest" class="inline-block px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors">
                     + Create Request
                 </a>
 
@@ -99,7 +99,7 @@
                             <td class="border border-gray-300 px-3 py-2">${r.approvedByName}</td>
                             <td class="border border-gray-300 px-3 py-2">${r.approvalNote}</td>
                             <td class="border border-gray-300 px-3 py-2">
-                                <a href="requestdetail?id=${r.requestId}" class="text-blue-600 hover:underline">Detail</a>
+                                <a href="${pageContext.request.contextPath}/request-detail?id=${r.requestId}" class="text-blue-600 hover:underline">Detail</a>
                             </td>
                         </tr>
                     </c:forEach>

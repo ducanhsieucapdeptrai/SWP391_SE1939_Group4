@@ -8,7 +8,7 @@ import model.RequestDetail;
 import dal.DBContext;
 import model.*;
 
-public class RequestDAO extend DBContext {
+public class RequestDAO extends DBContext {
 
     public List<RequestList> getAllRequests() {
         List<RequestList> list = new ArrayList<>();
