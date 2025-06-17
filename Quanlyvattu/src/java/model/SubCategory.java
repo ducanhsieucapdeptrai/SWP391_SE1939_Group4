@@ -21,6 +21,13 @@ public class SubCategory {
         this.categoryId = categoryId;
         this.description = description;
     }
+    //for create request
+    public SubCategory(int subCategoryId, String subCategoryName, int categoryId) {
+        this.subCategoryId = subCategoryId;
+        this.subCategoryName = subCategoryName;
+        this.categoryId = categoryId;
+    }
+    
 
     // Getters and Setters
     public int getSubCategoryId() {
