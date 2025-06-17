@@ -66,14 +66,16 @@
                             <div class="material-item grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
                                 <div class="md:col-span-6">
                                     <label class="block font-medium mb-1">Material <span class="text-red-500">*</span></label>
-                                    <select name="materialId" required class="w-full border border-gray-300 rounded p-2">
-                                        <option value="">-- Select material --</option>
-                                        <c:forEach var="m" items="${materials}">
-                                            <option value="${m.materialId}" data-sub="${m.subCategoryId}" data-stock="${m.quantity}">
-                                                ${m.materialName} (In stock: ${m.quantity})
-                                            </option>
-                                        </c:forEach>
-                                    </select>
+                                    <select name="materialId" class="form-select" required onchange="checkDup(this)">
+                                            <option value="">-- Select material --</option>
+                                            <c:forEach var="m" items="${materials}">
+                                                <option value="${m.materialId}"
+                                                        data-sub="${m.subCategoryId}"
+                                                        data-stock="${m.quantity}">
+                                                    ${m.materialName} (In stock: ${m.quantity})
+                                                </option>
+                                            </c:forEach>
+                                        </select>
                                 </div>
                                 <div class="md:col-span-4">
                                     <label class="block font-medium mb-1">Quantity</label>
@@ -148,6 +150,21 @@
                 document.querySelectorAll('select[name="materialId"] option[data-sub]').forEach(opt => {
                     opt.hidden = subId && opt.getAttribute('data-sub') !== subId;
                 });
+            }
+
+       function checkDup(sel) {
+                if (!sel.value)
+                    return;
+                // All select - id selected
+                const others = Array.from(
+                        document.getElementsByName('materialId')
+                        ).filter(s => s !== sel);
+
+                // Nếu có select khác đã chọn cùng giá trị
+                if (others.some(s => s.value === sel.value)) {
+                    alert('This material is already selected!');
+                    sel.value = '';  // reset về “-- Select material --”
+                }
             }
         </script>
 

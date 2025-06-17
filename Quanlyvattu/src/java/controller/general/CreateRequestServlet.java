@@ -55,13 +55,23 @@
                     doGet(req, resp);
                     return;
                 }
-
+                 boolean checkStock=(requestTypeId==1);
+             RequestDAO dao = new RequestDAO();
                 List<RequestDetail> details = new ArrayList<>();
                 for (int i = 0; i < materialIds.length; i++) {
                     int materialId = Integer.parseInt(materialIds[i]);
                     int qty        = Integer.parseInt(quantities[i]);
                     if (qty <= 0) throw new NumberFormatException();
-
+                     if (checkStock) {
+                    int stock = dao.getMaterialStock(materialId);
+                    if (qty > stock) {
+                        req.setAttribute("error",
+                            String.format("Material ID %d only has %d in stock, cannot request %d.",
+                                          materialId, stock, qty));
+                        doGet(req, resp);
+                        return;
+                    }
+                }
                     RequestDetail d = new RequestDetail();
                     d.setMaterialId(materialId);
                     d.setQuantity(qty);
