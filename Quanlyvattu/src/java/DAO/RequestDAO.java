@@ -358,4 +358,16 @@ public class RequestDAO extends DBContext {
             }
         }
     }
+      public int getMaterialStock(int materialId) throws SQLException {
+    String sql = "SELECT Quantity FROM Materials WHERE MaterialId = ?";
+    try (PreparedStatement st = connection.prepareStatement(sql)) {
+        st.setInt(1, materialId);
+        try (ResultSet rs = st.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt("Quantity");
+            }
+        }
+    }
+    return 0;
+}
 }
