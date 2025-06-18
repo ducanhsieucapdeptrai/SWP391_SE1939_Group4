@@ -26,6 +26,69 @@
                             <span class="mx-2">|</span>
                             <span class="bg-blue-700 px-2 py-1 rounded text-xs">${sessionScope.userRole}</span>
                         </div>
+                        <!-- Biểu tượng chuông -->
+                        <div class="relative">
+                            <button id="bell-icon" class="text-white text-xl focus:outline-none">
+                                <i class="fas fa-bell text-white text-xl"></i>
+                            </button>
+
+                            <!-- Dropdown thông báo -->
+                            <div id="notificationDropdown" class="hidden absolute right-0 mt-2 w-80 bg-gray-900 border border-gray-700 rounded-lg shadow-lg z-50">
+                                <ul id="notification-list" class="max-h-80 overflow-y-auto text-white divide-y divide-gray-700">
+                                    <!-- Dữ liệu sẽ được đổ vào đây -->
+                                    <li class="px-4 py-2 text-center text-gray-400">Loading...</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Script fetch thông báo -->
+                        <script>
+                            const bellIcon = document.getElementById("bell-icon");
+                            const dropdown = document.getElementById("notificationDropdown");
+                            const list = document.getElementById("notification-list");
+
+                            bellIcon.addEventListener("click", async () => {
+                                // Toggle dropdown
+                                dropdown.classList.toggle("hidden");
+
+                                if (!dropdown.classList.contains("hidden")) {
+                                    // Gọi API lấy danh sách thông báo
+                                    try {
+                                        const res = await fetch('/notifications');
+                                        const data = await res.json();
+
+                                        list.innerHTML = "";
+
+                                        if (data.length === 0) {
+                                            const emptyItem = document.createElement("li");
+                                            emptyItem.className = "px-4 py-2 text-gray-400";
+                                            emptyItem.textContent = "No ";
+                                            list.appendChild(emptyItem);
+                                        } else {
+                                            data.forEach(n => {
+                                                const li = document.createElement("li");
+                                                li.className = "px-4 py-2 hover:bg-gray-700 cursor-pointer";
+                                                li.textContent = n.message;
+                                                list.appendChild(li);
+                                            });
+                                        }
+
+                                    } catch (error) {
+                                        console.error("Lỗi lấy thông báo:", error);
+                                        list.innerHTML = '<li class="px-4 py-2 text-red-400">Lỗi tải thông báo</li>';
+                                    }
+                                }
+                            });
+
+                            // Tắt dropdown khi click ra ngoài
+                            window.addEventListener('click', function (e) {
+                                if (!bellIcon.contains(e.target) && !dropdown.contains(e.target)) {
+                                    dropdown.classList.add("hidden");
+                                }
+                            });
+                        </script>
+
+
                         <div class="relative">
                             <button id="userMenuBtn" class="flex items-center focus:outline-none">
                                 <img src="${pageContext.request.contextPath}/assets/images/UserImage/${sessionScope.userImage}"
@@ -33,11 +96,13 @@
                                      class="w-16 aspect-square rounded-full object-cover shadow-md border border-white" />
 
                             </button>
+
                             <div id="userMenu" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 hidden">
                                 <a href="${pageContext.request.contextPath}/user-detail?id=${sessionScope.userId}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</a>
                                 <a href="${pageContext.request.contextPath}/change_password.jsp" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Change password</a>
                                 <a href="${pageContext.request.contextPath}/logout.jsp" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Logout</a>
                             </div>
+
                         </div>
                     </div>
                 </div>
@@ -181,4 +246,3 @@
     </body>
 </html>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-

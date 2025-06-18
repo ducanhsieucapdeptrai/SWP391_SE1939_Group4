@@ -35,7 +35,8 @@ public class RequestUpdateServlet extends HttpServlet {
             List<RequestDetailItem> requestItems = getRequestDetails(reqId);
             request.setAttribute("requestItems", requestItems);
             request.setAttribute("requestId", requestId);
-            request.getRequestDispatcher("requestUpdate.jsp").forward(request, response);
+            request.setAttribute("pageContent", "/requestUpdate.jsp");
+            request.getRequestDispatcher("/layout/layout.jsp").forward(request, response);
         } catch (Exception e) {
             e.printStackTrace();
             response.sendRedirect("error.jsp");
@@ -62,13 +63,16 @@ public class RequestUpdateServlet extends HttpServlet {
             List<RequestDetailItem> requestItems = getRequestDetails(requestId);
             request.setAttribute("requestItems", requestItems);
             request.setAttribute("requestId", requestId);
-            request.getRequestDispatcher("requestUpdate.jsp").forward(request, response);
+            request.setAttribute("pageContent", "/requestUpdate.jsp");
+            request.getRequestDispatcher("/layout/layout.jsp").forward(request, response);
+
 
         } catch (Exception e) {
             e.printStackTrace();
             request.setAttribute("message", "Error occurred while updating request!");
             request.setAttribute("messageType", "error");
-            request.getRequestDispatcher("requestUpdate.jsp").forward(request, response);
+            request.setAttribute("pageContent", "/requestUpdate.jsp");
+            request.getRequestDispatcher("/layout/layout.jsp").forward(request, response);
         }
     }
 
@@ -107,46 +111,46 @@ public class RequestUpdateServlet extends HttpServlet {
     }
 
     private boolean updateRequestActualQuantities(HttpServletRequest request, int requestId, int totalItems) throws SQLException {
-        String sql = "UPDATE RequestDetail SET ActualQuantity = ? WHERE RequestId = ? AND MaterialId = ?";
+    String sql = "UPDATE RequestDetail SET Quantity = ? WHERE RequestId = ? AND MaterialId = ?";
 
-        DBContext db = new DBContext();
-        try (Connection conn = db.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+    DBContext db = new DBContext();
+    try (Connection conn = db.getConnection();
+         PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-            conn.setAutoCommit(false);
+        conn.setAutoCommit(false);
 
-            for (int i = 0; i < totalItems; i++) {
-                String materialIdParam = request.getParameter("materialId_" + i);
-                String actualQtyParam = request.getParameter("actualQuantity_" + i);
+        for (int i = 0; i < totalItems; i++) {
+            String materialIdParam = request.getParameter("materialId_" + i);
+            String actualQtyParam = request.getParameter("actualQuantity_" + i);
 
-                if (materialIdParam == null || actualQtyParam == null) {
-                    conn.rollback();
-                    return false;
-                }
-
-                int materialId = Integer.parseInt(materialIdParam);
-                int actualQuantity = Integer.parseInt(actualQtyParam);
-
-                pstmt.setInt(1, actualQuantity);
-                pstmt.setInt(2, requestId);
-                pstmt.setInt(3, materialId);
-                pstmt.addBatch();
+            if (materialIdParam == null || actualQtyParam == null) {
+                conn.rollback();
+                return false;
             }
 
-            int[] results = pstmt.executeBatch();
-            for (int result : results) {
-                if (result <= 0) {
-                    conn.rollback();
-                    return false;
-                }
-            }
+            int materialId = Integer.parseInt(materialIdParam);
+            int actualQuantity = Integer.parseInt(actualQtyParam);
 
-            conn.commit();
-            return true;
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            pstmt.setInt(1, actualQuantity);      // Replace Quantity with actualQuantity
+            pstmt.setInt(2, requestId);
+            pstmt.setInt(3, materialId);
+            pstmt.addBatch();
         }
+
+        int[] results = pstmt.executeBatch();
+        for (int result : results) {
+            if (result <= 0) {
+                conn.rollback();
+                return false;
+            }
+        }
+
+        conn.commit();
+        return true;
+
+    } catch (SQLException e) {
+        e.printStackTrace();
+        return false;
     }
+}
 }
