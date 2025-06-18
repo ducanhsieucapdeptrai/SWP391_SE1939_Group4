@@ -60,22 +60,36 @@ public class PendingRequestServlet extends HttpServlet {
             throws ServletException, IOException {
         int page = 1;
         int pageSize = 5;
+
         String pageParam = request.getParameter("page");
         if (pageParam != null && !pageParam.isEmpty()) {
-            page = Integer.parseInt(pageParam);
+            try {
+                page = Integer.parseInt(pageParam);
+            } catch (NumberFormatException e) {
+                // Nếu page không hợp lệ -> giữ nguyên là 1
+            }
         }
 
-        int totalRequests = RequestDAO.countPendingRequests();
-        int totalPages = (int) Math.ceil((double) totalRequests / pageSize);
-        int offset = (page - 1) * pageSize;
+        try {
+            int totalRequests = RequestDAO.countPendingRequests();
+            int totalPages = (int) Math.ceil((double) totalRequests / pageSize);
+            int offset = (page - 1) * pageSize;
 
-        List<RequestList> pendingRequests = RequestDAO.getPendingRequestsPaged(offset, pageSize);
+            List<RequestList> pendingRequests = RequestDAO.getPendingRequestsPaged(offset, pageSize);
 
-        request.setAttribute("pendingRequests", pendingRequests);
-        request.setAttribute("currentPage", page);
-        request.setAttribute("totalPages", totalPages);
-        request.setAttribute("pageContent", "/View/Director/DirectorRequestView.jsp"); // nếu bạn vẫn dùng layout
-        request.getRequestDispatcher("layout/layout.jsp").forward(request, response);
+            request.setAttribute("pendingRequests", pendingRequests);
+            request.setAttribute("currentPage", page);
+            request.setAttribute("totalPages", totalPages);
+            request.setAttribute("pageContent", "/View/Director/DirectorRequestView.jsp");
+            request.getRequestDispatcher("layout/layout.jsp").forward(request, response);
+        } catch (Exception e) {
+            e.printStackTrace(); // Log server
+
+            // Chuyển hướng tới trang lỗi hoặc layout với thông báo lỗi
+            request.setAttribute("errorMessage", "An error occurred while loading the request list.");
+            request.setAttribute("pageContent", "/View/Error/error.jsp"); // hoặc 1 trang JSP lỗi tùy bạn tạo
+            request.getRequestDispatcher("layout/layout.jsp").forward(request, response);
+        }
     }
 
     /**
