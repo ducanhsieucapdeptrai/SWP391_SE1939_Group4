@@ -35,7 +35,12 @@ public class RequestDetailServlet extends HttpServlet {
         String action = request.getParameter("action");
         int requestId = Integer.parseInt(request.getParameter("id"));
         HttpSession session = request.getSession();
-        int approverId = (int) session.getAttribute("userId");
+        Object userIdObj = session.getAttribute("userId");
+        if (userIdObj == null) {
+            response.sendRedirect("login.jsp");
+            return;
+        }
+        int approverId = (int) userIdObj;
 
         if ("approve".equals(action)) {
             // Lấy mảng materialIds và quantities do user chỉnh sửa
@@ -57,7 +62,7 @@ public class RequestDetailServlet extends HttpServlet {
             RequestDAO.rejectRequest(requestId, approverId, reason);
         }
 
-        response.sendRedirect(request.getContextPath() + "/pending-requests");
+        response.sendRedirect(request.getContextPath() + "/pending-requests?status=" + action);
     }
 
     @Override

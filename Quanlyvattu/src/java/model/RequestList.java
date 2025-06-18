@@ -126,4 +126,25 @@ public class RequestList {
     public void setRequestDetails(List<RequestDetail> requestDetails) {
         this.requestDetails = requestDetails;
     }
+
+    private boolean hasPO;
+    private String poStatus;  // sẽ nhận “Pending”, “Approved”, “Rejected”
+
+    // getter/setter
+    public boolean isHasPO() {
+        return hasPO;
+    }
+
+    public void setHasPO(boolean hasPO) {
+        this.hasPO = hasPO;
+    }
+
+    public String getPoStatus() {
+        return poStatus;
+    }
+
+    public void setPoStatus(String poStatus) {
+        this.poStatus = poStatus;
+    }
+
 }

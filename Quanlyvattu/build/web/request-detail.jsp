@@ -8,6 +8,7 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
         <script src="https://cdn.tailwindcss.com"></script>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     </head>
     <body class="bg-gray-100">
 
@@ -43,16 +44,8 @@
             <c:if test="${sessionScope.currentUser.role.roleName eq 'Director'}">
                 <div class="mt-6 flex flex-col gap-4">
                     <div class="flex gap-4">
-                        <c:choose>
-                            <c:when test="${requestInfo.requestType.requestTypeName eq 'Material Purchase'}">
-                                <button class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
-                                        onclick="openApproveModal()">Approve</button>
-                            </c:when>
-                            <c:otherwise>
-                                <button class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
-                                        onclick="simpleApprove()">Approve</button>
-                            </c:otherwise>
-                        </c:choose>
+                        <button class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
+                                onclick="openApproveModal()">Approve</button>
                         <button class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
                                 onclick="openRejectDialog()">Reject</button>
                     </div>
@@ -79,7 +72,7 @@
         </div>
 
         <!-- Modal: Only for Director + Material Purchase -->
-        <c:if test="${sessionScope.currentUser.role.roleName eq 'Director' and requestInfo.requestType.requestTypeName eq 'Material Purchase'}">
+        <c:if test="${sessionScope.currentUser.role.roleName eq 'Director'}">
             <div id="approveModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex justify-center items-center">
                 <div class="bg-white p-6 rounded shadow-lg w-3/4 max-w-2xl mr-0">
                     <h2 class="text-xl font-semibold mb-4">Approve & Edit Request</h2>
@@ -165,30 +158,30 @@
                 tbody.appendChild(row);
             }
 
-            function simpleApprove() {
-                Swal.fire({
-                    title: 'Approve this request?',
-                    input: 'textarea',
-                    inputLabel: 'Approval Note',
-                    inputPlaceholder: 'Enter your note...',
-                    showCancelButton: true,
-                    confirmButtonText: 'Approve',
-                    cancelButtonText: 'Cancel',
-                    confirmButtonColor: '#16a34a'
-                }).then((res) => {
-                    if (res.isConfirmed) {
-                        const f = document.createElement('form');
-                        f.method = 'post';
-                        f.action = 'request-detail';
-                        f.innerHTML = `
-                            <input type="hidden" name="action" value="approve"/>
-                            <input type="hidden" name="id" value="${requestInfo.requestId}"/>
-                            <input type="hidden" name="approveNote" value="${res.value || ''}"/>`;
-                        document.body.appendChild(f);
-                        f.submit();
-                    }
-                });
-            }
+//            function simpleApprove() {
+//                Swal.fire({
+//                    title: 'Approve this request?',
+//                    input: 'textarea',
+//                    inputLabel: 'Approval Note',
+//                    inputPlaceholder: 'Enter your note...',
+//                    showCancelButton: true,
+//                    confirmButtonText: 'Approve',
+//                    cancelButtonText: 'Cancel',
+//                    confirmButtonColor: '#16a34a'
+//                }).then((res) => {
+//                    if (res.isConfirmed) {
+//                        const f = document.createElement('form');
+//                        f.method = 'post';
+//                        f.action = 'request-detail';
+//                        f.innerHTML = `
+//                            <input type="hidden" name="action" value="approve"/>
+//                            <input type="hidden" name="id" value="${requestInfo.requestId}"/>
+//                            <input type="hidden" name="approveNote" value="${res.value || ''}"/>`;
+//                        document.body.appendChild(f);
+//                        f.submit();
+//                    }
+//                });
+//            }
 
             function openRejectDialog() {
                 Swal.fire({

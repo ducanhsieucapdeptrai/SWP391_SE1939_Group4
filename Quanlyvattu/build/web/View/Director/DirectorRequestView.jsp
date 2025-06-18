@@ -44,6 +44,28 @@
                         </c:forEach>
                     </tbody>
                 </table>
+
+                <!-- PHÂN TRANG chuyển xuống dưới bảng -->
+                <c:if test="${totalPages > 1}">
+                    <div class="flex justify-center mt-6 space-x-2">
+                        <c:if test="${currentPage > 1}">
+                            <a href="?page=${currentPage - 1}"
+                               class="px-3 py-1 bg-gray-300 rounded hover:bg-gray-400">&laquo; Prev</a>
+                        </c:if>
+
+                        <c:forEach var="i" begin="1" end="${totalPages}">
+                            <a href="?page=${i}"
+                               class="px-3 py-1 rounded ${i == currentPage ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'}">
+                                ${i}
+                            </a>
+                        </c:forEach>
+
+                        <c:if test="${currentPage < totalPages}">
+                            <a href="?page=${currentPage + 1}"
+                               class="px-3 py-1 bg-gray-300 rounded hover:bg-gray-400">Next &raquo;</a>
+                        </c:if>
+                    </div>
+                </c:if>
             </c:if>
 
             <div class="mt-6">

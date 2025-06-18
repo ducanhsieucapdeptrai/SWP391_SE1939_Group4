@@ -26,15 +26,6 @@
                             </span>
                         </div>
 
-                        <c:if test="${sessionScope.currentUser.role.roleName == 'Director'}">
-                            <div class="mr-4 relative">
-                                <a href="${pageContext.request.contextPath}/pending-po">
-                                    <i class="fas fa-bell text-white text-xl"></i>
-                                    <span class="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full px-1">!</span>
-                                </a>
-                            </div>
-                        </c:if>
-
                         <div class="relative">
                             <button id="userMenuBtn" class="flex items-center focus:outline-none">
                                 <img src="${pageContext.request.contextPath}/assets/images/UserImage/${sessionScope.currentUser.userImage}"
@@ -68,6 +59,15 @@
                                     </a>
                                 </li>
                             </c:if>
+
+                            <c:if test="${sessionScope.currentUser.role.roleName == 'Director'}">
+                                <li>
+                                    <a href="${pageContext.request.contextPath}/pending-po" class="block px-4 py-2 hover:bg-gray-700">
+                                        <i class="fas fa-clipboard-check mr-2"></i>List Purchase Order
+                                    </a>
+                                </li>
+                            </c:if>
+
 
                             <c:if test="${sessionScope.currentUser.role.roleName == 'Company Staff'}">
                                 <li>
@@ -145,6 +145,7 @@
             </div>
         </div>
 
+        <!-- Scripts -->
         <script>
             function toggleSubmenu(id) {
                 const submenu = document.getElementById(id);
@@ -157,5 +158,36 @@
                 document.getElementById("userMenu").classList.toggle("hidden");
             });
         </script>
+
+        <!-- SweetAlert2 -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+        <c:if test="${not empty param.status}">
+            <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                <c:choose>
+                    <c:when test="${param.status == 'approve'}">
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Duyệt thành công!',
+                    text: 'Yêu cầu đã được duyệt.',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+                    </c:when>
+                    <c:when test="${param.status == 'reject'}">
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Từ chối thành công!',
+                    text: 'Yêu cầu đã bị từ chối.',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+                    </c:when>
+                </c:choose>
+            });
+            </script>
+        </c:if>
+
     </body>
 </html>

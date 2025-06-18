@@ -1,10 +1,10 @@
 package DAO;
 
 import dal.DBContext;
+import model.PurchaseOrderList;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import model.PurchaseOrderList;
 
 public class PurchaseOrderDAO {
 
@@ -18,7 +18,6 @@ public class PurchaseOrderDAO {
             conn = new DBContext().getConnection();
             conn.setAutoCommit(false);
 
-            // 1. Tính tổng giá trị
             double totalPrice = 0;
             double[] unitPrices = new double[materialIds.length];
             double[] totals = new double[materialIds.length];
@@ -34,7 +33,6 @@ public class PurchaseOrderDAO {
                 totalPrice += total;
             }
 
-            // 2. Insert vào PurchaseOrderList (có TotalPrice)
             String insertPO = "INSERT INTO PurchaseOrderList (RequestId, CreatedBy, Note, TotalPrice) VALUES (?, ?, ?, ?)";
             ps = conn.prepareStatement(insertPO, Statement.RETURN_GENERATED_KEYS);
             ps.setInt(1, requestId);
@@ -50,7 +48,6 @@ public class PurchaseOrderDAO {
             }
             ps.close();
 
-            // 3. Insert vào PurchaseOrderDetail
             String insertDetail = "INSERT INTO PurchaseOrderDetail (POId, MaterialId, Quantity, UnitPrice, Total) VALUES (?, ?, ?, ?, ?)";
             ps = conn.prepareStatement(insertDetail);
 
@@ -68,11 +65,10 @@ public class PurchaseOrderDAO {
 
             ps.executeBatch();
 
-            // 4. Update Request status to 'Approved' (Fix: đúng tên bảng là RequestList)
-            String updateStatus = "UPDATE RequestList SET Status = 'Approved' WHERE RequestId = ?";
-            ps = conn.prepareStatement(updateStatus);
-            ps.setInt(1, requestId);
-            ps.executeUpdate();
+            String insertStatus = "INSERT INTO PurchaseOrderStatus (POId, Status) VALUES (?, 'Pending')";
+            PreparedStatement psStatus = conn.prepareStatement(insertStatus);
+            psStatus.setInt(1, purchaseOrderId);
+            psStatus.executeUpdate();
 
             conn.commit();
             System.out.println("✅ Purchase Order created successfully.");
@@ -103,11 +99,89 @@ public class PurchaseOrderDAO {
 
     public static List<PurchaseOrderList> getPurchaseOrdersByStatus(String status) {
         List<PurchaseOrderList> list = new ArrayList<>();
-        String query = "SELECT * FROM PurchaseOrderList WHERE Status = ?";
-        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(query)) {
+
+        String sql = "SELECT po.*, u.FullName AS CreatedByName "
+                + "FROM PurchaseOrderList po "
+                + "JOIN users u ON po.CreatedBy = u.UserId "
+                + "WHERE po.Status = ?";
+
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, status); // ✅ gán giá trị vào dấu hỏi
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    PurchaseOrderList po = new PurchaseOrderList();
+                    po.setPoId(rs.getInt("POId"));
+                    po.setRequestId(rs.getInt("RequestId"));
+                    po.setCreatedBy(rs.getInt("CreatedBy"));
+                    po.setCreatedDate(rs.getTimestamp("CreatedDate"));
+                    po.setTotalPrice(rs.getDouble("TotalPrice"));
+                    po.setStatus(rs.getString("Status"));
+                    po.setNote(rs.getString("Note"));
+                    po.setCreatedByName(rs.getString("CreatedByName")); // ✅ gán tên người tạo
+
+                    list.add(po);
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
+    public static PurchaseOrderList getPurchaseOrderById(int poId) {
+        PurchaseOrderList po = null;
+        String sql = "SELECT po.*, u.FullName AS CreatedByName "
+                + "FROM PurchaseOrderList po "
+                + "JOIN users u ON po.CreatedBy = u.UserId "
+                + "WHERE po.POId = ?";
+
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, poId);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                po = new PurchaseOrderList();
+                po.setPoId(rs.getInt("POId")); // ✅ Đúng tên cột
+                po.setRequestId(rs.getInt("RequestId"));
+                po.setCreatedBy(rs.getInt("CreatedBy"));
+                po.setStatus(rs.getString("Status"));
+                po.setCreatedDate(rs.getTimestamp("CreatedDate"));
+                po.setTotalPrice(rs.getDouble("TotalPrice"));
+                po.setApprovedBy(rs.getObject("ApprovedBy") != null ? rs.getInt("ApprovedBy") : null);
+                po.setApprovedDate(rs.getTimestamp("ApprovedDate"));
+                po.setNote(rs.getString("Note"));
+                po.setCreatedByName(rs.getString("CreatedByName"));
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return po;
+    }
+
+    public static List<PurchaseOrderList> getPurchaseOrdersByStatus(String status, int page, int pageSize) {
+        List<PurchaseOrderList> list = new ArrayList<>();
+        String sql = """
+        SELECT po.*, u.FullName AS CreatedByName
+        FROM PurchaseOrderList po
+        JOIN users u ON po.CreatedBy = u.UserId
+        WHERE po.Status = ?
+        ORDER BY po.POId DESC
+        LIMIT ? OFFSET ?""";
+
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, status);
+            ps.setInt(2, pageSize);
+            ps.setInt(3, (page - 1) * pageSize);
             ResultSet rs = ps.executeQuery();
+
             while (rs.next()) {
                 PurchaseOrderList po = new PurchaseOrderList();
                 po.setPoId(rs.getInt("POId"));
@@ -116,24 +190,120 @@ public class PurchaseOrderDAO {
                 po.setCreatedDate(rs.getTimestamp("CreatedDate"));
                 po.setTotalPrice(rs.getDouble("TotalPrice"));
                 po.setStatus(rs.getString("Status"));
+                po.setApprovedBy(rs.getInt("ApprovedBy"));
+                po.setApprovedDate(rs.getTimestamp("ApprovedDate"));
                 po.setNote(rs.getString("Note"));
+                po.setCreatedByName(rs.getString("CreatedByName"));
                 list.add(po);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
+    public static int countPurchaseOrdersByStatus(String status) {
+        String sql = "SELECT COUNT(*) FROM PurchaseOrderList WHERE Status = ?";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, status);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return list;
+        return 0;
     }
 
-    public static void main(String[] args) {
-        int employeeId = 12; // Thay bằng userId nhân viên công ty trong DB
-        int requestId = 2;   // ID của một request đã được approve, loại "Material Purchase"
-        String note = "Auto-generated PO test";
+    public static void approvePurchaseOrder(int poId, int approverId, String note, Timestamp approvedDate) {
+        String sql = "UPDATE PurchaseOrderList SET Status = 'Approved', ApprovedBy = ?, Note = ?, ApprovedDate = ? WHERE POId = ?";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, approverId);
+            ps.setString(2, note);
+            ps.setTimestamp(3, approvedDate);
+            ps.setInt(4, poId);
+            ps.executeUpdate();
 
-        // Giả lập dữ liệu từ requestDetail
-        String[] materialIds = {"1", "3"};  // materialId hợp lệ trong DB
-        String[] quantities = {"10", "5"};  // số lượng tương ứng
-
-        createPurchaseOrder(employeeId, requestId, note, materialIds, quantities);
+            // Cập nhật bảng PurchaseOrderStatus
+            String statusSql = "UPDATE PurchaseOrderStatus SET Status = 'Approved' WHERE POId = ?";
+            try (PreparedStatement psStatus = conn.prepareStatement(statusSql)) {
+                psStatus.setInt(1, poId);
+                psStatus.executeUpdate();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
+
+    public static void rejectPurchaseOrder(int poId, int approverId, String note, String approvedDate) {
+        String sql = "UPDATE PurchaseOrderList SET Status = 'Rejected', ApprovedBy = ?, Note = ?, ApprovedDate = ? WHERE POId = ?";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, approverId);
+            ps.setString(2, note);
+            ps.setString(3, approvedDate); // Sử dụng setString thay vì setTimestamp
+            ps.setInt(4, poId);
+
+            ps.executeUpdate();
+
+            // Cập nhật bảng status
+            String statusSql = "UPDATE PurchaseOrderStatus SET Status = 'Rejected' WHERE POId = ?";
+            try (PreparedStatement psStatus = conn.prepareStatement(statusSql)) {
+                psStatus.setInt(1, poId);
+                psStatus.executeUpdate();
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to reject PO", e);
+        }
+    }
+
+    public static boolean checkIfRequestHasPO(int requestId) {
+        String sql = "SELECT COUNT(*) FROM PurchaseOrderList WHERE RequestId = ?";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, requestId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public static String getPOStatusByRequestId(int requestId) {
+        String sql = "SELECT pos.Status FROM PurchaseOrderList pol "
+                + "JOIN PurchaseOrderStatus pos ON pol.POId = pos.POId "
+                + "WHERE pol.RequestId = ?";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, requestId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getString("Status");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "Unknown";
+    }
+
+    public static int getPOIdByRequestId(int requestId) {
+        String sql = "SELECT POId FROM PurchaseOrderList WHERE RequestId = ?";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, requestId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("POId");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
+
 }

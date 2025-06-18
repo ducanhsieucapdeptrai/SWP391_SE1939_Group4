@@ -11,6 +11,7 @@ import java.util.Date;
  * @author thinh
  */
 public class PurchaseOrderList {
+
     private int poId;
     private int requestId;
     private int createdBy;
@@ -93,4 +94,25 @@ public class PurchaseOrderList {
     public void setNote(String note) {
         this.note = note;
     }
+
+    private String createdByName;
+
+    public String getCreatedByName() {
+        return createdByName;
+    }
+
+    public void setCreatedByName(String createdByName) {
+        this.createdByName = createdByName;
+    }
+
+    private int purchaseOrderId;
+
+    public void setPurchaseOrderId(int purchaseOrderId) {
+        this.purchaseOrderId = purchaseOrderId;
+    }
+
+    public int getPurchaseOrderId() {
+        return purchaseOrderId;
+    }
+
 }

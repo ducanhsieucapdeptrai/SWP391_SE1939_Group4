@@ -58,13 +58,24 @@ public class PendingRequestServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // Lấy danh sách request có trạng thái "Pending"
-        List<RequestList> pendingRequests = RequestDAO.getPendingRequests();
+        int page = 1;
+        int pageSize = 5;
+        String pageParam = request.getParameter("page");
+        if (pageParam != null && !pageParam.isEmpty()) {
+            page = Integer.parseInt(pageParam);
+        }
+
+        int totalRequests = RequestDAO.countPendingRequests();
+        int totalPages = (int) Math.ceil((double) totalRequests / pageSize);
+        int offset = (page - 1) * pageSize;
+
+        List<RequestList> pendingRequests = RequestDAO.getPendingRequestsPaged(offset, pageSize);
 
         request.setAttribute("pendingRequests", pendingRequests);
-        request.setAttribute("pageContent", "/View/Director/DirectorRequestView.jsp"); // nếu giữ nguyên
+        request.setAttribute("currentPage", page);
+        request.setAttribute("totalPages", totalPages);
+        request.setAttribute("pageContent", "/View/Director/DirectorRequestView.jsp"); // nếu bạn vẫn dùng layout
         request.getRequestDispatcher("layout/layout.jsp").forward(request, response);
-
     }
 
     /**

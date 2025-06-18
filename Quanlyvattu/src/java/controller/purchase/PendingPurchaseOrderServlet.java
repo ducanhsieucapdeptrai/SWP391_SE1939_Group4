@@ -55,16 +55,33 @@ public class PendingPurchaseOrderServlet extends HttpServlet {
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
-    @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // Lấy danh sách đơn hàng có trạng thái PENDING
-        List<PurchaseOrderList> pendingPOs = PurchaseOrderDAO.getPurchaseOrdersByStatus("Pending");
 
-        // Gửi sang JSP
-        request.setAttribute("pendingOrders", pendingPOs);
+        int page = 1;
+        int pageSize = 10;
+
+        String pageParam = request.getParameter("page");
+        if (pageParam != null) {
+            try {
+                page = Integer.parseInt(pageParam);
+            } catch (NumberFormatException e) {
+                page = 1;
+            }
+        }
+
+        String status = "Pending";
+        List<PurchaseOrderList> pendingOrders = PurchaseOrderDAO.getPurchaseOrdersByStatus(status, page, pageSize);
+        int totalOrders = PurchaseOrderDAO.countPurchaseOrdersByStatus(status);
+        int totalPages = (int) Math.ceil((double) totalOrders / pageSize);
+
+        request.setAttribute("pendingOrders", pendingOrders);
+        request.setAttribute("currentPage", page);
+        request.setAttribute("totalPages", totalPages);
+
         request.setAttribute("pageContent", "/View/Director/DirectorRequestPurchaseOrderView.jsp");
         request.getRequestDispatcher("/layout/layout.jsp").forward(request, response);
+
     }
 
     /**

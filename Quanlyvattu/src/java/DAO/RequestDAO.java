@@ -51,31 +51,36 @@ public class RequestDAO {
     }
 
     public static RequestList getRequestById(int id) {
-        String sql = "SELECT rl.*, u.FullName, rt.RequestTypeName "
+        RequestList r = null;
+        String sql = "SELECT rl.RequestId, rl.RequestDate, rl.Note, rl.Status, "
+                + "u.FullName, rt.RequestTypeName "
                 + "FROM RequestList rl "
                 + "JOIN Users u ON rl.RequestedBy = u.UserId "
                 + "JOIN RequestType rt ON rl.RequestTypeId = rt.RequestTypeId "
                 + "WHERE rl.RequestId = ?";
+
         try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                RequestList r = new RequestList();
+                r = new RequestList();
                 r.setRequestId(id);
                 r.setRequestDate(rs.getDate("RequestDate"));
                 r.setNote(rs.getString("Note"));
+                r.setStatus(rs.getString("Status"));
+
                 Users u = new Users();
                 u.setFullName(rs.getString("FullName"));
                 r.setRequester(u);
+
                 RequestType rt = new RequestType();
                 rt.setRequestTypeName(rs.getString("RequestTypeName"));
                 r.setRequestType(rt);
-                return r;
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return null;
+        return r;
     }
 
     public static List<RequestDetail> getRequestDetails(int requestId) {
@@ -135,6 +140,10 @@ public class RequestDAO {
             String sqlInsert = "INSERT INTO RequestDetail(RequestId, MaterialId, Quantity) VALUES(?,?,?)";
             ps = conn.prepareStatement(sqlInsert);
             for (int i = 0; i < materialIds.length; i++) {
+                if (materialIds[i] == null || quantities[i] == null
+                        || materialIds[i].isEmpty() || quantities[i].isEmpty()) {
+                    continue;
+                }
                 int mid = Integer.parseInt(materialIds[i]);
                 int qty = Integer.parseInt(quantities[i]);
                 ps.setInt(1, requestId);
@@ -250,6 +259,122 @@ public class RequestDAO {
                         + ", Quantity: " + d.getQuantity());
             }
         }
+    }
+
+    public static List<RequestList> getRequestsByUserAndStatusPaged(int userId, String statusFilter, int offset, int pageSize) {
+        List<RequestList> list = new ArrayList<>();
+
+        String sql = "SELECT rl.RequestId, rl.RequestDate, rl.Note, rl.Status, rl.ApprovalNote, "
+                + "rt.RequestTypeId, rt.RequestTypeName "
+                + "FROM RequestList rl "
+                + "JOIN RequestType rt ON rl.RequestTypeId = rt.RequestTypeId "
+                + "WHERE rl.RequestedBy = ? ";
+        if (!"All".equalsIgnoreCase(statusFilter)) {
+            sql += "AND rl.Status = ? ";
+        }
+        sql += "ORDER BY (rl.Status = 'Pending') DESC, rl.RequestId DESC LIMIT ? OFFSET ?";
+
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            int paramIndex = 2;
+            if (!"All".equalsIgnoreCase(statusFilter)) {
+                ps.setString(paramIndex++, statusFilter);
+            }
+            ps.setInt(paramIndex++, pageSize);
+            ps.setInt(paramIndex, offset);
+
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                RequestList req = new RequestList();
+                req.setRequestId(rs.getInt("RequestId"));
+                req.setRequestDate(rs.getTimestamp("RequestDate"));
+                req.setNote(rs.getString("Note"));
+                req.setStatus(rs.getString("Status"));
+                req.setApprovalNote(rs.getString("ApprovalNote"));
+
+                RequestType type = new RequestType();
+                type.setRequestTypeId(rs.getInt("RequestTypeId"));
+                type.setRequestTypeName(rs.getString("RequestTypeName"));
+                req.setRequestType(type);
+
+                list.add(req);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public static List<RequestList> getPendingRequestsPaged(int offset, int pageSize) {
+        List<RequestList> list = new ArrayList<>();
+        String sql = "SELECT rl.RequestId, rl.RequestTypeId, rt.RequestTypeName, u.FullName "
+                + "FROM RequestList rl "
+                + "JOIN RequestType rt ON rl.RequestTypeId = rt.RequestTypeId "
+                + "JOIN Users u ON rl.RequestedBy = u.UserId "
+                + "WHERE rl.Status = 'Pending' "
+                + "ORDER BY rl.RequestId DESC LIMIT ? OFFSET ?";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, pageSize);
+            ps.setInt(2, offset);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                RequestList r = new RequestList();
+                r.setRequestId(rs.getInt("RequestId"));
+
+                Users user = new Users();
+                user.setFullName(rs.getString("FullName"));
+                r.setRequester(user);
+
+                RequestType type = new RequestType();
+                type.setRequestTypeId(rs.getInt("RequestTypeId"));
+                type.setRequestTypeName(rs.getString("RequestTypeName"));
+                r.setRequestType(type);
+
+                list.add(r);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public static int countPendingRequests() {
+        String sql = "SELECT COUNT(*) FROM RequestList WHERE Status = 'Pending'";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public static int countRequestsByUserAndStatus(int userId, String statusFilter) {
+        String sql = "SELECT COUNT(*) FROM RequestList WHERE RequestedBy = ?";
+        if (!"All".equalsIgnoreCase(statusFilter)) {
+            sql += " AND Status = ?";
+        }
+
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            if (!"All".equalsIgnoreCase(statusFilter)) {
+                ps.setString(2, statusFilter);
+            }
+
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return 0;
     }
 
     public static void main(String[] args) {

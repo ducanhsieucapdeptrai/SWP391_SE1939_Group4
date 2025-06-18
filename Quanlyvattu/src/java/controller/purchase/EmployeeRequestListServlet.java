@@ -63,14 +63,32 @@ public class EmployeeRequestListServlet extends HttpServlet {
         HttpSession session = request.getSession();
         int userId = (int) session.getAttribute("userId");
 
+        // Paging setup
+        int page = 1;
+        int pageSize = 5;
+        if (request.getParameter("page") != null) {
+            try {
+                page = Integer.parseInt(request.getParameter("page"));
+            } catch (NumberFormatException e) {
+                page = 1;
+            }
+        }
+
         String statusFilter = request.getParameter("status");
         if (statusFilter == null || statusFilter.trim().isEmpty()) {
             statusFilter = "All";
         }
 
-        List<RequestList> requests = RequestDAO.getRequestsByUserAndStatus(userId, statusFilter);
-        request.setAttribute("requestList", requests);
+        int totalRequests = RequestDAO.countRequestsByUserAndStatus(userId, statusFilter);
+        int totalPages = (int) Math.ceil((double) totalRequests / pageSize);
+        int offset = (page - 1) * pageSize;
+
+        List<RequestList> pagedRequests = RequestDAO.getRequestsByUserAndStatusPaged(userId, statusFilter, offset, pageSize);
+
+        request.setAttribute("requestList", pagedRequests);
         request.setAttribute("selectedStatus", statusFilter);
+        request.setAttribute("currentPage", page);
+        request.setAttribute("totalPages", totalPages);
 
         request.setAttribute("pageContent", "/View/CompanyStaff/employee-request-list.jsp");
         request.getRequestDispatcher("/layout/layout.jsp").forward(request, response);
