@@ -3,13 +3,14 @@ package controller.general;
 import jakarta.servlet.http.*;
 
 import DAO.HomepageDAO;
+import DAO.MaterialDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import model.Users;
+import model.Material;
+import java.util.List;
 
 import java.io.IOException;
-import java.text.DecimalFormat;
-import java.util.Map;
 
 @WebServlet(name = "HomepageServlet", urlPatterns = {"/dashboard"})
 public class HomepageServlet extends HttpServlet {
@@ -34,6 +35,13 @@ public class HomepageServlet extends HttpServlet {
             int totalExports = homepageDAO.getTotalExportCount();
             int pendingRequests = homepageDAO.getPendingRequestCount();
 
+            // Get recent material entries
+            MaterialDAO materialDAO = new MaterialDAO();
+            List<Material> recentImports = materialDAO.getRecentImportMaterials();
+            List<Material> recentExports = materialDAO.getRecentExportMaterials();
+            
+            request.setAttribute("recentImports", recentImports);
+            request.setAttribute("recentExports", recentExports);
             request.setAttribute("totalMaterials", totalMaterials);
             request.setAttribute("totalImports", totalImports);
             request.setAttribute("totalExports", totalExports);

@@ -3,7 +3,9 @@ package DAO;
 import dal.DBContext;
 import java.sql.*;
 import java.util.*;
+import model.Category;
 import model.Material;
+import model.SubCategory;
 
 public class MaterialDAO extends DBContext {
 
@@ -226,19 +228,192 @@ public class MaterialDAO extends DBContext {
         return false;
     }
 
-    public static double getMaterialPrice(int materialId) {
-        String sql = "SELECT Price FROM Materials WHERE MaterialId = ?";
-        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, materialId);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getDouble("Price");
+    /**
+     * Helper method to close database resources
+     */
+    private void closeResources(ResultSet rs, Statement stmt, Connection conn) {
+        try {
+            if (rs != null && !rs.isClosed()) {
+                rs.close();
+            }
+            if (stmt != null && !stmt.isClosed()) {
+                stmt.close();
+            }
+            if (conn != null && !conn.isClosed()) {
+                conn.close();
+            }
+        } catch (SQLException e) {
+            System.err.println("Error closing database resources: " + e.getMessage());
+        }
+    }
+
+    // ✅ Add new material with proper connection handling and return generated ID
+    public boolean addMaterial(Material material) {
+        String sql = """
+            INSERT INTO Materials 
+            (MaterialName, SubCategoryId, StatusId, Image, Description, 
+            Quantity, MinQuantity, Price, CreatedAt, UpdatedAt) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+            """;
+
+        try (
+                PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+            ps.setString(1, material.getMaterialName());
+            ps.setInt(2, material.getSubCategoryId());
+            ps.setInt(3, material.getStatusId());
+            ps.setString(4, material.getImage());
+            ps.setString(5, material.getDescription());
+            ps.setInt(6, material.getQuantity());
+            ps.setInt(7, material.getMinQuantity());
+            ps.setDouble(8, material.getPrice());
+
+            int rowsAffected = ps.executeUpdate();
+
+            if (rowsAffected > 0) {
+                try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        material.setMaterialId(generatedKeys.getInt(1));
+                        return true;
+                    }
+                }
+            }
+            return false;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public List<Category> getAllCategories() {
+        List<Category> categories = new ArrayList<>();
+        String sql = "SELECT CategoryId, CategoryName FROM Categories ORDER BY CategoryName";
+
+        try {
+            DBContext db = new DBContext();
+            try (Connection conn = db.getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+
+                while (rs.next()) {
+                    Category c = new Category();
+                    c.setCategoryId(rs.getInt("CategoryId"));
+                    c.setCategoryName(rs.getString("CategoryName"));
+                    categories.add(c);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return 0;
+
+        return categories;
     }
 
-    // Có thể thêm: insertMaterial(), updateMaterial(), deleteMaterialById(), searchMaterialByName()
+  public List<SubCategory> getAllSubcategories() {
+        List<SubCategory> subcategories = new ArrayList<>();
+        String sql = "SELECT SubCategoryId, SubCategoryName, CategoryId FROM SubCategories ORDER BY SubCategoryName";
+
+        try {
+            DBContext db = new DBContext();
+            try (Connection conn = db.getConnection();
+                 PreparedStatement ps = conn.prepareStatement(sql);
+                 ResultSet rs = ps.executeQuery()) {
+
+                while (rs.next()) {
+                    SubCategory sub = new SubCategory();
+                    sub.setSubCategoryId(rs.getInt("SubCategoryId"));
+                    sub.setSubCategoryName(rs.getString("SubCategoryName"));
+                    sub.setCategoryId(rs.getInt("CategoryId"));
+                    subcategories.add(sub);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return subcategories;
+    }
+
+    public List<Material> getRecentImportMaterials() {
+        List<Material> imports = new ArrayList<>();
+        String sql = """
+            SELECT m.MaterialId, m.MaterialName, id.Quantity as ImportQuantity, 
+                   i.ImportDate, c.CategoryName, sc.SubCategoryName
+            FROM ImportDetail id
+            JOIN Materials m ON id.MaterialId = m.MaterialId
+            JOIN ImportList i ON id.ImportId = i.ImportId
+            JOIN SubCategories sc ON m.SubCategoryId = sc.SubCategoryId
+            JOIN Categories c ON sc.CategoryId = c.CategoryId
+            ORDER BY i.ImportDate DESC
+            LIMIT 5
+            """;
+
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        try {
+            conn = connection;
+            ps = conn.prepareStatement(sql);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                Material m = new Material();
+                m.setMaterialId(rs.getInt("MaterialId"));
+                m.setMaterialName(rs.getString("MaterialName"));
+                m.setImportQuantity(rs.getInt("ImportQuantity"));
+                m.setImportDate(rs.getTimestamp("ImportDate"));
+                m.setCategoryName(rs.getString("CategoryName"));
+                m.setSubCategoryName(rs.getString("SubCategoryName"));
+                imports.add(m);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error in getRecentImportMaterials: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            closeResources(rs, ps, conn);
+        }
+        return imports;
+    }
+
+    public List<Material> getRecentExportMaterials() {
+        List<Material> exports = new ArrayList<>();
+        String sql = """
+            SELECT m.MaterialId, m.MaterialName, ed.Quantity as ExportQuantity, 
+                   e.ExportDate, c.CategoryName, sc.SubCategoryName
+            FROM ExportDetail ed
+            JOIN Materials m ON ed.MaterialId = m.MaterialId
+            JOIN ExportList e ON ed.ExportId = e.ExportId
+            JOIN SubCategories sc ON m.SubCategoryId = sc.SubCategoryId
+            JOIN Categories c ON sc.CategoryId = c.CategoryId
+            ORDER BY e.ExportDate DESC
+            LIMIT 5
+            """;
+
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        try {
+            conn = connection;
+            ps = conn.prepareStatement(sql);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                Material m = new Material();
+                m.setMaterialId(rs.getInt("MaterialId"));
+                m.setMaterialName(rs.getString("MaterialName"));
+                m.setExportQuantity(rs.getInt("ExportQuantity"));
+                m.setExportDate(rs.getTimestamp("ExportDate"));
+                m.setCategoryName(rs.getString("CategoryName"));
+                m.setSubCategoryName(rs.getString("SubCategoryName"));
+                exports.add(m);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error in getRecentExportMaterials: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            closeResources(rs, ps, conn);
+        }
+        return exports;
+    }
+
+    // Có thể thêm: deleteMaterialById()
 }

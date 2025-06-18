@@ -1,5 +1,13 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package model;
 
+/**
+ *
+ * @author anhdu
+ */
 public class RequestType {
 
     private int requestTypeId;
@@ -29,11 +37,4 @@ public class RequestType {
         this.requestTypeName = requestTypeName;
     }
 
-    @Override
-    public String toString() {
-        return "RequestType{"
-                + "requestTypeId=" + requestTypeId
-                + ", requestTypeName='" + requestTypeName + '\''
-                + '}';
-    }
 }

@@ -36,7 +36,9 @@ public class StatisticsDAO {
         try {
             conn = dbContext.getConnection();
             
-            String sql = "SELECT m.*, ms.StatusName FROM Materials m " +
+            String sql = "SELECT m.MaterialId, m.MaterialName, m.SubCategoryId, m.StatusId, m.Image, m.Description, " +
+                         "m.Quantity, m.MinQuantity, m.Price, m.CreatedAt, m.UpdatedAt, ms.StatusName " +
+                         "FROM Materials m " +
                          "LEFT JOIN MaterialStatus ms ON m.StatusId = ms.StatusId " +
                          "ORDER BY m.MaterialName";
             stmt = conn.prepareStatement(sql);
@@ -46,6 +48,7 @@ public class StatisticsDAO {
                 Material material = new Material();
                 material.setMaterialId(rs.getInt("MaterialId"));
                 material.setMaterialName(rs.getString("MaterialName"));
+                material.setSubCategoryId(rs.getInt("SubCategoryId"));
                 material.setStatusId(rs.getInt("StatusId"));
                 material.setStatusName(rs.getString("StatusName"));
                 material.setQuantity(rs.getInt("Quantity"));
@@ -53,6 +56,8 @@ public class StatisticsDAO {
                 material.setPrice(rs.getDouble("Price"));
                 material.setDescription(rs.getString("Description"));
                 material.setImage(rs.getString("Image"));
+                material.setCreatedAt(rs.getTimestamp("CreatedAt"));
+                material.setUpdatedAt(rs.getTimestamp("UpdatedAt"));
                 
                 materials.add(material);
             }

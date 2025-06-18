@@ -1,8 +1,16 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package model;
 
 import java.util.Date;
 import java.util.List;
 
+/**
+ *
+ * @author anhdu
+ */
 public class RequestList {
 
     private int requestId;
@@ -11,17 +19,59 @@ public class RequestList {
     private int requestTypeId;
     private String note;
     private String status;
-    private Integer approvedBy; // Có thể null nếu chưa duyệt
+    private int approvedBy;
     private Date approvedDate;
     private String approvalNote;
 
-    // Quan hệ bổ sung (không bắt buộc nhưng tiện)
-    private Users requester;       // người yêu cầu
-    private Users approver;        // người phê duyệt
-    private RequestType requestType; // loại yêu cầu
-    private List<RequestDetail> requestDetails; // chi tiết vật tư yêu cầu
+    private String requestedByName;     // Tuỳ chọn: dùng để hiển thị tên người gửi
+    private String approvedByName;      // Tuỳ chọn: dùng để hiển thị tên người duyệt
+    private String requestTypeName;     // Tuỳ chọn: để hiển thị tên loại yêu cầu
+    private String statusDescription;   // Tuỳ chọn: mô tả trạng thái từ RequestStatus
 
-    // Getters and Setters
+    private List<RequestDetail> requestDetails; // Tuỳ chọn: dùng nếu cần load chi tiết đi kèm
+    private String importTypeName;
+    private String exportTypeName;
+
+// getters & setters
+    public RequestList() {
+    }
+
+    public RequestList(int requestId, int requestedBy, Date requestDate, int requestTypeId, String note, String status, int approvedBy, Date approvedDate, String approvalNote, String requestedByName, String approvedByName, String requestTypeName, String statusDescription, List<RequestDetail> requestDetails, String importTypeName, String exportTypeName) {
+        this.requestId = requestId;
+        this.requestedBy = requestedBy;
+        this.requestDate = requestDate;
+        this.requestTypeId = requestTypeId;
+        this.note = note;
+        this.status = status;
+        this.approvedBy = approvedBy;
+        this.approvedDate = approvedDate;
+        this.approvalNote = approvalNote;
+        this.requestedByName = requestedByName;
+        this.approvedByName = approvedByName;
+        this.requestTypeName = requestTypeName;
+        this.statusDescription = statusDescription;
+        this.requestDetails = requestDetails;
+        this.importTypeName = importTypeName;
+        this.exportTypeName = exportTypeName;
+    }
+
+    public String getImportTypeName() {
+        return importTypeName;
+    }
+
+    public void setImportTypeName(String importTypeName) {
+        this.importTypeName = importTypeName;
+    }
+
+    public String getExportTypeName() {
+        return exportTypeName;
+    }
+
+    public void setExportTypeName(String exportTypeName) {
+        this.exportTypeName = exportTypeName;
+    }
+
+    
     public int getRequestId() {
         return requestId;
     }
@@ -70,11 +120,11 @@ public class RequestList {
         this.status = status;
     }
 
-    public Integer getApprovedBy() {
+    public int getApprovedBy() {
         return approvedBy;
     }
 
-    public void setApprovedBy(Integer approvedBy) {
+    public void setApprovedBy(int approvedBy) {
         this.approvedBy = approvedBy;
     }
 
@@ -94,29 +144,36 @@ public class RequestList {
         this.approvalNote = approvalNote;
     }
 
-    // Optional: Liên kết đến các đối tượng liên quan
-    public Users getRequester() {
-        return requester;
+    public String getRequestedByName() {
+        return requestedByName;
     }
 
-    public void setRequester(Users requester) {
-        this.requester = requester;
+    public void setRequestedByName(String requestedByName) {
+        this.requestedByName = requestedByName;
     }
 
-    public Users getApprover() {
-        return approver;
+    public String getApprovedByName() {
+        return approvedByName;
     }
 
-    public void setApprover(Users approver) {
-        this.approver = approver;
+    public void setApprovedByName(String approvedByName) {
+        this.approvedByName = approvedByName;
     }
 
-    public RequestType getRequestType() {
-        return requestType;
+    public String getRequestTypeName() {
+        return requestTypeName;
     }
 
-    public void setRequestType(RequestType requestType) {
-        this.requestType = requestType;
+    public void setRequestTypeName(String requestTypeName) {
+        this.requestTypeName = requestTypeName;
+    }
+
+    public String getStatusDescription() {
+        return statusDescription;
+    }
+
+    public void setStatusDescription(String statusDescription) {
+        this.statusDescription = statusDescription;
     }
 
     public List<RequestDetail> getRequestDetails() {
@@ -125,26 +182,6 @@ public class RequestList {
 
     public void setRequestDetails(List<RequestDetail> requestDetails) {
         this.requestDetails = requestDetails;
-    }
-
-    private boolean hasPO;
-    private String poStatus;  // sẽ nhận “Pending”, “Approved”, “Rejected”
-
-    // getter/setter
-    public boolean isHasPO() {
-        return hasPO;
-    }
-
-    public void setHasPO(boolean hasPO) {
-        this.hasPO = hasPO;
-    }
-
-    public String getPoStatus() {
-        return poStatus;
-    }
-
-    public void setPoStatus(String poStatus) {
-        this.poStatus = poStatus;
     }
 
 }

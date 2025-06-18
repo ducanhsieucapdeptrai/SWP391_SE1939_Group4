@@ -18,6 +18,10 @@ public class Material {
     private String categoryName;
     private String subCategoryName;
     private String statusName;
+    private Timestamp importDate;
+    private Timestamp exportDate;
+    private int importQuantity;
+    private int exportQuantity;
 
     public Material(int materialId, String materialName, int subCategoryId, int statusId, String image, String description, int quantity, int minQuantity, double price, Timestamp createdAt, Timestamp updatedAt, String categoryName, String subCategoryName, String statusName) {
         this.materialId = materialId;
@@ -37,6 +41,39 @@ public class Material {
     }
 
     public Material() {
+    }
+    
+    // Getters and Setters for new fields
+    public Timestamp getImportDate() {
+        return importDate;
+    }
+
+    public void setImportDate(Timestamp importDate) {
+        this.importDate = importDate;
+    }
+
+    public Timestamp getExportDate() {
+        return exportDate;
+    }
+
+    public void setExportDate(Timestamp exportDate) {
+        this.exportDate = exportDate;
+    }
+
+    public int getImportQuantity() {
+        return importQuantity;
+    }
+
+    public void setImportQuantity(int importQuantity) {
+        this.importQuantity = importQuantity;
+    }
+
+    public int getExportQuantity() {
+        return exportQuantity;
+    }
+
+    public void setExportQuantity(int exportQuantity) {
+        this.exportQuantity = exportQuantity;
     }
 
     public int getMaterialId() {

@@ -11,6 +11,7 @@ import model.Catalog;
 import model.Users;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -34,18 +35,25 @@ public class CatalogServlet extends HttpServlet {
         }
         
         try {
-            // Fetch catalog items from database
+            // Fetch catalog items from database with sorting and filtering
             CatalogDAO catalogDAO = new CatalogDAO();
-            List<Catalog> catalogItems = catalogDAO.getAllCatalogItems();
+            
+            // Get sorting and search parameters
+            String sortBy = request.getParameter("sortBy");
+            String searchTerm = request.getParameter("search");
+            
+            List<Catalog> catalogItems = catalogDAO.getCatalogItems(sortBy, searchTerm);
             
             // Set attributes for JSP
             request.setAttribute("catalogItems", catalogItems);
+            request.setAttribute("sortBy", sortBy);
+            request.setAttribute("searchTerm", searchTerm);
             
             // Set the page content and forward to the layout
             request.setAttribute("pageContent", "/catalog_management.jsp");
             request.getRequestDispatcher("/layout/layout.jsp").forward(request, response);
             
-        } catch (Exception e) {
+        } catch (SQLException e) {
             e.printStackTrace();
             request.setAttribute("errorMessage", "Error fetching catalog items: " + e.getMessage());
             request.setAttribute("pageContent", "/catalog_management.jsp");
