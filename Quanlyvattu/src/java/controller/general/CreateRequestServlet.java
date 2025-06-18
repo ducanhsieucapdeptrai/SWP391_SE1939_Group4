@@ -55,7 +55,7 @@
                     doGet(req, resp);
                     return;
                 }
-                 boolean checkStock=(requestTypeId==1);
+                 boolean checkStock=(requestTypeId==1||requestTypeId==4);
              RequestDAO dao = new RequestDAO();
                 List<RequestDetail> details = new ArrayList<>();
                 for (int i = 0; i < materialIds.length; i++) {
