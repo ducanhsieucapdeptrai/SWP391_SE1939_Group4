@@ -16,19 +16,19 @@ import dal.DBContext;
 
 @WebServlet("/request-detail")
 public class RequestDetailServlet extends HttpServlet {
-    
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
         try {
             String idParam = request.getParameter("id");
-            
+
             if (idParam == null || idParam.trim().isEmpty()) {
                 response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Request ID is required");
                 return;
             }
-            
+
             int requestId;
             try {
                 requestId = Integer.parseInt(idParam.trim());
@@ -39,44 +39,44 @@ public class RequestDetailServlet extends HttpServlet {
                 response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid request ID format: " + idParam);
                 return;
             }
-            
+
             RequestDetailDAO dao = new RequestDetailDAO();
             List<RequestDetail> details = dao.getRequestDetailsByRequestId(requestId);
-            
+
             request.setAttribute("requestDetails", details);
             request.setAttribute("requestId", requestId);
-            
+
             if (details == null || details.isEmpty()) {
                 request.setAttribute("message", "Không có vật tư nào trong yêu cầu này (ID: " + requestId + ")");
             }
-            
-            request.getRequestDispatcher("request-detail.jsp").forward(request, response);
-            
+
+            request.setAttribute("pageContent", "/request-detail.jsp");
+            request.getRequestDispatcher("/layout/layout.jsp").forward(request, response);
+
         } catch (Exception e) {
-            
+
             System.out.println("Error in RequestDetailServlet: " + e.getMessage());
             e.printStackTrace();
-            
-            
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, 
-                             "Internal server error: " + e.getMessage());
+
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                    "Internal server error: " + e.getMessage());
         }
     }
-    
+
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+
         try {
             String action = request.getParameter("action");
             String requestIdParam = request.getParameter("requestId");
-            
+
             if (requestIdParam == null || requestIdParam.trim().isEmpty()) {
                 request.setAttribute("errorMessage", "Request ID is required");
                 doGet(request, response);
                 return;
             }
-            
+
             int requestId;
             try {
                 requestId = Integer.parseInt(requestIdParam.trim());
@@ -88,7 +88,7 @@ public class RequestDetailServlet extends HttpServlet {
                 doGet(request, response);
                 return;
             }
-            
+
             if ("approve".equals(action)) {
                 handleApprove(request, response, requestId);
             } else if ("reject".equals(action)) {
@@ -97,7 +97,7 @@ public class RequestDetailServlet extends HttpServlet {
                 request.setAttribute("errorMessage", "Invalid action");
                 doGet(request, response);
             }
-            
+
         } catch (Exception e) {
             System.out.println("Error in RequestDetailServlet POST: " + e.getMessage());
             e.printStackTrace();
@@ -105,81 +105,81 @@ public class RequestDetailServlet extends HttpServlet {
             doGet(request, response);
         }
     }
-    
+
     private void handleApprove(HttpServletRequest request, HttpServletResponse response, int requestId)
             throws ServletException, IOException {
-        
+
         String note = request.getParameter("note");
-        if (note == null) note = "";
-        
+        if (note == null) {
+            note = "";
+        }
+
         try {
             boolean success = updateRequestStatus(requestId, "APPROVED", note);
-            
+
             if (success) {
                 request.setAttribute("successMessage", "Request has been approved successfully!");
             } else {
                 request.setAttribute("errorMessage", "Failed to approve request. Please try again.");
             }
-            
+
         } catch (Exception e) {
             System.out.println("Error approving request: " + e.getMessage());
             e.printStackTrace();
             request.setAttribute("errorMessage", "An error occurred while approving the request");
         }
-        
-        
+
         response.sendRedirect("request-detail?id=" + requestId);
     }
-    
+
     private void handleReject(HttpServletRequest request, HttpServletResponse response, int requestId)
             throws ServletException, IOException {
-        
+
         String reason = request.getParameter("reason");
-        
+
         if (reason == null || reason.trim().isEmpty()) {
             request.setAttribute("errorMessage", "Reason for rejection is required");
             doGet(request, response);
             return;
         }
-        
+
         try {
             boolean success = updateRequestStatus(requestId, "REJECTED", reason);
-            
+
             if (success) {
                 request.setAttribute("successMessage", "Request has been rejected successfully!");
             } else {
                 request.setAttribute("errorMessage", "Failed to reject request. Please try again.");
             }
-            
+
         } catch (Exception e) {
             System.out.println("Error rejecting request: " + e.getMessage());
             e.printStackTrace();
             request.setAttribute("errorMessage", "An error occurred while rejecting the request");
         }
-        
-        
+
         response.sendRedirect("request-detail?id=" + requestId);
     }
-    
+
     private boolean updateRequestStatus(int requestId, String status, String note) {
         String sql = "UPDATE Requests SET Status = ?, Note = ?, UpdatedDate = GETDATE() WHERE RequestId = ?";
-        
+
         try {
             DBContext db = new DBContext();
             Connection conn = db.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql);
-            
+
             ps.setString(1, status);
             ps.setString(2, note);
             ps.setInt(3, requestId);
-            
+
             int rowsAffected = ps.executeUpdate();
-            
+
             ps.close();
             conn.close();
-            
+
             return rowsAffected > 0;
-            
+
         } catch (SQLException e) {
             System.out.println("Database error in updateRequestStatus: " + e.getMessage());
             e.printStackTrace();
