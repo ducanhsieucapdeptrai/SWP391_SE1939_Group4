@@ -1,7 +1,9 @@
 package controller.general;
 
 import DAO.RequestDetailDAO;
+import DAO.RequestDAO;
 import model.RequestDetail;
+import model.RequestList;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -40,9 +42,16 @@ public class RequestDetailServlet extends HttpServlet {
                 return;
             }
 
+            // Lấy thông tin request
+            RequestDAO requestDAO = new RequestDAO();
+            RequestList requestInfo = requestDAO.getRequestById(requestId);
+            
+            // Lấy chi tiết materials
             RequestDetailDAO dao = new RequestDetailDAO();
             List<RequestDetail> details = dao.getRequestDetailsByRequestId(requestId);
 
+            // Set attributes
+            request.setAttribute("requestInfo", requestInfo);
             request.setAttribute("requestDetails", details);
             request.setAttribute("requestId", requestId);
 
@@ -54,10 +63,8 @@ public class RequestDetailServlet extends HttpServlet {
             request.getRequestDispatcher("/layout/layout.jsp").forward(request, response);
 
         } catch (Exception e) {
-
             System.out.println("Error in RequestDetailServlet: " + e.getMessage());
             e.printStackTrace();
-
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                     "Internal server error: " + e.getMessage());
         }
