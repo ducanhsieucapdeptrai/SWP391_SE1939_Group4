@@ -1,6 +1,8 @@
 package controller.general;
 
 import DAO.RequestDetailDAO;
+import DAO.MaterialDAO;
+import model.Material;
 import model.RequestDetail;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -42,9 +44,15 @@ public class RequestDetailServlet extends HttpServlet {
 
             RequestDetailDAO dao = new RequestDetailDAO();
             List<RequestDetail> details = dao.getRequestDetailsByRequestId(requestId);
+            String status = dao.getRequestStatus(requestId);
+
+            MaterialDAO materialDAO = new MaterialDAO();
+            List<Material> allMaterials = materialDAO.getAllMaterials();
 
             request.setAttribute("requestDetails", details);
+            request.setAttribute("requestStatus", status);
             request.setAttribute("requestId", requestId);
+            request.setAttribute("allMaterials", allMaterials);
 
             if (details == null || details.isEmpty()) {
                 request.setAttribute("message", "Không có vật tư nào trong yêu cầu này (ID: " + requestId + ")");
@@ -54,7 +62,6 @@ public class RequestDetailServlet extends HttpServlet {
             request.getRequestDispatcher("/layout/layout.jsp").forward(request, response);
 
         } catch (Exception e) {
-
             System.out.println("Error in RequestDetailServlet: " + e.getMessage());
             e.printStackTrace();
 
@@ -164,20 +171,13 @@ public class RequestDetailServlet extends HttpServlet {
     private boolean updateRequestStatus(int requestId, String status, String note) {
         String sql = "UPDATE Requests SET Status = ?, Note = ?, UpdatedDate = GETDATE() WHERE RequestId = ?";
 
-        try {
-            DBContext db = new DBContext();
-            Connection conn = db.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql);
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, status);
             ps.setString(2, note);
             ps.setInt(3, requestId);
 
             int rowsAffected = ps.executeUpdate();
-
-            ps.close();
-            conn.close();
-
             return rowsAffected > 0;
 
         } catch (SQLException e) {

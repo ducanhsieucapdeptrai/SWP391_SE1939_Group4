@@ -190,6 +190,7 @@ public class RequestDAO extends DBContext {
 //======================================================================================================================================================================================
     // Create Request 
     // 1. Load all request types
+
     public List<RequestType> getAllRequestType() {
         List<RequestType> list = new ArrayList<>();
         String sql = "SELECT RequestTypeId, RequestTypeName FROM requesttype";
@@ -358,16 +359,99 @@ public class RequestDAO extends DBContext {
             }
         }
     }
-      public int getMaterialStock(int materialId) throws SQLException {
-    String sql = "SELECT Quantity FROM Materials WHERE MaterialId = ?";
-    try (PreparedStatement st = connection.prepareStatement(sql)) {
-        st.setInt(1, materialId);
-        try (ResultSet rs = st.executeQuery()) {
-            if (rs.next()) {
-                return rs.getInt("Quantity");
+
+    public int getMaterialStock(int materialId) throws SQLException {
+        String sql = "SELECT Quantity FROM Materials WHERE MaterialId = ?";
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setInt(1, materialId);
+            try (ResultSet rs = st.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("Quantity");
+                }
             }
         }
+        return 0;
     }
-    return 0;
-}
+
+    public List<RequestList> getSimpleRequestsByUser(int userId) {
+        List<RequestList> list = new ArrayList<>();
+
+        String sql = """
+        SELECT 
+            r.RequestDate, 
+            rt.RequestTypeName AS RequestTypeName, 
+            r.Note, 
+            r.Status
+        FROM 
+            requestlist r
+        JOIN 
+            RequestType rt ON r.RequestTypeId = rt.RequestTypeId
+        WHERE 
+            r.RequestedBy = ?
+        ORDER BY 
+            r.RequestDate DESC
+    """;
+
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, userId);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                RequestList r = new RequestList();
+                r.setRequestDate(rs.getDate("RequestDate"));
+                r.setRequestTypeName(rs.getString("RequestTypeName"));
+                r.setNote(rs.getString("Note"));
+                r.setStatus(rs.getString("Status"));
+                list.add(r);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
+    public List<RequestList> getSimpleRequestsByUserAndStatus(int userId, String status) {
+        List<RequestList> list = new ArrayList<>();
+
+        String sql = """
+        SELECT 
+            r.RequestDate, 
+            rt.RequestTypeName, 
+            r.Note, 
+            r.Status
+        FROM 
+            requestlist r
+        JOIN 
+            RequestType rt ON r.RequestTypeId = rt.RequestTypeId
+        WHERE 
+            r.RequestedBy = ? AND r.Status = ?
+        ORDER BY 
+            r.RequestDate DESC
+    """;
+
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, userId);
+            ps.setString(2, status);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                RequestList r = new RequestList();
+                r.setRequestDate(rs.getDate("RequestDate"));
+                r.setRequestTypeName(rs.getString("RequestTypeName"));
+                r.setNote(rs.getString("Note"));
+                r.setStatus(rs.getString("Status"));
+                list.add(r);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
 }
