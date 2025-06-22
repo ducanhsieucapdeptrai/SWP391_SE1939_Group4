@@ -22,9 +22,9 @@ public class RequestDAO extends DBContext {
                 + "JOIN RequestStatus rs ON r.Status = rs.StatusCode "
                 + "JOIN Users u1 ON r.RequestedBy = u1.UserId "
                 + "LEFT JOIN Users u2 ON r.ApprovedBy = u2.UserId "
-                + "LEFT JOIN ImportList il ON r.RequestId = il.RequestId "
+                + "LEFT JOIN ImportList il ON r.RequestId = il.RequestId AND r.RequestTypeId = 2 "
                 + "LEFT JOIN ImportType it ON il.ImportTypeId = it.ImportTypeId "
-                + "LEFT JOIN ExportList el ON r.RequestId = el.RequestId "
+                + "LEFT JOIN ExportList el ON r.RequestId = el.RequestId AND r.RequestTypeId = 1 "
                 + "LEFT JOIN ExportType et ON el.ExportTypeId = et.ExportTypeId";
 
         DBContext db = new DBContext();
@@ -42,15 +42,9 @@ public class RequestDAO extends DBContext {
                     r.setApprovedDate(rs.getTimestamp("ApprovedDate"));
                     r.setApprovalNote(rs.getString("ApprovalNote"));
 
-                    // Set import/export type name if exists
-                    String importType = rs.getString("ImportTypeName");
-                    String exportType = rs.getString("ExportTypeName");
-                    if (importType != null) {
-                        r.setImportTypeName(importType);
-                    }
-                    if (exportType != null) {
-                        r.setExportTypeName(exportType);
-                    }
+                    // Gán nếu có
+                    r.setImportTypeName(rs.getString("ImportTypeName")); // Có thể null
+                    r.setExportTypeName(rs.getString("ExportTypeName")); // Có thể null
 
                     list.add(r);
                 }
@@ -190,6 +184,7 @@ public class RequestDAO extends DBContext {
 //======================================================================================================================================================================================
     // Create Request 
     // 1. Load all request types
+
     public List<RequestType> getAllRequestType() {
         List<RequestType> list = new ArrayList<>();
         String sql = "SELECT RequestTypeId, RequestTypeName FROM requesttype";
@@ -358,16 +353,71 @@ public class RequestDAO extends DBContext {
             }
         }
     }
-      public int getMaterialStock(int materialId) throws SQLException {
-    String sql = "SELECT Quantity FROM Materials WHERE MaterialId = ?";
-    try (PreparedStatement st = connection.prepareStatement(sql)) {
-        st.setInt(1, materialId);
-        try (ResultSet rs = st.executeQuery()) {
-            if (rs.next()) {
-                return rs.getInt("Quantity");
+
+    public int getMaterialStock(int materialId) throws SQLException {
+        String sql = "SELECT Quantity FROM Materials WHERE MaterialId = ?";
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setInt(1, materialId);
+            try (ResultSet rs = st.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("Quantity");
+                }
             }
         }
+        return 0;
     }
-    return 0;
-}
+
+    public void assignImportTask(int requestId, int staffId) {
+        String sql = "UPDATE ImportList SET HandledBy = ? WHERE RequestId = ?";
+        DBContext db = new DBContext(); // Thêm dòng này
+
+        try (Connection conn = db.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, staffId);
+            ps.setInt(2, requestId);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void assignExportTask(int requestId, int staffId) {
+        String sql = "UPDATE ExportList SET HandledBy = ? WHERE RequestId = ?";
+        DBContext db = new DBContext(); // Thêm dòng này
+
+        try (Connection conn = db.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, staffId);
+            ps.setInt(2, requestId);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public List<RequestList> getAssignedRequestsByStaffId(int staffId) {
+        List<RequestList> list = new ArrayList<>();
+        String sql = "SELECT * FROM RequestList WHERE Status = 'Approved' AND AssignedStaffId = ?";
+        DBContext db = new DBContext();
+        try (Connection con = db.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, staffId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                RequestList r = new RequestList();
+                r.setRequestId(rs.getInt("RequestId"));
+                r.setRequestedBy(rs.getInt("RequestedBy"));
+                r.setRequestDate(rs.getTimestamp("RequestDate"));
+                r.setRequestTypeId(rs.getInt("RequestTypeId"));
+                r.setNote(rs.getString("Note"));
+                r.setStatus(rs.getString("Status"));
+                r.setApprovedBy(rs.getInt("ApprovedBy"));
+                r.setApprovedDate(rs.getTimestamp("ApprovedDate"));
+                r.setApprovalNote(rs.getString("ApprovalNote"));
+                r.setAssignedStaffId(rs.getInt("AssignedStaffId"));
+                list.add(r);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
 }

@@ -11,41 +11,58 @@
     <body class="bg-gray-100 p-0 m-0">
 
         <div class="p-6">
-            <h1 class="text-2xl font-bold mb-6">Approved Requests</h1>
+            <div class="flex justify-between items-center mb-4">
+                <h1 class="text-2xl font-bold">Approved Requests</h1>
 
-            <button onclick="history.back()" class="btn btn-outline-secondary back-button">
-                <i class="fas fa-arrow-left me-2"></i>
-                Back
-            </button>
+                <div class="flex gap-4">
+                    <!-- Nút Back -->
+                    <button onclick="history.back()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Back
+                    </button>
 
-            <!-- FORM FILTER (bỏ phần status) -->
-            <form action="reqlist" method="get" class="mb-6 flex flex-wrap gap-4 items-end">
-                <input type="hidden" name="status" value="Approved" />
-
-                <div>
-                    <label class="block font-semibold mb-1">Request Type:</label>
-                    <select name="requestType" class="px-3 py-2 border rounded w-48">
-                        <option value="">All</option>
-                        <c:forEach var="type" items="${requestTypes}">
-                            <option value="${type}" ${type == filterType ? 'selected' : ''}>${type}</option>
-                        </c:forEach>
-                    </select>
                 </div>
+            </div>
 
-                <div>
-                    <label class="block font-semibold mb-1">Request By:</label>
-                    <input type="text" name="requestedBy" value="${filterRequestedBy != null ? filterRequestedBy : ''}" class="px-3 py-2 border rounded w-48" />
-                </div>
 
-                <div>
-                    <label class="block font-semibold mb-1">Created At:</label>
-                    <input type="date" name="requestDate" value="${filterRequestDate != null ? filterRequestDate : ''}" class="px-3 py-2 border rounded w-48" />
-                </div>
+            <!-- Wrapper chứa form filter + nút My Task -->
+            <div class="mb-6 flex justify-between items-end flex-wrap gap-4">
 
-                <div class="self-end">
-                    <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Find</button>
-                </div>
-            </form>
+                <!-- FORM FILTER (bỏ phần status) -->
+                <form action="approvedrequests" method="get" class="flex flex-wrap gap-4 items-end">
+                    <input type="hidden" name="status" value="Approved" />
+
+                    <div>
+                        <label class="block font-semibold mb-1">Request Type:</label>
+                        <select name="requestType" class="px-3 py-2 border rounded w-48">
+                            <option value="">All</option>
+                            <c:forEach var="type" items="${requestTypes}">
+                                <option value="${type}" ${type == filterType ? 'selected' : ''}>${type}</option>
+                            </c:forEach>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold mb-1">Request By:</label>
+                        <input type="text" name="requestedBy" value="${filterRequestedBy != null ? filterRequestedBy : ''}" class="px-3 py-2 border rounded w-48" />
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold mb-1">Created At:</label>
+                        <input type="date" name="requestDate" value="${filterRequestDate != null ? filterRequestDate : ''}" class="px-3 py-2 border rounded w-48" />
+                    </div>
+
+                    <div class="self-end">
+                        <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Find</button>
+                    </div>
+                </form>
+
+                <!-- Nút My Task đẩy về bên phải -->
+                <a href="${pageContext.request.contextPath}/mytasks" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 h-[42px] flex items-center">
+                    <i class="fas fa-tasks mr-2"></i> My Task
+                </a>
+            </div>
+
 
             <!-- TABLE -->
             <table class="w-full table-auto border-collapse bg-white shadow-md">
@@ -80,7 +97,7 @@
                             <td class="border border-gray-300 px-3 py-2">${r.approvedByName}</td>
                             <td class="border border-gray-300 px-3 py-2">${r.approvalNote}</td>
                             <td class="border border-gray-300 px-3 py-2">
-                                <a href="${pageContext.request.contextPath}/request-detail?id=${r.requestId}" class="text-blue-600 hover:underline">Detail</a>
+                                <a href="${pageContext.request.contextPath}/approvedrequestdetail?id=${r.requestId}" class="text-blue-600 hover:underline">Detail</a>
                             </td>
                         </tr>
                     </c:forEach>
