@@ -22,6 +22,9 @@ public class RequestList {
     private int approvedBy;
     private Date approvedDate;
     private String approvalNote;
+    private int assignedStaffId;           // ✅ Thêm trường này
+    private String assignedStaffName;
+    private RequestType requestType;
 
     private String requestedByName;     // Tuỳ chọn: dùng để hiển thị tên người gửi
     private String approvedByName;      // Tuỳ chọn: dùng để hiển thị tên người duyệt
@@ -36,7 +39,7 @@ public class RequestList {
     public RequestList() {
     }
 
-    public RequestList(int requestId, int requestedBy, Date requestDate, int requestTypeId, String note, String status, int approvedBy, Date approvedDate, String approvalNote, String requestedByName, String approvedByName, String requestTypeName, String statusDescription, List<RequestDetail> requestDetails, String importTypeName, String exportTypeName) {
+    public RequestList(int requestId, int requestedBy, Date requestDate, int requestTypeId, String note, String status, int approvedBy, Date approvedDate, String approvalNote, int assignedStaffId, String assignedStaffName, RequestType requestType, String requestedByName, String approvedByName, String requestTypeName, String statusDescription, List<RequestDetail> requestDetails, String importTypeName, String exportTypeName) {
         this.requestId = requestId;
         this.requestedBy = requestedBy;
         this.requestDate = requestDate;
@@ -46,6 +49,9 @@ public class RequestList {
         this.approvedBy = approvedBy;
         this.approvedDate = approvedDate;
         this.approvalNote = approvalNote;
+        this.assignedStaffId = assignedStaffId;
+        this.assignedStaffName = assignedStaffName;
+        this.requestType = requestType;
         this.requestedByName = requestedByName;
         this.approvedByName = approvedByName;
         this.requestTypeName = requestTypeName;
@@ -54,6 +60,32 @@ public class RequestList {
         this.importTypeName = importTypeName;
         this.exportTypeName = exportTypeName;
     }
+
+    public RequestType getRequestType() {
+        return requestType;
+    }
+
+    public void setRequestType(RequestType requestType) {
+        this.requestType = requestType;
+    }
+
+    public int getAssignedStaffId() {
+        return assignedStaffId;
+    }
+
+    public void setAssignedStaffId(int assignedStaffId) {
+        this.assignedStaffId = assignedStaffId;
+    }
+
+    public String getAssignedStaffName() {
+        return assignedStaffName;
+    }
+
+    public void setAssignedStaffName(String assignedStaffName) {
+        this.assignedStaffName = assignedStaffName;
+    }
+
+   
 
     public String getImportTypeName() {
         return importTypeName;

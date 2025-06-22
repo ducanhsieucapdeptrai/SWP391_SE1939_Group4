@@ -17,7 +17,7 @@
     
     <!-- Action Buttons -->
     <div class="mb-6 flex flex-wrap gap-4">
-        <a href=" " class="inline-flex items-center px-4 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition duration-300">
+        <a href="RequestUpdateServlet?requestId=${requestId} " class="inline-flex items-center px-4 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition duration-300">
             <i class="fas fa-edit mr-2"></i> Update Request
         </a>
         <button type="button" onclick="showSendToModal()" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition duration-300">
@@ -192,7 +192,7 @@
     <!-- Related Import Records -->
     <div class="bg-white rounded-lg shadow-md mb-6">
         <div class="px-6 py-4 border-b border-gray-200">
-            <h2 class="text-xl font-semibold text-gray-900">Related Import Records</h2>
+            <h2 class="text-xl font-semibold text-gray-900">Related ${requestInfo.requestTypeName} Records</h2>
         </div>
         <div class="p-6">
             <c:choose>
@@ -268,10 +268,10 @@
         </div>
     </div>
     
-    <!-- Related Import Details -->
+    <!-- Related  Details -->
     <div class="bg-white rounded-lg shadow-md mb-6">
         <div class="px-6 py-4 border-b border-gray-200">
-            <h2 class="text-xl font-semibold text-gray-900">Related Import Details</h2>
+            <h2 class="text-xl font-semibold text-gray-900">Related  ${requestInfo.requestTypeName} Details</h2>
         </div>
         <div class="p-6">
             <c:choose>

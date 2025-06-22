@@ -4,6 +4,7 @@ import DAO.RequestDetailDAO;
 import DAO.MaterialDAO;
 import model.Material;
 import model.RequestDetail;
+import model.RequestList;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -42,6 +43,11 @@ public class RequestDetailServlet extends HttpServlet {
                 return;
             }
 
+            // Lấy thông tin request
+            RequestDAO requestDAO = new RequestDAO();
+            RequestList requestInfo = requestDAO.getRequestById(requestId);
+            
+            // Lấy chi tiết materials
             RequestDetailDAO dao = new RequestDetailDAO();
             List<RequestDetail> details = dao.getRequestDetailsByRequestId(requestId);
             String status = dao.getRequestStatus(requestId);
@@ -49,6 +55,8 @@ public class RequestDetailServlet extends HttpServlet {
             MaterialDAO materialDAO = new MaterialDAO();
             List<Material> allMaterials = materialDAO.getAllMaterials();
 
+            // Set attributes
+            request.setAttribute("requestInfo", requestInfo);
             request.setAttribute("requestDetails", details);
             request.setAttribute("requestStatus", status);
             request.setAttribute("requestId", requestId);
@@ -64,7 +72,6 @@ public class RequestDetailServlet extends HttpServlet {
         } catch (Exception e) {
             System.out.println("Error in RequestDetailServlet: " + e.getMessage());
             e.printStackTrace();
-
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                     "Internal server error: " + e.getMessage());
         }
