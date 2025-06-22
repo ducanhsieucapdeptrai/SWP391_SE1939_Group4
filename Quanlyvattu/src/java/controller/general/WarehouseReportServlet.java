@@ -60,13 +60,16 @@ public class WarehouseReportServlet extends HttpServlet {
             List<ImportDetail> relatedImportDetails = requestDAO.getRelatedImportDetailsByRequestId(requestId);
             
             // Set attributes for JSP
+            request.setAttribute("requestId", requestId);
             request.setAttribute("requestInfo", requestInfo);
             request.setAttribute("requestDetails", requestDetails);
             request.setAttribute("relatedImports", relatedImports);
             request.setAttribute("relatedImportDetails", relatedImportDetails);
             
             // Forward to JSP
-            request.getRequestDispatcher("WarehouseStaffReport.jsp").forward(request, response);
+           request.setAttribute("pageContent",   "/WarehouseStaffReport.jsp");
+           
+            request.getRequestDispatcher("/layout/layout.jsp").forward(request, response);
             
         } catch (NumberFormatException e) {
             request.setAttribute("errorMessage", "Invalid request ID: " + e.getMessage());
