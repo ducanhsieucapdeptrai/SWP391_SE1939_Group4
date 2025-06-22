@@ -74,7 +74,7 @@
                         <td class="border px-4 py-2">${r.note}</td>
                         <td class="border px-4 py-2">
                             <!-- Sua lai nut detail -->
-                            <a href="approvedrequestdetail?requestId=${r.requestId}" class="text-blue-600 hover:underline">Detail</a> 
+                            <a href="warehousereport?requestId=${r.requestId}" class="text-blue-600 hover:underline">Detail</a> 
                         </td>
                     </tr>
                 </c:forEach>

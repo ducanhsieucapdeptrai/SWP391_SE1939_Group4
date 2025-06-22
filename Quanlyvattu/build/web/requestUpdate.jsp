@@ -205,9 +205,10 @@
         </c:if>
 
         <div class="form-actions">
-            <a href="reqlist" class="btn-back">
+            <a onclick="history.back()" class="btn-back">
                 <i class="fas fa-arrow-left me-2"></i>Back to Requests
             </a>
+        
             <c:choose>
                 <c:when test="${isAlreadyUpdated}">
                     <button type="button" class="btn btn-confirm opacity-50 cursor-not-allowed" disabled>
