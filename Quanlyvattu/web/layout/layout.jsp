@@ -83,6 +83,11 @@
                                         <i class="fas fa-file-import mr-2"></i> Request
                                     </a>
                                 </li>
+                                <li class="mb-2">
+                                    <a href="${pageContext.request.contextPath}/purchase-request-list" class="flex items-center px-4 py-2 rounded hover:bg-gray-700">
+                                        <i class="fas fa-shopping-cart mr-2"></i> Purchase Requests
+                                    </a>
+                                </li>
                             </c:if>
                             <c:if test="${userRole == 'Warehouse Manager'}">
                                 <li class="mb-2">

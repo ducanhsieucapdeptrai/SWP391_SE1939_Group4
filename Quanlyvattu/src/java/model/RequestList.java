@@ -71,7 +71,6 @@ public class RequestList {
         this.exportTypeName = exportTypeName;
     }
 
-    
     public int getRequestId() {
         return requestId;
     }
@@ -182,6 +181,36 @@ public class RequestList {
 
     public void setRequestDetails(List<RequestDetail> requestDetails) {
         this.requestDetails = requestDetails;
+    }
+
+    private boolean hasPO;
+
+    public boolean isHasPO() {
+        return hasPO;
+    }
+
+    public void setHasPO(boolean hasPO) {
+        this.hasPO = hasPO;
+    }
+
+    private int poCount;
+
+    public int getPoCount() {
+        return poCount;
+    }
+
+    public void setPoCount(int poCount) {
+        this.poCount = poCount;
+    }
+
+    private String poStatus;
+
+    public String getPoStatus() {
+        return poStatus;
+    }
+
+    public void setPoStatus(String poStatus) {
+        this.poStatus = poStatus;
     }
 
 }

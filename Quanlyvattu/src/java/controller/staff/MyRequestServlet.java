@@ -22,20 +22,16 @@ public class MyRequestServlet extends HttpServlet {
         }
 
         int userId = (int) session.getAttribute("userId");
-        String statusFilter = request.getParameter("status"); // lấy filter từ query
+        String statusFilter = request.getParameter("status");
+        String poStatusFilter = request.getParameter("poStatus");
 
         RequestDAO dao = new RequestDAO();
-        List<RequestList> list;
-
-        if (statusFilter != null && !statusFilter.isEmpty()) {
-            list = dao.getSimpleRequestsByUserAndStatus(userId, statusFilter);
-        } else {
-            list = dao.getSimpleRequestsByUser(userId);
-        }
+        List<RequestList> list = dao.getSimpleRequestsByUserFiltered(userId, statusFilter, poStatusFilter);
 
         request.setAttribute("myRequestList", list);
-        request.setAttribute("pageContent", "/my-request.jsp");
+        request.setAttribute("statusFilter", statusFilter);
+        request.setAttribute("poStatusFilter", poStatusFilter);
+        request.setAttribute("pageContent", "/View/CompanyStaff/my-request.jsp");
         request.getRequestDispatcher("/layout/layout.jsp").forward(request, response);
     }
-
 }
