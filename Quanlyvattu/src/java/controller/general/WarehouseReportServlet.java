@@ -30,50 +30,50 @@ public class WarehouseReportServlet extends HttpServlet {
             throws ServletException, IOException {
         isWarehouseStaff(request);
         try {
-            // Lấy ID từ parameter
+            // Get ID from parameter
             String requestIdStr = request.getParameter("requestId");
             int requestId;
             
-            // Kiểm tra parameter
+            // Check parameter
             if (requestIdStr != null && !requestIdStr.trim().isEmpty()) {
                 requestId = Integer.parseInt(requestIdStr);
             } else {
-                // Nếu không có parameter, sử dụng giá trị mặc định
+                // If no parameter, use default value
                 requestId = 1;
             }
             
-            // Lấy thông tin request
+            // Get request info
             RequestList requestInfo = requestDAO.getRequestById(requestId);
             if (requestInfo == null) {
-                request.setAttribute("errorMessage", "Không tìm thấy yêu cầu với ID: " + requestId);
+                request.setAttribute("errorMessage", "Request not found with ID: " + requestId);
                 request.getRequestDispatcher("error.jsp").forward(request, response);
                 return;
             }
             
-            // Lấy chi tiết request
+            // Get request details
             List<RequestDetail> requestDetails = requestDAO.getRequestDetailsByRequestId(requestId);
             
-            // Lấy danh sách import liên quan
+            // Get related import list
             List<ImportList> relatedImports = requestDAO.getRelatedImportsByRequestId(requestId);
             
-            // Lấy chi tiết import liên quan
+            // Get related import details
             List<ImportDetail> relatedImportDetails = requestDAO.getRelatedImportDetailsByRequestId(requestId);
             
-            // Set attributes cho JSP
+            // Set attributes for JSP
             request.setAttribute("requestInfo", requestInfo);
             request.setAttribute("requestDetails", requestDetails);
             request.setAttribute("relatedImports", relatedImports);
             request.setAttribute("relatedImportDetails", relatedImportDetails);
             
-            // Forward đến JSP
+            // Forward to JSP
             request.getRequestDispatcher("WarehouseStaffReport.jsp").forward(request, response);
             
         } catch (NumberFormatException e) {
-            request.setAttribute("errorMessage", "ID yêu cầu không hợp lệ: " + e.getMessage());
+            request.setAttribute("errorMessage", "Invalid request ID: " + e.getMessage());
             request.getRequestDispatcher("error.jsp").forward(request, response);
         } catch (Exception e) {
             e.printStackTrace();
-            request.setAttribute("errorMessage", "Có lỗi xảy ra: " + e.getMessage());
+            request.setAttribute("errorMessage", "An error occurred: " + e.getMessage());
             request.getRequestDispatcher("error.jsp").forward(request, response);
         }
     }
@@ -83,14 +83,13 @@ public class WarehouseReportServlet extends HttpServlet {
             throws ServletException, IOException {
         doGet(request, response);
     }
+
     private boolean isWarehouseStaff(HttpServletRequest request) {
         HttpSession session = request.getSession(false);
-         String userRole = (String) session.getAttribute("userRole");
+        String userRole = (String) session.getAttribute("userRole");
         if (userRole != null) {
             return "warehouse_staff".equals(userRole) || "Warehouse Staff".equals(userRole);
-          
-    }
+        }
         return false;
-        
-}
+    }
 }

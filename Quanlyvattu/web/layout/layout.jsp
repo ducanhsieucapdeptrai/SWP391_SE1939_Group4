@@ -11,7 +11,6 @@
         <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
         <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
-        
     </head>
     <body>
         <div id="app" class="min-h-screen flex flex-col">
@@ -117,39 +116,50 @@
                                     <i class="fas fa-tachometer-alt mr-2"></i> Dashboard
                                 </a>
                             </li>
+
                             <li class="mb-1">
                                 <a href="${pageContext.request.contextPath}/materiallist" class="block px-4 py-2 rounded hover:bg-gray-700">
                                     <i class="fas fa-boxes mr-2"></i> Inventory
                                 </a>
-
                             </li>
-                            <li class="mb-1">
-                                <a href="${pageContext.request.contextPath}/reqlist" class="block px-4 py-2 rounded hover:bg-gray-700">
-                                    <i class="fas fa-file-import mr-2"></i> Request
-                                </a>
-                            </li>
-                            <li class="mb-1">
-                                <a href="#" onclick="toggleSubmenu('userManagerSubmenu')" class="block px-4 py-2 rounded hover:bg-gray-700">
-                                    <i class="fas fa-users mr-2"></i> User Manager
-                                    <i class="fas fa-chevron-down float-right" id="userManagerChevron"></i>
-                                </a>
-                                <ul id="userManagerSubmenu" class="hidden ml-4 mt-1">
-                                    <li class="mb-1">
-                                        <a href="${pageContext.request.contextPath}/userlist" class="block px-3 py-2 rounded hover:bg-gray-600 text-gray-300 hover:text-white">
-                                            <i class="fas fa-list mr-2"></i> User List
-                                        </a>
 
-                                        </a>
-                                    </li>
-                                    <li class="mb-1">
-                                        <a href="..." class="block px-3 py-2 rounded hover:bg-gray-600 text-white hover:text-white">
-                                            <i class="fas fa-key mr-2"></i> Authorization
-                                        </a>
+                          
 
-                                        </a>
-                                    </li>
-                                </ul>
-                            </li>
+                            <c:if test="${userRole == 'Warehouse Staff'}">
+                                <li class="mb-1">
+                                    <a href="${pageContext.request.contextPath}/approvedrequests" class="block px-4 py-2 rounded hover:bg-gray-700">
+                                        <i class="fas fa-tasks mr-2"></i> Request List
+                                    </a>
+                                </li>
+                            </c:if>
+
+
+                            <c:if test="${userRole == 'Warehouse Manager'}">
+                                <li class="mb-1">
+                                    <a href="${pageContext.request.contextPath}/reqlist" class="block px-4 py-2 rounded hover:bg-gray-700">
+                                        <i class="fas fa-file-import mr-2"></i> Request
+                                    </a>
+                                </li>
+
+                                <li class="mb-1">
+                                    <a href="#" onclick="toggleSubmenu('userManagerSubmenu')" class="block px-4 py-2 rounded hover:bg-gray-700">
+                                        <i class="fas fa-users mr-2"></i> User Manager
+                                        <i class="fas fa-chevron-down float-right" id="userManagerChevron"></i>
+                                    </a>
+                                    <ul id="userManagerSubmenu" class="hidden ml-4 mt-1">
+                                        <li class="mb-1">
+                                            <a href="${pageContext.request.contextPath}/userlist" class="block px-3 py-2 rounded hover:bg-gray-600 text-gray-300 hover:text-white">
+                                                <i class="fas fa-list mr-2"></i> User List
+                                            </a>
+                                        </li>
+                                        <li class="mb-1">
+                                            <a href="${pageContext.request.contextPath}/user-matrix" class="block px-3 py-2 rounded hover:bg-gray-600 text-gray-300 hover:text-white">
+                                                <i class="fas fa-key mr-2"></i> Authorization
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </li>
+                            </c:if>
 
                             <li class="mb-1">
                                 <a href="advanced-dashboard" class="block px-4 py-2 rounded hover:bg-gray-700">
@@ -159,6 +169,7 @@
                         </ul>
                     </nav>
                 </aside>
+
                 <main class="flex-1 bg-gray-100 p-6 overflow-auto">
                     <%-- Nếu dùng JSTL --%>
                     <c:if test="${not empty pageContent}">
@@ -194,55 +205,54 @@
                     </nav>
                 </div>
             </div>
-        </div>
-        <script>
-            function toggleSubmenu(id) {
-                const submenu = document.getElementById(id);
-                const chevron = document.getElementById("userManagerChevron");
-                submenu.classList.toggle("hidden");
-                chevron.classList.toggle("rotate-180");
-            }
-
-            document.getElementById("mobileSidebarToggle")?.addEventListener("click", () => {
-                document.getElementById("mobileSidebar").classList.remove("hidden");
-            });
-
-            document.getElementById("closeMobileSidebar")?.addEventListener("click", () => {
-                document.getElementById("mobileSidebar").classList.add("hidden");
-            });
-
-            document.getElementById("userMenuBtn")?.addEventListener("click", () => {
-                document.getElementById("userMenu").classList.toggle("hidden");
-            });
-        </script>
-        <!-- Popup hiển thị ảnh lớn -->
-        <div id="image-popup" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-            <img id="popup-img" class="max-w-full max-h-full rounded-lg shadow-lg" />
-        </div>
-        <script>
-            function showImage(src) {
-                const popup = document.getElementById("image-popup");
-                const img = document.getElementById("popup-img");
-                img.src = src;
-                popup.classList.remove("hidden");
-            }
-
-            function closeImage() {
-                document.getElementById("image-popup").classList.add("hidden");
-            }
-
-            // Đóng popup khi click ra ngoài ảnh
-            document.addEventListener("DOMContentLoaded", function () {
-                const popup = document.getElementById("image-popup");
-                if (popup) {
-                    popup.addEventListener("click", function (e) {
-                        if (e.target.id === "image-popup") {
-                            closeImage();
-                        }
-                    });
+            <script>
+                function toggleSubmenu(id) {
+                    const submenu = document.getElementById(id);
+                    const chevron = document.getElementById("userManagerChevron");
+                    submenu.classList.toggle("hidden");
+                    chevron.classList.toggle("rotate-180");
                 }
-            });
-        </script>
+
+                document.getElementById("mobileSidebarToggle")?.addEventListener("click", () => {
+                    document.getElementById("mobileSidebar").classList.remove("hidden");
+                });
+
+                document.getElementById("closeMobileSidebar")?.addEventListener("click", () => {
+                    document.getElementById("mobileSidebar").classList.add("hidden");
+                });
+
+                document.getElementById("userMenuBtn")?.addEventListener("click", () => {
+                    document.getElementById("userMenu").classList.toggle("hidden");
+                });
+            </script>
+            <!-- Popup hiển thị ảnh lớn -->
+            <div id="image-popup" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+                <img id="popup-img" class="max-w-full max-h-full rounded-lg shadow-lg" />
+            </div>
+            <script>
+                function showImage(src) {
+                    const popup = document.getElementById("image-popup");
+                    const img = document.getElementById("popup-img");
+                    img.src = src;
+                    popup.classList.remove("hidden");
+                }
+
+                function closeImage() {
+                    document.getElementById("image-popup").classList.add("hidden");
+                }
+
+                // Đóng popup khi click ra ngoài ảnh
+                document.addEventListener("DOMContentLoaded", function () {
+                    const popup = document.getElementById("image-popup");
+                    if (popup) {
+                        popup.addEventListener("click", function (e) {
+                            if (e.target.id === "image-popup") {
+                                closeImage();
+                            }
+                        });
+                    }
+                });
+            </script>
 
     </body>
 </html>

@@ -103,11 +103,14 @@ CREATE TABLE RequestList (
     ApprovedBy INT,
     ApprovedDate DATETIME,
     ApprovalNote TEXT,
+    AssignedStaffId INT, -- ✅ Nhân viên kho được giao xử lý
     FOREIGN KEY (RequestedBy) REFERENCES Users(UserId),
     FOREIGN KEY (RequestTypeId) REFERENCES RequestType(RequestTypeId),
     FOREIGN KEY (ApprovedBy) REFERENCES Users(UserId),
+    FOREIGN KEY (AssignedStaffId) REFERENCES Users(UserId),
     FOREIGN KEY (Status) REFERENCES RequestStatus(StatusCode)
 );
+
 
 
 
@@ -120,6 +123,7 @@ CREATE TABLE RequestDetail (
     FOREIGN KEY (RequestId) REFERENCES RequestList(RequestId),
     FOREIGN KEY (MaterialId) REFERENCES Materials(MaterialId)
 );
+
 -- NHẬP KHO
 
 
@@ -506,17 +510,19 @@ VALUES
 
 -- RequestList (các yêu cầu)
 INSERT INTO RequestList 
-(RequestId, RequestedBy, RequestDate, RequestTypeId, Note, Status, ApprovedBy, ApprovedDate, ApprovalNote) VALUES
-(1, 10, '2025-05-20 08:00:00', 2, 'Request to import materials for Project A', 'Approved', 2, '2025-05-20 08:30:00', 'Approved - match delivery note.'),
-(2, 11, '2025-05-21 09:30:00', 2, 'Returned items after repair', 'Approved', 2, '2025-05-21 10:00:00', 'Valid receipt'),
-(3, 12, '2025-05-25 07:30:00', 1, 'Export for foundation of Building A', 'Approved', 2, '2025-05-25 08:00:00', 'Approved on schedule'),
-(4, 13, '2025-05-26 08:30:00', 1, 'Export finishing materials to site B', 'Approved', 2, '2025-05-26 09:00:00', 'Export approved.'),
-(5, 4, NOW(), 4, 'Purchase office air conditioners', 'Approved', 2, NOW(), 'Approved within budget.'),
-(6, 5, NOW(), 1, 'Export leftover cement', 'Rejected', 2, NOW(), 'Not needed. Keep for future use.'),
-(7, 6, NOW(), 3, 'Repair broken drill machine', 'Rejected', 2, NOW(), 'Request denied. Out of budget.'),
-(8, 7, NOW(), 2, 'Import bricks for building site', 'Pending', NULL, NULL, NULL),
-(9, 8, NOW(), 3, 'Repair water leakage at storage', 'Pending', NULL, NULL, NULL),
-(10, 14, '2025-05-29 10:00:00', 3, 'Propose purchase of office chairs', 'Pending', NULL, NULL, NULL);
+(RequestId, RequestedBy, RequestDate, RequestTypeId, Note, Status, ApprovedBy, ApprovedDate, ApprovalNote, AssignedStaffId) 
+VALUES
+(1, 10, '2025-05-20 08:00:00', 2, 'Request to import materials for Project A', 'Approved', 2, '2025-05-20 08:30:00', 'Approved - match delivery note.', 3),
+(2, 11, '2025-05-21 09:30:00', 2, 'Returned items after repair', 'Approved', 2, '2025-05-21 10:00:00', 'Valid receipt', 4),
+(3, 12, '2025-05-25 07:30:00', 1, 'Export for foundation of Building A', 'Approved', 2, '2025-05-25 08:00:00', 'Approved on schedule', 5),
+(4, 13, '2025-05-26 08:30:00', 1, 'Export finishing materials to site B', 'Approved', 2, '2025-05-26 09:00:00', 'Export approved.', 6),
+(5, 4, NOW(), 4, 'Purchase office air conditioners', 'Approved', 2, NOW(), 'Approved within budget.', 7),
+(6, 5, NOW(), 1, 'Export leftover cement', 'Rejected', 2, NOW(), 'Not needed. Keep for future use.', NULL),
+(7, 6, NOW(), 3, 'Repair broken drill machine', 'Rejected', 2, NOW(), 'Request denied. Out of budget.', NULL),
+(8, 7, NOW(), 2, 'Import bricks for building site', 'Pending', NULL, NULL, NULL, NULL),
+(9, 8, NOW(), 3, 'Repair water leakage at storage', 'Pending', NULL, NULL, NULL, NULL),
+(10, 14, '2025-05-29 10:00:00', 3, 'Propose purchase of office chairs', 'Pending', NULL, NULL, NULL, NULL);
+
 
 -- RequestDetail (chi tiết yêu cầu)
 INSERT INTO RequestDetail (RequestId, MaterialId, Quantity) VALUES
@@ -527,7 +533,13 @@ INSERT INTO RequestDetail (RequestId, MaterialId, Quantity) VALUES
 (3, 3, 10),
 (4, 11, 100),
 (4, 13, 50),
-(10, 25, 5);
+(5, 15, 3),      -- ✔ thêm chi tiết cho RequestId = 5 (nếu cần)
+(6, 16, 50),     -- ✔ thêm chi tiết cho RequestId = 6 (Rejected)
+(7, 17, 1),      -- ✔ thêm chi tiết cho RequestId = 7 (Repair)
+(8, 18, 200),    -- ✔ thêm chi tiết cho RequestId = 8 (Pending Import)
+(9, 19, 1),      -- ✔ thêm chi tiết cho RequestId = 9 (Repair request)
+(10, 25, 5);     -- ✔ đã có
+
 
 -- ImportList (danh sách nhập)
 INSERT INTO ImportList (ImportId, ImportDate, ImportedBy, ImportTypeId, Note, RequestId) VALUES
@@ -582,108 +594,4 @@ VALUES
 INSERT INTO PurchaseOrderDetail (POId, MaterialId, Quantity, UnitPrice, Total)
 VALUES
 (2, 11, 150, 80000, 12000000);
-
-
-        SELECT 
-    r.RequestId,
-    r.RequestDate,
-    r.Note,
-    rt.RequestTypeName AS RequestType,
-    rs.Description AS Status,
-    u1.FullName AS RequestedBy,
-    u2.FullName AS ApprovedBy,
-    r.ApprovedDate,
-    r.ApprovalNote,
-    it.ImportTypeName AS ImportType,
-    et.ExportTypeName AS ExportType
-FROM RequestList r
-JOIN RequestType rt ON r.RequestTypeId = rt.RequestTypeId
-JOIN RequestStatus rs ON r.Status = rs.StatusCode
-JOIN Users u1 ON r.RequestedBy = u1.UserId
-LEFT JOIN Users u2 ON r.ApprovedBy = u2.UserId
-LEFT JOIN ImportList il ON r.RequestId = il.ImportId
-LEFT JOIN ImportType it ON il.ImportTypeId = it.ImportTypeId
-LEFT JOIN ExportList el ON r.RequestId = el.ExportId
-LEFT JOIN ExportType et ON el.ExportTypeId = et.ExportTypeId
-ORDER BY r.RequestId;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-SELECT r.RequestId, r.RequestDate, r.Note, 
-       rt.RequestTypeName, rs.Description AS StatusDescription, 
-       u1.FullName AS RequestedByName, 
-       u2.FullName AS ApprovedByName, r.ApprovedDate, r.ApprovalNote, 
-       it.ImportTypeName, et.ExportTypeName 
-FROM RequestList r 
-JOIN RequestType rt ON r.RequestTypeId = rt.RequestTypeId 
-JOIN RequestStatus rs ON r.Status = rs.StatusCode 
-JOIN Users u1 ON r.RequestedBy = u1.UserId 
-LEFT JOIN Users u2 ON r.ApprovedBy = u2.UserId 
-LEFT JOIN ImportList il ON r.RequestId = il.ImportId 
-LEFT JOIN ImportType it ON il.ImportTypeId = it.ImportTypeId 
-LEFT JOIN ExportList el ON r.RequestId = el.ExportId 
-LEFT JOIN ExportType et ON el.ExportTypeId = et.ExportTypeId;
-
-
-delete 
--- Tổng số vật tư
-SELECT COUNT(*) AS TotalMaterials FROM Materials;
-
--- Số lượt nhập kho trong tháng này
-SELECT COUNT(*) AS TotalImportsThisMonth
-FROM ImportList
-WHERE MONTH(ImportDate) = MONTH(CURDATE())
-  AND YEAR(ImportDate) = YEAR(CURDATE());
-
--- Số lượt xuất kho trong tháng này
-SELECT COUNT(*) AS TotalExportsThisMonth
-FROM ExportList
-WHERE MONTH(ExportDate) = MONTH(CURDATE())
-  AND YEAR(ExportDate) = YEAR(CURDATE());
-
--- Số yêu cầu đang chờ xử lý
-SELECT COUNT(*) AS PendingRequests
-FROM RequestList
-WHERE Status = 'Pending';
-
-SELECT 
-  r.RequestId, r.RequestDate, r.Note,
-  rt.RequestTypeName, rs.Description AS StatusDescription,
-  u1.FullName AS RequestedByName,
-  u2.FullName AS ApprovedByName, r.ApprovedDate, r.ApprovalNote,
-  
-  -- Lấy ImportTypeName nếu có, ưu tiên lấy ImportType đầu tiên
-  (SELECT it.ImportTypeName 
-   FROM ImportList il 
-   JOIN ImportType it ON il.ImportTypeId = it.ImportTypeId 
-   WHERE il.RequestId = r.RequestId 
-   LIMIT 1) AS ImportTypeName,
-
-  -- Lấy ExportTypeName nếu có, ưu tiên lấy ExportType đầu tiên
-  (SELECT et.ExportTypeName 
-   FROM ExportList el 
-   JOIN ExportType et ON el.ExportTypeId = et.ExportTypeId 
-   WHERE el.RequestId = r.RequestId 
-   LIMIT 1) AS ExportTypeName
-
-FROM RequestList r
-JOIN RequestType rt ON r.RequestTypeId = rt.RequestTypeId
-JOIN RequestStatus rs ON r.Status = rs.StatusCode
-JOIN Users u1 ON r.RequestedBy = u1.UserId
-LEFT JOIN Users u2 ON r.ApprovedBy = u2.UserId
-ORDER BY r.RequestDate DESC;
-
-
-SELECT * FROM RequestType;
 
