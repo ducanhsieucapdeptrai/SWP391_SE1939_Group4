@@ -11,6 +11,7 @@
         <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
         <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
+        
     </head>
     <body>
         <div id="app" class="min-h-screen flex flex-col">
@@ -141,7 +142,7 @@
                                         </a>
                                     </li>
                                     <li class="mb-1">
-                                        <a href="${pageContext.request.contextPath}/user-matrix" class="block px-3 py-2 rounded hover:bg-gray-600 text-gray-300 hover:text-white">
+                                        <a href="..." class="block px-3 py-2 rounded hover:bg-gray-600 text-white hover:text-white">
                                             <i class="fas fa-key mr-2"></i> Authorization
                                         </a>
 
