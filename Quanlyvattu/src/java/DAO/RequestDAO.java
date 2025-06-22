@@ -10,6 +10,63 @@ import model.*;
 
 public class RequestDAO extends DBContext {
 
+    // Thêm method mới để lấy thông tin chi tiết của 1 request
+    public RequestList getRequestById(int requestId) {
+        RequestList request = null;
+        String sql = "SELECT r.RequestId, r.RequestDate, r.Note, r.Status, "
+                + "rt.RequestTypeName, rs.Description AS StatusDescription, "
+                + "u1.FullName AS RequestedByName, "
+                + "u2.FullName AS ApprovedByName, r.ApprovedDate, r.ApprovalNote, "
+                + "it.ImportTypeName, et.ExportTypeName "
+                + "FROM RequestList r "
+                + "JOIN RequestType rt ON r.RequestTypeId = rt.RequestTypeId "
+                + "JOIN RequestStatus rs ON r.Status = rs.StatusCode "
+                + "JOIN Users u1 ON r.RequestedBy = u1.UserId "
+                + "LEFT JOIN Users u2 ON r.ApprovedBy = u2.UserId "
+                + "LEFT JOIN ImportList il ON r.RequestId = il.RequestId "
+                + "LEFT JOIN ImportType it ON il.ImportTypeId = it.ImportTypeId "
+                + "LEFT JOIN ExportList el ON r.RequestId = el.RequestId "
+                + "LEFT JOIN ExportType et ON el.ExportTypeId = et.ExportTypeId "
+                + "WHERE r.RequestId = ?";
+
+        DBContext db = new DBContext();
+        try (Connection conn = db.getConnection(); 
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setInt(1, requestId);
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    request = new RequestList();
+                    request.setRequestId(rs.getInt("RequestId"));
+                    request.setRequestDate(rs.getTimestamp("RequestDate"));
+                    request.setNote(rs.getString("Note"));
+                    request.setStatus(rs.getString("Status"));
+                    request.setRequestTypeName(rs.getString("RequestTypeName"));
+                    request.setStatusDescription(rs.getString("StatusDescription"));
+                    request.setRequestedByName(rs.getString("RequestedByName"));
+                    request.setApprovedByName(rs.getString("ApprovedByName"));
+                    request.setApprovedDate(rs.getTimestamp("ApprovedDate"));
+                    request.setApprovalNote(rs.getString("ApprovalNote"));
+
+                    // Set import/export type name if exists
+                    String importType = rs.getString("ImportTypeName");
+                    String exportType = rs.getString("ExportTypeName");
+                    if (importType != null) {
+                        request.setImportTypeName(importType);
+                    }
+                    if (exportType != null) {
+                        request.setExportTypeName(exportType);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return request;
+    }
+
     public List<RequestList> getAllRequests() {
         List<RequestList> list = new ArrayList<>();
         String sql = "SELECT r.RequestId, r.RequestDate, r.Note, "
@@ -181,9 +238,6 @@ public class RequestDAO extends DBContext {
         }
         return list;
     }
-//======================================================================================================================================================================================
-    // Create Request 
-    // 1. Load all request types
 
     public List<RequestType> getAllRequestType() {
         List<RequestType> list = new ArrayList<>();
@@ -201,7 +255,6 @@ public class RequestDAO extends DBContext {
         return list;
     }
 
-    // 2. Load all categories
     public List<Category> getAllCategories() {
         List<Category> list = new ArrayList<>();
         String sql = "SELECT CategoryId, CategoryName FROM categories";
@@ -218,7 +271,6 @@ public class RequestDAO extends DBContext {
         return list;
     }
 
-    // 3. Load all sub‑categories (optionally filterable by category)
     public List<SubCategory> getAllSubCategories() {
         List<SubCategory> list = new ArrayList<>();
         String sql = "SELECT SubCategoryId, SubCategoryName, CategoryId FROM subcategories";
@@ -236,7 +288,6 @@ public class RequestDAO extends DBContext {
         return list;
     }
 
-    // 4. Load sub‑categories by CategoryId
     public List<SubCategory> getSubCategoriesByCategory(int categoryId) {
         List<SubCategory> list = new ArrayList<>();
         String sql = "SELECT SubCategoryId, SubCategoryName FROM subcategories WHERE CategoryId = ?";
@@ -257,7 +308,6 @@ public class RequestDAO extends DBContext {
         return list;
     }
 
-    // 5. Load all active materials (with Category/SubCategory names joined)
     public List<Material> getAllMaterials() {
         List<Material> list = new ArrayList<>();
         String sql
@@ -297,16 +347,12 @@ public class RequestDAO extends DBContext {
         return list;
     }
 
-    // 6. Optionally: load materials by SubCategoryId
     public List<Material> getMaterialsBySubCategory(int subCategoryId) {
-        // same join as above, plus WHERE m.SubCategoryId = ?
-        // ...
         return getAllMaterials().stream()
                 .filter(m -> m.getSubCategoryId() == subCategoryId)
                 .toList();
     }
 
-    // 7. Create a new request with details (unchanged)
     public boolean createRequest(int requestedBy, int requestTypeId, String note, List<RequestDetail> details) {
         String sqlReq = "INSERT INTO requestlist (RequestedBy, RequestDate, RequestTypeId, Note, Status) "
                 + "VALUES (?, NOW(), ?, ?, 'Pending')";
