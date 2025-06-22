@@ -192,7 +192,7 @@
     <!-- Related Import Records -->
     <div class="bg-white rounded-lg shadow-md mb-6">
         <div class="px-6 py-4 border-b border-gray-200">
-            <h2 class="text-xl font-semibold text-gray-900">Related Import Records</h2>
+            <h2 class="text-xl font-semibold text-gray-900">Related ${requestInfo.requestTypeName} Records</h2>
         </div>
         <div class="p-6">
             <c:choose>
@@ -268,10 +268,10 @@
         </div>
     </div>
     
-    <!-- Related Import Details -->
+    <!-- Related  Details -->
     <div class="bg-white rounded-lg shadow-md mb-6">
         <div class="px-6 py-4 border-b border-gray-200">
-            <h2 class="text-xl font-semibold text-gray-900">Related Import Details</h2>
+            <h2 class="text-xl font-semibold text-gray-900">Related  ${requestInfo.requestTypeName} Details</h2>
         </div>
         <div class="p-6">
             <c:choose>
