@@ -2,6 +2,7 @@ package controller.general;
 
 import DAO.RequestDetailDAO;
 import DAO.MaterialDAO;
+import DAO.RequestDAO;
 import model.Material;
 import model.RequestDetail;
 import model.RequestList;
