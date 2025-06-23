@@ -29,11 +29,10 @@ public class RequestDAO extends DBContext {
                 + "WHERE r.RequestId = ?";
 
         DBContext db = new DBContext();
-        try (Connection conn = db.getConnection(); 
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            
+        try (Connection conn = db.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
             ps.setInt(1, requestId);
-            
+
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     request = new RequestList();
@@ -666,4 +665,25 @@ public class RequestDAO extends DBContext {
         return list;
     }
 
+    public void assignImportTask(int requestId, int staffId) {
+        String sql = "UPDATE ImportList SET HandledBy = ? WHERE RequestId = ?";
+        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, staffId);
+            ps.setInt(2, requestId);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void assignExportTask(int requestId, int staffId) {
+        String sql = "UPDATE ExportList SET HandledBy = ? WHERE RequestId = ?";
+        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, staffId);
+            ps.setInt(2, requestId);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }

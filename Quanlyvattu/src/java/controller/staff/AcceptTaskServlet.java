@@ -13,9 +13,10 @@ import java.io.IOException;
 
 @WebServlet("/accept-task")
 public class AcceptTaskServlet extends HttpServlet {
-     protected void doGet(HttpServletRequest request, HttpServletResponse response)
+
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-      
+
         request.setAttribute("pageContent", "/approvedrequestdetail.jsp");
         request.getRequestDispatcher("/layout/layout.jsp").forward(request, response);
     }
@@ -53,4 +54,5 @@ public class AcceptTaskServlet extends HttpServlet {
     public String getServletInfo() {
         return "Servlet xử lý nhân viên kho nhận nhiệm vụ từ yêu cầu đã được duyệt";
     }
+    
 }

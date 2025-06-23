@@ -78,7 +78,7 @@ protected void doPost(HttpServletRequest request, HttpServletResponse response)
             if (session == null || session.getAttribute("userId") == null) {
                 response.sendRedirect(request.getContextPath() + "/login.jsp");
                 return;
-            }
+                }
 
             int staffId = (int) session.getAttribute("userId");
 

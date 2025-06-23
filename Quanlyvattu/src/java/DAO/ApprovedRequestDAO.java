@@ -1,7 +1,6 @@
 package DAO;
 
 import dal.DBContext;
-import jakarta.security.auth.message.callback.PrivateKeyCallback.Request;
 import java.sql.*;
 import java.util.*;
 import model.RequestList;
@@ -291,4 +290,58 @@ public class ApprovedRequestDAO extends DBContext {
         return request;
     }
 
+    public boolean assignRequestToStaff(int requestId, int staffId) {
+        String sql = "UPDATE RequestList SET AssignedStaffId = ? WHERE RequestId = ? AND AssignedStaffId IS NULL";
+        DBContext db = new DBContext();
+
+        try (Connection conn = db.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, staffId);
+            ps.setInt(2, requestId);
+            int rowsAffected = ps.executeUpdate();
+            return rowsAffected > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public List<RequestList> getRequestsByAssignedStaff(int staffId) {
+        List<RequestList> list = new ArrayList<>();
+        String sql = "SELECT * FROM RequestList WHERE AssignedStaffId = ?";
+        DBContext db = new DBContext();
+        try (Connection conn = db.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, staffId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                RequestList r = new RequestList();
+                // set fields...
+                list.add(r);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public List<RequestList> getAllUnassignedApprovedRequests() {
+        List<RequestList> list = new ArrayList<>();
+
+        DBContext db = new DBContext();
+        String sql = "SELECT * FROM RequestList WHERE Status = 'Approved' AND AssignedStaffId IS NULL";
+
+        try (Connection conn = db.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                RequestList r = new RequestList();
+                // set các thuộc tính r ở đây
+                list.add(r);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
 }
