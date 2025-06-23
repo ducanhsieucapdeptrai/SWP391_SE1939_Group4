@@ -344,4 +344,5 @@ public class ApprovedRequestDAO extends DBContext {
 
         return list;
     }
+
 }

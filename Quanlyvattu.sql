@@ -104,6 +104,7 @@ CREATE TABLE RequestList (
     ApprovedDate DATETIME,
     ApprovalNote TEXT,
     AssignedStaffId INT,
+    IsUpdated BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (RequestedBy) REFERENCES Users(UserId),
     FOREIGN KEY (RequestTypeId) REFERENCES RequestType(RequestTypeId),
     FOREIGN KEY (ApprovedBy) REFERENCES Users(UserId),
@@ -111,16 +112,16 @@ CREATE TABLE RequestList (
     FOREIGN KEY (Status) REFERENCES RequestStatus(StatusCode)
 );
 
-
-
 CREATE TABLE RequestDetail (
     RequestId INT,
     MaterialId INT,
     Quantity INT,
+    ActualQuantity INT DEFAULT 0,
     PRIMARY KEY (RequestId, MaterialId),
     FOREIGN KEY (RequestId) REFERENCES RequestList(RequestId),
     FOREIGN KEY (MaterialId) REFERENCES Materials(MaterialId)
 );
+
 
 -- NHẬP KHO
 
@@ -137,7 +138,6 @@ CREATE TABLE ImportList (
     FOREIGN KEY (RequestId) REFERENCES RequestList(RequestId)
 );
 
--- ========== IMPORT DETAIL ==========
 CREATE TABLE ImportDetail (
     ImportDetailId INT AUTO_INCREMENT PRIMARY KEY,
     ImportId INT,
@@ -148,7 +148,7 @@ CREATE TABLE ImportDetail (
     FOREIGN KEY (MaterialId) REFERENCES Materials(MaterialId)
 );
 
--- ========== EXPORT LIST ==========
+
 CREATE TABLE ExportList (
     ExportId INT AUTO_INCREMENT PRIMARY KEY,
     ExportDate DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -161,7 +161,8 @@ CREATE TABLE ExportList (
     FOREIGN KEY (RequestId) REFERENCES RequestList(RequestId)
 );
 
--- ========== EXPORT DETAIL ==========
+
+
 CREATE TABLE ExportDetail (
     ExportDetailId INT AUTO_INCREMENT PRIMARY KEY,
     ExportId INT,
@@ -170,6 +171,7 @@ CREATE TABLE ExportDetail (
     FOREIGN KEY (ExportId) REFERENCES ExportList(ExportId),
     FOREIGN KEY (MaterialId) REFERENCES Materials(MaterialId)
 );
+
 
 -- ========== NOTIFICATIONS ==========
 CREATE TABLE Notifications (
@@ -183,7 +185,7 @@ CREATE TABLE Notifications (
     FOREIGN KEY (RequestId) REFERENCES RequestList(RequestId)
 );
 
--- ========== PURCHASE ORDER STATUS ==========
+
 CREATE TABLE PurchaseOrderStatus (
     StatusCode VARCHAR(20) PRIMARY KEY,
     Description VARCHAR(100)
@@ -194,7 +196,6 @@ INSERT INTO PurchaseOrderStatus (StatusCode, Description) VALUES
 ('Approved', 'Approved by director'),
 ('Rejected', 'Rejected by director');
 
--- ========== PURCHASE ORDER LIST ==========
 CREATE TABLE PurchaseOrderList (
     POId INT AUTO_INCREMENT PRIMARY KEY,
     RequestId INT NOT NULL,
@@ -211,7 +212,6 @@ CREATE TABLE PurchaseOrderList (
     FOREIGN KEY (Status) REFERENCES PurchaseOrderStatus(StatusCode)
 );
 
--- ========== PURCHASE ORDER DETAIL ==========
 CREATE TABLE PurchaseOrderDetail (
     POId INT,
     MaterialId INT,
@@ -223,7 +223,6 @@ CREATE TABLE PurchaseOrderDetail (
     FOREIGN KEY (MaterialId) REFERENCES Materials(MaterialId)
 );
 
--- ========== REPAIR LIST ==========
 CREATE TABLE RepairList (
     RepairId INT AUTO_INCREMENT PRIMARY KEY,
     RequestId INT NOT NULL,
@@ -235,7 +234,6 @@ CREATE TABLE RepairList (
     FOREIGN KEY (RepairedBy) REFERENCES Users(UserId)
 );
 
--- ========== REPAIR DETAIL ==========
 CREATE TABLE RepairDetail (
     RepairDetailId INT AUTO_INCREMENT PRIMARY KEY,
     RepairId INT,
@@ -245,6 +243,11 @@ CREATE TABLE RepairDetail (
     FOREIGN KEY (RepairId) REFERENCES RepairList(RepairId),
     FOREIGN KEY (MaterialId) REFERENCES Materials(MaterialId)
 );
+
+
+
+
+
 
 
 INSERT INTO Roles (RoleId, RoleName)
@@ -479,7 +482,8 @@ INSERT INTO RequestStatus (StatusCode, Description)
 VALUES 
 ('Pending', 'Waiting for approval'),
 ('Approved', 'Approved by director'),
-('Rejected', 'Request has been rejected');
+('Rejected', 'Request has been rejected'),
+('Completed', 'Successfull');
 
 
 INSERT INTO ExportType (ExportTypeName, Description)
@@ -541,73 +545,74 @@ VALUES
 (20, 13, '2025-06-19 10:00:00', 2, 'Import steel rods for base', 'Approved', 2, '2025-06-19 10:30:00', 'Warehouse notified.', NULL);
 
 -- RequestDetail (đầy đủ vật tư cho từng RequestId)
-INSERT INTO RequestDetail (RequestId, MaterialId, Quantity) VALUES
+INSERT INTO RequestDetail (RequestId, MaterialId, Quantity, ActualQuantity) VALUES
 -- RequestId = 1 (Import)
-(1, 1, 50),
-(1, 2, 30),
-(1, 3, 20),
+(1, 1, 50, NULL),
+(1, 2, 30, NULL),
+(1, 3, 20, NULL),
 
 -- RequestId = 2 (Import + Purchase)
-(2, 21, 10),
-(2, 18, 30),
+(2, 21, 10, NULL),
+(2, 18, 30, NULL),
 
 -- RequestId = 3 (Export)
-(3, 1, 20),
-(3, 3, 10),
+(3, 1, 20, NULL),
+(3, 3, 10, NULL),
 
 -- RequestId = 4 (Export)
-(4, 11, 100),
-(4, 13, 50),
+(4, 11, 100, NULL),
+(4, 13, 50, NULL),
 
 -- RequestId = 5 (Purchase)
-(5, 15, 3),
-(5, 11, 150),
+(5, 15, 3, NULL),
+(5, 11, 150, NULL),
 
 -- RequestId = 6 (Export)
-(6, 16, 50),
+(6, 16, 50, NULL),
 
 -- RequestId = 7 (Repair)
-(7, 17, 1),
-(7, 3, 2),
+(7, 17, 1, NULL),
+(7, 3, 2, NULL),
 
 -- RequestId = 8 (Import)
-(8, 18, 200),
+(8, 18, 200, NULL),
 
 -- RequestId = 9 (Repair)
-(9, 19, 1),
+(9, 19, 1, NULL),
 
 -- RequestId = 10 (Purchase)
-(10, 25, 5),
+(10, 25, 5, NULL),
 
 -- RequestId = 11 (Import)
-(11, 6, 500),
+(11, 6, 500, NULL),
 
 -- RequestId = 12 (Export)
-(12, 7, 50),
+(12, 7, 50, NULL),
 
 -- RequestId = 13 (Repair)
-(13, 3, 1),
+(13, 3, 1, NULL),
 
 -- RequestId = 14 (Purchase)
-(14, 35, 20),
+(14, 35, 20, NULL),
 
 -- RequestId = 15 (Import)
-(15, 17, 200),
+(15, 17, 200, NULL),
 
 -- RequestId = 16 (Export)
-(16, 9, 80),
+(16, 9, 80, NULL),
 
 -- RequestId = 17 (Repair)
-(17, 26, 1),
+(17, 26, 1, NULL),
 
 -- RequestId = 18 (Purchase)
-(18, 28, 30),
+(18, 28, 30, NULL),
 
 -- RequestId = 19 (Export)
-(19, 13, 100),
+(19, 13, 100, NULL),
 
 -- RequestId = 20 (Import)
-(20, 3, 100);
+(20, 3, 100, NULL);
+
 
 
 -- ========================================
@@ -622,10 +627,11 @@ INSERT INTO ImportList (ImportId, ImportDate, ImportedBy, ImportTypeId, Note, Re
 (5, '2025-06-17 12:00:00', 4, 1, 'Ceiling boards for office site', 15),
 (6, '2025-06-19 14:00:00', 3, 1, 'Steel rods imported for base foundation', 20);
 
+-- ImportDetail
 INSERT INTO ImportDetail (ImportId, MaterialId, Quantity, Price) VALUES
-(1, 1, 50, 1200000), (1, 2, 30, 950000), (1, 3, 20, 1800000),
-(2, 21, 10, 220000), (2, 18, 30, 550000),
-(4, 6, 500, 1500), (5, 17, 200, 120000), (6, 3, 100, 1800000);
+(1, 1, 0, 1200000), (1, 2, 0, 950000), (1, 3, 0, 1800000),
+(2, 21, 0, 220000), (2, 18, 0, 550000),
+(4, 6, 0, 1500), (5, 17, 0, 120000), (6, 3, 0, 1800000);
 
 -- ========================================
 -- 3. XUẤT KHO
@@ -639,10 +645,11 @@ INSERT INTO ExportList (ExportId, ExportDate, ExportedBy, ExportTypeId, Note, Re
 (5, '2025-06-17 13:30:00', 4, 1, 'Timber for site C foundation', 16),
 (6, '2025-06-19 15:30:00', 3, 1, 'Export wall tiles to branch B', 19);
 
+-- ExportDetail
 INSERT INTO ExportDetail (ExportId, MaterialId, Quantity) VALUES
-(1, 1, 20), (1, 3, 10), (2, 11, 100), (2, 13, 50),
-(4, 7, 50), (5, 9, 80),
-(6, 13, 100);
+(1, 1, 0), (1, 3, 0), (2, 11, 0), (2, 13, 0),
+(4, 7, 0), (5, 9, 0),
+(6, 13, 0);
 
 -- ========================================
 -- 4. PHIẾU MUA HÀNG
@@ -655,10 +662,9 @@ VALUES
 (18, 11, NOW(), 6600000, 'Pending', 'Purchase fire extinguishers urgently');
 
 INSERT INTO PurchaseOrderDetail (POId, MaterialId, Quantity, UnitPrice, Total) VALUES
-(1, 21, 5, 220000, 1100000),
-(2, 11, 150, 80000, 12000000),
-(3, 28, 30, 220000, 6600000);
-
+(1, 21, 0, 220000, 0),
+(2, 11, 0, 80000, 0),
+(3, 28, 0, 220000, 0);
 -- ========================================
 -- 5. SỬA CHỮA
 -- ========================================
@@ -669,7 +675,12 @@ VALUES
 (13, 5, '2025-06-16 11:00:00', 'In Progress', 'Inspection ongoing.'),
 (17, 6, '2025-06-18 13:00:00', 'Pending', 'Awaiting parts.');
 
+-- RepairDetail
 INSERT INTO RepairDetail (RepairId, MaterialId, Quantity, Price) VALUES
-(1, 3, 2, 500000),
-(2, 3, 1, 1800000),
-(3, 26, 1, 160000);
+(1, 3, 0, 500000),
+(2, 3, 0, 1800000),
+(3, 26, 0, 160000);
+
+
+
+

@@ -70,14 +70,17 @@
                                     <i class="fas fa-boxes mr-2"></i> Inventory
                                 </a>
                             </li>
-                            <c:if test="${userRole == 'Warehouse Staff'}">
-                                <li class="mb-2">
-                                    <a href="${pageContext.request.contextPath}/approvedrequests" class="flex items-center px-4 py-2 rounded hover:bg-gray-700">
+
+                          
+
+                            <c:if test="${sessionScope.userRole == 'Warehouse Staff'}">
+                                <li class="mb-1">
+                                    <a href="${pageContext.request.contextPath}/approvedrequests" class="block px-4 py-2 rounded hover:bg-gray-700">
                                         <i class="fas fa-tasks mr-2"></i> Request List
                                     </a>
                                 </li>
                             </c:if>
-                            <c:if test="${userRole == 'Warehouse Manager' || userRole == 'Director'}">
+                            <c:if test="${sessionScope.userRole == 'Warehouse Manager' || sessionScope.userRole == 'Director'}">
                                 <li class="mb-2">
                                     <a href="${pageContext.request.contextPath}/reqlist" class="flex items-center px-4 py-2 rounded hover:bg-gray-700">
                                         <i class="fas fa-file-import mr-2"></i> Request
@@ -89,7 +92,7 @@
                                     </a>
                                 </li>
                             </c:if>
-                            <c:if test="${userRole == 'Warehouse Manager'}">
+                            <c:if test="${sessionScope.userRole == 'Warehouse Manager'}">
                                 <li class="mb-2">
                                     <a href="#" onclick="toggleSubmenu('userManagerSubmenu')" class="flex items-center px-4 py-2 rounded hover:bg-gray-700">
                                         <i class="fas fa-users mr-2"></i> User Manager
@@ -105,7 +108,7 @@
                                     </ul>
                                 </li>
                             </c:if>
-                            <c:if test="${userRole == 'Company Staff'}">
+                            <c:if test="${sessionScope.userRole == 'Company Staff'}">
                                 <li class="mb-2">
                                     <a href="${pageContext.request.contextPath}/my-request" class="flex items-center px-4 py-2 rounded hover:bg-gray-700">
                                         <i class="fas fa-envelope-open-text mr-2"></i> My Request

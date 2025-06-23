@@ -41,14 +41,14 @@
                     <table class="min-w-full divide-y divide-gray-200 border border-gray-300">
                         <thead class="bg-gray-100">
                             <tr>
-                                <th class="px-4 py-2 border">STT</th>
-                                <th class="px-4 py-2 border">Image</th>
-                                <th class="px-4 py-2 border">Material Name</th>
-                                <th class="px-4 py-2 border">Category</th>
-                                <th class="px-4 py-2 border">Quantity</th>
-                                <th class="px-4 py-2 border">Unit Price</th>
-                                <th class="px-4 py-2 border">Total Value</th>
-                                <th class="px-4 py-2 border">Description</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 border">#</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 border">Image</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 border">Material Info</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 border">Category</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 border">Quantity</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 border">Unit Price</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 border">đ</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 border">Description</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y text-sm">
@@ -75,8 +75,30 @@
                                     <td class="px-4 py-2 border text-green-600">
                                         <fmt:formatNumber value="${detail.price}" type="currency" currencySymbol="$" />
                                     </td>
-                                    <td class="px-4 py-2 border text-green-700 font-semibold">
-                                        <fmt:formatNumber value="${detail.totalValue}" type="currency" currencySymbol="$" />
+                                    <td class="px-4 py-3 border text-gray-600">
+                                        <div>
+                                            <p class="font-medium">${detail.categoryName}</p>
+                                            <p class="text-xs text-gray-500">${detail.subCategoryName}</p>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-3 border text-blue-600 font-semibold text-center">
+                                        <span class="bg-blue-100 px-2 py-1 rounded">${detail.quantity}</span>
+                                    </td>
+                                    <td class="px-4 py-3 border text-green-600 font-medium">
+                                        <fmt:formatNumber value="${detail.price}" type="number" groupingUsed="true"/>đ
+                                    </td>
+                                    <td class="px-4 py-3 border text-green-700 font-semibold">
+                                        <fmt:formatNumber value="${detail.totalValue}" type="number" groupingUsed="true"/>đ
+                                    </td>
+                                    <td class="px-4 py-3 border text-gray-600">
+                                        <c:choose>
+                                            <c:when test="${not empty detail.description}">
+                                                ${detail.description}
+                                            </c:when>
+                                            <c:otherwise>
+                                                <span class="text-gray-400 italic">No description</span>
+                                            </c:otherwise>
+                                        </c:choose>
                                     </td>
                                     <td class="px-4 py-2 border text-gray-600">${detail.description}</td>
                                 </tr>
@@ -86,26 +108,40 @@
                 </div>
 
                 <!-- Summary -->
-                <div class="mt-6 bg-gray-100 rounded p-4 grid grid-cols-1 md:grid-cols-3 text-center gap-4">
-                    <div>
-                        <h5 class="font-semibold text-primary"><i class="fas fa-boxes mr-1"></i>Total Items</h5>
-                        <p class="text-lg font-bold">${requestDetails.size()}</p>
-                    </div>
-                    <div>
-                        <h5 class="font-semibold text-info"><i class="fas fa-calculator mr-1"></i>Total Quantity</h5>
-                        <p class="text-lg font-bold">
-                            <c:set var="totalQuantity" value="0" />
-                            <c:forEach var="detail" items="${requestDetails}">
-                                <c:set var="totalQuantity" value="${totalQuantity + detail.quantity}" />
-                            </c:forEach>
-                            ${totalQuantity}
-                        </p>
-                    </div>
-                    <div>
-                        <h5 class="font-semibold text-success"><i class="fas fa-dollar-sign mr-1"></i>Total Value</h5>
-                        <p class="text-lg font-bold">
-                            <fmt:formatNumber value="${totalValue}" type="currency" currencySymbol="$" />
-                        </p>
+                <div class="mt-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6">
+                    <h3 class="text-lg font-semibold mb-4 text-gray-800">
+                        <i class="fas fa-chart-bar mr-2"></i>Request Summary
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="text-center p-4 bg-white rounded-lg shadow-sm">
+                            <div class="text-2xl font-bold text-blue-600 mb-1">
+                                <i class="fas fa-boxes text-blue-500"></i>
+                            </div>
+                            <h5 class="text-sm font-semibold text-gray-700 mb-1">Total Items</h5>
+                            <p class="text-2xl font-bold text-blue-600">${requestDetails.size()}</p>
+                        </div>
+                        <div class="text-center p-4 bg-white rounded-lg shadow-sm">
+                            <div class="text-2xl font-bold text-purple-600 mb-1">
+                                <i class="fas fa-calculator text-purple-500"></i>
+                            </div>
+                            <h5 class="text-sm font-semibold text-gray-700 mb-1">Total Quantity</h5>
+                            <p class="text-2xl font-bold text-purple-600">
+                                <c:set var="totalQuantity" value="0" />
+                                <c:forEach var="detail" items="${requestDetails}">
+                                    <c:set var="totalQuantity" value="${totalQuantity + detail.quantity}" />
+                                </c:forEach>
+                                ${totalQuantity}
+                            </p>
+                        </div>
+                        <div class="text-center p-4 bg-white rounded-lg shadow-sm">
+                            <div class="text-2xl font-bold text-green-600 mb-1">
+                                <i class="fas fa-dong-sign text-green-500"></i>
+                            </div>
+                            <h5 class="text-sm font-semibold text-gray-700 mb-1">Total Value</h5>
+                            <p class="text-2xl font-bold text-green-600">
+                                <fmt:formatNumber value="${totalValue}" type="number" groupingUsed="true"/>
+                            </p>
+                        </div>
                     </div>
                 </div>
             </c:when>

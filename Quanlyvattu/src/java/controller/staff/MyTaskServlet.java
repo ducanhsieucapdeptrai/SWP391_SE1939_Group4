@@ -49,11 +49,37 @@ public class MyTaskServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+    
+
+   
+        HttpSession session = request.getSession();
+        Users currentUser = (Users) session.getAttribute("currentUser");
+
+        if (currentUser == null) {
+            response.sendRedirect("login.jsp");
+            return;
+        }
+
+        String action = request.getParameter("action");
+
+        if ("acceptTask".equals(action)) {
+            int requestId = Integer.parseInt(request.getParameter("requestId"));
+            int staffId = currentUser.getUserId();
+
+            ApprovedRequestDAO dao = new ApprovedRequestDAO();
+            dao.assignRequestToStaff(requestId, staffId);  // hàm bạn phải thêm trong DAO
+
+            response.sendRedirect("mytasks"); // Reload trang sau khi nhận
+            return;
+        }
+
+        // Mặc định gọi doGet nếu không phải xử lý nhận việc
         doGet(request, response);
     }
 
-    @Override
-    public String getServletInfo() {
+
+@Override
+public String getServletInfo() {
         return "Displays tasks assigned to the current warehouse staff";
     }
 }
