@@ -8,43 +8,48 @@
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/controller/general/MaterialListServlet.java</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/controller/staff/ApprovedRequestListServlet.java</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/web/material-add.jsp</file>
+            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/DAO/WarehouseReportDAO.java</file>
+            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/controller/general/UserListController.java</file>
+            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/model/RequestDetail.java</file>
+            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/controller/staff/ApprovedRequestDetailServlet.java</file>
+            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/DAO/StatisticsDAO.java</file>
+            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/model/ImportList.java</file>
+            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/model/ImportDetail.java</file>
+            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/web/requestUpdate.jsp</file>
+            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/web/reqlist.jsp</file>
+            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/web/approvedrequestdetail.jsp</file>
+            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/controller/staff/AcceptTaskServlet.java</file>
+            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/web/index.jsp</file>
+            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/model/SubCategory.java</file>
+            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/web/mytask.jsp</file>
+            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/web/MaterialDetail.jsp</file>
+            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/DAO/HomepageDAO.java</file>
+            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/web/WEB-INF/web.xml</file>
+            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/DAO/ApprovedRequestDAO.java</file>
+            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/model/RequestType.java</file>
+            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/controller/general/RequestUpdateServlet.java</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/controller/general/RequestDetailServlet.java</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/web/request-detail.jsp</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/controller/general/LoginServlet.java</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/model/ExportList.java</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/DAO/RoleFunctionDAO.java</file>
-            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/controller/general/UserListController.java</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/controller/general/RequestNewPasswordServlet.java</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/controller/general/ChangePasswordServlet.java</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/web/layout/layout.jsp</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/web/homepage.jsp</file>
-            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/model/RequestDetail.java</file>
-            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/controller/staff/ApprovedRequestDetailServlet.java</file>
+            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/controller/general/WarehouseReportServlet.java</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/web/WarehouseStaffReport.jsp</file>
-            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/DAO/StatisticsDAO.java</file>
-            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/model/ImportList.java</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/web/login.jsp</file>
-            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/model/ImportDetail.java</file>
-            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/web/reqlist.jsp</file>
-            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/web/approvedrequestdetail.jsp</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/DAO/MaterialDAO.java</file>
-            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/controller/staff/AcceptTaskServlet.java</file>
+            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/web/createRequest.jsp</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/dal/DBContext.java</file>
-            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/web/index.jsp</file>
-            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/model/SubCategory.java</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/model/Category.java</file>
-            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/web/mytask.jsp</file>
-            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/web/MaterialDetail.jsp</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/controller/general/UserDetailController.java</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/model/Users.java</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/web/MaterialList.jsp</file>
-            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/DAO/HomepageDAO.java</file>
-            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/web/WEB-INF/web.xml</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/controller/staff/ReqListServlet.java</file>
-            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/DAO/ApprovedRequestDAO.java</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/controller/staff/MyTaskServlet.java</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/DAO/CatalogDAO.java</file>
-            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/model/RequestType.java</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/model/RequestList.java</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/DAO/RoleDAO.java</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/controller/general/MaterialDetailServlet.java</file>

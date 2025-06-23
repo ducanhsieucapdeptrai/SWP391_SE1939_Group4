@@ -10,7 +10,7 @@ import model.*;
 
 public class WarehouseReportDAO {
 
-    // Lấy thông tin request theo ID
+    
     public RequestList getRequestById(int requestId) {
         String sql = "SELECT r.*, u1.FullName as RequestedByName, u2.FullName as ApprovedByName, rt.RequestTypeName " +
                     "FROM RequestList r " +
@@ -56,7 +56,7 @@ public class WarehouseReportDAO {
         return null;
     }
     
-    // Lấy chi tiết request theo ID - theo mẫu RequestDetailDAO
+    
     public List<RequestDetail> getRequestDetailsByRequestId(int requestId) {
         List<RequestDetail> list = new ArrayList<>();
         String sql = "SELECT rd.RequestId, rd.MaterialId, rd.Quantity, " +
@@ -99,17 +99,15 @@ public class WarehouseReportDAO {
         return list;
     }
     
-    // Lấy danh sách import liên quan đến request
+   
     public List<ImportList> getRelatedImportsByRequestId(int requestId) {
         List<ImportList> list = new ArrayList<>();
-        String sql = "SELECT DISTINCT il.*, u.FullName as ImportedByName, it.ImportTypeName " +
-                    "FROM ImportList il " +
-                    "LEFT JOIN Users u ON il.ImportedBy = u.UserId " +
-                    "LEFT JOIN ImportType it ON il.ImportTypeId = it.ImportTypeId " +
-                    "INNER JOIN ImportDetail id ON il.ImportId = id.ImportId " +
-                    "WHERE id.MaterialId IN (" +
-                    "    SELECT rd.MaterialId FROM RequestDetail rd WHERE rd.RequestId = ?" +
-                    ") ORDER BY il.ImportDate DESC";
+        String sql = "SELECT il.*, u.FullName as ImportedByName, it.ImportTypeName " +
+        "FROM ImportList il " +
+        "LEFT JOIN Users u ON il.ImportedBy = u.UserId " +
+        "LEFT JOIN ImportType it ON il.ImportTypeId = it.ImportTypeId " +
+        "WHERE il.RequestId = ? " +
+        "ORDER BY il.ImportDate DESC";
         
         try {
             DBContext db = new DBContext();
@@ -140,7 +138,7 @@ public class WarehouseReportDAO {
         return list;
     }
     
-    // Lấy chi tiết import theo import ID
+    
     public List<ImportDetail> getImportDetailsByImportId(int importId) {
         List<ImportDetail> list = new ArrayList<>();
         String sql = "SELECT id.*, m.MaterialName " +
@@ -176,16 +174,15 @@ public class WarehouseReportDAO {
         return list;
     }
     
-    // Lấy chi tiết import liên quan đến request
+  
     public List<ImportDetail> getRelatedImportDetailsByRequestId(int requestId) {
         List<ImportDetail> list = new ArrayList<>();
-        String sql = "SELECT id.*, m.MaterialName, il.ImportDate " +
-                    "FROM ImportDetail id " +
-                    "LEFT JOIN Materials m ON id.MaterialId = m.MaterialId " +
-                    "LEFT JOIN ImportList il ON id.ImportId = il.ImportId " +
-                    "WHERE id.MaterialId IN (" +
-                    "    SELECT rd.MaterialId FROM RequestDetail rd WHERE rd.RequestId = ?" +
-                    ") ORDER BY il.ImportDate DESC, id.ImportDetailId";
+        String sql = "SELECT id.*, m.MaterialName " +
+      "FROM ImportDetail id " +
+      "LEFT JOIN Materials m ON id.MaterialId = m.MaterialId " +
+      "LEFT JOIN ImportList il ON id.ImportId = il.ImportId " +
+      "WHERE il.RequestId = ? " +
+      "ORDER BY il.ImportDate DESC, id.ImportDetailId";
         
         try {
             DBContext db = new DBContext();
@@ -214,4 +211,66 @@ public class WarehouseReportDAO {
         }
         return list;
     }
+    public List<ExportList> getRelatedExportsByRequestId(int requestId) {
+    List<ExportList> list = new ArrayList<>();
+    String sql =
+        "SELECT el.*, u.FullName as ExportedByName, et.ExportTypeName " +
+        "FROM ExportList el " +
+        "LEFT JOIN Users u ON el.ExportedBy = u.UserId " +
+        "LEFT JOIN ExportType et ON el.ExportTypeId = et.ExportTypeId " +
+        "WHERE el.RequestId = ? " +
+        "ORDER BY el.ExportDate DESC";
+    try (Connection conn = new DBContext().getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setInt(1, requestId);
+        try (ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                ExportList ex = new ExportList();
+                ex.setExportId(rs.getInt("ExportId"));
+                ex.setExportDate(rs.getTimestamp("ExportDate"));
+                ex.setExportedBy(rs.getInt("ExportedBy"));
+                ex.setExportTypeId(rs.getInt("ExportTypeId"));
+                ex.setNote(rs.getString("Note"));
+                ex.setExportedByName(rs.getString("ExportedByName"));
+                ex.setExportTypeName(rs.getString("ExportTypeName"));
+                list.add(ex);
+            }
+        }
+    } catch (Exception e) {
+        System.out.println("Error in getRelatedExportsByRequestId: " + e.getMessage());
+        e.printStackTrace();
+    }
+    return list;
+}
+
+
+public List<ExportDetail> getRelatedExportDetailsByRequestId(int requestId) {
+    List<ExportDetail> list = new ArrayList<>();
+    String sql =
+        "SELECT ed.*, m.MaterialName " +
+        "FROM ExportDetail ed " +
+        "LEFT JOIN Materials m ON ed.MaterialId = m.MaterialId " +
+        "LEFT JOIN ExportList el ON ed.ExportId = el.ExportId " +
+        "WHERE el.RequestId = ? " +
+        "ORDER BY el.ExportDate DESC, ed.ExportDetailId";
+    try (Connection conn = new DBContext().getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setInt(1, requestId);
+        try (ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                ExportDetail det = new ExportDetail();
+                det.setExportDetailId(rs.getInt("ExportDetailId"));
+                det.setExportId(rs.getInt("ExportId"));
+                det.setMaterialId(rs.getInt("MaterialId"));
+                det.setQuantity(rs.getInt("Quantity"));
+                det.setMaterialName(rs.getString("MaterialName"));
+                list.add(det);
+            }
+        }
+    } catch (Exception e) {
+        System.out.println("Error in getRelatedExportDetailsByRequestId: " + e.getMessage());
+        e.printStackTrace();
+    }
+    return list;
+}
 }
