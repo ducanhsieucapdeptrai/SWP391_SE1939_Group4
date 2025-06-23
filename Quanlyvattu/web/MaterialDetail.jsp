@@ -135,7 +135,9 @@
                 <div class="image-box">
                     <c:choose>
                         <c:when test="${not empty m.image}">
-                            <img src="${m.image}" alt="Material Image" style="max-width: 100%; max-height: 100%;">
+                            <img src="${pageContext.request.contextPath}/assets/images/materials/${m.image}" 
+                                 alt="Material Image" 
+                                 style="max-width: 100%; max-height: 100%;">
                         </c:when>
                         <c:otherwise>
                             <span>&#128247;</span>
