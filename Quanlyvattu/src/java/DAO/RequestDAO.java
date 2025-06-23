@@ -143,93 +143,87 @@ public class RequestDAO extends DBContext {
     }
 
     public List<RequestList> getFilteredRequests(String type, String status, String requestedBy, String requestDate) {
-        List<RequestList> list = new ArrayList<>();
-        StringBuilder sql = new StringBuilder(
-                "SELECT r.RequestId, r.RequestDate, r.Note,"
-                + "   r.Status, "
-                + "rt.RequestTypeName, rs.Description AS StatusDescription, "
-                + "u1.FullName AS RequestedByName, "
-                + "u2.FullName AS ApprovedByName, r.ApprovedDate, r.ApprovalNote, "
-                + "it.ImportTypeName, et.ExportTypeName "
-                + "FROM RequestList r "
-                + "JOIN RequestType rt ON r.RequestTypeId = rt.RequestTypeId "
-                + "JOIN RequestStatus rs ON r.Status = rs.StatusCode "
-                + "JOIN Users u1 ON r.RequestedBy = u1.UserId "
-                + "LEFT JOIN Users u2 ON r.ApprovedBy = u2.UserId "
-                + "LEFT JOIN ImportList il ON r.RequestId = il.RequestId "
-                + "LEFT JOIN ImportType it ON il.ImportTypeId = it.ImportTypeId "
-                + "LEFT JOIN ExportList el ON r.RequestId = el.RequestId "
-                + "LEFT JOIN ExportType et ON el.ExportTypeId = et.ExportTypeId "
-                + "WHERE 1=1 "
-        );
+    List<RequestList> list = new ArrayList<>();
+    StringBuilder sql = new StringBuilder(
+            "SELECT r.RequestId, r.RequestDate, r.Note,"
+            + "   r.Status, "
+            + "rt.RequestTypeName, rs.Description AS StatusDescription, "
+            + "u1.FullName AS RequestedByName, "
+            + "u2.FullName AS ApprovedByName, r.ApprovedDate, r.ApprovalNote, "
+            + "it.ImportTypeName, et.ExportTypeName "
+            + "FROM RequestList r "
+            + "JOIN RequestType rt ON r.RequestTypeId = rt.RequestTypeId "
+            + "JOIN RequestStatus rs ON r.Status = rs.StatusCode "
+            + "JOIN Users u1 ON r.RequestedBy = u1.UserId "
+            + "LEFT JOIN Users u2 ON r.ApprovedBy = u2.UserId "
+            + "LEFT JOIN ImportList il ON r.RequestId = il.RequestId "
+            + "LEFT JOIN ImportType it ON il.ImportTypeId = it.ImportTypeId "
+            + "LEFT JOIN ExportList el ON r.RequestId = el.RequestId "
+            + "LEFT JOIN ExportType et ON el.ExportTypeId = et.ExportTypeId "
+            + "WHERE r.IsUpdated = FALSE " // ✅ Only show un-updated requests
+    );
 
-        List<Object> params = new ArrayList<>();
+    List<Object> params = new ArrayList<>();
 
-        if (type != null && !type.isEmpty()) {
-            sql.append(" AND rt.RequestTypeName = ? ");
-            params.add(type);
-        }
-
-        if (status != null && !status.isEmpty()) {
-            sql.append(" AND r.Status = ? ");;
-            params.add(status);
-        }
-
-        if (requestedBy != null && !requestedBy.isEmpty()) {
-            sql.append(" AND u1.FullName LIKE ? ");
-            params.add("%" + requestedBy + "%");
-        }
-
-        if (requestDate != null && !requestDate.isEmpty()) {
-            sql.append(" AND DATE(r.RequestDate) = ? ");
-            try {
-                java.sql.Date sqlDate = java.sql.Date.valueOf(requestDate);
-                params.add(sqlDate);
-            } catch (IllegalArgumentException e) {
-                // Trường hợp chuỗi date sai định dạng yyyy-MM-dd, bỏ qua filter
-            }
-        }
-
-        DBContext db = new DBContext();
-        try (Connection conn = db.getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
-
-            for (int i = 0; i < params.size(); i++) {
-                ps.setObject(i + 1, params.get(i));
-            }
-
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    RequestList r = new RequestList();
-                    r.setRequestId(rs.getInt("RequestId"));
-                    r.setRequestDate(rs.getTimestamp("RequestDate"));
-                    r.setNote(rs.getString("Note"));
-                    r.setStatus(rs.getString("Status"));
-
-                    r.setRequestTypeName(rs.getString("RequestTypeName"));
-                    r.setStatusDescription(rs.getString("StatusDescription"));
-                    r.setRequestedByName(rs.getString("RequestedByName"));
-                    r.setApprovedByName(rs.getString("ApprovedByName"));
-                    r.setApprovedDate(rs.getTimestamp("ApprovedDate"));
-                    r.setApprovalNote(rs.getString("ApprovalNote"));
-
-                    String importType = rs.getString("ImportTypeName");
-                    String exportType = rs.getString("ExportTypeName");
-                    if (importType != null) {
-                        r.setImportTypeName(importType);
-                    }
-                    if (exportType != null) {
-                        r.setExportTypeName(exportType);
-                    }
-
-                    list.add(r);
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return list;
+    if (type != null && !type.isEmpty()) {
+        sql.append(" AND rt.RequestTypeName = ? ");
+        params.add(type);
     }
+
+    if (status != null && !status.isEmpty()) {
+        sql.append(" AND r.Status = ? ");
+        params.add(status);
+    }
+
+    if (requestedBy != null && !requestedBy.isEmpty()) {
+        sql.append(" AND u1.FullName LIKE ? ");
+        params.add("%" + requestedBy + "%");
+    }
+
+    if (requestDate != null && !requestDate.isEmpty()) {
+        sql.append(" AND DATE(r.RequestDate) = ? ");
+        try {
+            java.sql.Date sqlDate = java.sql.Date.valueOf(requestDate);
+            params.add(sqlDate);
+        } catch (IllegalArgumentException e) {
+            // Ignore invalid date format
+        }
+    }
+
+    try (Connection conn = connection; PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        for (int i = 0; i < params.size(); i++) {
+            ps.setObject(i + 1, params.get(i));
+        }
+
+        try (ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                RequestList r = new RequestList();
+                r.setRequestId(rs.getInt("RequestId"));
+                r.setRequestDate(rs.getTimestamp("RequestDate"));
+                r.setNote(rs.getString("Note"));
+                r.setStatus(rs.getString("Status"));
+                r.setRequestTypeName(rs.getString("RequestTypeName"));
+                r.setStatusDescription(rs.getString("StatusDescription"));
+                r.setRequestedByName(rs.getString("RequestedByName"));
+                r.setApprovedByName(rs.getString("ApprovedByName"));
+                r.setApprovedDate(rs.getTimestamp("ApprovedDate"));
+                r.setApprovalNote(rs.getString("ApprovalNote"));
+
+                String importType = rs.getString("ImportTypeName");
+                String exportType = rs.getString("ExportTypeName");
+                if (importType != null) r.setImportTypeName(importType);
+                if (exportType != null) r.setExportTypeName(exportType);
+
+                list.add(r);
+            }
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+
+    return list;
+}
+
 
     public List<String> getAllRequestTypes() {
         List<String> list = new ArrayList<>();
@@ -419,4 +413,215 @@ public class RequestDAO extends DBContext {
         }
         return 0;
     }
+    public List<RequestList> getUpdatedRequests() {
+    List<RequestList> list = new ArrayList<>();
+    String sql = "SELECT r.RequestId, r.RequestDate, r.Note, r.Status, "
+               + "rt.RequestTypeName, rs.Description AS StatusDescription, "
+               + "u1.FullName AS RequestedByName, u2.FullName AS ApprovedByName, "
+               + "r.ApprovedDate, r.ApprovalNote, it.ImportTypeName, et.ExportTypeName "
+               + "FROM RequestList r "
+               + "JOIN RequestType rt ON r.RequestTypeId = rt.RequestTypeId "
+               + "JOIN RequestStatus rs ON r.Status = rs.StatusCode "
+               + "JOIN Users u1 ON r.RequestedBy = u1.UserId "
+               + "LEFT JOIN Users u2 ON r.ApprovedBy = u2.UserId "
+               + "LEFT JOIN ImportList il ON r.RequestId = il.RequestId "
+               + "LEFT JOIN ImportType it ON il.ImportTypeId = it.ImportTypeId "
+               + "LEFT JOIN ExportList el ON r.RequestId = el.RequestId "
+               + "LEFT JOIN ExportType et ON el.ExportTypeId = et.ExportTypeId "
+               + "WHERE r.IsUpdated = TRUE";
+
+    try (Connection conn = connection; PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+        while (rs.next()) {
+            RequestList r = new RequestList();
+            r.setRequestId(rs.getInt("RequestId"));
+            r.setRequestDate(rs.getTimestamp("RequestDate"));
+            r.setNote(rs.getString("Note"));
+            r.setStatus(rs.getString("Status"));
+            r.setRequestTypeName(rs.getString("RequestTypeName"));
+            r.setStatusDescription(rs.getString("StatusDescription"));
+            r.setRequestedByName(rs.getString("RequestedByName"));
+            r.setApprovedByName(rs.getString("ApprovedByName"));
+            r.setApprovedDate(rs.getTimestamp("ApprovedDate"));
+            r.setApprovalNote(rs.getString("ApprovalNote"));
+
+            String importType = rs.getString("ImportTypeName");
+            String exportType = rs.getString("ExportTypeName");
+            if (importType != null) r.setImportTypeName(importType);
+            if (exportType != null) r.setExportTypeName(exportType);
+
+            list.add(r);
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+
+    return list;
+}
+public String getRequestTypeName(int requestId) throws SQLException {
+    String sql = "SELECT rt.RequestTypeName FROM RequestList rl " +
+                 "JOIN RequestType rt ON rl.RequestTypeId = rt.RequestTypeId " +
+                 "WHERE rl.RequestId = ?";
+    try (Connection conn = new DBContext().getConnection();
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        stmt.setInt(1, requestId);
+        ResultSet rs = stmt.executeQuery();
+        if (rs.next()) {
+            return rs.getString("RequestTypeName");
+        }
+    }
+    return null;
+}
+public boolean isRequestAlreadyUpdated(int requestId) throws SQLException {
+    String sql = "SELECT IsUpdated FROM RequestList WHERE RequestId = ?";
+    try (Connection conn = new DBContext().getConnection();
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        stmt.setInt(1, requestId);
+        ResultSet rs = stmt.executeQuery();
+        return rs.next() && rs.getBoolean("IsUpdated");
+    }
+}
+public boolean updateActualQuantities(Connection conn, int requestId, List<RequestDetailItem> items, String requestType) throws SQLException {
+    String updateDetailSql = "UPDATE RequestDetail SET ActualQuantity = ? WHERE RequestId = ? AND MaterialId = ?";
+    try (PreparedStatement detailStmt = conn.prepareStatement(updateDetailSql)) {
+        for (RequestDetailItem item : items) {
+            int requestedQty = item.getQuantity(); // already stored in RequestDetailItem
+
+            // Validate per request type
+            if ("Import".equalsIgnoreCase(requestType) || "Purchase".equalsIgnoreCase(requestType)) {
+                if (item.getActualQuantity() < requestedQty) return false;
+            } else if ("Export".equalsIgnoreCase(requestType) || "Repair".equalsIgnoreCase(requestType)) {
+                if (item.getActualQuantity() != requestedQty) return false;
+            }
+
+            // Update actual quantity
+            detailStmt.setInt(1, item.getActualQuantity());
+            detailStmt.setInt(2, requestId);
+            detailStmt.setInt(3, item.getMaterialId());
+            detailStmt.addBatch();
+
+            // Update stock
+            String stockSql;
+            if ("Import".equalsIgnoreCase(requestType) || "Purchase".equalsIgnoreCase(requestType)) {
+                stockSql = "UPDATE Materials SET Quantity = Quantity + ? WHERE MaterialId = ?";
+            } else {
+                stockSql = "UPDATE Materials SET Quantity = Quantity - ? WHERE MaterialId = ? AND Quantity >= ?";
+            }
+
+            try (PreparedStatement stockStmt = conn.prepareStatement(stockSql)) {
+                stockStmt.setInt(1, item.getActualQuantity());
+                stockStmt.setInt(2, item.getMaterialId());
+                if (stockSql.contains("AND Quantity >=")) {
+                    stockStmt.setInt(3, item.getActualQuantity());
+                }
+
+                int affected = stockStmt.executeUpdate();
+                if (affected <= 0) return false; // insufficient stock
+            }
+        }
+
+        int[] result = detailStmt.executeBatch();
+        for (int r : result) {
+            if (r <= 0) return false;
+        }
+
+        // Mark request as updated
+        try (PreparedStatement stmt = conn.prepareStatement(
+                "UPDATE RequestList SET IsUpdated = TRUE WHERE RequestId = ?")) {
+            stmt.setInt(1, requestId);
+            stmt.executeUpdate();
+        }
+
+        return true;
+    }
+}
+
+
+public boolean markRequestUpdated(int requestId, Connection conn) throws SQLException {
+    String sql = "UPDATE RequestList SET IsUpdated = TRUE WHERE RequestId = ?";
+    try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+        stmt.setInt(1, requestId);
+        return stmt.executeUpdate() > 0;
+    }
+}
+
+private int getRequestedQuantity(Connection conn, int requestId, int materialId) throws SQLException {
+    String sql = "SELECT Quantity FROM RequestDetail WHERE RequestId = ? AND MaterialId = ?";
+    try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+        stmt.setInt(1, requestId);
+        stmt.setInt(2, materialId);
+        ResultSet rs = stmt.executeQuery();
+        if (rs.next()) {
+            return rs.getInt("Quantity");
+        }
+    }
+    return -1;
+}
+public List<RequestDetailItem> getRequestDetails(int requestId) throws SQLException {
+    List<RequestDetailItem> items = new ArrayList<>();
+    String sql = "SELECT rd.RequestId, rd.MaterialId, rd.Quantity, rd.ActualQuantity, " +
+                 "m.MaterialName, rt.RequestTypeName, rl.Note, m.Quantity as StockQuantity " +
+                 "FROM RequestDetail rd " +
+                 "JOIN Materials m ON rd.MaterialId = m.MaterialId " +
+                 "JOIN RequestList rl ON rd.RequestId = rl.RequestId " +
+                 "JOIN RequestType rt ON rl.RequestTypeId = rt.RequestTypeId " +
+                 "WHERE rd.RequestId = ?";
+
+    try (Connection conn = new DBContext().getConnection();
+         PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        pstmt.setInt(1, requestId);
+        ResultSet rs = pstmt.executeQuery();
+
+        while (rs.next()) {
+            RequestDetailItem item = new RequestDetailItem();
+            item.setRequestId(rs.getInt("RequestId"));
+            item.setMaterialId(rs.getInt("MaterialId"));
+            item.setMaterialName(rs.getString("MaterialName"));
+            item.setRequestTypeName(rs.getString("RequestTypeName"));
+            item.setQuantity(rs.getInt("Quantity"));
+            item.setActualQuantity(rs.getInt("ActualQuantity"));
+            item.setNote(rs.getString("Note"));
+            item.setStockQuantity(rs.getInt("StockQuantity"));
+            items.add(item);
+        }
+    }
+    return items;
+}
+public boolean isRequestUpdated(int requestId) throws SQLException {
+    String sql = "SELECT IsUpdated FROM RequestList WHERE RequestId = ?";
+    try (Connection conn = new DBContext().getConnection();
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        stmt.setInt(1, requestId);
+        try (ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                return rs.getBoolean("IsUpdated");
+            }
+        }
+    }
+    return false;
+}
+public boolean markRequestUpdated(int requestId) throws SQLException {
+    String sql = "UPDATE RequestList SET IsUpdated = TRUE WHERE RequestId = ?";
+    try (Connection conn = new DBContext().getConnection();
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        stmt.setInt(1, requestId);
+        return stmt.executeUpdate() > 0;
+    }
+}
+public boolean saveActualQuantities(int requestId, List<RequestDetailItem> items, Connection conn) throws SQLException {
+    String sql = "UPDATE RequestDetail SET ActualQuantity = ? WHERE RequestId = ? AND MaterialId = ?";
+    try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+        for (RequestDetailItem item : items) {
+            stmt.setInt(1, item.getActualQuantity());
+            stmt.setInt(2, requestId);
+            stmt.setInt(3, item.getMaterialId());
+            stmt.addBatch();
+        }
+        int[] results = stmt.executeBatch();
+        for (int res : results) {
+            if (res <= 0) return false;
+        }
+        return true;
+    }
+}
+
 }
