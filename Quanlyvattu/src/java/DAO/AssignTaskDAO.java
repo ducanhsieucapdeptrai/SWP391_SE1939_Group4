@@ -590,4 +590,15 @@ public class AssignTaskDAO extends DBContext {
         return names;
     }
 
+    public void updateIsTransferredToday(int requestId, boolean isTransferred) {
+        String sql = "UPDATE RequestList SET IsTransferredToday = ? WHERE RequestId = ?";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setBoolean(1, isTransferred);
+            ps.setInt(2, requestId);
+            ps.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 }
