@@ -43,8 +43,7 @@
                             <button id="userMenuBtn" class="flex items-center focus:outline-none">
                                 <img src="${pageContext.request.contextPath}/assets/images/UserImage/${sessionScope.userImage}"
                                      alt="Avatar" class="w-10 h-10 rounded-full border border-white shadow">
-                            </button>
-                            <div id="userMenu" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-md py-1 z-50 hidden">
+                            </button><div id="userMenu" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-md py-1 z-50 hidden">
                                 <a href="${pageContext.request.contextPath}/user-detail?id=${sessionScope.userId}" class="block px-4 py-2 text-black hover:bg-gray-100">Profile</a>
                                 <a href="${pageContext.request.contextPath}/change_password.jsp" class="block px-4 py-2 text-black hover:bg-gray-100">Change password</a>
                                 <a href="${pageContext.request.contextPath}/logout.jsp" class="block px-4 py-2 text-black hover:bg-gray-100">Logout</a>
@@ -91,16 +90,15 @@
                                     </a>
 
                                     <ul id="reqSubmenu" class="hidden ml-4 mt-1">
-                                        <li class="mb-1">
-                                            <a href="${pageContext.request.contextPath}/reqlist" class="block px-3 py-2 rounded hover:bg-gray-600 text-gray-300 hover:text-white">
+                                        <li class="mb-1"><a href="${pageContext.request.contextPath}/reqlist" class="block px-3 py-2 rounded hover:bg-gray-600 text-gray-300 hover:text-white">
                                                 <i class="fas fa-user-plus mr-2"></i> Request List
                                             </a>
                                         </li>
-                                         <li class="mb-2">
-                                    <a href="${pageContext.request.contextPath}/purchase-request-list" class="block px-3 py-2 rounded hover:bg-gray-600 text-gray-300 hover:text-white">
-                                        <i class="fas fa-shopping-cart mr-2"></i> Purchase Requests
-                                         </a>
-                                </li>
+                                        <li class="mb-2">
+                                            <a href="${pageContext.request.contextPath}/purchase-request-list" class="block px-3 py-2 rounded hover:bg-gray-600 text-gray-300 hover:text-white">
+                                                <i class="fas fa-shopping-cart mr-2"></i> Purchase Requests
+                                            </a>
+                                        </li>
 
                                         <li class="mb-1">
                                             <a href="${pageContext.request.contextPath}/completed-tasks" class="block px-3 py-2 rounded hover:bg-gray-600 text-gray-300 hover:text-white">
@@ -125,6 +123,7 @@
                                                 <i class="fas fa-user-plus mr-2"></i> Task List
                                             </a>
                                         </li>
+                                        
                                         <li class="mb-1">
                                             <a href="${pageContext.request.contextPath}/completed-tasks" class="block px-3 py-2 rounded hover:bg-gray-600 text-gray-300 hover:text-white">
                                                 <i class="fas fa-check-circle mr-2"></i> Manage Task
@@ -132,8 +131,7 @@
                                         </li>
 
                                         <li class="mb-1">
-                                            <a href="${pageContext.request.contextPath}/completed-tasks" class="block px-3 py-2 rounded hover:bg-gray-600 text-gray-300 hover:text-white">
-                                                <i class="fas fa-check-circle mr-2"></i> Completed Task
+                                            <a href="${pageContext.request.contextPath}/completed-tasks" class="block px-3 py-2 rounded hover:bg-gray-600 text-gray-300 hover:text-white"><i class="fas fa-check-circle mr-2"></i> Completed Task
                                             </a>
                                         </li>
 
@@ -186,8 +184,7 @@
             <!-- Mobile Sidebar -->
             <div class="md:hidden fixed bottom-4 right-4 z-50">
                 <button id="mobileSidebarToggle" class="bg-blue-800 text-white p-3 rounded-full shadow-lg">
-                    <i class="fas fa-bars"></i>
-                </button>
+                    <i class="fas fa-bars"></i></button>
             </div>
             <div id="mobileSidebar" class="fixed inset-0 bg-gray-800 bg-opacity-75 z-40 hidden">
                 <div class="bg-blue-800 text-white w-64 min-h-screen p-4">

@@ -35,8 +35,7 @@ public class RequestDAO extends DBContext {
                 + "LEFT JOIN ExportType et ON el.ExportTypeId = et.ExportTypeId "
                 + "WHERE r.RequestId = ?";
 
-        try (Connection conn = getConnection(); 
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, requestId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -751,8 +750,12 @@ public class RequestDAO extends DBContext {
 
                 String importType = rs.getString("ImportTypeName");
                 String exportType = rs.getString("ExportTypeName");
-                if (importType != null) r.setImportTypeName(importType);
-                if (exportType != null) r.setExportTypeName(exportType);
+                if (importType != null) {
+                    r.setImportTypeName(importType);
+                }
+                if (exportType != null) {
+                    r.setExportTypeName(exportType);
+                }
 
                 list.add(r);
             }
@@ -767,8 +770,7 @@ public class RequestDAO extends DBContext {
         String sql = "SELECT rt.RequestTypeName FROM RequestList rl "
                 + "JOIN RequestType rt ON rl.RequestTypeId = rt.RequestTypeId "
                 + "WHERE rl.RequestId = ?";
-        try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, requestId);
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
@@ -781,8 +783,7 @@ public class RequestDAO extends DBContext {
 
     public boolean isRequestAlreadyUpdated(int requestId) throws SQLException {
         String sql = "SELECT IsUpdated FROM RequestList WHERE RequestId = ?";
-        try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, requestId);
             try (ResultSet rs = stmt.executeQuery()) {
                 return rs.next() && rs.getBoolean("IsUpdated");
@@ -797,9 +798,13 @@ public class RequestDAO extends DBContext {
                 int requestedQty = item.getQuantity();
 
                 if ("Import".equalsIgnoreCase(requestType) || "Purchase".equalsIgnoreCase(requestType)) {
-                    if (item.getActualQuantity() < requestedQty) return false;
+                    if (item.getActualQuantity() < requestedQty) {
+                        return false;
+                    }
                 } else if ("Export".equalsIgnoreCase(requestType) || "Repair".equalsIgnoreCase(requestType)) {
-                    if (item.getActualQuantity() != requestedQty) return false;
+                    if (item.getActualQuantity() != requestedQty) {
+                        return false;
+                    }
                 }
 
                 detailStmt.setInt(1, item.getActualQuantity());
@@ -822,13 +827,17 @@ public class RequestDAO extends DBContext {
                     }
 
                     int affected = stockStmt.executeUpdate();
-                    if (affected <= 0) return false;
+                    if (affected <= 0) {
+                        return false;
+                    }
                 }
             }
 
             int[] result = detailStmt.executeBatch();
             for (int r : result) {
-                if (r <= 0) return false;
+                if (r <= 0) {
+                    return false;
+                }
             }
 
             try (PreparedStatement stmt = conn.prepareStatement(
@@ -873,8 +882,7 @@ public class RequestDAO extends DBContext {
                 + "JOIN RequestType rt ON rl.RequestTypeId = rt.RequestTypeId "
                 + "WHERE rd.RequestId = ?";
 
-        try (Connection conn = getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (Connection conn = getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, requestId);
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
@@ -896,8 +904,7 @@ public class RequestDAO extends DBContext {
 
     public boolean isRequestUpdated(int requestId) throws SQLException {
         String sql = "SELECT IsUpdated FROM RequestList WHERE RequestId = ?";
-        try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, requestId);
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
@@ -910,8 +917,7 @@ public class RequestDAO extends DBContext {
 
     public boolean markRequestUpdated(int requestId) throws SQLException {
         String sql = "UPDATE RequestList SET IsUpdated = TRUE WHERE RequestId = ?";
-        try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, requestId);
             return stmt.executeUpdate() > 0;
         }
@@ -928,9 +934,112 @@ public class RequestDAO extends DBContext {
             }
             int[] results = stmt.executeBatch();
             for (int res : results) {
-                if (res <= 0) return false;
+                if (res <= 0) {
+                    return false;
+                }
             }
             return true;
         }
     }
+
+    public List<RequestList> getPagedRequestsByUserFiltered(int userId, String status, String poStatus, String type, int offset, int limit) {
+        List<RequestList> list = new ArrayList<>();
+        String sql = """
+        SELECT r.*, rt.RequestTypeName,
+               (SELECT COUNT(*) FROM PurchaseOrderList po WHERE po.RequestId = r.RequestId) AS POCount,
+               (SELECT po.Status FROM PurchaseOrderList po WHERE po.RequestId = r.RequestId LIMIT 1) AS POStatus
+        FROM RequestList r
+        JOIN RequestType rt ON r.RequestTypeId = rt.RequestTypeId
+        WHERE r.RequestedBy = ?
+    """;
+
+        if (status != null && !status.isEmpty()) {
+            sql += " AND r.Status = ?";
+        }
+        if (poStatus != null && !poStatus.isEmpty()) {
+            sql += " AND EXISTS (SELECT 1 FROM PurchaseOrderList po WHERE po.RequestId = r.RequestId AND po.Status = ?)";
+        }
+        if (type != null && !type.isEmpty()) {
+            sql += " AND rt.RequestTypeName = ?";
+        }
+
+        sql += " ORDER BY r.RequestDate DESC LIMIT ? OFFSET ?";
+
+        try (Connection conn = getNewConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            int idx = 1;
+            stmt.setInt(idx++, userId);
+            if (status != null && !status.isEmpty()) {
+                stmt.setString(idx++, status);
+            }
+            if (poStatus != null && !poStatus.isEmpty()) {
+                stmt.setString(idx++, poStatus);
+            }
+            if (type != null && !type.isEmpty()) {
+                stmt.setString(idx++, type);
+            }
+            stmt.setInt(idx++, limit);
+            stmt.setInt(idx, offset);
+
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                RequestList r = new RequestList();
+                r.setRequestId(rs.getInt("RequestId"));
+                r.setRequestTypeName(rs.getString("RequestTypeName"));
+                r.setStatus(rs.getString("Status"));
+                r.setRequestDate(rs.getDate("RequestDate"));
+                r.setNote(rs.getString("Note"));
+                r.setApprovalNote(rs.getString("ApprovalNote"));
+                r.setPoCount(rs.getInt("POCount"));
+                r.setPoStatus(rs.getString("POStatus"));
+                r.setHasPO(rs.getInt("POCount") > 0);
+                list.add(r);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
+    public int countRequestsByUserWithFilters(int userId, String status, String poStatus, String type) {
+        String sql = """
+        SELECT COUNT(*) FROM RequestList r
+        JOIN RequestType rt ON r.RequestTypeId = rt.RequestTypeId
+        WHERE r.RequestedBy = ?
+    """;
+
+        if (status != null && !status.isEmpty()) {
+            sql += " AND r.Status = ?";
+        }
+        if (poStatus != null && !poStatus.isEmpty()) {
+            sql += " AND EXISTS (SELECT 1 FROM PurchaseOrderList po WHERE po.RequestId = r.RequestId AND po.Status = ?)";
+        }
+        if (type != null && !type.isEmpty()) {
+            sql += " AND rt.RequestTypeName = ?";
+        }
+
+        try (Connection conn = getNewConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            int idx = 1;
+            stmt.setInt(idx++, userId);
+            if (status != null && !status.isEmpty()) {
+                stmt.setString(idx++, status);
+            }
+            if (poStatus != null && !poStatus.isEmpty()) {
+                stmt.setString(idx++, poStatus);
+            }
+            if (type != null && !type.isEmpty()) {
+                stmt.setString(idx++, type);
+            }
+
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return 0;
+    }
+
 }

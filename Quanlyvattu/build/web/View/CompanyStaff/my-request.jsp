@@ -7,6 +7,17 @@
 
     <!-- Filter Form -->
     <form class="mb-4 flex flex-wrap gap-4 items-end" method="get" action="my-request">
+        <!-- Type Filter -->
+        <div>
+            <label for="typeFilter" class="block mb-1 font-medium">Type Request:</label>
+            <select id="typeFilter" name="type" class="form-select w-48 p-2 rounded border border-gray-300">
+                <option value="" ${empty param.type ? "selected" : ""}>All</option>
+                <option value="Export" ${param.type == 'Export' ? "selected" : ""}>Export</option>
+                <option value="Import" ${param.type == 'Import' ? "selected" : ""}>Import</option>
+                <option value="Purchase" ${param.type == 'Purchase' ? "selected" : ""}>Purchase</option>
+            </select>
+        </div>
+
         <!-- Status Filter -->
         <div>
             <label for="statusFilter" class="block mb-1 font-medium">Status Request:</label>
@@ -40,7 +51,7 @@
 
     <c:if test="${not empty myRequestList}">
         <div class="overflow-auto rounded shadow">
-            <table class="min-w-full bg-white text-sm border border-gray-200" id="requestTable">
+            <table class="min-w-full bg-white text-sm border border-gray-200">
                 <thead class="bg-gray-100 text-gray-600 font-semibold">
                     <tr>
                         <th class="p-3 text-left">No</th>
@@ -51,12 +62,13 @@
                         <th class="p-3 text-left">Director Note</th>
                         <th class="p-3 text-left">PO Status</th>
                         <th class="p-3 text-left">Action</th>
+                        <th class="p-3 text-left">Detail</th>
                     </tr>
                 </thead>
-                <tbody id="requestTableBody">
+                <tbody>
                     <c:forEach var="req" items="${myRequestList}" varStatus="loop">
-                        <tr class="request-row border-t hover:bg-gray-50">
-                            <td class="p-3">${loop.index + 1}</td>
+                        <tr class="border-t hover:bg-gray-50">
+                            <td class="p-3">${(currentPage - 1) * 5 + loop.index + 1}</td>
                             <td class="p-3">${req.requestTypeName}</td>
                             <td class="p-3">
                                 <span class="px-2 py-1 rounded-full text-xs font-semibold
@@ -107,86 +119,38 @@
                                             </c:otherwise>
                                         </c:choose>
                                     </td>
+                                    <td class="p-3">
+                                        <a href="request-detail?id=${req.requestId}" 
+                                           class="text-blue-600 hover:underline text-sm">View</a>
+                                    </td>
                                 </tr>
                             </c:forEach>
                         </tbody>
                     </table>
 
-                    <!-- PHÂN TRANG -->
-                    <div class="mt-4 flex justify-center gap-2" id="pagination"></div>
+                    <div class="mt-4 flex justify-center gap-2">
+                        <c:if test="${currentPage > 1}">
+                            <a href="my-request?page=1&type=${param.type}&status=${param.status}&poStatus=${param.poStatus}"
+                               class="px-3 py-1 border rounded bg-white text-gray-700 hover:bg-gray-100">&laquo;</a>
+                            <a href="my-request?page=${currentPage - 1}&type=${param.type}&status=${param.status}&poStatus=${param.poStatus}"
+                               class="px-3 py-1 border rounded bg-white text-gray-700 hover:bg-gray-100">&lt;</a>
+                        </c:if>
+
+                        <c:forEach begin="1" end="${totalPages}" var="i">
+                            <a href="my-request?page=${i}&type=${param.type}&status=${param.status}&poStatus=${param.poStatus}"
+                               class="px-3 py-1 border rounded 
+                               ${i == currentPage ? 'bg-blue-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'}">
+                                ${i}
+                            </a>
+                        </c:forEach>
+
+                        <c:if test="${currentPage < totalPages}">
+                            <a href="my-request?page=${currentPage + 1}&type=${param.type}&status=${param.status}&poStatus=${param.poStatus}"
+                               class="px-3 py-1 border rounded bg-white text-gray-700 hover:bg-gray-100">&gt;</a>
+                            <a href="my-request?page=${totalPages}&type=${param.type}&status=${param.status}&poStatus=${param.poStatus}"
+                               class="px-3 py-1 border rounded bg-white text-gray-700 hover:bg-gray-100">&raquo;</a>
+                        </c:if>
+                    </div>
                 </div>
             </c:if>
-
-            <!-- JS PHÂN TRANG -->
-            <script>
-                const rowsPerPage = 8;
-                const rows = document.querySelectorAll(".request-row");
-                const pagination = document.getElementById("pagination");
-
-                let currentPage = 1;
-
-                function renderPagination(totalPages) {
-                    pagination.innerHTML = "";
-
-                    // << Button
-                    const firstBtn = document.createElement("button");
-                    firstBtn.innerText = "<<";
-                    firstBtn.className = "px-3 py-1 border rounded bg-white text-gray-700 hover:bg-gray-100";
-                    firstBtn.onclick = () => showPage(1);
-                    pagination.appendChild(firstBtn);
-
-                    // < Button
-                    const prevBtn = document.createElement("button");
-                    prevBtn.innerText = "<";
-                    prevBtn.className = "px-3 py-1 border rounded bg-white text-gray-700 hover:bg-gray-100";
-                    prevBtn.onclick = () => showPage(currentPage - 1);
-                    pagination.appendChild(prevBtn);
-
-                    // Page buttons
-                    for (let i = 1; i <= totalPages; i++) {
-                        const btn = document.createElement("button");
-                        btn.innerText = i;
-                        btn.className = "px-3 py-1 border rounded " + (i === currentPage ? "bg-blue-500 text-white" : "bg-white text-gray-700 hover:bg-gray-100");
-                        btn.onclick = () => showPage(i);
-                        pagination.appendChild(btn);
-                    }
-
-                    // > Button
-                    const nextBtn = document.createElement("button");
-                    nextBtn.innerText = ">";
-                    nextBtn.className = "px-3 py-1 border rounded bg-white text-gray-700 hover:bg-gray-100";
-                    nextBtn.onclick = () => showPage(currentPage + 1);
-                    pagination.appendChild(nextBtn);
-
-                    // >> Button
-                    const lastBtn = document.createElement("button");
-                    lastBtn.innerText = ">>";
-                    lastBtn.className = "px-3 py-1 border rounded bg-white text-gray-700 hover:bg-gray-100";
-                    lastBtn.onclick = () => showPage(totalPages);
-                    pagination.appendChild(lastBtn);
-                }
-
-                function showPage(page) {
-                    const totalPages = Math.ceil(rows.length / rowsPerPage);
-                    if (page < 1)
-                        page = 1;
-                    if (page > totalPages)
-                        page = totalPages;
-                    currentPage = page;
-
-                    const start = (page - 1) * rowsPerPage;
-                    const end = start + rowsPerPage;
-
-                    rows.forEach((row, index) => {
-                        row.style.display = (index >= start && index < end) ? "" : "none";
-                    });
-
-                    renderPagination(totalPages);
-                }
-
-                if (rows.length > 0) {
-                    showPage(1);
-                }
-            </script>
-
         </div>
