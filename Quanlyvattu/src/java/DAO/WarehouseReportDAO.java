@@ -181,7 +181,7 @@ public class WarehouseReportDAO {
       "FROM ImportDetail id " +
       "LEFT JOIN Materials m ON id.MaterialId = m.MaterialId " +
       "LEFT JOIN ImportList il ON id.ImportId = il.ImportId " +
-      "WHERE il.RequestId = ? " +
+      "WHERE il.RequestId = ?  AND id.Quantity > 0 " + 
       "ORDER BY il.ImportDate DESC, id.ImportDetailId";
         
         try {
@@ -251,7 +251,7 @@ public List<ExportDetail> getRelatedExportDetailsByRequestId(int requestId) {
         "FROM ExportDetail ed " +
         "LEFT JOIN Materials m ON ed.MaterialId = m.MaterialId " +
         "LEFT JOIN ExportList el ON ed.ExportId = el.ExportId " +
-        "WHERE el.RequestId = ? " +
+        "WHERE el.RequestId = ? AND ed.Quantity > 0 " + 
         "ORDER BY el.ExportDate DESC, ed.ExportDetailId";
     try (Connection conn = new DBContext().getConnection();
          PreparedStatement ps = conn.prepareStatement(sql)) {
