@@ -242,4 +242,111 @@ public class PurchaseOrderDAO extends DBContext {
         }
         return false;
     }
+
+    public List<PurchaseOrderList> getFilteredPurchaseOrdersPaged(String status, String createdDate, String createdByName, int offset, int pageSize) {
+        List<PurchaseOrderList> list = new ArrayList<>();
+        StringBuilder sql = new StringBuilder("""
+        SELECT po.*, 
+               u1.FullName AS CreatedByName, 
+               u2.FullName AS ApprovedByName
+        FROM PurchaseOrderList po
+        JOIN Users u1 ON po.CreatedBy = u1.UserId
+        LEFT JOIN Users u2 ON po.ApprovedBy = u2.UserId
+        WHERE 1=1
+    """);
+
+        List<Object> params = new ArrayList<>();
+
+        if (status != null && !status.isEmpty()) {
+            sql.append(" AND po.Status = ? ");
+            params.add(status);
+        }
+        if (createdDate != null && !createdDate.isEmpty()) {
+            sql.append(" AND DATE(po.CreatedDate) = ? ");
+            params.add(Date.valueOf(createdDate));
+        }
+        if (createdByName != null && !createdByName.isEmpty()) {
+            sql.append(" AND u1.FullName LIKE ? ");
+            params.add("%" + createdByName + "%");
+        }
+
+        sql.append(" ORDER BY po.CreatedDate DESC LIMIT ? OFFSET ? ");
+        params.add(pageSize);
+        params.add(offset);
+
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    PurchaseOrderList po = new PurchaseOrderList();
+                    po.setPoId(rs.getInt("POId"));
+                    po.setRequestId(rs.getInt("RequestId"));
+                    po.setCreatedBy(rs.getInt("CreatedBy"));
+                    po.setCreatedDate(rs.getTimestamp("CreatedDate"));
+                    po.setTotalPrice(rs.getDouble("TotalPrice"));
+                    po.setStatus(rs.getString("Status"));
+
+                    int approvedBy = rs.getInt("ApprovedBy");
+                    po.setApprovedBy(rs.wasNull() ? null : approvedBy);
+
+                    Timestamp approvedDate = rs.getTimestamp("ApprovedDate");
+                    po.setApprovedDate(approvedDate != null ? new Date(approvedDate.getTime()) : null);
+
+                    po.setNote(rs.getString("Note"));
+                    po.setCreatedByName(rs.getString("CreatedByName"));
+                    po.setApprovedByName(rs.getString("ApprovedByName"));
+
+                    list.add(po);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
+    public int countFilteredPurchaseOrders(String status, String createdDate, String createdByName) {
+        StringBuilder sql = new StringBuilder("""
+        SELECT COUNT(*) 
+        FROM PurchaseOrderList po
+        JOIN Users u1 ON po.CreatedBy = u1.UserId
+        WHERE 1=1
+    """);
+
+        List<Object> params = new ArrayList<>();
+
+        if (status != null && !status.isEmpty()) {
+            sql.append(" AND po.Status = ? ");
+            params.add(status);
+        }
+        if (createdDate != null && !createdDate.isEmpty()) {
+            sql.append(" AND DATE(po.CreatedDate) = ? ");
+            params.add(Date.valueOf(createdDate));
+        }
+        if (createdByName != null && !createdByName.isEmpty()) {
+            sql.append(" AND u1.FullName LIKE ? ");
+            params.add("%" + createdByName + "%");
+        }
+
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return 0;
+    }
+
 }
