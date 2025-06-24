@@ -166,7 +166,9 @@
 
                     <!-- Nút Back và Edit -->
                     <div>
-                        <a href="${pageContext.request.contextPath}/materiallist" class="btn-back">&larr; Back to Materials</a>
+                        <a href="${pageContext.request.contextPath}/materiallist?page=${currentPage}&category=${selectedCategory}&subcategory=${selectedSubcategory}&name=${searchName}" class="btn-back">
+                            &larr; Back to Materials
+                        </a>
                         <a href="${pageContext.request.contextPath}/editmaterial?materialId=${m.materialId}" class="btn-edit">✏️ Edit</a>
                     </div>
                 </div>

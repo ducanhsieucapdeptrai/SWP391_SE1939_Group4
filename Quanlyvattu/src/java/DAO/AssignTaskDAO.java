@@ -464,9 +464,10 @@ public class AssignTaskDAO extends DBContext {
         LEFT JOIN ImportType it ON il.ImportTypeId = it.ImportTypeId
         LEFT JOIN ExportList el ON rl.RequestId = el.RequestId
         LEFT JOIN ExportType et ON el.ExportTypeId = et.ExportTypeId
-        WHERE rl.Status = 'Approved'
-          AND rl.AssignedStaffId IS NOT NULL
-          AND DATE(rl.ArrivalDate) = CURDATE()
+
+        WHERE Status = 'Approved'
+          AND IsTransferredToday = TRUE
+          AND IsCompleted = FALSE;
     """);
 
         List<Object> params = new ArrayList<>();
@@ -525,9 +526,11 @@ public class AssignTaskDAO extends DBContext {
         LEFT JOIN ImportType it ON il.ImportTypeId = it.ImportTypeId
         LEFT JOIN ExportList el ON rl.RequestId = el.RequestId
         LEFT JOIN ExportType et ON el.ExportTypeId = et.ExportTypeId
-        WHERE rl.Status = 'Approved'
-            AND rl.AssignedStaffId IS NOT NULL
-            AND (rl.ArrivalDate IS NULL OR DATE(rl.ArrivalDate) > CURDATE())
+  
+        WHERE Status = 'Approved'
+          AND IsTransferredToday = FALSE
+          AND IsCompleted = FALSE;
+   
     """);
 
         List<Object> params = new ArrayList<>();
