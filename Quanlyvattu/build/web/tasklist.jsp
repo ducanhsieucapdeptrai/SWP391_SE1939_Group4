@@ -87,15 +87,16 @@
                             <th class="border border-gray-300 px-3 py-2">Note</th>
                             <th class="border border-gray-300 px-3 py-2">Approved By</th>
                             <th class="border border-gray-300 px-3 py-2">Approval Note</th>
+                                <c:if test="${sessionScope.userRole == 'Warehouse Manager'}">
 
-                            <c:if test="${activeView == 'upcoming'}">
-                                <th class="border border-gray-300 px-3 py-2 text-center">IsTransfer</th>
+                                <c:if test="${activeView == 'upcoming'}">
+                                    <th class="border border-gray-300 px-3 py-2 text-center">IsTransfer</th>
+                                    </c:if>
+
+                                <c:if test="${activeView == 'ongoing'}">
+                                    <th class="border border-gray-300 px-3 py-2 text-center">Revert Transfer</th>
+                                    </c:if>
                                 </c:if>
-
-                            <c:if test="${activeView == 'ongoing'}">
-                                <th class="border border-gray-300 px-3 py-2 text-center">Revert Transfer</th>
-                                </c:if>
-
                             <th class="border border-gray-300 px-3 py-2">Action</th>
                         </tr>
                     </thead>
@@ -115,26 +116,32 @@
                                 <td class="border border-gray-300 px-3 py-2">${r.approvalNote}</td>
 
                                 <!-- UPCOMING: hiển thị checkbox IsTransfer -->
-                                <c:if test="${activeView == 'upcoming'}">
-                                    <td class="border border-gray-300 px-3 py-2 text-center">
-                                        <c:choose>
-                                            <c:when test="${r.isTransferredToday}">
-                                                ✅
-                                            </c:when>
-                                            <c:otherwise>
-                                                <input type="checkbox" name="requestIds" value="${r.requestId}" class="isTransferCheckbox" />
-                                            </c:otherwise>
-                                        </c:choose>
-                                    </td>
+                                <c:if test="${sessionScope.userRole == 'Warehouse Manager'}">
+                                    <c:if test="${activeView == 'upcoming'}">
+                                        <td class="border border-gray-300 px-3 py-2 text-center">
+                                            <c:choose>
+                                                <c:when test="${r.isTransferredToday}">
+                                                    ✅
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <input type="checkbox" name="requestIds" value="${r.requestId}" class="isTransferCheckbox" />
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </td>
+                                    </c:if>
                                 </c:if>
+
 
                                 <!-- ONGOING: hiển thị checkbox Revert -->
-                                <c:if test="${activeView == 'ongoing'}">
-                                    <td class="border border-gray-300 px-3 py-2 text-center">
-                                        <input type="checkbox" name="revertRequestIds" value="${r.requestId}" class="revertTransferCheckbox" />
-                                    </td>
-                                </c:if>
 
+                                <c:if test="${sessionScope.userRole == 'Warehouse Manager'}">
+
+                                    <c:if test="${activeView == 'ongoing'}">
+                                        <td class="border border-gray-300 px-3 py-2 text-center">
+                                            <input type="checkbox" name="revertRequestIds" value="${r.requestId}" class="revertTransferCheckbox" />
+                                        </td>
+                                    </c:if>
+                                </c:if>
                                 <td class="border border-gray-300 px-3 py-2">
                                     <a href="warehousereport?requestId=${r.requestId}" class="text-blue-600 hover:underline">Detail</a>
                                 </td>
