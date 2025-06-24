@@ -21,9 +21,14 @@
     }
 
     String baseParams = "";
-    if (selectedCategory != null && !selectedCategory.isEmpty()) baseParams += "&category=" + selectedCategory;
-    if (selectedSubcategory != null && !selectedSubcategory.isEmpty()) baseParams += "&subcategory=" + selectedSubcategory;
-    if (searchName != null && !searchName.isEmpty()) baseParams += "&name=" + searchName;
+    if (selectedCategory != null && !selectedCategory.isEmpty()) {
+        baseParams += "&category=" + selectedCategory;
+    }
+    if (selectedSubcategory != null && !selectedSubcategory.isEmpty()) {
+        baseParams += "&subcategory=" + selectedSubcategory;
+    }
+    if (searchName != null && !searchName.isEmpty())
+        baseParams += "&name=" + searchName;
 %>
 
 <!-- Material List Page -->
@@ -33,15 +38,15 @@
             <h2 class="col-span-4 text-2xl font-bold text-gray-800">Material List</h2>
 
             <!-- Category -->
-            <select name="category" class="border px-3 py-2 rounded-lg shadow-sm">
+            <select name="category" id="category" class="border px-3 py-2 rounded-lg shadow-sm">
                 <option value="">-- All Categories --</option>
                 <%
                     List<Category> allCategories = (List<Category>) request.getAttribute("allCategories");
                     if (allCategories != null) {
                         for (Category c : allCategories) {
                 %>
-                <option value="<%= c.getCategoryName() %>" <%= c.getCategoryName().equals(selectedCategory) ? "selected" : "" %>>
-                    <%= c.getCategoryName() %>
+                <option value="<%= c.getCategoryName()%>" <%= c.getCategoryName().equals(selectedCategory) ? "selected" : ""%>>
+                    <%= c.getCategoryName()%>
                 </option>
                 <%
                         }
@@ -50,26 +55,15 @@
             </select>
 
             <!-- SubCategory -->
-            <select name="subcategory" class="border px-3 py-2 rounded-lg shadow-sm">
+            <select name="subcategory" id="subcategory" class="border px-3 py-2 rounded-lg shadow-sm">
                 <option value="">-- All Subcategories --</option>
-                <%
-                    List<SubCategory> allSubcategories = (List<SubCategory>) request.getAttribute("allSubcategories");
-                    if (allSubcategories != null) {
-                        for (SubCategory sc : allSubcategories) {
-                %>
-                <option value="<%= sc.getSubCategoryName() %>" <%= sc.getSubCategoryName().equals(selectedSubcategory) ? "selected" : "" %>>
-                    <%= sc.getSubCategoryName() %>
-                </option>
-                <%
-                        }
-                    }
-                %>
             </select>
 
             <!-- Search -->
             <input type="text" name="name" placeholder="Search name..."
-                   value="<%= searchName != null ? searchName : "" %>"
+                   value="<%= searchName != null ? searchName : ""%>"
                    class="border px-3 py-2 rounded-lg shadow-sm" />
+
 
             <!-- Buttons -->
             <div class="flex space-x-2">
@@ -117,28 +111,28 @@
                     int inStock = m.getQuantity();
             %>
             <tr class="border-t hover:bg-gray-50">
-                <td class="py-2 px-4"><%= m.getCategoryName() %></td>
-                <td class="py-2 px-4"><%= m.getSubCategoryName() %></td>
-                <td class="py-2 px-4 font-medium"><%= code %></td>
+                <td class="py-2 px-4"><%= m.getCategoryName()%></td>
+                <td class="py-2 px-4"><%= m.getSubCategoryName()%></td>
+                <td class="py-2 px-4 font-medium"><%= code%></td>
                 <td class="py-2 px-4">
-                    <img src="<%= request.getContextPath() + "/assets/images/materials/" + ((m.getImage() == null || m.getImage().isEmpty()) ? "default.png" : m.getImage()) %>"
-                         alt="<%= m.getMaterialName() %>"
+                    <img src="<%= request.getContextPath() + "/assets/images/materials/" + ((m.getImage() == null || m.getImage().isEmpty()) ? "default.png" : m.getImage())%>"
+                         alt="<%= m.getMaterialName()%>"
                          class="h-12 w-12 object-cover rounded cursor-pointer transition-transform hover:scale-110"
                          onclick="showImage(this.src)" />
                 </td>
-                <td class="py-2 px-4"><%= m.getMaterialName() %></td>
+                <td class="py-2 px-4"><%= m.getMaterialName()%></td>
                 <td class="py-2 px-4">
-                    <span class="<%= "New".equals(m.getStatusName()) ? "text-green-600" : ("Damaged".equals(m.getStatusName()) ? "text-red-600" : "text-yellow-600") %>">
-                        <%= m.getStatusName() %>
+                    <span class="<%= "New".equals(m.getStatusName()) ? "text-green-600" : ("Damaged".equals(m.getStatusName()) ? "text-red-600" : "text-yellow-600")%>">
+                        <%= m.getStatusName()%>
                     </span>
                 </td>
-                <td class="py-2 px-4"><%= inStock %></td>
-                <td class="py-2 px-4"><%= String.format("%,.0f", m.getPrice()) %> đ</td>
+                <td class="py-2 px-4"><%= inStock%></td>
+                <td class="py-2 px-4"><%= String.format("%,.0f", m.getPrice())%> đ</td>
                 <td class="py-2 px-4">
-                    <a href="materialdetail?id=<%= m.getMaterialId() %>&page=<%= currentPage %><%= baseParams %>" class="text-blue-600 hover:underline">View</a>
+                    <a href="materialdetail?id=<%= m.getMaterialId()%>&page=<%= currentPage%><%= baseParams%>" class="text-blue-600 hover:underline">View</a>
                 </td>
             </tr>
-            <% } %>
+            <% }%>
         </tbody>
     </table>
 </div>
@@ -146,28 +140,28 @@
 <!-- Pagination -->
 <div class="flex justify-between items-center mt-4">
     <div class="text-sm text-gray-600">
-        Showing <%= currentPage %> / <%= totalPage %> page
+        Showing <%= currentPage%> / <%= totalPage%> page
     </div>
     <div class="space-x-1">
-        <% if (currentPage > 1) { %>
-            <a href="materiallist?page=<%= currentPage - 1 %><%= baseParams %>" class="px-3 py-1 border rounded">«</a>
+        <% if (currentPage > 1) {%>
+        <a href="materiallist?page=<%= currentPage - 1%><%= baseParams%>" class="px-3 py-1 border rounded">«</a>
         <% } else { %>
-            <span class="px-3 py-1 border rounded text-gray-400 cursor-not-allowed">«</span>
+        <span class="px-3 py-1 border rounded text-gray-400 cursor-not-allowed">«</span>
         <% } %>
 
         <% for (int i = startPage; i <= endPage; i++) { %>
-            <% if (i == currentPage) { %>
-                <span class="px-3 py-1 border rounded bg-blue-600 text-white"><%= i %></span>
-            <% } else { %>
-                <a href="materiallist?page=<%= i %><%= baseParams %>" class="px-3 py-1 border rounded hover:bg-gray-100"><%= i %></a>
-            <% } %>
+        <% if (i == currentPage) {%>
+        <span class="px-3 py-1 border rounded bg-blue-600 text-white"><%= i%></span>
+        <% } else {%>
+        <a href="materiallist?page=<%= i%><%= baseParams%>" class="px-3 py-1 border rounded hover:bg-gray-100"><%= i%></a>
+        <% } %>
         <% } %>
 
-        <% if (currentPage < totalPage) { %>
-            <a href="materiallist?page=<%= currentPage + 1 %><%= baseParams %>" class="px-3 py-1 border rounded">»</a>
+        <% if (currentPage < totalPage) {%>
+        <a href="materiallist?page=<%= currentPage + 1%><%= baseParams%>" class="px-3 py-1 border rounded">»</a>
         <% } else { %>
-            <span class="px-3 py-1 border rounded text-gray-400 cursor-not-allowed">»</span>
-        <% } %>
+        <span class="px-3 py-1 border rounded text-gray-400 cursor-not-allowed">»</span>
+        <% }%>
     </div>
 </div>
 
@@ -186,6 +180,52 @@
     document.getElementById("image-popup").addEventListener("click", function (e) {
         if (e.target.id === "image-popup") {
             closeImage();
+        }
+    });
+</script>
+<script>
+    const subcategories = {
+        "Structural Materials": ["Concrete", "Structural Steel", "Bricks", "Building Stone", "Structural Timber"],
+        "Finishing Materials": ["Flooring Materials", "Wall Coverings", "Paints and Coatings", "Ceiling Materials"],
+        "Insulation & Waterproofing": ["Thermal Insulation", "Waterproofing Materials", "Sound Insulation"],
+        "Mechanical & Electrical": ["Electrical Systems", "Plumbing Systems", "HVAC Systems"],
+        "Interior Decoration": ["Wooden Furniture", "Decorative Materials", "Sanitary Equipment"],
+        "Other Construction Materials": ["Foundation Materials", "Roofing Materials", "Door and Window Materials"]
+    };
+
+    function updateSubcategories() {
+        const categorySelect = document.querySelector('select[name="category"]');
+        const subcategorySelect = document.querySelector('select[name="subcategory"]');
+        const selectedCategory = categorySelect.value;
+
+        // Xóa toàn bộ option cũ
+        subcategorySelect.innerHTML = '<option value="">-- All Subcategories --</option>';
+
+        if (selectedCategory && subcategories[selectedCategory]) {
+            subcategories[selectedCategory].forEach(sub => {
+                const option = document.createElement("option");
+                option.value = sub;
+                option.text = sub;
+                subcategorySelect.appendChild(option);
+            });
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelector('select[name="category"]').addEventListener("change", updateSubcategories);
+
+        // Tự động kích hoạt sau khi load nếu có selectedCategory
+        updateSubcategories();
+
+        // Gán selected cho subcategory nếu đã chọn từ trước
+        const selectedSub = "<%= selectedSubcategory != null ? selectedSubcategory : ""%>";
+        if (selectedSub) {
+            const subSelect = document.querySelector('select[name="subcategory"]');
+            Array.from(subSelect.options).forEach(option => {
+                if (option.value === selectedSub) {
+                    option.selected = true;
+                }
+            });
         }
     });
 </script>

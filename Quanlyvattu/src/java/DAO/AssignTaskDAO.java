@@ -571,4 +571,23 @@ public class AssignTaskDAO extends DBContext {
         return list;
     }
 
+    public List<String> getAllRequesterNames() {
+        List<String> names = new ArrayList<>();
+        String sql = """
+        SELECT DISTINCT u.FullName
+        FROM Users u
+        JOIN RequestList r ON u.UserId = r.RequestedBy
+        ORDER BY u.FullName
+    """;
+        DBContext db = new DBContext();
+        try (Connection conn = db.getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                names.add(rs.getString("FullName"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return names;
+    }
+
 }

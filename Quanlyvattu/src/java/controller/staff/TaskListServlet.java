@@ -37,6 +37,8 @@ public class TaskListServlet extends HttpServlet {
 
         // Danh sách loại yêu cầu
         List<String> requestTypes = dao.getAllRequestTypes();
+        List<String> requesterNames = dao.getAllRequesterNames();
+        request.setAttribute("requesterNames", requesterNames);
 
         // Gửi dữ liệu cho JSP
         request.setAttribute("approvedRequestList", list);

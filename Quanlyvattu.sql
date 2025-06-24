@@ -105,7 +105,7 @@ CREATE TABLE RequestList (
     ApprovalNote TEXT,
     AssignedStaffId INT,
     IsTransferredToday BOOLEAN DEFAULT FALSE,
-    IsUpdated BOOLEAN DEFAULT FALSE,
+    IsUpdated BOOLEAN DEFAULT FALSE NOT NULL,
     ArrivalDate DATETIME,
     IsCompleted BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (RequestedBy) REFERENCES Users(UserId),
