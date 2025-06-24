@@ -44,9 +44,12 @@
 
             <!-- Header -->
             <div class="row mb-4">
-                <div class="col-12">
+                <div class="col-11">
                     <h3>Warehouse Staff's Report</h3>
                     <p class="text-muted">Request ID: ${requestInfo.requestId}</p>
+                </div>
+                <div class="col-1">
+                    <a href="javascript:history.back()" class="btn btn-secondary btn-sm shadow-sm">&larr; Back</a>
                 </div>
             </div>
 
