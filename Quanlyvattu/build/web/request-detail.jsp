@@ -137,7 +137,9 @@
                 </div>
             </div>
 
+            <!-- Additional Information Row -->
             <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Request Note -->
                 <div class="md:col-span-1">
                     <c:if test="${not empty requestInfo.note}">
                         <div class="p-4 bg-yellow-50 rounded-lg border-l-4 border-yellow-400">
@@ -157,6 +159,7 @@
                     </c:if>
                 </div>
 
+                <!-- Approval Information -->
                 <div class="md:col-span-2">
                     <c:choose>
                         <c:when test="${not empty requestInfo.approvedByName}">
@@ -203,6 +206,7 @@
             </div>
         </div>
 
+        <!-- Request Details Table -->
         <div class="bg-white shadow-lg rounded-lg p-6">
             <h2 class="text-xl font-semibold mb-4 text-gray-800">
                 <i class="fas fa-list mr-2 text-green-600"></i>
@@ -280,6 +284,7 @@
                         </table>
                     </div>
 
+                    <!-- Summary -->
                     <div class="mt-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6">
                         <h3 class="text-lg font-semibold mb-4 text-gray-800">
                             <i class="fas fa-chart-bar mr-2"></i>Request Summary
@@ -333,6 +338,7 @@
         </div>
     </div>
 
+    <!-- Approve Modal -->
     <div id="approveModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
         <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div class="fixed inset-0 transition-opacity">
@@ -374,6 +380,7 @@
         </div>
     </div>
 
+    <!-- Reject Modal -->
     <div id="rejectModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
         <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div class="fixed inset-0 transition-opacity">
@@ -432,7 +439,7 @@
             document.getElementById('rejectModal').classList.add('hidden');
         }
 
-    // Close modals when clicking outside
+        // Close modals when clicking outside
         document.getElementById('approveModal').addEventListener('click', function (e) {
             if (e.target === this) {
                 closeApproveModal();
@@ -444,4 +451,4 @@
                 closeRejectModal();
             }
         });
-    </script> 
+    </script>

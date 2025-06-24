@@ -36,12 +36,14 @@ public class RequestList {
     private String exportTypeName;
     private Date arrivalDate;
     private boolean isUpdated;
-
+    private boolean isCompleted;
+    private boolean IsTransferredToday;
 // getters & setters
+
     public RequestList() {
     }
 
-    public RequestList(int requestId, int requestedBy, Date requestDate, int requestTypeId, String note, String status, int approvedBy, Date approvedDate, String approvalNote, int assignedStaffId, String assignedStaffName, RequestType requestType, String requestedByName, String approvedByName, String requestTypeName, String statusDescription, List<RequestDetail> requestDetails, String importTypeName, String exportTypeName, Date arrivalDate, boolean isUpdated) {
+    public RequestList(int requestId, int requestedBy, Date requestDate, int requestTypeId, String note, String status, int approvedBy, Date approvedDate, String approvalNote, int assignedStaffId, String assignedStaffName, RequestType requestType, String requestedByName, String approvedByName, String requestTypeName, String statusDescription, List<RequestDetail> requestDetails, String importTypeName, String exportTypeName, Date arrivalDate, boolean isUpdated, boolean isCompleted, boolean IsTransferredToday, boolean hasPO, int poCount, String poStatus) {
         this.requestId = requestId;
         this.requestedBy = requestedBy;
         this.requestDate = requestDate;
@@ -63,7 +65,30 @@ public class RequestList {
         this.exportTypeName = exportTypeName;
         this.arrivalDate = arrivalDate;
         this.isUpdated = isUpdated;
+        this.isCompleted = isCompleted;
+        this.IsTransferredToday = IsTransferredToday;
+        this.hasPO = hasPO;
+        this.poCount = poCount;
+        this.poStatus = poStatus;
     }
+
+    public boolean isIsCompleted() {
+        return isCompleted;
+    }
+
+    public void setIsCompleted(boolean isCompleted) {
+        this.isCompleted = isCompleted;
+    }
+
+    public boolean isIsTransferredToday() {
+        return IsTransferredToday;
+    }
+
+    public void setIsTransferredToday(boolean IsTransferredToday) {
+        this.IsTransferredToday = IsTransferredToday;
+    }
+
+    
 
     public Date getArrivalDate() {
         return arrivalDate;
@@ -80,8 +105,6 @@ public class RequestList {
     public void setIsUpdated(boolean isUpdated) {
         this.isUpdated = isUpdated;
     }
-
-    
 
     public RequestType getRequestType() {
         return requestType;

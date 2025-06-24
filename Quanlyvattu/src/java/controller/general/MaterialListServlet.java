@@ -27,9 +27,7 @@ public class MaterialListServlet extends HttpServlet {
         if (pageParam != null) {
             try {
                 page = Integer.parseInt(pageParam);
-                if (page < 1) {
-                    page = 1;
-                }
+                if (page < 1) page = 1;
             } catch (NumberFormatException e) {
                 page = 1;
             }
@@ -46,33 +44,41 @@ public class MaterialListServlet extends HttpServlet {
         List<Material> materials;
         int totalCount;
 
-        if ((category != null && !category.isEmpty())
-                || (subcategory != null && !subcategory.isEmpty())
-                || (name != null && !name.isEmpty())) {
+        boolean isSearching = (category != null && !category.isEmpty())
+                            || (subcategory != null && !subcategory.isEmpty())
+                            || (name != null && !name.isEmpty());
 
-            // Nếu có điều kiện tìm kiếm → lọc
+        if (isSearching) {
             materials = dao.searchMaterials(category, subcategory, name);
             totalCount = materials.size();  // Không phân trang khi tìm kiếm
-            request.setAttribute("isSearching", true); // Để JSP biết không hiển thị phân trang
+            request.setAttribute("isSearching", true);
         } else {
-            // Nếu không tìm kiếm → phân trang
             materials = dao.getMaterialsByPage(offset, pageSize);
             totalCount = dao.getTotalMaterialCount();
         }
 
         int totalPage = (int) Math.ceil((double) totalCount / pageSize);
-// Lấy danh sách category và subcategory để hiển thị trong dropdown filter
+
+        // Lấy danh sách dropdown filter
         List<Category> allCategories = dao.getAllCategories();
         List<SubCategory> allSubcategories = dao.getAllSubcategories();
 
+        // Truyền các dữ liệu cần thiết sang JSP
+        request.setAttribute("materials", materials);
         request.setAttribute("allCategories", allCategories);
         request.setAttribute("allSubcategories", allSubcategories);
-
-        request.setAttribute("materials", materials);
         request.setAttribute("currentPage", page);
         request.setAttribute("totalPage", totalPage);
-        request.setAttribute("pageContent", "/MaterialList.jsp");
 
+        // Giữ lại các tham số để tái sử dụng trong phân trang / filter
+        request.setAttribute("selectedCategory", category);
+        request.setAttribute("selectedSubcategory", subcategory);
+        request.setAttribute("searchName", name);
+
+        // Truyền thêm current page để sử dụng khi back từ detail
+        request.setAttribute("pageIndex", page);
+
+        request.setAttribute("pageContent", "/MaterialList.jsp");
         request.getRequestDispatcher("/layout/layout.jsp").forward(request, response);
     }
 
