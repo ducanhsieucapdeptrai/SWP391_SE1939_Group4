@@ -43,6 +43,12 @@
         <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
             Filter
         </button>
+        <div class="flex items-end">
+            <a href="my-request"
+               class="text-center bg-red-300 hover:bg-gray-400 text-gray-800 px-6 py-2 rounded w-full md:w-auto">
+                Clear Filter
+            </a>
+        </div>
     </form>
 
     <c:if test="${empty myRequestList}">

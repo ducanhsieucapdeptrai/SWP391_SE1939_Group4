@@ -1,6 +1,7 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
+<%@taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 
 <!DOCTYPE html>
 <html>
@@ -15,7 +16,12 @@
             <h1 class="text-3xl font-bold text-blue-800 mb-6 border-b pb-2">Purchase Request List</h1>
 
             <!-- FILTER FORM -->
-            <form method="get" action="purchase-request-list" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 bg-white p-4 rounded shadow">
+            <form method="get" action="purchase-request-list" class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6 bg-white p-4 rounded shadow">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Created By (Name)</label>
+                    <input type="text" name="createdByName" value="${filterCreatedByName}" placeholder="Enter name"
+                           class="w-full border px-3 py-2 rounded">
+                </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1">Status</label>
                     <select name="status" class="w-full border px-3 py-2 rounded">
@@ -29,10 +35,16 @@
                     <label class="block text-sm font-semibold text-gray-700 mb-1">Created Date</label>
                     <input type="date" name="createdDate" value="${filterDate}" class="w-full border px-3 py-2 rounded">
                 </div>
-                <div class="flex items-end col-span-1 md:col-span-2">
-                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded w-full md:w-auto">
+                <div class="flex items-end">
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded w-full">
                         Filter
                     </button>
+                </div>
+                <div class="flex items-end">
+                    <a href="purchase-request-list"
+                       class="text-center bg-red-300 hover:bg-gray-400 text-gray-800 px-6 py-2 rounded w-full md:w-auto">
+                        Clear Filter
+                    </a>
                 </div>
             </form>
 
@@ -42,7 +54,6 @@
                     <thead class="bg-blue-600 text-white">
                         <tr>
                             <th class="px-4 py-3">No</th>
-                            <th class="px-4 py-3">Request ID</th>
                             <th class="px-4 py-3">Created By</th>
                             <th class="px-4 py-3">Created Date</th>
                             <th class="px-4 py-3">Total</th>
@@ -53,14 +64,13 @@
                     </thead>
                     <tbody>
                         <c:forEach var="po" items="${poList}" varStatus="i">
-                            <tr class="purchase-request-row border-t hover:bg-gray-50 transition">
-                                <td class="px-4 py-2">${i.index + 1}</td>
-                                <td class="px-4 py-2">${po.requestId}</td>
+                            <tr class="border-t hover:bg-gray-50 transition">
+                                <td class="px-4 py-2">${(currentPage - 1) * pageSize + i.index + 1}</td>
                                 <td class="px-4 py-2">${po.createdByName}</td>
                                 <td class="px-4 py-2">
-                                    <fmt:formatDate value="${po.createdDate}" pattern="yyyy-MM-dd HH:mm" />
+                                    <fmt:formatDate value="${po.createdDate}" pattern="yyyy-MM-dd HH:mm"/>
                                 </td>
-                                <td class="px-4 py-2 text-right text-green-700 font-semibold">
+                                <td class="px-4 py-2 text-green-700 font-semibold">
                                     <fmt:formatNumber value="${po.totalPrice}" type="number" groupingUsed="true" maxFractionDigits="0"/> VND
                                 </td>
                                 <td class="px-4 py-2">
@@ -82,63 +92,31 @@
                 </table>
             </div>
 
-            <!-- PHÂN TRANG -->
-            <div class="mt-4 flex justify-center gap-2" id="pagination"></div>
+            <!-- PAGINATION -->
+            <div class="mt-4 flex justify-center gap-2">
+                <c:if test="${currentPage > 1}">
+                    <a href="purchase-request-list?page=1&status=${filterStatus}&createdDate=${filterDate}&createdByName=${filterCreatedByName}"
+                       class="px-3 py-1 border rounded bg-white text-gray-700 hover:bg-gray-100">&laquo;</a>
+                    <a href="purchase-request-list?page=${currentPage - 1}&status=${filterStatus}&createdDate=${filterDate}&createdByName=${filterCreatedByName}"
+                       class="px-3 py-1 border rounded bg-white text-gray-700 hover:bg-gray-100">&lt;</a>
+                </c:if>
+
+                <c:forEach begin="1" end="${totalPages}" var="i">
+                    <a href="purchase-request-list?page=${i}&status=${filterStatus}&createdDate=${filterDate}&createdByName=${filterCreatedByName}"
+                       class="px-3 py-1 border rounded
+                       ${i == currentPage ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'}">
+                        ${i}
+                    </a>
+                </c:forEach>
+
+                <c:if test="${currentPage < totalPages}">
+                    <a href="purchase-request-list?page=${currentPage + 1}&status=${filterStatus}&createdDate=${filterDate}&createdByName=${filterCreatedByName}"
+                       class="px-3 py-1 border rounded bg-white text-gray-700 hover:bg-gray-100">&gt;</a>
+                    <a href="purchase-request-list?page=${totalPages}&status=${filterStatus}&createdDate=${filterDate}&createdByName=${filterCreatedByName}"
+                       class="px-3 py-1 border rounded bg-white text-gray-700 hover:bg-gray-100">&raquo;</a>
+                </c:if>
+            </div>
         </div>
-
-        <!-- SCRIPT PHÂN TRANG -->
-        <script>
-            const rowsPerPage = 5;
-            const rows = document.querySelectorAll(".purchase-request-row");
-            const pagination = document.getElementById("pagination");
-            let currentPage = 1;
-
-            function renderPagination(totalPages) {
-                pagination.innerHTML = "";
-
-                const createBtn = (label, page, disabled = false, isActive = false) => {
-                    const btn = document.createElement("button");
-                    btn.innerText = label;
-                    btn.className = "px-3 py-1 border rounded " +
-                            (disabled ? "text-gray-400 cursor-not-allowed" :
-                                    (isActive ? "bg-blue-600 text-white" : "bg-white text-gray-700 hover:bg-gray-100"));
-                    if (!disabled)
-                        btn.onclick = () => showPage(page);
-                    return btn;
-                };
-
-                pagination.appendChild(createBtn("<<", 1, currentPage === 1));
-                pagination.appendChild(createBtn("<", currentPage - 1, currentPage === 1));
-
-                for (let i = 1; i <= totalPages; i++) {
-                    pagination.appendChild(createBtn(i, i, false, i === currentPage));
-                }
-
-                pagination.appendChild(createBtn(">", currentPage + 1, currentPage === totalPages));
-                pagination.appendChild(createBtn(">>", totalPages, currentPage === totalPages));
-            }
-
-            function showPage(page) {
-                const totalPages = Math.ceil(rows.length / rowsPerPage);
-                if (page < 1)
-                    page = 1;
-                if (page > totalPages)
-                    page = totalPages;
-                currentPage = page;
-
-                const start = (page - 1) * rowsPerPage;
-                const end = start + rowsPerPage;
-
-                rows.forEach((row, index) => {
-                    row.style.display = (index >= start && index < end) ? "" : "none";
-                });
-
-                renderPagination(totalPages);
-            }
-
-            if (rows.length > 0)
-                showPage(1);
-        </script>
 
     </body>
 </html>
