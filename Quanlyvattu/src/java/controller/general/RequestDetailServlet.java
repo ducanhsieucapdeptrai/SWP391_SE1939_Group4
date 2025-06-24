@@ -1,7 +1,9 @@
 package controller.general;
 
 import DAO.RequestDetailDAO;
+import DAO.MaterialDAO;
 import DAO.RequestDAO;
+import model.Material;
 import model.RequestDetail;
 import model.RequestList;
 import jakarta.servlet.ServletException;
@@ -49,11 +51,17 @@ public class RequestDetailServlet extends HttpServlet {
             // Lấy chi tiết materials
             RequestDetailDAO dao = new RequestDetailDAO();
             List<RequestDetail> details = dao.getRequestDetailsByRequestId(requestId);
+            String status = dao.getRequestStatus(requestId);
+
+            MaterialDAO materialDAO = new MaterialDAO();
+            List<Material> allMaterials = materialDAO.getAllMaterials();
 
             // Set attributes
             request.setAttribute("requestInfo", requestInfo);
             request.setAttribute("requestDetails", details);
+            request.setAttribute("requestStatus", status);
             request.setAttribute("requestId", requestId);
+            request.setAttribute("allMaterials", allMaterials);
 
             if (details == null || details.isEmpty()) {
                 request.setAttribute("message", "Không có vật tư nào trong yêu cầu này (ID: " + requestId + ")");
@@ -171,20 +179,13 @@ public class RequestDetailServlet extends HttpServlet {
     private boolean updateRequestStatus(int requestId, String status, String note) {
         String sql = "UPDATE Requests SET Status = ?, Note = ?, UpdatedDate = GETDATE() WHERE RequestId = ?";
 
-        try {
-            DBContext db = new DBContext();
-            Connection conn = db.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql);
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, status);
             ps.setString(2, note);
             ps.setInt(3, requestId);
 
             int rowsAffected = ps.executeUpdate();
-
-            ps.close();
-            conn.close();
-
             return rowsAffected > 0;
 
         } catch (SQLException e) {

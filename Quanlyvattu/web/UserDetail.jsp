@@ -61,7 +61,42 @@
 
         <div class="mt-6">
             <a href="userlist" class="inline-block bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded mr-2 text-sm">Back to List</a>
-            <a href="user-edit?id=${user.userId}" class="inline-block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm">Edit</a>
+            <!-- nút Edit -->
+            <a id="btnEdit"
+               href="user-edit?id=${user.userId}"
+               data-current-role="${sessionScope.currentUser.role.roleId}"
+               data-current-id="${sessionScope.currentUser.userId}"
+               data-target-role="${user.roleId}"
+               data-target-id="${user.userId}"
+               class="inline-block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm">
+                EditRole&Status
+            </a>
         </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                var btn = document.getElementById('btnEdit');
+                if (!btn)
+                    return;
+
+                btn.addEventListener('click', function (e) {
+                    // Lấy dữ liệu từ data-attributes
+                    var currRole = parseInt(btn.getAttribute('data-current-role'), 10);
+                    var currId = parseInt(btn.getAttribute('data-current-id'), 10);
+                    var targetRole = parseInt(btn.getAttribute('data-target-role'), 10);
+                    var targetId = parseInt(btn.getAttribute('data-target-id'), 10);
+
+                    // Chỉ áp dụng với Warehouse Manager (roleId = 3)
+                    if (currRole === 1) {
+                        // Nếu đang edit chính mình hoặc edit Director (roleId = 1)
+                        if (targetId === currId || targetRole === 3) {
+                            e.preventDefault();
+                            alert('You can not allowed to edit this user’s role or status');
+                        }
+                    }
+
+                });
+            });
+        </script>
     </div>
 </div>

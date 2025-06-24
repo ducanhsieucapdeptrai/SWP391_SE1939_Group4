@@ -12,6 +12,11 @@
 
         <div class="p-6">
             <h1 class="text-2xl font-bold mb-6">Request List</h1>
+            <c:if test="${filterType == 'Purchase'}">
+                <div class="text-sm text-gray-600 mb-2 italic">
+                    Currently showing: <strong>Purchase Requests</strong>
+                </div>
+            </c:if>
 
             <!-- FORM FILTER -->
             <form action="reqlist" method="get" class="mb-6 flex flex-wrap gap-4 items-end">
@@ -55,6 +60,25 @@
                 <a href="${pageContext.request.contextPath}/createrequest" class="inline-block px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors">
                     + Create Request
                 </a>
+
+                <c:choose>
+                    <c:when test="${filterType == 'Purchase'}">
+                        <form action="reqlist" method="get">
+                            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 ml-auto">
+                                Show Material Request List
+                            </button>
+                        </form>
+                    </c:when>
+                    <c:otherwise>
+                        <form action="reqlist" method="get">
+                            <input type="hidden" name="requestType" value="Purchase" />
+                            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 ml-auto">
+                                Show Purchase Requests
+                            </button>
+                        </form>
+                    </c:otherwise>
+                </c:choose>
+
                 <form action="updated-requests" method="get">
                     <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 ml-auto">
                         Show Confirmed Requests

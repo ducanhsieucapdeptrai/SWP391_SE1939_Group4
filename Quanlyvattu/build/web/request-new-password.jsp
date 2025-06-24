@@ -80,8 +80,13 @@
                         </select>
                     </div>
 
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-primary">Send Request</button>
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary px-4">Send Request</button>
+                    </div>
+                    <div class="mt-3 text-center">
+                        <a href="${pageContext.request.contextPath}/login.jsp" class="btn btn-outline-secondary">
+                            Back to Login
+                        </a>
                     </div>
                 </form>
             </div>

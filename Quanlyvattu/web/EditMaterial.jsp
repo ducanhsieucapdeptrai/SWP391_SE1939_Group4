@@ -43,6 +43,17 @@
                 border-radius: 10px;
             }
 
+            .image-container {
+                background: #f5f5f5;
+                border-radius: 10px;
+                height: 300px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 50px;
+                color: #ccc;
+            }
+
             .detail-grid .info label {
                 display: block;
                 margin: 15px 0 5px;
@@ -112,9 +123,17 @@
         <form action="updatematerial" method="post">
             <div class="detail-grid">
                 <!-- Material Image -->
-                <div>
-                    <img src="${material.image}" alt="Material Image" />
-
+                <div class="image-container">
+                    <c:choose>
+                        <c:when test="${not empty material.image}">
+                            <img src="${pageContext.request.contextPath}/assets/images/materials/${material.image}" 
+                                 alt="Material Image" 
+                                 style="max-width: 100%; max-height: 100%; object-fit: contain;">
+                        </c:when>
+                        <c:otherwise>
+                            <span>&#128247;</span>
+                        </c:otherwise>
+                    </c:choose>
                 </div>
 
                 <!-- Material Info Form -->
