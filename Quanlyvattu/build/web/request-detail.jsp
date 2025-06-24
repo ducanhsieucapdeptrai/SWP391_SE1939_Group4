@@ -48,7 +48,6 @@
 </style>
 
 <div class="p-6 bg-gray-50 min-h-screen">
-    <!-- Header -->
     <div class="mb-6">
         <div class="flex justify-between items-center">
             <div>
@@ -63,8 +62,7 @@
                     <i class="fas fa-arrow-left mr-2"></i>
                     Back to Requests
                 </button>
-                <!-- Action buttons for pending requests -->
-                <c:if test="${requestInfo.status == 'Pending' || requestInfo.status == 'P'}">
+                <c:if test="${(requestInfo.status == 'Pending' || requestInfo.status == 'P') && (sessionScope.userRole == 'Director' || sessionScope.userRole == 'Warehouse Manager')}">
                     <button onclick="openApproveModal()" class="action-button px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shadow-sm">
                         <i class="fas fa-check mr-2"></i>
                         Approve
@@ -78,7 +76,6 @@
         </div>
     </div>
 
-    <!-- Success/Error Messages -->
     <c:if test="${not empty successMessage}">
         <div class="mb-6 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
             <span class="block sm:inline">${successMessage}</span>
@@ -90,7 +87,6 @@
         </div>
     </c:if>
 
-    <!-- Request Information Card -->
     <div class="bg-white shadow-lg rounded-lg p-6 mb-6">
         <h2 class="text-xl font-semibold mb-4 text-gray-800">
             <i class="fas fa-info-circle mr-2 text-blue-600"></i>
@@ -98,7 +94,6 @@
         </h2>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <!-- Requested By -->
             <div class="p-4 bg-green-50 rounded-lg">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Requested By</label>
                 <p class="text-lg font-semibold text-green-700">
@@ -108,7 +103,6 @@
                 <p class="text-xs text-green-600">ID: ${requestInfo.requestedBy}</p>
             </div>
 
-            <!-- Request Date -->
             <div class="p-4 bg-orange-50 rounded-lg">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Request Date</label>
                 <p class="text-lg font-semibold text-orange-700">
@@ -117,7 +111,6 @@
                 </p>
             </div>
 
-            <!-- Request Type -->
             <div class="p-4 bg-purple-50 rounded-lg">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Request Type</label>
                 <p class="text-lg font-semibold text-purple-700">
@@ -133,7 +126,6 @@
                 <p class="text-xs text-purple-600">Type ID: ${requestInfo.requestTypeId}</p>
             </div>
 
-            <!-- Status -->
             <div class="p-4 bg-gray-50 rounded-lg">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Current Status</label>
                 <span class="status-badge ${requestInfo.status == 'Pending' || requestInfo.status == 'P' ? 'status-pending' : 
