@@ -45,9 +45,9 @@
                                      alt="Avatar" class="w-10 h-10 rounded-full border border-white shadow">
                             </button>
                             <div id="userMenu" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-md py-1 z-50 hidden">
-                                <a href="${pageContext.request.contextPath}/user-detail?id=${sessionScope.userId}" class="block px-4 py-2 text-sm hover:bg-gray-100">Profile</a>
-                                <a href="${pageContext.request.contextPath}/change_password.jsp" class="block px-4 py-2 text-sm hover:bg-gray-100">Change password</a>
-                                <a href="${pageContext.request.contextPath}/logout.jsp" class="block px-4 py-2 text-sm hover:bg-gray-100">Logout</a>
+                                <a href="${pageContext.request.contextPath}/user-detail?id=${sessionScope.userId}" class="block px-4 py-2 text-black hover:bg-gray-100">Profile</a>
+                                <a href="${pageContext.request.contextPath}/change_password.jsp" class="block px-4 py-2 text-black hover:bg-gray-100">Change password</a>
+                                <a href="${pageContext.request.contextPath}/logout.jsp" class="block px-4 py-2 text-black hover:bg-gray-100">Logout</a>
                             </div>
                         </div>
                     </div>
@@ -96,12 +96,12 @@
                                                 <i class="fas fa-user-plus mr-2"></i> Request List
                                             </a>
                                         </li>
+                                         <li class="mb-2">
+                                    <a href="${pageContext.request.contextPath}/purchase-request-list" class="block px-3 py-2 rounded hover:bg-gray-600 text-gray-300 hover:text-white">
+                                        <i class="fas fa-shopping-cart mr-2"></i> Purchase Requests
+                                         </a>
+                                </li>
 
-                                        <li class="mb-1">
-                                            <a href="${pageContext.request.contextPath}/purchase-request-list" class="block px-3 py-2 rounded hover:bg-gray-600 text-gray-300 hover:text-white">
-                                                <i class="fas fa-shopping-cart mr-2"></i> Purchase Requests
-                                            </a>
-                                        </li>
                                         <li class="mb-1">
                                             <a href="${pageContext.request.contextPath}/completed-tasks" class="block px-3 py-2 rounded hover:bg-gray-600 text-gray-300 hover:text-white">
                                                 <i class="fas fa-check-circle mr-2"></i> My Request
@@ -142,12 +142,6 @@
                                 </li>
 
 
-                                <li class="mb-1">
-                                    <a href="#" onclick="toggleSubmenu('userManagerSubmenu')" class="block px-4 py-2 rounded hover:bg-gray-700">
-                                        <i class="fas fa-users mr-2"></i> User Management
-                                        <i class="fas fa-chevron-down float-right" id="userManagerChevron"></i>
-                                    </a>
-                                </li>
                             </c:if>
                             <c:if test="${sessionScope.userRole == 'Warehouse Manager'}">
                                 <li class="mb-2">
