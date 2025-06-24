@@ -34,12 +34,14 @@ public class RequestList {
     private List<RequestDetail> requestDetails; // Tuỳ chọn: dùng nếu cần load chi tiết đi kèm
     private String importTypeName;
     private String exportTypeName;
+    private Date arrivalDate;
+    private boolean isUpdated;
 
 // getters & setters
     public RequestList() {
     }
 
-    public RequestList(int requestId, int requestedBy, Date requestDate, int requestTypeId, String note, String status, int approvedBy, Date approvedDate, String approvalNote, int assignedStaffId, String assignedStaffName, RequestType requestType, String requestedByName, String approvedByName, String requestTypeName, String statusDescription, List<RequestDetail> requestDetails, String importTypeName, String exportTypeName) {
+    public RequestList(int requestId, int requestedBy, Date requestDate, int requestTypeId, String note, String status, int approvedBy, Date approvedDate, String approvalNote, int assignedStaffId, String assignedStaffName, RequestType requestType, String requestedByName, String approvedByName, String requestTypeName, String statusDescription, List<RequestDetail> requestDetails, String importTypeName, String exportTypeName, Date arrivalDate, boolean isUpdated) {
         this.requestId = requestId;
         this.requestedBy = requestedBy;
         this.requestDate = requestDate;
@@ -59,7 +61,27 @@ public class RequestList {
         this.requestDetails = requestDetails;
         this.importTypeName = importTypeName;
         this.exportTypeName = exportTypeName;
+        this.arrivalDate = arrivalDate;
+        this.isUpdated = isUpdated;
     }
+
+    public Date getArrivalDate() {
+        return arrivalDate;
+    }
+
+    public void setArrivalDate(Date arrivalDate) {
+        this.arrivalDate = arrivalDate;
+    }
+
+    public boolean isIsUpdated() {
+        return isUpdated;
+    }
+
+    public void setIsUpdated(boolean isUpdated) {
+        this.isUpdated = isUpdated;
+    }
+
+    
 
     public RequestType getRequestType() {
         return requestType;
@@ -84,8 +106,6 @@ public class RequestList {
     public void setAssignedStaffName(String assignedStaffName) {
         this.assignedStaffName = assignedStaffName;
     }
-
-   
 
     public String getImportTypeName() {
         return importTypeName;

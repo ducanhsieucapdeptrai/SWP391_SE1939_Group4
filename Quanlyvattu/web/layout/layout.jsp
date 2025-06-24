@@ -123,7 +123,7 @@
                                 </a>
                             </li>
 
-                          
+
 
                             <c:if test="${sessionScope.userRole == 'Warehouse Staff'}">
                                 <li class="mb-1">
@@ -135,11 +135,59 @@
 
 
                             <c:if test="${sessionScope.userRole == 'Warehouse Manager'}">
+
                                 <li class="mb-1">
-                                    <a href="${pageContext.request.contextPath}/reqlist" class="block px-4 py-2 rounded hover:bg-gray-700">
-                                        <i class="fas fa-file-import mr-2"></i> Request
+                                    <a href="#" onclick="toggleSubmenu('reqSubmenu')" class="block px-4 py-2 rounded hover:bg-gray-700">
+                                        <i class="fas fa-tasks mr-2"></i> Request
+                                        <i class="fas fa-chevron-down float-right" id="taskChevron"></i>
                                     </a>
+
+                                    <ul id="reqSubmenu" class="hidden ml-4 mt-1">
+                                        <li class="mb-1">
+                                            <a href="${pageContext.request.contextPath}/reqlist" class="block px-3 py-2 rounded hover:bg-gray-600 text-gray-300 hover:text-white">
+                                                <i class="fas fa-user-plus mr-2"></i> Request List
+                                            </a>
+                                        </li>
+
+                                        <li class="mb-1">
+                                            <a href="${pageContext.request.contextPath}/completed-tasks" class="block px-3 py-2 rounded hover:bg-gray-600 text-gray-300 hover:text-white">
+                                                <i class="fas fa-check-circle mr-2"></i> My Request
+                                            </a>
+                                        </li>
+
+
+                                    </ul>
                                 </li>
+
+
+                                <li class="mb-1">
+                                    <a href="#" onclick="toggleSubmenu('taskSubmenu')" class="block px-4 py-2 rounded hover:bg-gray-700">
+                                        <i class="fas fa-tasks mr-2"></i> Task
+                                        <i class="fas fa-chevron-down float-right" id="taskChevron"></i>
+                                    </a>
+
+                                    <ul id="taskSubmenu" class="hidden ml-4 mt-1">
+                                        <li class="mb-1">
+                                            <a href="${pageContext.request.contextPath}/tasklist" class="block px-3 py-2 rounded hover:bg-gray-600 text-gray-300 hover:text-white">
+                                                <i class="fas fa-user-plus mr-2"></i> Task List
+                                            </a>
+                                        </li>
+                                        <li class="mb-1">
+                                            <a href="${pageContext.request.contextPath}/completed-tasks" class="block px-3 py-2 rounded hover:bg-gray-600 text-gray-300 hover:text-white">
+                                                <i class="fas fa-check-circle mr-2"></i> Manage Task
+                                            </a>
+                                        </li>
+
+                                        <li class="mb-1">
+                                            <a href="${pageContext.request.contextPath}/completed-tasks" class="block px-3 py-2 rounded hover:bg-gray-600 text-gray-300 hover:text-white">
+                                                <i class="fas fa-check-circle mr-2"></i> Completed Task
+                                            </a>
+                                        </li>
+
+
+                                    </ul>
+                                </li>
+
 
                                 <li class="mb-1">
                                     <a href="#" onclick="toggleSubmenu('userManagerSubmenu')" class="block px-4 py-2 rounded hover:bg-gray-700">
@@ -208,9 +256,12 @@
             <script>
                 function toggleSubmenu(id) {
                     const submenu = document.getElementById(id);
-                    const chevron = document.getElementById("userManagerChevron");
                     submenu.classList.toggle("hidden");
-                    chevron.classList.toggle("rotate-180");
+
+                    const chevron = submenu.previousElementSibling.querySelector("i.fas.fa-chevron-down");
+                    if (chevron) {
+                        chevron.classList.toggle("rotate-180");
+                    }
                 }
 
                 document.getElementById("mobileSidebarToggle")?.addEventListener("click", () => {

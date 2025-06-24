@@ -5,7 +5,7 @@ import java.sql.*;
 import java.util.*;
 import model.RequestList;
 
-public class ApprovedRequestDAO extends DBContext {
+public class AssignTaskDAO extends DBContext {
 
     public List<RequestList> getApprovedRequests(String type, String requestedBy, String requestDate) {
         List<RequestList> list = new ArrayList<>();
@@ -326,15 +326,238 @@ public class ApprovedRequestDAO extends DBContext {
     public List<RequestList> getAllUnassignedApprovedRequests() {
         List<RequestList> list = new ArrayList<>();
 
-        DBContext db = new DBContext();
         String sql = "SELECT * FROM RequestList WHERE Status = 'Approved' AND AssignedStaffId IS NULL";
-
+        DBContext db = new DBContext();
         try (Connection conn = db.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ResultSet rs = ps.executeQuery();
 
             while (rs.next()) {
                 RequestList r = new RequestList();
                 // set các thuộc tính r ở đây
+                list.add(r);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
+    // Lấy danh sách Ongoing Tasks - hàng sẽ đến trong hôm nay
+    public List<RequestList> getOngoingTasksToday() {
+        List<RequestList> list = new ArrayList<>();
+        String sql = """
+        SELECT rl.*, 
+               u1.FullName AS RequestedByName,
+               u2.FullName AS ApprovedByName,
+               rt.RequestTypeName,
+               it.ImportTypeName,
+               et.ExportTypeName
+        FROM RequestList rl
+        JOIN Users u1 ON rl.RequestedBy = u1.UserId
+        LEFT JOIN Users u2 ON rl.ApprovedBy = u2.UserId
+        JOIN RequestType rt ON rl.RequestTypeId = rt.RequestTypeId
+        LEFT JOIN ImportList il ON rl.RequestId = il.RequestId
+        LEFT JOIN ImportType it ON il.ImportTypeId = it.ImportTypeId
+        LEFT JOIN ExportList el ON rl.RequestId = el.RequestId
+        LEFT JOIN ExportType et ON el.ExportTypeId = et.ExportTypeId
+        WHERE rl.Status = 'Approved'
+          AND rl.AssignedStaffId IS NOT NULL
+          AND DATE(rl.ArrivalDate) = CURDATE()
+    """;
+
+        DBContext db = new DBContext();
+        try (Connection conn = db.getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                RequestList r = mapResultSetToRequestList(rs);
+                r.setRequestedByName(rs.getString("RequestedByName"));
+                r.setApprovedByName(rs.getString("ApprovedByName"));
+                r.setRequestTypeName(rs.getString("RequestTypeName"));
+                r.setImportTypeName(rs.getString("ImportTypeName")); // có thể null
+                r.setExportTypeName(rs.getString("ExportTypeName")); // có thể null
+                list.add(r);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
+    public List<RequestList> getUpcomingTasks() {
+        List<RequestList> list = new ArrayList<>();
+        String sql = """
+        SELECT rl.*, 
+               u1.FullName AS RequestedByName,
+               u2.FullName AS ApprovedByName,
+               rt.RequestTypeName,
+               it.ImportTypeName,
+               et.ExportTypeName
+        FROM RequestList rl
+        JOIN Users u1 ON rl.RequestedBy = u1.UserId
+        LEFT JOIN Users u2 ON rl.ApprovedBy = u2.UserId
+        JOIN RequestType rt ON rl.RequestTypeId = rt.RequestTypeId
+        LEFT JOIN ImportList il ON rl.RequestId = il.RequestId
+        LEFT JOIN ImportType it ON il.ImportTypeId = it.ImportTypeId
+        LEFT JOIN ExportList el ON rl.RequestId = el.RequestId
+        LEFT JOIN ExportType et ON el.ExportTypeId = et.ExportTypeId
+        WHERE rl.Status = 'Approved'
+          AND rl.AssignedStaffId IS NOT NULL
+          AND (rl.ArrivalDate IS NULL OR DATE(rl.ArrivalDate) > CURDATE())
+    """;
+
+        DBContext db = new DBContext();
+        try (Connection conn = db.getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                RequestList r = mapResultSetToRequestList(rs);
+                r.setRequestedByName(rs.getString("RequestedByName"));
+                r.setApprovedByName(rs.getString("ApprovedByName"));
+                r.setRequestTypeName(rs.getString("RequestTypeName"));
+                r.setImportTypeName(rs.getString("ImportTypeName"));
+                r.setExportTypeName(rs.getString("ExportTypeName"));
+                list.add(r);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
+    // Hàm dựng dữ liệu từ ResultSet
+    private RequestList mapResultSetToRequestList(ResultSet rs) throws SQLException {
+        RequestList r = new RequestList();
+        r.setRequestId(rs.getInt("RequestId"));
+        r.setRequestedBy(rs.getInt("RequestedBy"));
+        r.setRequestDate(rs.getTimestamp("RequestDate"));
+        r.setRequestTypeId(rs.getInt("RequestTypeId"));
+        r.setNote(rs.getString("Note"));
+        r.setStatus(rs.getString("Status"));
+        r.setApprovedBy(rs.getInt("ApprovedBy"));
+        r.setApprovedDate(rs.getTimestamp("ApprovedDate"));
+        r.setApprovalNote(rs.getString("ApprovalNote"));
+        r.setAssignedStaffId(rs.getInt("AssignedStaffId"));
+        r.setIsUpdated(rs.getBoolean("IsUpdated"));
+        try {
+            r.setArrivalDate(rs.getTimestamp("ArrivalDate"));
+        } catch (Exception ignored) {
+        }
+        return r;
+    }
+
+    public List<RequestList> getOngoingTasksTodayFiltered(String type, String requestedBy, String requestDate) {
+        List<RequestList> list = new ArrayList<>();
+
+        StringBuilder sql = new StringBuilder("""
+        SELECT rl.*, 
+               u1.FullName AS RequestedByName,
+               u2.FullName AS ApprovedByName,
+               rt.RequestTypeName,
+               it.ImportTypeName,
+               et.ExportTypeName
+        FROM RequestList rl
+        JOIN Users u1 ON rl.RequestedBy = u1.UserId
+        LEFT JOIN Users u2 ON rl.ApprovedBy = u2.UserId
+        JOIN RequestType rt ON rl.RequestTypeId = rt.RequestTypeId
+        LEFT JOIN ImportList il ON rl.RequestId = il.RequestId
+        LEFT JOIN ImportType it ON il.ImportTypeId = it.ImportTypeId
+        LEFT JOIN ExportList el ON rl.RequestId = el.RequestId
+        LEFT JOIN ExportType et ON el.ExportTypeId = et.ExportTypeId
+        WHERE rl.Status = 'Approved'
+          AND rl.AssignedStaffId IS NOT NULL
+          AND DATE(rl.ArrivalDate) = CURDATE()
+    """);
+
+        List<Object> params = new ArrayList<>();
+        if (type != null && !type.isEmpty()) {
+            sql.append(" AND rt.RequestTypeName = ?");
+            params.add(type);
+        }
+        if (requestedBy != null && !requestedBy.isEmpty()) {
+            sql.append(" AND u1.FullName LIKE ?");
+            params.add("%" + requestedBy + "%");
+        }
+        if (requestDate != null && !requestDate.isEmpty()) {
+            sql.append(" AND DATE(rl.RequestDate) = ?");
+            params.add(requestDate);
+        }
+
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                RequestList r = mapResultSetToRequestList(rs);
+                r.setRequestedByName(rs.getString("RequestedByName"));
+                r.setApprovedByName(rs.getString("ApprovedByName"));
+                r.setRequestTypeName(rs.getString("RequestTypeName"));
+                r.setImportTypeName(rs.getString("ImportTypeName"));
+                r.setExportTypeName(rs.getString("ExportTypeName"));
+                list.add(r);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
+    public List<RequestList> getUpcomingTasksFiltered(String type, String requestedBy, String requestDate) {
+        List<RequestList> list = new ArrayList<>();
+
+        StringBuilder sql = new StringBuilder("""
+        SELECT rl.*, 
+               u1.FullName AS RequestedByName,
+               u2.FullName AS ApprovedByName,
+               rt.RequestTypeName,
+               it.ImportTypeName,
+               et.ExportTypeName
+        FROM RequestList rl
+        JOIN Users u1 ON rl.RequestedBy = u1.UserId
+        LEFT JOIN Users u2 ON rl.ApprovedBy = u2.UserId
+        JOIN RequestType rt ON rl.RequestTypeId = rt.RequestTypeId
+        LEFT JOIN ImportList il ON rl.RequestId = il.RequestId
+        LEFT JOIN ImportType it ON il.ImportTypeId = it.ImportTypeId
+        LEFT JOIN ExportList el ON rl.RequestId = el.RequestId
+        LEFT JOIN ExportType et ON el.ExportTypeId = et.ExportTypeId
+        WHERE rl.Status = 'Approved'
+            AND rl.AssignedStaffId IS NOT NULL
+            AND (rl.ArrivalDate IS NULL OR DATE(rl.ArrivalDate) > CURDATE())
+    """);
+
+        List<Object> params = new ArrayList<>();
+        if (type != null && !type.isEmpty()) {
+            sql.append(" AND rt.RequestTypeName = ?");
+            params.add(type);
+        }
+        if (requestedBy != null && !requestedBy.isEmpty()) {
+            sql.append(" AND u1.FullName LIKE ?");
+            params.add("%" + requestedBy + "%");
+        }
+        if (requestDate != null && !requestDate.isEmpty()) {
+            sql.append(" AND DATE(rl.RequestDate) = ?");
+            params.add(requestDate);
+        }
+
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                RequestList r = mapResultSetToRequestList(rs);
+                r.setRequestedByName(rs.getString("RequestedByName"));
+                r.setApprovedByName(rs.getString("ApprovedByName"));
+                r.setRequestTypeName(rs.getString("RequestTypeName"));
+                r.setImportTypeName(rs.getString("ImportTypeName"));
+                r.setExportTypeName(rs.getString("ExportTypeName"));
                 list.add(r);
             }
 
