@@ -4,7 +4,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        
+
         <meta charset="UTF-8">
         <title>Task List</title>
         <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
@@ -13,9 +13,11 @@
         <div class="p-6">
             <div class="flex justify-between items-center mb-4">
                 <h1 class="text-2xl font-bold">Task List</h1>
-                <button onclick="history.back()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-                    ← Back
-                </button>
+                <a href="${pageContext.request.contextPath}/dashboard" 
+                   class="bg-gray-300 hover:bg-gray-400 text-black font-semibold py-2 px-4 rounded inline-block">
+                    Back to Dashboard
+                </a>
+
             </div>
 
             <!-- FORM FILTER -->
@@ -47,6 +49,10 @@
                 <div class="self-end">
                     <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Find</button>
                 </div>
+                <a href="${pageContext.request.contextPath}/tasklist" 
+                   class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded inline-block">
+                    Clear Filter
+                </a>
             </form>
 
             <!-- FILTER VIEW BUTTONS -->
