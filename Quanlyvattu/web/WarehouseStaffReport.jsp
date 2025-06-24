@@ -1,360 +1,231 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Actual Records Detail  - Request #${requestInfo.requestId}</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"/>
+        <style>
+            body {
+                background-color: #f8f9fa;
+            }
+            .card-header {
+                background-color: #0d6efd;
+                color: white;
+                font-weight: 500;
+            }
+            table th {
+                background-color: #f1f1f1;
+                font-weight: 500;
+            }
+            .badge-note {
+                font-style: italic;
+                color: #6c757d;
+            }
+            .group-header {
+                font-weight: bold;
+                background-color: #e9ecef;
+                padding: 6px 10px;
+            }
+            .btn-update {
+                background-color: #0d6efd;
+                color: white;
+            }
+            .btn-update:hover {
+                background-color: #0b5ed7;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container-fluid py-4">
 
-<script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
-<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-<link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
-<!-- WarehouseStaffReport Content -->
-<div class="max-w-7xl mx-auto">
-    <!-- Header with Back Button and Title -->
-    <div class="mb-6">
-        <a href="approvedrequests" class="inline-flex items-center text-blue-600 hover:text-blue-800 mb-4">
-            <i class="fas fa-arrow-left mr-2"></i> Back
-        </a>
-        <h1 class="text-3xl font-bold text-gray-900">Warehouse Staff Report</h1>
-    </div>
-
-    <!-- Action Buttons -->
-    <div class="mb-6 flex flex-wrap gap-4">
-        <a href="RequestUpdateServlet?requestId=${requestId} " class="inline-flex items-center px-4 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition duration-300">
-            <i class="fas fa-edit mr-2"></i> Update Request
-        </a>
-        <button type="button" onclick="showSendToModal()" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition duration-300">
-            <i class="fas fa-paper-plane mr-2"></i> Send To
-        </button>
-    </div>
-
-    <!-- Request Information -->
-    <div class="bg-white rounded-lg shadow-md mb-6">
-        <div class="px-6 py-4 border-b border-gray-200">
-            <h2 class="text-xl font-semibold text-gray-900">Approved Request Information</h2>
-        </div>
-        <div class="p-6">
-            <div class="overflow-x-auto">
-                <table class="min-w-full">
-                    <tbody class="divide-y divide-gray-200">
-                        <tr>
-                            <td class="py-3 text-sm font-medium text-gray-900 w-48">Request ID:</td>
-                            <td class="py-3 text-sm text-gray-700">${requestInfo.requestId}</td>
-                        </tr>
-                        <tr>
-                            <td class="py-3 text-sm font-medium text-gray-900">Request Type:</td>
-                            <td class="py-3 text-sm text-gray-700">
-                                <c:choose>
-                                    <c:when test="${not empty requestInfo.requestTypeName}">
-                                        ${requestInfo.requestTypeName}
-                                    </c:when>
-                                    <c:otherwise>
-                                        Not specified
-                                    </c:otherwise>
-                                </c:choose>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="py-3 text-sm font-medium text-gray-900">Requested By:</td>
-                            <td class="py-3 text-sm text-gray-700">
-                                <c:choose>
-                                    <c:when test="${not empty requestInfo.requestedByName}">
-                                        ${requestInfo.requestedByName}
-                                    </c:when>
-                                    <c:otherwise>
-                                        ID: ${requestInfo.requestedBy}
-                                    </c:otherwise>
-                                </c:choose>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="py-3 text-sm font-medium text-gray-900">Request Date:</td>
-                            <td class="py-3 text-sm text-gray-700">
-                                <c:choose>
-                                    <c:when test="${not empty requestInfo.requestDate}">
-                                        <fmt:formatDate value="${requestInfo.requestDate}" pattern="dd/MM/yyyy" />
-                                    </c:when>
-                                    <c:otherwise>
-                                        No information available
-                                    </c:otherwise>
-                                </c:choose>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="py-3 text-sm font-medium text-gray-900">Status:</td>
-                            <td class="py-3">
-                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium
-                                      <c:choose>
-                                          <c:when test="${requestInfo.status == 'Pending'}">bg-yellow-100 text-yellow-800</c:when>
-                                          <c:when test="${requestInfo.status == 'Approved'}">bg-green-100 text-green-800</c:when>
-                                          <c:when test="${requestInfo.status == 'Rejected'}">bg-red-100 text-red-800</c:when>
-                                          <c:otherwise>bg-gray-100 text-gray-800</c:otherwise>
-                                      </c:choose>">
-                                    <c:choose>
-                                        <c:when test="${not empty requestInfo.status}">
-                                            ${requestInfo.status}
-                                        </c:when>
-                                        <c:otherwise>
-                                            Not specified
-                                        </c:otherwise>
-                                    </c:choose>
-                                </span>
-                            </td>
-                        </tr>
-                        <c:if test="${not empty requestInfo.approvedByName}">
-                            <tr>
-                                <td class="py-3 text-sm font-medium text-gray-900">Approved By:</td>
-                                <td class="py-3 text-sm text-gray-700">${requestInfo.approvedByName}</td>
-                            </tr>
-                        </c:if>
-                        <c:if test="${not empty requestInfo.approvedDate}">
-                            <tr>
-                                <td class="py-3 text-sm font-medium text-gray-900">Approval Date:</td>
-                                <td class="py-3 text-sm text-gray-700">
-                                    <fmt:formatDate value="${requestInfo.approvedDate}" pattern="dd/MM/yyyy" />
-                                </td>
-                            </tr>
-                        </c:if>
-                        <tr>
-                            <td class="py-3 text-sm font-medium text-gray-900">Notes:</td>
-                            <td class="py-3 text-sm text-gray-700">
-                                <c:choose>
-                                    <c:when test="${not empty requestInfo.note}">
-                                        ${requestInfo.note}
-                                    </c:when>
-                                    <c:otherwise>
-                                        No notes
-                                    </c:otherwise>
-                                </c:choose>
-                            </td>
-                        </tr>
-                        <c:if test="${not empty requestInfo.approvalNote}">
-                            <tr>
-                                <td class="py-3 text-sm font-medium text-gray-900">Approval Notes:</td>
-                                <td class="py-3 text-sm text-gray-700">${requestInfo.approvalNote}</td>
-                            </tr>
-                        </c:if>
-                    </tbody>
-                </table>
+            <!-- Header -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h3>Warehouse Staff's Report</h3>
+                    <p class="text-muted">Request ID: ${requestInfo.requestId}</p>
+                </div>
             </div>
-        </div>
-    </div>
 
-    <!-- Requested Materials Details -->
-    <div class="bg-white rounded-lg shadow-md mb-6">
-        <div class="px-6 py-4 border-b border-gray-200">
-            <h2 class="text-xl font-semibold text-gray-900">Requested Materials Details</h2>
-        </div>
-        <div class="p-6">
-            <c:choose>
-                <c:when test="${not empty requestDetails}">
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No.</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Material ID</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Material Name</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Requested Quantity</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                <c:forEach var="detail" items="${requestDetails}" varStatus="status">
-                                    <tr class="hover:bg-gray-50">
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${status.count}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${detail.materialId}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            <c:choose>
-                                                <c:when test="${not empty detail.materialName}">
-                                                    ${detail.materialName}
-                                                </c:when>
-                                                <c:otherwise>
-                                                    No name available
-                                                </c:otherwise>
-                                            </c:choose>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            <fmt:formatNumber value="${detail.quantity}" />
-                                        </td>
+            <!-- Request Info and Summary -->
+            <div class="row mb-4">
+                <div class="col-lg-5">
+                    <div class="card mb-3">
+                        <div class="card-header">Request Information</div>
+                        <div class="card-body">
+                            <p><strong>Type:</strong> ${requestInfo.requestTypeName}</p>
+                            <p><strong>Requested By:</strong> ${requestInfo.requestedByName}</p>
+                            <p><strong>Date:</strong>
+                                <fmt:formatDate value="${requestInfo.requestDate}" pattern="dd/MM/yyyy HH:mm"/>
+                            </p>
+                            <p><strong>Status:</strong> ${requestInfo.status}</p>
+                            <c:if test="${not empty requestInfo.note}">
+                                <p><strong>Note:</strong> ${requestInfo.note}</p>
+                            </c:if>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">Summary</div>
+                        <div class="card-body">
+                            <div class="row text-center">
+                                <div class="col">
+                                    <h5>${fn:length(requestDetails)}</h5>
+                                    <p>Items</p>
+                                </div>
+                                <div class="col">
+                                    <c:set var="totalQty" value="0"/>
+                                    <c:forEach var="d" items="${requestDetails}">
+                                        <c:set var="totalQty" value="${totalQty + d.quantity}"/>
+                                    </c:forEach>
+                                    <h5>${totalQty}</h5>
+                                    <p>Total Qty</p>
+                                </div>
+                                <div class="col">
+                                    <c:set var="totalValue" value="0"/>
+                                    <c:forEach var="d" items="${requestDetails}">
+                                        <c:set var="totalValue" value="${totalValue + d.totalValue}"/>
+                                    </c:forEach>
+                                    <h5><fmt:formatNumber value="${totalValue}" pattern="#,##0"/>₫</h5>
+                                    <p>Total Value</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Request Details -->
+                <div class="col-lg-7">
+                    <div class="card">
+                        <div class="card-header">Request Details</div>
+                        <div class="table-responsive" style="max-height: 400px;">
+                            <table class="table table-striped mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Image</th>
+                                        <th>Material</th>
+                                        <th>Qty</th>
+                                        <th>Price</th>
+                                        <th>Total</th>
                                     </tr>
+                                </thead>
+                                <tbody>
+                                    <c:forEach var="d" items="${requestDetails}">
+                                        <tr>
+                                            <td>
+                                                <c:choose>
+                                                    <c:when test="${not empty d.image}">
+                                                        <img src="${d.image}" width="40" height="40" style="object-fit:cover;"/>
+                                                    </c:when>
+                                                    <c:otherwise><span class="text-muted">N/A</span></c:otherwise>
+                                                </c:choose>
+                                            </td>
+                                            <td>${d.materialName}</td>
+                                            <td>${d.quantity}</td>
+                                            <td><fmt:formatNumber value="${d.price}" pattern="#,##0"/>₫</td>
+                                            <td><strong><fmt:formatNumber value="${d.totalValue}" pattern="#,##0"/>₫</strong></td>
+                                        </tr>
+                                    </c:forEach>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actual Records -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>Actual Records</span>
+                    <a href="RequestUpdateServlet?requestId=${requestInfo.requestId}" class="btn btn-success btn-sm fw-bold shadow-sm">Update Records</a>
+
+                </div>
+                <div class="card-body">
+
+                    <c:choose>
+                        <c:when test="${not hasRecords}">
+                            <div class="text-center text-muted py-5">
+                                <p>No import/export records yet.</p>
+                            </div>
+                        </c:when>
+                        <c:otherwise>
+                            <c:set var="prevDate" value=""/>
+                            <c:forEach var="d" items="${actualDetails}" varStatus="st">
+                                <c:set var="rec" value="${actualLists[st.index]}"/>
+                                <c:choose>
+                                    <c:when test="${not empty rec.importDate}">
+                                        <fmt:formatDate var="recDate" value="${rec.importDate}" pattern="dd/MM/yyyy"/>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <fmt:formatDate var="recDate" value="${rec.exportDate}" pattern="dd/MM/yyyy"/>
+                                    </c:otherwise>
+                                </c:choose>
+
+                                <c:if test="${st.index == 0 || recDate != prevDate}">
+                                    <c:if test="${st.index != 0}"></tbody></table></div></c:if>
+                                <div class="group-header">${recDate}</div>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Material</th>
+                                                <th>Requested</th>
+                                                <th>Actual</th>
+                                                <th>Note</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                        </c:if>
+
+                                        <tr>
+                                            <td>${st.index + 1}</td>
+                                            <td>${d.materialName}</td>
+                                            <td>${requestDetails[st.index].quantity}</td>
+                                            <td>${d.quantity}</td>
+                                            <td>
+                                                <c:choose>
+                                                    <c:when test="${not empty rec.note}">
+                                                        ${rec.note}
+                                                    </c:when>
+                                                    <c:otherwise><span class="badge-note">—</span></c:otherwise>
+                                                </c:choose>
+                                            </td>
+                                        </tr>
+                                        <c:set var="prevDate" value="${recDate}"/>
+                                    </c:forEach>
+                                </tbody></table></div>
+
+                        <!-- Always show pagination -->
+                        <nav>
+                            <ul class="pagination justify-content-center">
+                                <li class="page-item ${currentPage == 1 ? 'disabled' : ''}">
+                                    <a class="page-link" href="?requestId=${requestInfo.requestId}&page=${currentPage-1}">&laquo; Prev</a>
+                                </li>
+                                <c:forEach var="p" begin="${startPage}" end="${endPage}">
+                                    <li class="page-item ${p == currentPage ? 'active' : ''}">
+                                        <a class="page-link" href="?requestId=${requestInfo.requestId}&page=${p}">${p}</a>
+                                    </li>
                                 </c:forEach>
-                            </tbody>
-                        </table>
-                    </div>
-                </c:when>
-                <c:otherwise>
-                    <div class="text-center py-12">
-                        <i class="fas fa-inbox text-4xl text-gray-400 mb-4"></i>
-                        <p class="text-gray-500">No material details available.</p>
-                    </div>
-                </c:otherwise>
-            </c:choose>
+                                <li class="page-item ${currentPage == totalPages ? 'disabled' : ''}">
+                                    <a class="page-link" href="?requestId=${requestInfo.requestId}&page=${currentPage+1}">Next &raquo;</a>
+                                </li>
+                            </ul>
+                        </nav>
+                        <div class="text-center text-muted">
+                            Showing ${startIndex+1}–${endIndex} of ${totalRecords}
+                        </div>
+
+                    </c:otherwise>
+                </c:choose>
+            </div>
         </div>
+
     </div>
-    
 
-<!-- ACTUAL RECORDS GROUPED BY IMPORT/EXPORT DATE -->
-<div class="bg-white rounded-lg shadow-md mb-6">
-  <div class="px-6 py-4 border-b border-gray-200">
-    <h2 class="text-xl font-semibold text-gray-900">
-      Actual ${requestInfo.requestTypeName} Records
-    </h2>
-  </div>
-  <div class="p-6 overflow-x-auto">
-    <c:set var="grandTotal" value="0"/>
-    
-    <c:forEach var="entry" items="${fn:contains(requestInfo.requestTypeName, 'Import') ? relatedImports : relatedExports}" varStatus="loop">
-      <div class="mb-6 border border-gray-200 rounded-md shadow-sm">
-        <div class="bg-orange-50 px-6 py-3 font-semibold text-gray-800 border-b border-orange-300 rounded-t-md">
-          ${requestInfo.requestTypeName} ${loop.count} — 
-          Date: <fmt:formatDate value="${entry.importDate != null ? entry.importDate : entry.exportDate}" pattern="dd/MM/yyyy" /> — 
-          Type: ${entry.importTypeName != null ? entry.importTypeName : entry.exportTypeName}
-        </div>
-
-        <table class="min-w-full table-auto divide-y divide-gray-200">
-          <thead class="bg-gray-100">
-            <tr>
-              <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">No.</th>
-              <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Material Name</th>
-              <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Actual Quantity</th>
-              <c:if test="${fn:contains(requestInfo.requestTypeName, 'Import')}">
-                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Unit Price</th>
-                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Total</th>
-              </c:if>
-              <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Note</th>
-            </tr>
-          </thead>
-          <tbody class="bg-white divide-y divide-gray-200">
-            <c:set var="index" value="1"/>
-            <c:forEach var="detail" items="${fn:contains(requestInfo.requestTypeName, 'Import') ? relatedImportDetails : relatedExportDetails}">
-              <c:if test="${(entry.importId != null && detail.importId == entry.importId) || (entry.exportId != null && detail.exportId == entry.exportId)}">
-                <c:set var="lineTotal" value="${fn:contains(requestInfo.requestTypeName, 'Import') ? detail.quantity * detail.price : 0}" />
-                <c:if test="${fn:contains(requestInfo.requestTypeName, 'Import')}">
-                  <c:set var="grandTotal" value="${grandTotal + lineTotal}" />
-                </c:if>
-                <tr class="hover:bg-gray-50">
-                  <td class="px-6 py-4 text-sm text-gray-800">${index}</td>
-                  <td class="px-6 py-4 text-sm text-gray-800">${detail.materialName}</td>
-                  <td class="px-6 py-4 text-sm text-gray-800">${detail.quantity}</td>
-                  <c:if test="${fn:contains(requestInfo.requestTypeName, 'Import')}">
-                    <td class="px-6 py-4 text-sm text-gray-800">
-                      <fmt:formatNumber value="${detail.price}" type="currency" currencySymbol="₫"/>
-                    </td>
-                    <td class="px-6 py-4 text-sm text-gray-800">
-                      <fmt:formatNumber value="${lineTotal}" type="currency" currencySymbol="₫"/>
-                    </td>
-                  </c:if>
-                  <td class="px-6 py-4 text-sm text-gray-800">
-                    <c:out value="${entry.note != null ? entry.note : '-'}"/>
-                  </td>
-                </tr>
-                <c:set var="index" value="${index + 1}" />
-              </c:if>
-            </c:forEach>
-          </tbody>
-        </table>
-      </div>
-    </c:forEach>
-
-    <c:if test="${fn:contains(requestInfo.requestTypeName, 'Import')}">
-      <div class="text-right mt-4 text-gray-900 font-semibold">
-        Grand Total: <fmt:formatNumber value="${grandTotal}" type="currency" currencySymbol="₫"/>
-      </div>
-    </c:if>
-  </div>
-</div>
-
-
-</div>
-
-<!-- SendTo Modal -->
-<div id="sendToModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-lg bg-white">
-        <div class="flex justify-between items-center pb-3 border-b">
-            <h3 class="text-lg font-semibold text-gray-900">Send Report To</h3>
-            <button onclick="closeSendToModal()" class="text-gray-400 hover:text-gray-600">
-                <i class="fas fa-times text-xl"></i>
-            </button>
-        </div>
-
-        <form id="sendToForm" action="sendreport" method="post" class="mt-4">
-            <input type="hidden" name="requestId" value="${requestInfo.requestId}">
-
-            <div class="mb-4">
-                <label for="recipient" class="block text-sm font-medium text-gray-700 mb-2">Select Recipient:</label>
-                <select name="recipient" id="recipient" required
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    <option value="">-- Select Recipient --</option>
-                    <option value="director">Director</option>
-                    <option value="staff">Company Staff</option>
-                    <option value="warehouse_manager">Warehouse Manager</option>
-                </select>
-            </div>
-
-            <div class="mb-6">
-                <label for="message" class="block text-sm font-medium text-gray-700 mb-2">Message Content:</label>
-                <textarea name="message" id="message" rows="4"
-                          placeholder="Enter notification message (optional)..."
-                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-vertical"></textarea>
-            </div>
-
-            <div class="flex justify-end space-x-3">
-                <button type="button" onclick="closeSendToModal()" 
-                        class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition duration-300">
-                    Cancel
-                </button>
-                <button type="submit" 
-                        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-300">
-                    <i class="fas fa-paper-plane mr-2"></i> Send Notification
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<script>
-    function showSendToModal() {
-        document.getElementById('sendToModal').classList.remove('hidden');
-    }
-
-    function closeSendToModal() {
-        document.getElementById('sendToModal').classList.add('hidden');
-        // Reset form
-        document.getElementById('sendToForm').reset();
-    }
-
-    // Close modal when clicking outside of it
-    document.getElementById('sendToModal').addEventListener('click', function (e) {
-        if (e.target.id === 'sendToModal') {
-            closeSendToModal();
-        }
-    });
-
-    // Handle form submission
-    document.getElementById('sendToForm').onsubmit = function (e) {
-        var recipient = document.getElementById('recipient').value;
-        if (!recipient) {
-            alert('Please select a recipient!');
-            e.preventDefault();
-            return false;
-        }
-
-        // Show confirmation
-        var recipientText = '';
-        switch (recipient) {
-            case 'director':
-                recipientText = 'Director';
-                break;
-            case 'staff':
-                recipientText = 'Company Staff';
-                break;
-            case 'warehouse_manager':
-                recipientText = 'Warehouse Manager';
-                break;
-        }
-
-        if (!confirm('Are you sure you want to send the report to ' + recipientText + '?')) {
-            e.preventDefault();
-            return false;
-        }
-    }
-</script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
