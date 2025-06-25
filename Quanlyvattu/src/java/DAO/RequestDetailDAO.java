@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 import model.RequestDetail;
+import model.RequestList;
 
 public class RequestDetailDAO {
 
@@ -23,10 +24,8 @@ public class RequestDetailDAO {
                 + "WHERE rd.RequestId = ?";
 
         try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-
             ps.setInt(1, requestId);
             ResultSet rs = ps.executeQuery();
-
             while (rs.next()) {
                 RequestDetail detail = new RequestDetail(
                         rs.getInt("RequestId"),
@@ -41,33 +40,59 @@ public class RequestDetailDAO {
                 );
                 list.add(detail);
             }
-
             rs.close();
-
         } catch (Exception e) {
             System.out.println("Error in getRequestDetailsByRequestId: " + e.getMessage());
             e.printStackTrace();
         }
-
         return list;
+    }
+
+    public RequestList getRequestById(int requestId) {
+        String sql = "SELECT r.RequestId, r.RequestedBy, u.FullName, r.RequestTypeId, rt.RequestTypeName, "
+                + "r.RequestDate, r.Status, r.Note, r.ApprovedBy, r.ApprovedDate, r.ApprovalNote "
+                + "FROM RequestList r "
+                + "JOIN Users u ON r.RequestedBy = u.UserId "
+                + "JOIN RequestType rt ON r.RequestTypeId = rt.RequestTypeId "
+                + "WHERE r.RequestId = ?";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, requestId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    RequestList req = new RequestList();
+                    req.setRequestId(rs.getInt("RequestId"));
+                    req.setRequestedBy(rs.getInt("RequestedBy"));
+                    req.setRequestedByName(rs.getString("FullName"));
+                    req.setRequestTypeId(rs.getInt("RequestTypeId"));
+                    req.setRequestTypeName(rs.getString("RequestTypeName"));
+                    req.setRequestDate(rs.getTimestamp("RequestDate"));
+                    req.setStatus(rs.getString("Status"));
+                    req.setNote(rs.getString("Note"));
+                    req.setApprovedBy(rs.getInt("ApprovedBy"));
+                    req.setApprovedDate(rs.getTimestamp("ApprovedDate"));
+                    req.setApprovalNote(rs.getString("ApprovalNote"));
+                    return req;
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Error in getRequestById: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public String getRequestStatus(int requestId) {
         String sql = "SELECT Status FROM requestlist WHERE RequestId = ?";
         try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-
             ps.setInt(1, requestId);
             ResultSet rs = ps.executeQuery();
-
             if (rs.next()) {
                 return rs.getString("Status");
             }
-
         } catch (Exception e) {
             System.out.println("Error in getRequestStatus: " + e.getMessage());
             e.printStackTrace();
         }
-
         return null;
     }
 
@@ -75,7 +100,6 @@ public class RequestDetailDAO {
         try (Connection conn = new DBContext().getConnection()) {
             conn.setAutoCommit(false);
 
-            // Cập nhật trạng thái request
             String updateRequest = "UPDATE requestlist SET Status = 'Approved', ApprovalNote = ?, ApprovedBy = ?, ApprovedDate = CURRENT_TIMESTAMP WHERE RequestId = ?";
             try (PreparedStatement ps = conn.prepareStatement(updateRequest)) {
                 ps.setString(1, note);
@@ -84,7 +108,6 @@ public class RequestDetailDAO {
                 ps.executeUpdate();
             }
 
-            // Thêm các vật tư bổ sung nếu chưa có
             String checkSql = "SELECT COUNT(*) FROM RequestDetail WHERE RequestId = ? AND MaterialId = ?";
             String insertSql = "INSERT INTO RequestDetail (RequestId, MaterialId, Quantity) VALUES (?, ?, ?)";
             try (PreparedStatement checkStmt = conn.prepareStatement(checkSql); PreparedStatement insertStmt = conn.prepareStatement(insertSql)) {

@@ -45,7 +45,7 @@
             <!-- Header -->
             <div class="row mb-4">
                 <div class="col-11">
-                    <h3>Warehouse Staff's Report</h3>
+                    <h3>Task Detail-Actual Report</h3>
                     <p class="text-muted">Request ID: ${requestInfo.requestId}</p>
                 </div>
                 <div class="col-1">

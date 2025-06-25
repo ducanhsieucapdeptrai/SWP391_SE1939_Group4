@@ -42,8 +42,8 @@
                 </div>
                 <div class="flex items-end">
                     <a href="purchase-request-list"
-                       class="text-center bg-red-300 hover:bg-gray-400 text-gray-800 px-6 py-2 rounded w-full md:w-auto">
-                        Clear Filter
+                       class="text-center bg-blue-600 hover:bg-gray-400 text-white px-6 py-2 rounded w-full md:w-auto">
+                        Show All Purchases
                     </a>
                 </div>
             </form>

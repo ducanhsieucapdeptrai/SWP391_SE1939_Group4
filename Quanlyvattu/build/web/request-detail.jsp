@@ -7,6 +7,8 @@
 <title>Request Detail - Material Management System</title>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <style>
     .material-image {
         width: 60px;
@@ -63,11 +65,12 @@
                     Back to Requests
                 </button>
                 <c:if test="${(requestInfo.status == 'Pending' || requestInfo.status == 'P') && (sessionScope.userRole == 'Director' || sessionScope.userRole == 'Warehouse Manager')}">
-                    <button onclick="openApproveModal()" class="action-button px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shadow-sm">
+                    <%-- Changed onclick to redirect to a new page for approval --%>
+                    <button onclick="redirectToApprovePage(${requestInfo.requestId})" class="action-button px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shadow-sm">
                         <i class="fas fa-check mr-2"></i>
                         Approve
                     </button>
-                    <button onclick="openRejectModal()" class="action-button px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors shadow-sm">
+                    <button onclick="confirmReject(${requestInfo.requestId})" class="action-button px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors shadow-sm">
                         <i class="fas fa-times mr-2"></i>
                         Reject
                     </button>
@@ -128,18 +131,16 @@
 
             <div class="p-4 bg-gray-50 rounded-lg">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Current Status</label>
-                <span class="status-badge ${requestInfo.status == 'Pending' || requestInfo.status == 'P' ? 'status-pending' : 
+                <span class="status-badge ${requestInfo.status == 'Pending' || requestInfo.status == 'P' ? 'status-pending' :
                                             requestInfo.status == 'Approved' || requestInfo.status == 'A' ? 'status-approved' : 'status-rejected'}">
-                    <i class="fas ${requestInfo.status == 'Pending' || requestInfo.status == 'P' ? 'fa-clock' : 
+                    <i class="fas ${requestInfo.status == 'Pending' || requestInfo.status == 'P' ? 'fa-clock' :
                                     requestInfo.status == 'Approved' || requestInfo.status == 'A' ? 'fa-check-circle' : 'fa-times-circle'} mr-2"></i>
                        ${not empty requestInfo.statusDescription ? requestInfo.statusDescription : requestInfo.status}
                     </span>
                 </div>
             </div>
 
-            <!-- Additional Information Row -->
             <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-                <!-- Request Note -->
                 <div class="md:col-span-1">
                     <c:if test="${not empty requestInfo.note}">
                         <div class="p-4 bg-yellow-50 rounded-lg border-l-4 border-yellow-400">
@@ -159,7 +160,6 @@
                     </c:if>
                 </div>
 
-                <!-- Approval Information -->
                 <div class="md:col-span-2">
                     <c:choose>
                         <c:when test="${not empty requestInfo.approvedByName}">
@@ -206,7 +206,6 @@
             </div>
         </div>
 
-        <!-- Request Details Table -->
         <div class="bg-white shadow-lg rounded-lg p-6">
             <h2 class="text-xl font-semibold mb-4 text-gray-800">
                 <i class="fas fa-list mr-2 text-green-600"></i>
@@ -224,7 +223,7 @@
                                     <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 border">Category</th>
                                     <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 border">Quantity</th>
                                     <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 border">Unit Price</th>
-                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 border">đ</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 border">Total Value</th>
                                     <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 border">Description</th>
                                 </tr>
                             </thead>
@@ -284,7 +283,6 @@
                         </table>
                     </div>
 
-                    <!-- Summary -->
                     <div class="mt-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6">
                         <h3 class="text-lg font-semibold mb-4 text-gray-800">
                             <i class="fas fa-chart-bar mr-2"></i>Request Summary
@@ -316,139 +314,82 @@
                                 </div>
                                 <h5 class="text-sm font-semibold text-gray-700 mb-1">Total Value</h5>
                                 <p class="text-2xl font-bold text-green-600">
-                                    <fmt:formatNumber value="${totalValue}" type="number" groupingUsed="true"/>
+                                    <fmt:formatNumber value="${totalValue}" type="number" groupingUsed="true"/>đ
                                 </p>
                             </div>
                         </div>
                     </div>
                 </c:when>
                 <c:otherwise>
-                    <div class="text-center py-12">
-                        <i class="fas fa-inbox fa-4x text-gray-300 mb-4"></i>
-                        <h5 class="text-xl font-semibold text-gray-600 mb-2">No materials found in this request</h5>
-                        <c:if test="${not empty message}">
-                            <p class="text-gray-500">${message}</p>
-                        </c:if>
-                        <c:if test="${empty message}">
-                            <p class="text-gray-500">This request doesn't contain any material details.</p>
-                        </c:if>
+                    <div class="text-center py-10">
+                        <i class="fas fa-inbox fa-3x text-gray-400 mb-3"></i>
+                        <h5 class="text-gray-600">No materials found in this request</h5>
                     </div>
                 </c:otherwise>
             </c:choose>
         </div>
     </div>
 
-    <!-- Approve Modal -->
-    <div id="approveModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
-        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div class="fixed inset-0 transition-opacity">
-                <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
-            </div>
-            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-                <form method="post" action="request-detail">
-                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                        <div class="sm:flex sm:items-start">
-                            <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-green-100 sm:mx-0 sm:h-10 sm:w-10">
-                                <i class="fas fa-check text-green-600"></i>
-                            </div>
-                            <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
-                                <h3 class="text-lg leading-6 font-medium text-gray-900">Approve Request</h3>
-                                <div class="mt-2">
-                                    <p class="text-sm text-gray-500">
-                                        Are you sure you want to approve this request? You can add an optional approval note.
-                                    </p>
-                                    <div class="mt-4">
-                                        <label class="block text-sm font-medium text-gray-700">Approval Note (Optional)</label>
-                                        <textarea name="note" rows="3" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500" placeholder="Enter approval note..."></textarea>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                        <input type="hidden" name="action" value="approve">
-                        <input type="hidden" name="requestId" value="${requestInfo.requestId}">
-                        <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:ml-3 sm:w-auto sm:text-sm">
-                            Approve
-                        </button>
-                        <button type="button" onclick="closeApproveModal()" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
-                            Cancel
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+    <%-- The approveModal div and all its contents are removed from here --%>
 
-    <!-- Reject Modal -->
-    <div id="rejectModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
-        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div class="fixed inset-0 transition-opacity">
-                <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
-            </div>
-            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-                <form method="post" action="request-detail">
-                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                        <div class="sm:flex sm:items-start">
-                            <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
-                                <i class="fas fa-times text-red-600"></i>
-                            </div>
-                            <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
-                                <h3 class="text-lg leading-6 font-medium text-gray-900">Reject Request</h3>
-                                <div class="mt-2">
-                                    <p class="text-sm text-gray-500">
-                                        Please provide a reason for rejecting this request.
-                                    </p>
-                                    <div class="mt-4">
-                                        <label class="block text-sm font-medium text-gray-700">Rejection Reason *</label>
-                                        <textarea name="reason" rows="3" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500" placeholder="Enter reason for rejection..."></textarea>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                        <input type="hidden" name="action" value="reject">
-                        <input type="hidden" name="requestId" value="${requestInfo.requestId}">
-                        <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm">
-                            Reject
-                        </button>
-                        <button type="button" onclick="closeRejectModal()" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
-                            Cancel
-                        </button>
-                    </div>
-                </form>
-            </div>
+    <div id="rejectModal" class="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50 hidden">
+        <div class="bg-white p-6 rounded shadow-md w-full max-w-md">
+            <h2 class="text-xl font-bold mb-4">Reject Request</h2>
+            <form id="rejectForm" method="POST" action="approveandrejectrequest">
+                <input type="hidden" name="requestId" value="${requestInfo.requestId}" />
+                <input type="hidden" name="action" value="reject" />
+                <label for="rejectReason" class="block mb-2 font-medium text-gray-700">Rejection Reason:</label>
+                <textarea id="rejectReason" name="reason" class="w-full border p-2 mb-4 rounded" rows="4" placeholder="Enter reason for rejection..." required></textarea>
+                <div class="flex justify-end gap-3">
+                    <button type="button" onclick="closeRejectModal()" class="px-4 py-2 border rounded text-gray-600 hover:bg-gray-100">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">Confirm Reject</button>
+                </div>
+            </form>
         </div>
     </div>
 
     <script>
-        function openApproveModal() {
-            document.getElementById('approveModal').classList.remove('hidden');
-        }
-
-        function closeApproveModal() {
-            document.getElementById('approveModal').classList.add('hidden');
+        function redirectToApprovePage(requestId) {
+            window.location.href = 'approve-request?requestId=' + requestId; // Or your servlet path, e.g., 'approveRequestServlet?requestId='
         }
 
         function openRejectModal() {
-            document.getElementById('rejectModal').classList.remove('hidden');
+            document.getElementById("rejectModal").classList.remove("hidden");
         }
 
         function closeRejectModal() {
-            document.getElementById('rejectModal').classList.add('hidden');
+            document.getElementById("rejectModal").classList.add("hidden");
         }
 
-        // Close modals when clicking outside
-        document.getElementById('approveModal').addEventListener('click', function (e) {
-            if (e.target === this) {
-                closeApproveModal();
-            }
-        });
-
-        document.getElementById('rejectModal').addEventListener('click', function (e) {
-            if (e.target === this) {
-                closeRejectModal();
-            }
-        });
+        function confirmReject(requestId) {
+            Swal.fire({
+                title: 'Reject this request?',
+                input: 'textarea',
+                inputLabel: 'Rejection Reason',
+                inputPlaceholder: 'Enter your reason...',
+                inputValidator: (value) => {
+                    if (!value.trim())
+                        return 'You must enter a reason to reject.';
+                },
+                showCancelButton: true,
+                confirmButtonText: 'Reject',
+                cancelButtonText: 'Cancel',
+                icon: 'warning',
+                preConfirm: (reason) => {
+                    return new Promise((resolve) => {
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = 'approveandrejectrequest';
+                        form.innerHTML = `
+                            <input type="hidden" name="requestId" value="${requestId}">
+                            <input type="hidden" name="reason" value="${reason}">
+                            <input type="hidden" name="action" value="reject">
+                        `;
+                        document.body.appendChild(form);
+                        form.submit();
+                        resolve();
+                    });
+                }
+            });
+        }
     </script>
