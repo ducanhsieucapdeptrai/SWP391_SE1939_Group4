@@ -13,6 +13,7 @@
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/controller/general/WarehouseReportServlet.java</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/web/WarehouseStaffReport.jsp</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/web/EditMaterial.jsp</file>
+            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/web/requestUpdate.jsp</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/web/reqlist.jsp</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/DAO/MaterialDAO.java</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/controller/staff/MyRequestServlet.java</file>
@@ -26,9 +27,12 @@
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/web/request-new-password.jsp</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/controller/staff/TaskListServlet.java</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/model/RequestList.java</file>
+            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/web/UserEditRole_Status.jsp</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/web/add-material.jsp</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/DAO/AuditLogDAO.java</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/controller/general/MaterialDetailServlet.java</file>
+            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/controller/general/RequestUpdateServlet.java</file>
+            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/web/UserList.jsp</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/DAO/RequestDetailDAO.java</file>
         </group>
     </open-files>

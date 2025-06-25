@@ -7,9 +7,7 @@
         <title>Actual Records Detail  - Request #${requestInfo.requestId}</title>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"/>
         <style>
-            body {
-                background-color: #f8f9fa;
-            }
+            
             .card-header {
                 background-color: #0d6efd;
                 color: white;
@@ -119,7 +117,7 @@
                                             <td>
                                                 <c:choose>
                                                     <c:when test="${not empty d.image}">
-                                                        <img src="${d.image}" width="40" height="40" style="object-fit:cover;"/>
+                                                        <img src="${pageContext.request.contextPath}/assets/images/materials/${d.image}" width="40" height="40" style="object-fit:cover;"/>
                                                     </c:when>
                                                     <c:otherwise><span class="text-muted">N/A</span></c:otherwise>
                                                 </c:choose>
