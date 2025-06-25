@@ -8,3 +8,9 @@
 
 # Ignore NetBeans-specific project files (optional)
 nbproject/private/
+
+# Ignore DB configuration file
+src/dal/DBContext.java
+
+# Ignore NetBeans private user settings
+nbproject/private/
