@@ -1,14 +1,28 @@
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
-
+<%@ page contentType="text/html" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <!DOCTYPE html>
 <html>
     <head>
         <meta charset="UTF-8">
         <title>Request List</title>
         <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     </head>
     <body class="bg-gray-100 p-0 m-0">
+
+        <c:if test="${param.success eq 'true'}">
+            <script>
+                window.addEventListener("DOMContentLoaded", () => {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: 'The request has been processed successfully.',
+                        timer: 3000,
+                        showConfirmButton: false
+                    });
+                });
+            </script>
+        </c:if>
 
         <div class="p-6">
             <h1 class="text-2xl font-bold mb-6">Request List</h1>
@@ -136,4 +150,17 @@
         </div>
 
     </body>
+
+    <script>
+        <c:if test="${not empty sessionScope.successMessage}">
+       Swal.fire({
+           icon: 'success',
+           title: 'Success',
+           text: '${sessionScope.successMessage}',
+           showConfirmButton: false,
+           timer: 2000
+       });
+            <c:remove var="successMessage" scope="session" />
+        </c:if>
+    </script>
 </html>
