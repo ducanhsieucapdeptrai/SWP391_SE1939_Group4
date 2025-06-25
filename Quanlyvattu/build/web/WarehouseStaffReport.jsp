@@ -2,8 +2,6 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
-<!DOCTYPE html>
-<html>
     <head>
         <meta charset="UTF-8">
         <title>Actual Records Detail  - Request #${requestInfo.requestId}</title>
@@ -45,7 +43,7 @@
             <!-- Header -->
             <div class="row mb-4">
                 <div class="col-11">
-                    <h3>Warehouse Staff's Report</h3>
+                    <h3>Task Detail-Actual Report</h3>
                     <p class="text-muted">Request ID: ${requestInfo.requestId}</p>
                 </div>
                 <div class="col-1">
@@ -231,4 +229,3 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-</html>
