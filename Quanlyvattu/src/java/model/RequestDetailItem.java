@@ -9,6 +9,7 @@ public class RequestDetailItem {
     private int actualQuantity;
     private String note;
     private int stockQuantity;
+    private double price;
     
     // Default constructor
     public RequestDetailItem() {}
@@ -24,6 +25,7 @@ public class RequestDetailItem {
         this.actualQuantity = actualQuantity;
         this.note = note;
         this.stockQuantity = stockQuantity;
+        
     }
     
     // Getters and Setters
@@ -90,7 +92,12 @@ public class RequestDetailItem {
     public void setStockQuantity(int stockQuantity) {
         this.stockQuantity = stockQuantity;
     }
-    
+    public double getPrice() {
+    return price;
+    }
+    public void setPrice(double price) {
+        this.price = price;
+    }
     @Override
     public String toString() {
         return "RequestDetailItem{" +
