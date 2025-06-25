@@ -100,7 +100,7 @@
 
                     <!-- Buttons -->
                     <div class="flex justify-between items-center mt-4">
-                        <a href="dashboard" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded">Back</a>
+                        <a href="javascript:history.back()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded">Back</a>
                         <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded" onclick="return validateForm()">Submit Request</button>
                     </div>
                 </form>
