@@ -32,12 +32,7 @@ public class WarehouseReportServlet extends HttpServlet {
             req.getRequestDispatcher("login.jsp").forward(req, resp);
             return;
         }
-        // Nếu không phải Warehouse Staff
-        if (!isWarehouseStaff(req)) {
-            req.setAttribute("errorMsg", "Access denied. Only Warehouse Staff can view this page.");
-            req.getRequestDispatcher("login.jsp").forward(req, resp);
-            return;
-        }
+        
         // Parse request ID
         int requestId;
         try {
@@ -130,13 +125,5 @@ public class WarehouseReportServlet extends HttpServlet {
         doGet(req, resp);
     }
 
-    private boolean isWarehouseStaff(HttpServletRequest request) {
-        HttpSession session = request.getSession(false);
-        if (session == null) {
-            return false;
-        }
-        String userRole = (String) session.getAttribute("userRole");
-        return "Warehouse Staff".equalsIgnoreCase(userRole);
-    }
 
 }
