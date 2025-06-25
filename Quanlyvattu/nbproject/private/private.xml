@@ -3,24 +3,32 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/controller/staff/MyRequestServlet.java</file>
+            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/DAO/RequestDAO.java</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/controller/general/MaterialListServlet.java</file>
-            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/controller/staff/AcceptTaskServlet.java</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/web/request-detail.jsp</file>
+            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/controller/general/LoginServlet.java</file>
+            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/DAO/WarehouseReportDAO.java</file>
+            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/web/layout/layout.jsp</file>
+            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/controller/staff/UpdatedRequestsServlet.java</file>
+            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/controller/general/WarehouseReportServlet.java</file>
+            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/web/WarehouseStaffReport.jsp</file>
+            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/web/EditMaterial.jsp</file>
+            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/web/reqlist.jsp</file>
+            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/DAO/MaterialDAO.java</file>
+            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/controller/staff/MyRequestServlet.java</file>
+            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/controller/staff/AcceptTaskServlet.java</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/dal/DBContext.java</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/web/tasklist.jsp</file>
-            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/controller/general/LoginServlet.java</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/web/MaterialDetail.jsp</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/DAO/AssignTaskDAO.java</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/web/MaterialList.jsp</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/controller/staff/ReqListServlet.java</file>
-            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/web/layout/layout.jsp</file>
-            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/controller/general/WarehouseReportServlet.java</file>
+            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/web/request-new-password.jsp</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/controller/staff/TaskListServlet.java</file>
-            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/web/WarehouseStaffReport.jsp</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/model/RequestList.java</file>
+            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/web/add-material.jsp</file>
+            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/DAO/AuditLogDAO.java</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/controller/general/MaterialDetailServlet.java</file>
-            <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/DAO/MaterialDAO.java</file>
             <file>file:/D:/Gitgithubhub/SWP391_SE1939_Group4/Quanlyvattu/src/java/DAO/RequestDetailDAO.java</file>
         </group>
     </open-files>
