@@ -70,6 +70,8 @@ public class ApproveRequestServlet extends HttpServlet {
         request.setAttribute("currentRequestDetails", currentRequestDetails);
         request.setAttribute("materialList", materialList);
 
-        request.getRequestDispatcher("/View/Director/approve-request.jsp").forward(request, response);
+        // ✅ Sửa tại đây: dùng layout.jsp và nhúng approve-request.jsp vào
+        request.setAttribute("pageContent", "/View/Director/approve-request.jsp");
+        request.getRequestDispatcher("/layout/layout.jsp").forward(request, response);
     }
 }

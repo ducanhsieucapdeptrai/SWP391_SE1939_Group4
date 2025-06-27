@@ -15,7 +15,7 @@ public class LoginServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.getRequestDispatcher("login.jsp").forward(request, response);
+        request.getRequestDispatcher("/View/General/login.jsp").forward(request, response);
     }
 
     @Override
@@ -27,7 +27,7 @@ public class LoginServlet extends HttpServlet {
 
         if (email == null || email.trim().isEmpty() || password == null || password.trim().isEmpty()) {
             request.setAttribute("errorMsg", "Please enter both email and password.");
-            request.getRequestDispatcher("login.jsp").forward(request, response);
+            request.getRequestDispatcher("/View/General/login.jsp").forward(request, response);
             return;
         }
 
@@ -37,7 +37,7 @@ public class LoginServlet extends HttpServlet {
 
             if (user == null) {
                 request.setAttribute("errorMsg", "Incorrect email or password.");
-                request.getRequestDispatcher("login.jsp").forward(request, response);
+                request.getRequestDispatcher("/View/General/login.jsp").forward(request, response);
                 return;
             }
 
@@ -61,13 +61,13 @@ public class LoginServlet extends HttpServlet {
 
             if (!isPasswordCorrect) {
                 request.setAttribute("errorMsg", "Incorrect email or password.");
-                request.getRequestDispatcher("login.jsp").forward(request, response);
+                request.getRequestDispatcher("/View/General/login.jsp").forward(request, response);
                 return;
             }
 
             if (!user.isIsActive()) {
                 request.setAttribute("errorMsg", "Your account is deactivated. Please contact the administrator.");
-                request.getRequestDispatcher("login.jsp").forward(request, response);
+                request.getRequestDispatcher("/View/General/login.jsp").forward(request, response);
                 return;
             }
 
@@ -93,7 +93,7 @@ public class LoginServlet extends HttpServlet {
         } catch (Exception e) {
             e.printStackTrace();
             request.setAttribute("errorMsg", "System error: " + e.getMessage());
-            request.getRequestDispatcher("login.jsp").forward(request, response);
+            request.getRequestDispatcher("/View/General/login.jsp").forward(request, response);
         }
         
         

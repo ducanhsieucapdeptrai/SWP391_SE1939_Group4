@@ -57,12 +57,6 @@
                 border-color: #357ab8;
             }
 
-            .btn-outline-danger {
-                border-radius: 50px;
-                padding: 8px 24px;
-                font-size: 1rem;
-            }
-
             .form-control {
                 border-radius: 10px;
                 font-size: 1.05rem;
@@ -131,17 +125,6 @@
                         <button type="submit" class="btn btn-primary">Sign in</button>
                     </div>
                 </form>
-
-                <div class="text-center mt-3">
-                    <span class="text-muted">Or sign in with</span>
-                    <div class="mt-2">
-                        <a href="${pageContext.request.contextPath}/google-login"
-                           class="btn btn-outline-danger d-flex align-items-center justify-content-center gap-2">
-                            <img src="${pageContext.request.contextPath}/assets/images/google-logo.png" alt="Google" width="20" height="20">
-                            <span>Sign in with Google</span>
-                        </a>
-                    </div>
-                </div>
             </div>
         </div>
 

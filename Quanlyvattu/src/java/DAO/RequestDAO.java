@@ -223,16 +223,17 @@ public class RequestDAO extends DBContext {
         }
     } catch (SQLException e) {
         e.printStackTrace();
-    } finally {
-        // Đóng kết nối thủ công
-        if (conn != null) {
-            try {
-                conn.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
     }
+//    } finally {
+//        // Đóng kết nối thủ công
+//        if (conn != null) {
+//            try {
+//                conn.close();
+//            } catch (SQLException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//    }
 
     return list;
 }

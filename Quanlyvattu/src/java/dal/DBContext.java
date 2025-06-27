@@ -12,7 +12,7 @@ public class DBContext {
         try {
             String url = "jdbc:mysql://localhost:3306/quan_ly_vat_tu?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
             String user = "root";
-            String password = "1234";
+            String password = "123456";
 
             Class.forName("com.mysql.cj.jdbc.Driver");
             connection = DriverManager.getConnection(url, user, password);
@@ -26,11 +26,10 @@ public class DBContext {
         return connection;
     }
 
-    // ✅ thêm phương thức an toàn để dùng riêng cho PurchaseOrderDAO
     public Connection getNewConnection() throws SQLException {
         String url = "jdbc:mysql://localhost:3306/quan_ly_vat_tu?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
         String user = "root";
-        String password = "1234";
+        String password = "123456";
         return DriverManager.getConnection(url, user, password);
     }
 }
