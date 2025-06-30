@@ -46,14 +46,14 @@ public class LoginServlet extends HttpServlet {
 
             boolean isPasswordCorrect = false;
 
-            // Nếu password trong DB đã được hash
+            // password in db hashed
             if (storedPassword.length() == 64 && storedPassword.matches("[0-9a-fA-F]+")) {
                 String hashedInput = HashUtil.hashPassword(inputPassword);
                 if (hashedInput.equals(storedPassword)) {
                     isPasswordCorrect = true;
                 }
             } else {
-                // Nếu DB vẫn đang lưu mật khẩu plain text
+                // password db = plane text
                 if (inputPassword.equals(storedPassword)) {
                     isPasswordCorrect = true;
                 }

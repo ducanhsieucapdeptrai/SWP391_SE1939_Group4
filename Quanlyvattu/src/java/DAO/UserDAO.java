@@ -56,7 +56,6 @@ public class UserDAO extends DBContext {
         return user;
     }
 
-    // Get user by email
     public Users getUserByEmail(String email) {
         Users user = null;
         String sql = "SELECT u.*, r.RoleName FROM Users u JOIN Roles r ON u.RoleID = r.RoleID WHERE u.Email = ?";
@@ -64,7 +63,7 @@ public class UserDAO extends DBContext {
             ps.setString(1, email);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    user = extractUserFromResultSet(rs);  // Đảm bảo hàm này có xử lý RoleName
+                    user = extractUserFromResultSet(rs);
                 }
             }
         } catch (SQLException e) {
@@ -73,7 +72,6 @@ public class UserDAO extends DBContext {
         return user;
     }
 
-    // Get user by ID
     public Users getUserById(int id) {
         Users user = null;
         try {
