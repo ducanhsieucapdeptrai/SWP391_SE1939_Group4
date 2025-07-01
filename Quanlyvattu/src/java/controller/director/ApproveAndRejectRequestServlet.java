@@ -96,8 +96,6 @@ public class ApproveAndRejectRequestServlet extends HttpServlet {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid action.");
             return;
         }
-
-        // Delay redirect using a temporary attribute (optional client-side SweetAlert timer)
         response.sendRedirect("reqlist?success=true");
     }
 

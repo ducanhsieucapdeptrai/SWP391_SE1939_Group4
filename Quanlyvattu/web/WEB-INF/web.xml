@@ -5,10 +5,6 @@
         <servlet-class>controller.general.LoginServlet</servlet-class>
     </servlet>
     <servlet>
-        <servlet-name>GoogleLoginServlet</servlet-name>
-        <servlet-class>controller.general.GoogleLoginServlet</servlet-class>
-    </servlet>
-    <servlet>
         <servlet-name>RequestPasswordServlet</servlet-name>
         <servlet-class>controller.RequestPasswordServlet</servlet-class>
     </servlet>
@@ -39,10 +35,6 @@
     <servlet-mapping>
         <servlet-name>LoginServlet</servlet-name>
         <url-pattern>/login</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>GoogleLoginServlet</servlet-name>
-        <url-pattern>/google-login</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>RequestPasswordServlet</servlet-name>

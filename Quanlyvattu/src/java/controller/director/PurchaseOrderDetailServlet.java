@@ -34,7 +34,6 @@ public class PurchaseOrderDetailServlet extends HttpServlet {
         PurchaseOrderDAO poDAO = new PurchaseOrderDAO();
         RequestDAO reqDAO = new RequestDAO();
 
-        // ===== Lấy thông tin đơn hàng =====
         PurchaseOrderList po = poDAO.getPurchaseOrderById(poId);
         if (po == null) {
             System.out.println("[DEBUG] Purchase Order #" + poId + " not found.");
@@ -44,7 +43,6 @@ public class PurchaseOrderDetailServlet extends HttpServlet {
 
         System.out.println("[DEBUG] Loaded PO: " + po.getPoId() + ", requestId = " + po.getRequestId());
 
-        // ===== Lấy chi tiết vật tư =====
         List<PurchaseOrderDetail> details = poDAO.getPODetails(poId);
         po.setDetails(details);
 
@@ -53,7 +51,6 @@ public class PurchaseOrderDetailServlet extends HttpServlet {
             System.out.println("   - " + d.getMaterialName() + " | Qty: " + d.getQuantity() + " | Total: " + d.getTotal());
         }
 
-        // ===== Ghi chú request =====
         String requestNote = reqDAO.getRequestNoteById(po.getRequestId());
         System.out.println("[DEBUG] Request note: " + requestNote);
 
@@ -88,7 +85,6 @@ public class PurchaseOrderDetailServlet extends HttpServlet {
             request.setAttribute("alertMessage", "Failed to update status.");
         }
 
-        // Load lại thông tin đơn hàng để hiển thị sau POST
         PurchaseOrderList po = dao.getPurchaseOrderById(poId);
         List<PurchaseOrderDetail> details = dao.getPODetails(poId);
         po.setDetails(details);
