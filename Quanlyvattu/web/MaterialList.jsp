@@ -184,13 +184,19 @@
     });
 </script>
 <script>
+   
+
+
     const subcategories = {
         "Structural Materials": ["Concrete", "Structural Steel", "Bricks", "Building Stone", "Structural Timber"],
         "Finishing Materials": ["Flooring Materials", "Wall Coverings", "Paints and Coatings", "Ceiling Materials"],
         "Insulation & Waterproofing": ["Thermal Insulation", "Waterproofing Materials", "Sound Insulation"],
         "Mechanical & Electrical": ["Electrical Systems", "Plumbing Systems", "HVAC Systems"],
         "Interior Decoration": ["Wooden Furniture", "Decorative Materials", "Sanitary Equipment"],
-        "Other Construction Materials": ["Foundation Materials", "Roofing Materials", "Door and Window Materials"]
+        "Other Construction Materials": ["Foundation Materials", "Roofing Materials", "Door and Window Materials"],
+        "Hand Tools": ["Mixing & Plastering Tools", "Measuring & Alignment Tools", "Cutting & Assembly Tools", "Auxiliary Tools"],
+        "Construction Machinery": ["Concrete Machinery", "Earthmoving Equipment", "Lifting Equipment", "Steel Processing Equipment", "Finishing Machinery", "Utility Machines"],
+        "Safety Equipment": ["Head Protection", "Eye & Face Protection", "Hand Protection", "Footwear", "Body Protection", "Fall Protection", "Respiratory Protection"]
     };
 
     function updateSubcategories() {
