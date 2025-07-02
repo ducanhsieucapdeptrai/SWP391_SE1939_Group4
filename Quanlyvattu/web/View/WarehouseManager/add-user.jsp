@@ -14,7 +14,6 @@
         <form action="${pageContext.request.contextPath}/add-user" method="post" enctype="multipart/form-data"
               class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-            <!-- Left Column -->
             <div>
                 <label class="block mb-1 font-medium text-gray-700">Full Name</label>
                 <input type="text" name="fullName" class="w-full border px-3 py-2 rounded" required autocomplete="off"/>
@@ -29,11 +28,9 @@
                 <input type="password" name="password" class="w-full border px-3 py-2 rounded" required autocomplete="new-password"/>
             </div>
 
-            <!-- Right Column -->
             <div>
                 <label class="block mb-1 font-medium text-gray-700">Avatar</label>
                 <div class="relative w-full">
-                    <!-- Choose File Button -->
                     <label id="chooseFileLabel" for="avatar"
                            class="block w-full border px-3 py-2 rounded bg-white text-gray-700 cursor-pointer text-center">
                         Choose File
