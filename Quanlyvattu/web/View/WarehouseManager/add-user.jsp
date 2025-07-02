@@ -32,11 +32,24 @@
             <!-- Right Column -->
             <div>
                 <label class="block mb-1 font-medium text-gray-700">Avatar</label>
-                <label for="avatar" class="custom-file-label w-full border px-3 py-2 rounded bg-white text-gray-700 cursor-pointer">
-                    <span id="avatarLabel">Choose File</span>
-                </label>
-                <input type="file" name="avatar" id="avatar" accept="image/*" required class="hidden" onchange="handleFileChange(event)">
-                <img id="avatarPreview" src="#" alt="Preview" class="hidden mt-2 w-32 h-32 object-cover border rounded" />
+                <div class="relative w-full">
+                    <!-- Choose File Button -->
+                    <label id="chooseFileLabel" for="avatar"
+                           class="block w-full border px-3 py-2 rounded bg-white text-gray-700 cursor-pointer text-center">
+                        Choose File
+                    </label>
+                    <input type="file" name="avatar" id="avatar" accept="image/*"
+                           class="hidden" required onchange="handleFileChange(event)">
+
+                    <img id="avatarPreview" src="#" alt="Preview"
+                         class="hidden mt-2 object-cover border rounded" style="width: 170px; height: 113px;"/>
+
+                    <button type="button" id="clearAvatarBtn"
+                            onclick="clearAvatar()"
+                            class="hidden absolute top-0 right-0 text-xl text-black hover:text-gray-700">
+                        &times;
+                    </button>
+                </div>
 
                 <label class="block mt-4 mb-1 font-medium text-gray-700">Status</label>
                 <select name="status" class="w-full border px-3 py-2 rounded" required>
@@ -54,8 +67,10 @@
 
             <!-- Buttons -->
             <div class="col-span-2 flex justify-center gap-10 mt-6">
-                <a href="${pageContext.request.contextPath}/userlist" class="w-40 bg-gray-300 text-center py-2 rounded hover:bg-gray-400">Cancel</a>
-                <button type="submit" class="w-40 bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Add User</button>
+                <a href="${pageContext.request.contextPath}/userlist"
+                   class="w-40 bg-gray-300 text-center py-2 rounded hover:bg-gray-400">Cancel</a>
+                <button type="submit"
+                        class="w-40 bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Add User</button>
             </div>
         </form>
     </div>
@@ -63,18 +78,17 @@
     <c:if test="${not empty successMessage}">
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script>
-                    Swal.fire({
-                        icon: 'success',
-                        title: '${successMessage}',
-                        showConfirmButton: false,
-                        timer: 2000
-                    }).then(() => {
-                        window.location.href = 'userlist';
-                    });
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: '${successMessage}',
+                                    showConfirmButton: false,
+                                    timer: 2000
+                                }).then(() => {
+                                    window.location.href = 'userlist';
+                                });
         </script>
     </c:if>
 </div>
-
 
 <style>
     .custom-file-label:hover {
@@ -86,13 +100,27 @@
     function handleFileChange(event) {
         const file = event.target.files[0];
         const preview = document.getElementById("avatarPreview");
+        const label = document.getElementById("chooseFileLabel");
+        const clearBtn = document.getElementById("clearAvatarBtn");
 
         if (file) {
             preview.src = URL.createObjectURL(file);
             preview.classList.remove("hidden");
-        } else {
-            preview.classList.add("hidden");
+            label.classList.add("hidden");
+            clearBtn.classList.remove("hidden");
         }
     }
-</script>
 
+    function clearAvatar() {
+        const avatarInput = document.getElementById("avatar");
+        const preview = document.getElementById("avatarPreview");
+        const label = document.getElementById("chooseFileLabel");
+        const clearBtn = document.getElementById("clearAvatarBtn");
+
+        avatarInput.value = "";
+        preview.src = "#";
+        preview.classList.add("hidden");
+        clearBtn.classList.add("hidden");
+        label.classList.remove("hidden");
+    }
+</script>
