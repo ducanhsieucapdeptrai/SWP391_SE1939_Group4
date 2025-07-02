@@ -31,6 +31,12 @@ public class LoginServlet extends HttpServlet {
             return;
         }
 
+        if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")) {
+            request.setAttribute("errorMsg", "Invalid email format.");
+            request.getRequestDispatcher("/View/General/login.jsp").forward(request, response);
+            return;
+        }
+
         try {
             UserDAO dao = new UserDAO();
             Users user = dao.getUserByEmail(email);
@@ -46,14 +52,14 @@ public class LoginServlet extends HttpServlet {
 
             boolean isPasswordCorrect = false;
 
-            // password in db hashed
+            // hash password if stored password is SHA-256
             if (storedPassword.length() == 64 && storedPassword.matches("[0-9a-fA-F]+")) {
                 String hashedInput = HashUtil.hashPassword(inputPassword);
                 if (hashedInput.equals(storedPassword)) {
                     isPasswordCorrect = true;
                 }
             } else {
-                // password db = plane text
+                // pass plain current
                 if (inputPassword.equals(storedPassword)) {
                     isPasswordCorrect = true;
                 }
@@ -95,8 +101,6 @@ public class LoginServlet extends HttpServlet {
             request.setAttribute("errorMsg", "System error: " + e.getMessage());
             request.getRequestDispatcher("/View/General/login.jsp").forward(request, response);
         }
-        
-        
     }
 
     @Override
