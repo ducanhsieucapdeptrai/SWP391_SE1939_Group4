@@ -56,24 +56,28 @@
             </form>
 
             <!-- FILTER VIEW BUTTONS -->
-            <div class="mb-6 flex gap-4">
-                <form action="tasklist" method="get">
-                    <input type="hidden" name="view" value="ongoing" />
-                    <button type="submit"
-                            class="px-4 py-2 rounded font-semibold transition-colors
-                            ${activeView == 'ongoing' || empty activeView ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-white text-blue-600 border border-blue-600 hover:bg-blue-50'}">
-                        Ongoing Tasks
-                    </button>
-                </form>
-                <form action="tasklist" method="get">
-                    <input type="hidden" name="view" value="upcoming" />
-                    <button type="submit"
-                            class="px-4 py-2 rounded font-semibold transition-colors
-                            ${activeView == 'upcoming' ? 'bg-yellow-500 text-white hover:bg-yellow-600' : 'bg-white text-yellow-600 border border-yellow-500 hover:bg-yellow-50'}">
-                        Upcoming Tasks
-                    </button>
-                </form>
-            </div>
+            <!-- FILTER VIEW BUTTONS -->
+            <c:if test="${sessionScope.userRole != 'Warehouse Staff'}">
+                <div class="mb-6 flex gap-4">
+                    <form action="tasklist" method="get">
+                        <input type="hidden" name="view" value="ongoing" />
+                        <button type="submit"
+                                class="px-4 py-2 rounded font-semibold transition-colors
+                                ${activeView == 'ongoing' || empty activeView ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-white text-blue-600 border border-blue-600 hover:bg-blue-50'}">
+                            Ongoing Tasks
+                        </button>
+                    </form>
+                    <form action="tasklist" method="get">
+                        <input type="hidden" name="view" value="upcoming" />
+                        <button type="submit"
+                                class="px-4 py-2 rounded font-semibold transition-colors
+                                ${activeView == 'upcoming' ? 'bg-yellow-500 text-white hover:bg-yellow-600' : 'bg-white text-yellow-600 border border-yellow-500 hover:bg-yellow-50'}">
+                            Upcoming Tasks
+                        </button>
+                    </form>
+                </div>
+            </c:if>
+
 
             <!-- MAIN TABLE FORM -->
             <form id="transferForm" onsubmit="submitTransfer(event)">
