@@ -12,7 +12,10 @@ public class Role {
         this.roleName = roleName;
     }
 
-    // Getter và Setter
+    public Role(int roleId) {
+        this.roleId = roleId;
+    }
+
     public int getRoleId() {
         return roleId;
     }

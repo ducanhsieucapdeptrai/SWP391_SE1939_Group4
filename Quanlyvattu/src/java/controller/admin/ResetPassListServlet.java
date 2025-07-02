@@ -62,7 +62,7 @@ public class ResetPassListServlet extends HttpServlet {
             return;
         }
 
-        // Hash password
+        // hash pass
         String hashed = HashUtil.hashPassword(newPassword);
         boolean updated = userDAO.updatePassword(user.getEmail(), hashed);
 
@@ -82,7 +82,7 @@ public class ResetPassListServlet extends HttpServlet {
             return;
         }
 
-        // Send email to user
+        // send email
         boolean mailSent = sendNewPasswordToUser(user.getEmail(), newPassword);
 
         if (mailSent) {

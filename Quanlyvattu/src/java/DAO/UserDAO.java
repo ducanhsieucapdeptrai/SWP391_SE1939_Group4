@@ -211,7 +211,7 @@ public class UserDAO extends DBContext {
 
     public Users getUserByEmailAndPhone(String email, String phone) {
         String sql = "SELECT u.*, r.RoleName FROM Users u JOIN Roles r ON u.RoleId = r.RoleId WHERE u.Email = ? AND u.Phone = ?";
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = new DBContext().getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, email);
             ps.setString(2, phone);
             ResultSet rs = ps.executeQuery();
@@ -231,6 +231,54 @@ public class UserDAO extends DBContext {
             return ps.executeUpdate() > 0;
         } catch (Exception e) {
             e.printStackTrace();
+            return false;
+        }
+    }
+
+    public Users getUserByPhone(String phone) {
+        Users user = null;
+        String sql = "SELECT * FROM Users WHERE Phone = ?";
+        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, phone);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    user = new Users();
+                    user.setUserId(rs.getInt("UserId"));
+                    user.setFullName(rs.getString("FullName"));
+                    user.setUserImage(rs.getString("UserImage"));
+                    user.setEmail(rs.getString("Email"));
+                    user.setPhone(rs.getString("Phone"));
+                    user.setPassword(rs.getString("Password"));
+                    user.setRoleId(rs.getInt("RoleId"));
+                    user.setIsActive(rs.getBoolean("IsActive"));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return user;
+    }
+
+    public boolean addUser(Users user) {
+        String sql = "INSERT INTO Users (FullName, UserImage, Email, Phone, Password, RoleId, IsActive) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?)";
+
+        try (Connection conn = new DBContext().getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, user.getFullName());
+            ps.setString(2, user.getUserImage());
+            ps.setString(3, user.getEmail());
+            ps.setString(4, user.getPhone());
+            ps.setString(5, user.getPassword());
+            ps.setInt(6, user.getRoleId()); //
+            ps.setBoolean(7, user.isIsActive());
+
+            int rowsInserted = ps.executeUpdate();
+            System.out.println("Inserted rows: " + rowsInserted);
+            return rowsInserted > 0;
+
+        } catch (SQLException e) {
+            System.err.println("Error inserting user: " + e.getMessage());
             return false;
         }
     }

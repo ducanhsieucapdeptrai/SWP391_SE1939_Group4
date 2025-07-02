@@ -64,17 +64,7 @@
                     <i class="fas fa-arrow-left mr-2"></i>
                     Back to Requests
                 </button>
-                <c:if test="${(requestInfo.status == 'Pending' || requestInfo.status == 'P') && (sessionScope.userRole == 'Director' || sessionScope.userRole == 'Warehouse Manager')}">
-                    <%-- Changed onclick to redirect to a new page for approval --%>
-                    <button onclick="redirectToApprovePage(${requestInfo.requestId})" class="action-button px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shadow-sm">
-                        <i class="fas fa-check mr-2"></i>
-                        Approve
-                    </button>
-                    <button onclick="confirmReject(${requestInfo.requestId})" class="action-button px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors shadow-sm">
-                        <i class="fas fa-times mr-2"></i>
-                        Reject
-                    </button>
-                </c:if>
+
             </div>
         </div>
     </div>
@@ -328,7 +318,22 @@
                 </c:otherwise>
             </c:choose>
         </div>
+        <c:if test="${(requestInfo.status == 'Pending' || requestInfo.status == 'P') && (sessionScope.userRole == 'Director' || sessionScope.userRole == 'Warehouse Manager')}">
+            <div class="flex justify-end gap-4 mt-6">
+                <button onclick="redirectToApprovePage(${requestInfo.requestId})"
+                        class="action-button px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shadow-sm">
+                    <i class="fas fa-check mr-2"></i>
+                    Approve
+                </button>
+                <button onclick="confirmReject(${requestInfo.requestId})"
+                        class="action-button px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors shadow-sm">
+                    <i class="fas fa-times mr-2"></i>
+                    Reject
+                </button>
+            </div>
+        </c:if>
     </div>
+
 
     <%-- The approveModal div and all its contents are removed from here --%>
 
