@@ -109,11 +109,12 @@ public class MaterialDAO extends DBContext {
     """;
 
         if (category != null && !category.isEmpty()) {
-            sql += " AND c.CategoryName LIKE ?";
+            sql += " AND c.CategoryId = ?";
         }
         if (subcategory != null && !subcategory.isEmpty()) {
-            sql += " AND sc.SubCategoryName LIKE ?";
+            sql += " AND sc.SubCategoryId = ?";
         }
+
         if (name != null && !name.isEmpty()) {
             sql += " AND m.MaterialName LIKE ?";
         }
@@ -123,11 +124,12 @@ public class MaterialDAO extends DBContext {
 
             int idx = 1;
             if (category != null && !category.isEmpty()) {
-                ps.setString(idx++, "%" + category + "%");
+                ps.setInt(idx++, Integer.parseInt(category));
             }
             if (subcategory != null && !subcategory.isEmpty()) {
-                ps.setString(idx++, "%" + subcategory + "%");
+                ps.setInt(idx++, Integer.parseInt(subcategory));
             }
+
             if (name != null && !name.isEmpty()) {
                 ps.setString(idx++, "%" + name + "%");
             }
@@ -308,15 +310,13 @@ public class MaterialDAO extends DBContext {
         return categories;
     }
 
-  public List<SubCategory> getAllSubcategories() {
+    public List<SubCategory> getAllSubcategories() {
         List<SubCategory> subcategories = new ArrayList<>();
         String sql = "SELECT SubCategoryId, SubCategoryName, CategoryId FROM SubCategories ORDER BY SubCategoryName";
 
         try {
             DBContext db = new DBContext();
-            try (Connection conn = db.getConnection();
-                 PreparedStatement ps = conn.prepareStatement(sql);
-                 ResultSet rs = ps.executeQuery()) {
+            try (Connection conn = db.getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
 
                 while (rs.next()) {
                     SubCategory sub = new SubCategory();

@@ -210,7 +210,7 @@
 
         filtered.forEach(sub => {
             const option = document.createElement("option");
-            option.value = sub.subCategoryName;
+            option.value = sub.subCategoryId; // ✅ Đúng
             option.text = sub.subCategoryName;
             subcategorySelect.appendChild(option);
         });
