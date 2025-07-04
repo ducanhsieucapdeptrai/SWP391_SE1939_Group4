@@ -1,6 +1,7 @@
 package controller.director;
 
 import DAO.PurchaseOrderDAO;
+import Helper.AuthorizationHelper;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.WebServlet;
@@ -15,6 +16,11 @@ public class PurchaseRequestListServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        if (!AuthorizationHelper.hasAnyRole(request, "Director", "Warehouse Manager")) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied.");
+            return;
+        }
+
         String status = request.getParameter("status");
         String createdDate = request.getParameter("createdDate");
         String createdByName = request.getParameter("createdByName");
@@ -28,6 +34,7 @@ public class PurchaseRequestListServlet extends HttpServlet {
             } catch (NumberFormatException ignored) {
             }
         }
+
         int offset = (currentPage - 1) * pageSize;
 
         PurchaseOrderDAO dao = new PurchaseOrderDAO();
@@ -38,6 +45,7 @@ public class PurchaseRequestListServlet extends HttpServlet {
             currentPage = totalPages;
             offset = (currentPage - 1) * pageSize;
         }
+
         if (currentPage < 1) {
             currentPage = 1;
             offset = 0;
@@ -53,6 +61,7 @@ public class PurchaseRequestListServlet extends HttpServlet {
         request.setAttribute("totalPages", totalPages);
         request.setAttribute("pageSize", pageSize);
         request.setAttribute("pageContent", "/View/Director/purchase-request-list.jsp");
+
         request.getRequestDispatcher("/layout/layout.jsp").forward(request, response);
     }
 }

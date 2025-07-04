@@ -1,6 +1,7 @@
 package controller.director;
 
 import DAO.RequestDetailDAO;
+import Helper.AuthorizationHelper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
@@ -15,6 +16,11 @@ public class ApproveAndRejectRequestServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
+        if (!AuthorizationHelper.hasAnyRole(request, "Director", "Warehouse Manager")) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access Denied: Only Directors or Warehouse Managers can approve or reject requests.");
+            return;
+        }
 
         String action = request.getParameter("action");
         String requestIdStr = request.getParameter("requestId");
@@ -34,19 +40,8 @@ public class ApproveAndRejectRequestServlet extends HttpServlet {
 
         HttpSession session = request.getSession();
         Users user = (Users) session.getAttribute("currentUser");
-
-        if (user == null) {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "User not logged in.");
-            return;
-        }
-
-        String roleName = user.getRole().getRoleName();
-        if (!"Director".equalsIgnoreCase(roleName) && !"Warehouse Manager".equalsIgnoreCase(roleName)) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access Denied: Only Directors or Warehouse Managers can approve requests.");
-            return;
-        }
-
         int approvedBy = user.getUserId();
+
         RequestDetailDAO dao = new RequestDetailDAO();
 
         if ("approve".equalsIgnoreCase(action)) {
@@ -96,6 +91,7 @@ public class ApproveAndRejectRequestServlet extends HttpServlet {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid action.");
             return;
         }
+
         response.sendRedirect("reqlist?success=true");
     }
 

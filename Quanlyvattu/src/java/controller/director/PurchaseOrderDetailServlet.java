@@ -2,6 +2,7 @@ package controller.director;
 
 import DAO.PurchaseOrderDAO;
 import DAO.RequestDAO;
+import Helper.AuthorizationHelper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
@@ -16,6 +17,11 @@ public class PurchaseOrderDetailServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
+        if (!AuthorizationHelper.hasAnyRole(request, "Director", "Warehouse Manager")) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied.");
+            return;
+        }
 
         String idParam = request.getParameter("id");
         if (idParam == null || idParam.isEmpty()) {
@@ -36,23 +42,14 @@ public class PurchaseOrderDetailServlet extends HttpServlet {
 
         PurchaseOrderList po = poDAO.getPurchaseOrderById(poId);
         if (po == null) {
-            System.out.println("[DEBUG] Purchase Order #" + poId + " not found.");
             response.sendError(HttpServletResponse.SC_NOT_FOUND, "Purchase Order not found");
             return;
         }
 
-        System.out.println("[DEBUG] Loaded PO: " + po.getPoId() + ", requestId = " + po.getRequestId());
-
         List<PurchaseOrderDetail> details = poDAO.getPODetails(poId);
         po.setDetails(details);
 
-        System.out.println("[DEBUG] Found " + (details != null ? details.size() : 0) + " material(s) for PO #" + poId);
-        for (PurchaseOrderDetail d : details) {
-            System.out.println("   - " + d.getMaterialName() + " | Qty: " + d.getQuantity() + " | Total: " + d.getTotal());
-        }
-
         String requestNote = reqDAO.getRequestNoteById(po.getRequestId());
-        System.out.println("[DEBUG] Request note: " + requestNote);
 
         request.setAttribute("po", po);
         request.setAttribute("requestNote", requestNote);
@@ -65,10 +62,24 @@ public class PurchaseOrderDetailServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        if (!AuthorizationHelper.hasAnyRole(request, "Director", "Warehouse Manager")) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied.");
+            return;
+        }
+
         String action = request.getParameter("action");
-        int poId = Integer.parseInt(request.getParameter("poId"));
+        String poIdStr = request.getParameter("poId");
+        int poId;
+
+        try {
+            poId = Integer.parseInt(poIdStr);
+        } catch (NumberFormatException e) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid Purchase Order ID.");
+            return;
+        }
+
         HttpSession session = request.getSession();
-        int directorId = (int) session.getAttribute("userId");
+        int directorId = ((model.Users) session.getAttribute("currentUser")).getUserId();
 
         PurchaseOrderDAO dao = new PurchaseOrderDAO();
         boolean success = false;

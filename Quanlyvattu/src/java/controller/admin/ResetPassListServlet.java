@@ -2,6 +2,7 @@ package controller.admin;
 
 import DAO.PasswordResetDAO;
 import DAO.UserDAO;
+import Helper.AuthorizationHelper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
@@ -20,10 +21,16 @@ public class ResetPassListServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
+        if (!AuthorizationHelper.hasRole(request, "Warehouse Manager")) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied.");
+            return;
+        }
+
         PasswordResetDAO dao = new PasswordResetDAO();
         List<model.PasswordResetRequest> requests = dao.getAllPendingRequests();
         request.setAttribute("resetRequests", requests);
-        
+
         request.setAttribute("pageContent", "/View/WarehouseManager/reset-pass-list.jsp");
         request.getRequestDispatcher("/layout/layout.jsp").forward(request, response);
     }
@@ -31,6 +38,11 @@ public class ResetPassListServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
+        if (!AuthorizationHelper.hasRole(request, "Warehouse Manager")) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied.");
+            return;
+        }
 
         String newPassword = request.getParameter("newPassword");
         String userIdStr = request.getParameter("userId");
@@ -62,7 +74,6 @@ public class ResetPassListServlet extends HttpServlet {
             return;
         }
 
-        // hash pass
         String hashed = HashUtil.hashPassword(newPassword);
         boolean updated = userDAO.updatePassword(user.getEmail(), hashed);
 
@@ -73,7 +84,6 @@ public class ResetPassListServlet extends HttpServlet {
             return;
         }
 
-        // Mark request as processed
         boolean marked = resetDAO.markAsProcessed(requestId);
         if (!marked) {
             request.setAttribute("alertType", "error");
@@ -82,7 +92,6 @@ public class ResetPassListServlet extends HttpServlet {
             return;
         }
 
-        // send email
         boolean mailSent = sendNewPasswordToUser(user.getEmail(), newPassword);
 
         if (mailSent) {
