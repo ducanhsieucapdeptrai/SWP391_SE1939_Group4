@@ -45,7 +45,7 @@
                     if (allCategories != null) {
                         for (Category c : allCategories) {
                 %>
-                <option value="<%= c.getCategoryName()%>" <%= c.getCategoryName().equals(selectedCategory) ? "selected" : ""%>>
+                <option value="<%= c.getCategoryId()%>" <%= ("" + c.getCategoryId()).equals(selectedCategory) ? "selected" : ""%>>
                     <%= c.getCategoryName()%>
                 </option>
                 <%
@@ -53,6 +53,7 @@
                     }
                 %>
             </select>
+
 
             <!-- SubCategory -->
             <select name="subcategory" id="subcategory" class="border px-3 py-2 rounded-lg shadow-sm">
@@ -72,13 +73,19 @@
             </div>
         </form>
     </div>
-
     <!-- Add Button -->
+    <div class="mb-6">
+        <a href="material-add" class="inline-block px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors">
+            <i class="fas fa-plus mr-1"></i> Add Category/SubCategory
+        </a>
+    </div>
+    
     <div class="mb-6">
         <a href="material-add" class="inline-block px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors">
             <i class="fas fa-plus mr-1"></i> Add New Material
         </a>
     </div>
+    
 </div>
 
 <!-- Table -->
@@ -184,48 +191,54 @@
     });
 </script>
 <script>
-    const subcategories = {
-        "Structural Materials": ["Concrete", "Structural Steel", "Bricks", "Building Stone", "Structural Timber"],
-        "Finishing Materials": ["Flooring Materials", "Wall Coverings", "Paints and Coatings", "Ceiling Materials"],
-        "Insulation & Waterproofing": ["Thermal Insulation", "Waterproofing Materials", "Sound Insulation"],
-        "Mechanical & Electrical": ["Electrical Systems", "Plumbing Systems", "HVAC Systems"],
-        "Interior Decoration": ["Wooden Furniture", "Decorative Materials", "Sanitary Equipment"],
-        "Other Construction Materials": ["Foundation Materials", "Roofing Materials", "Door and Window Materials"]
-    };
+    let allSubcategories = [];
+
+    async function fetchSubcategories() {
+        try {
+            const response = await fetch("<%= request.getContextPath()%>/general/get-subcategories");
+
+
+            allSubcategories = await response.json();
+        } catch (error) {
+            console.error("Failed to fetch subcategories:", error);
+        }
+    }
 
     function updateSubcategories() {
         const categorySelect = document.querySelector('select[name="category"]');
         const subcategorySelect = document.querySelector('select[name="subcategory"]');
-        const selectedCategory = categorySelect.value;
+        const selectedCategoryId = categorySelect.value;
 
-        // Xóa toàn bộ option cũ
         subcategorySelect.innerHTML = '<option value="">-- All Subcategories --</option>';
 
-        if (selectedCategory && subcategories[selectedCategory]) {
-            subcategories[selectedCategory].forEach(sub => {
-                const option = document.createElement("option");
-                option.value = sub;
-                option.text = sub;
-                subcategorySelect.appendChild(option);
-            });
-        }
-    }
+        const categoryId = Number(selectedCategoryId);
+        const filtered = allSubcategories.filter(sub => sub.categoryId === categoryId);
 
-    document.addEventListener("DOMContentLoaded", function () {
-        document.querySelector('select[name="category"]').addEventListener("change", updateSubcategories);
+        filtered.forEach(sub => {
+            const option = document.createElement("option");
+            option.value = sub.subCategoryId; // ✅ Đúng
+            option.text = sub.subCategoryName;
+            subcategorySelect.appendChild(option);
+        });
 
-        // Tự động kích hoạt sau khi load nếu có selectedCategory
-        updateSubcategories();
-
-        // Gán selected cho subcategory nếu đã chọn từ trước
+        // Giữ lại subcategory đã chọn sau khi lọc
         const selectedSub = "<%= selectedSubcategory != null ? selectedSubcategory : ""%>";
         if (selectedSub) {
-            const subSelect = document.querySelector('select[name="subcategory"]');
-            Array.from(subSelect.options).forEach(option => {
+            Array.from(subcategorySelect.options).forEach(option => {
                 if (option.value === selectedSub) {
                     option.selected = true;
                 }
             });
         }
+    }
+
+    document.addEventListener("DOMContentLoaded", async function () {
+        await fetchSubcategories();
+        document.querySelector('select[name="category"]').addEventListener("change", updateSubcategories);
+        updateSubcategories(); // initial trigger
     });
+
 </script>
+
+
+

@@ -14,16 +14,13 @@ public class AssignTaskDAO extends DBContext {
                 + "rt.RequestTypeName, rs.Description AS StatusDescription, "
                 + "u1.FullName AS RequestedByName, "
                 + "u2.FullName AS ApprovedByName, r.ApprovedDate, r.ApprovalNote, "
-                + "it.ImportTypeName, et.ExportTypeName "
+                + "rst.SubTypeName "
                 + "FROM RequestList r "
                 + "JOIN RequestType rt ON r.RequestTypeId = rt.RequestTypeId "
                 + "JOIN RequestStatus rs ON r.Status = rs.StatusCode "
                 + "JOIN Users u1 ON r.RequestedBy = u1.UserId "
                 + "LEFT JOIN Users u2 ON r.ApprovedBy = u2.UserId "
-                + "LEFT JOIN ImportList il ON r.RequestId = il.RequestId "
-                + "LEFT JOIN ImportType it ON il.ImportTypeId = it.ImportTypeId "
-                + "LEFT JOIN ExportList el ON r.RequestId = el.RequestId "
-                + "LEFT JOIN ExportType et ON el.ExportTypeId = et.ExportTypeId "
+                + "LEFT JOIN RequestSubType rst ON r.SubTypeId = rst.SubTypeId "
                 + "WHERE r.Status = 'Approved' AND r.AssignedStaffId IS NULL "
         );
 
@@ -44,7 +41,7 @@ public class AssignTaskDAO extends DBContext {
                 sql.append(" AND DATE(r.RequestDate) = ? ");
                 params.add(java.sql.Date.valueOf(requestDate));
             } catch (IllegalArgumentException e) {
-                // Bỏ qua nếu sai format
+                // skip invalid date
             }
         }
 
@@ -66,15 +63,7 @@ public class AssignTaskDAO extends DBContext {
                 r.setApprovedByName(rs.getString("ApprovedByName"));
                 r.setApprovedDate(rs.getTimestamp("ApprovedDate"));
                 r.setApprovalNote(rs.getString("ApprovalNote"));
-
-                String importType = rs.getString("ImportTypeName");
-                String exportType = rs.getString("ExportTypeName");
-                if (importType != null) {
-                    r.setImportTypeName(importType);
-                }
-                if (exportType != null) {
-                    r.setExportTypeName(exportType);
-                }
+                r.setSubTypeName(rs.getString("SubTypeName"));
 
                 list.add(r);
             }
@@ -102,22 +91,18 @@ public class AssignTaskDAO extends DBContext {
     public List<RequestList> getFilteredRequests(String type, String status, String requestedBy, String requestDate) {
         List<RequestList> list = new ArrayList<>();
         StringBuilder sql = new StringBuilder(
-                "SELECT r.RequestId, r.RequestDate, r.Note,"
-                + "   r.Status, "
+                "SELECT r.RequestId, r.RequestDate, r.Note, r.Status, "
                 + "rt.RequestTypeName, rs.Description AS StatusDescription, "
                 + "u1.FullName AS RequestedByName, "
                 + "u2.FullName AS ApprovedByName, r.ApprovedDate, r.ApprovalNote, "
-                + "it.ImportTypeName, et.ExportTypeName "
+                + "rst.SubTypeName "
                 + "FROM RequestList r "
                 + "JOIN RequestType rt ON r.RequestTypeId = rt.RequestTypeId "
                 + "JOIN RequestStatus rs ON r.Status = rs.StatusCode "
                 + "JOIN Users u1 ON r.RequestedBy = u1.UserId "
                 + "LEFT JOIN Users u2 ON r.ApprovedBy = u2.UserId "
-                + "LEFT JOIN ImportList il ON r.RequestId = il.RequestId "
-                + "LEFT JOIN ImportType it ON il.ImportTypeId = it.ImportTypeId "
-                + "LEFT JOIN ExportList el ON r.RequestId = el.RequestId "
-                + "LEFT JOIN ExportType et ON el.ExportTypeId = et.ExportTypeId "
-                + "WHERE r.Status = 'Approved' AND r.AssignedStaffId IS NULL "
+                + "LEFT JOIN RequestSubType rst ON r.SubTypeId = rst.SubTypeId "
+                + "WHERE 1 = 1 "
         );
 
         List<Object> params = new ArrayList<>();
@@ -128,7 +113,7 @@ public class AssignTaskDAO extends DBContext {
         }
 
         if (status != null && !status.isEmpty()) {
-            sql.append(" AND r.Status = ? ");;
+            sql.append(" AND r.Status = ? ");
             params.add(status);
         }
 
@@ -138,18 +123,15 @@ public class AssignTaskDAO extends DBContext {
         }
 
         if (requestDate != null && !requestDate.isEmpty()) {
-            sql.append(" AND DATE(r.RequestDate) = ? ");
             try {
-                java.sql.Date sqlDate = java.sql.Date.valueOf(requestDate);
-                params.add(sqlDate);
+                sql.append(" AND DATE(r.RequestDate) = ? ");
+                params.add(java.sql.Date.valueOf(requestDate));
             } catch (IllegalArgumentException e) {
-                // Trường hợp chuỗi date sai định dạng yyyy-MM-dd, bỏ qua filter
+                // skip invalid date
             }
         }
 
-        DBContext db = new DBContext();
-        try (Connection conn = db.getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
-
+        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
             for (int i = 0; i < params.size(); i++) {
                 ps.setObject(i + 1, params.get(i));
             }
@@ -161,22 +143,13 @@ public class AssignTaskDAO extends DBContext {
                     r.setRequestDate(rs.getTimestamp("RequestDate"));
                     r.setNote(rs.getString("Note"));
                     r.setStatus(rs.getString("Status"));
-
                     r.setRequestTypeName(rs.getString("RequestTypeName"));
                     r.setStatusDescription(rs.getString("StatusDescription"));
                     r.setRequestedByName(rs.getString("RequestedByName"));
                     r.setApprovedByName(rs.getString("ApprovedByName"));
                     r.setApprovedDate(rs.getTimestamp("ApprovedDate"));
                     r.setApprovalNote(rs.getString("ApprovalNote"));
-
-                    String importType = rs.getString("ImportTypeName");
-                    String exportType = rs.getString("ExportTypeName");
-                    if (importType != null) {
-                        r.setImportTypeName(importType);
-                    }
-                    if (exportType != null) {
-                        r.setExportTypeName(exportType);
-                    }
+                    r.setSubTypeName(rs.getString("SubTypeName"));
 
                     list.add(r);
                 }
@@ -352,32 +325,28 @@ public class AssignTaskDAO extends DBContext {
                u1.FullName AS RequestedByName,
                u2.FullName AS ApprovedByName,
                rt.RequestTypeName,
-               it.ImportTypeName,
-               et.ExportTypeName
+               rst.SubTypeName
         FROM RequestList rl
         JOIN Users u1 ON rl.RequestedBy = u1.UserId
         LEFT JOIN Users u2 ON rl.ApprovedBy = u2.UserId
         JOIN RequestType rt ON rl.RequestTypeId = rt.RequestTypeId
-        LEFT JOIN ImportList il ON rl.RequestId = il.RequestId
-        LEFT JOIN ImportType it ON il.ImportTypeId = it.ImportTypeId
-        LEFT JOIN ExportList el ON rl.RequestId = el.RequestId
-        LEFT JOIN ExportType et ON el.ExportTypeId = et.ExportTypeId
+        LEFT JOIN RequestSubType rst ON rl.SubTypeId = rst.SubTypeId
         WHERE rl.Status = 'Approved'
           AND rl.AssignedStaffId IS NOT NULL
           AND DATE(rl.ArrivalDate) = CURDATE()
     """;
 
-        DBContext db = new DBContext();
-        try (Connection conn = db.getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+
             while (rs.next()) {
                 RequestList r = mapResultSetToRequestList(rs);
                 r.setRequestedByName(rs.getString("RequestedByName"));
                 r.setApprovedByName(rs.getString("ApprovedByName"));
                 r.setRequestTypeName(rs.getString("RequestTypeName"));
-                r.setImportTypeName(rs.getString("ImportTypeName")); // có thể null
-                r.setExportTypeName(rs.getString("ExportTypeName")); // có thể null
+                r.setSubTypeName(rs.getString("SubTypeName")); // mới
                 list.add(r);
             }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -392,32 +361,28 @@ public class AssignTaskDAO extends DBContext {
                u1.FullName AS RequestedByName,
                u2.FullName AS ApprovedByName,
                rt.RequestTypeName,
-               it.ImportTypeName,
-               et.ExportTypeName
+               rst.SubTypeName
         FROM RequestList rl
         JOIN Users u1 ON rl.RequestedBy = u1.UserId
         LEFT JOIN Users u2 ON rl.ApprovedBy = u2.UserId
         JOIN RequestType rt ON rl.RequestTypeId = rt.RequestTypeId
-        LEFT JOIN ImportList il ON rl.RequestId = il.RequestId
-        LEFT JOIN ImportType it ON il.ImportTypeId = it.ImportTypeId
-        LEFT JOIN ExportList el ON rl.RequestId = el.RequestId
-        LEFT JOIN ExportType et ON el.ExportTypeId = et.ExportTypeId
+        LEFT JOIN RequestSubType rst ON rl.SubTypeId = rst.SubTypeId
         WHERE rl.Status = 'Approved'
           AND rl.AssignedStaffId IS NOT NULL
           AND (rl.ArrivalDate IS NULL OR DATE(rl.ArrivalDate) > CURDATE())
     """;
 
-        DBContext db = new DBContext();
-        try (Connection conn = db.getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+
             while (rs.next()) {
                 RequestList r = mapResultSetToRequestList(rs);
                 r.setRequestedByName(rs.getString("RequestedByName"));
                 r.setApprovedByName(rs.getString("ApprovedByName"));
                 r.setRequestTypeName(rs.getString("RequestTypeName"));
-                r.setImportTypeName(rs.getString("ImportTypeName"));
-                r.setExportTypeName(rs.getString("ExportTypeName"));
+                r.setSubTypeName(rs.getString("SubTypeName")); // mới
                 list.add(r);
             }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -454,20 +419,15 @@ public class AssignTaskDAO extends DBContext {
                u1.FullName AS RequestedByName,
                u2.FullName AS ApprovedByName,
                rt.RequestTypeName,
-               it.ImportTypeName,
-               et.ExportTypeName
+               rst.SubTypeName
         FROM RequestList rl
         JOIN Users u1 ON rl.RequestedBy = u1.UserId
         LEFT JOIN Users u2 ON rl.ApprovedBy = u2.UserId
         JOIN RequestType rt ON rl.RequestTypeId = rt.RequestTypeId
-        LEFT JOIN ImportList il ON rl.RequestId = il.RequestId
-        LEFT JOIN ImportType it ON il.ImportTypeId = it.ImportTypeId
-        LEFT JOIN ExportList el ON rl.RequestId = el.RequestId
-        LEFT JOIN ExportType et ON el.ExportTypeId = et.ExportTypeId
-
-        WHERE Status = 'Approved'
-          AND IsTransferredToday = TRUE
-          AND IsCompleted = FALSE;
+        LEFT JOIN RequestSubType rst ON rl.SubTypeId = rst.SubTypeId
+        WHERE rl.Status = 'Approved'
+          AND rl.IsTransferredToday = TRUE
+          AND rl.IsCompleted = FALSE
     """);
 
         List<Object> params = new ArrayList<>();
@@ -485,7 +445,6 @@ public class AssignTaskDAO extends DBContext {
         }
 
         try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
-
             for (int i = 0; i < params.size(); i++) {
                 ps.setObject(i + 1, params.get(i));
             }
@@ -496,11 +455,9 @@ public class AssignTaskDAO extends DBContext {
                 r.setRequestedByName(rs.getString("RequestedByName"));
                 r.setApprovedByName(rs.getString("ApprovedByName"));
                 r.setRequestTypeName(rs.getString("RequestTypeName"));
-                r.setImportTypeName(rs.getString("ImportTypeName"));
-                r.setExportTypeName(rs.getString("ExportTypeName"));
+                r.setSubTypeName(rs.getString("SubTypeName"));
                 list.add(r);
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -516,21 +473,15 @@ public class AssignTaskDAO extends DBContext {
                u1.FullName AS RequestedByName,
                u2.FullName AS ApprovedByName,
                rt.RequestTypeName,
-               it.ImportTypeName,
-               et.ExportTypeName
+               rst.SubTypeName
         FROM RequestList rl
         JOIN Users u1 ON rl.RequestedBy = u1.UserId
         LEFT JOIN Users u2 ON rl.ApprovedBy = u2.UserId
         JOIN RequestType rt ON rl.RequestTypeId = rt.RequestTypeId
-        LEFT JOIN ImportList il ON rl.RequestId = il.RequestId
-        LEFT JOIN ImportType it ON il.ImportTypeId = it.ImportTypeId
-        LEFT JOIN ExportList el ON rl.RequestId = el.RequestId
-        LEFT JOIN ExportType et ON el.ExportTypeId = et.ExportTypeId
-  
-        WHERE Status = 'Approved'
-          AND IsTransferredToday = FALSE
-          AND IsCompleted = FALSE;
-   
+        LEFT JOIN RequestSubType rst ON rl.SubTypeId = rst.SubTypeId
+        WHERE rl.Status = 'Approved'
+          AND rl.IsTransferredToday = FALSE
+          AND rl.IsCompleted = FALSE
     """);
 
         List<Object> params = new ArrayList<>();
@@ -548,7 +499,6 @@ public class AssignTaskDAO extends DBContext {
         }
 
         try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
-
             for (int i = 0; i < params.size(); i++) {
                 ps.setObject(i + 1, params.get(i));
             }
@@ -559,11 +509,9 @@ public class AssignTaskDAO extends DBContext {
                 r.setRequestedByName(rs.getString("RequestedByName"));
                 r.setApprovedByName(rs.getString("ApprovedByName"));
                 r.setRequestTypeName(rs.getString("RequestTypeName"));
-                r.setImportTypeName(rs.getString("ImportTypeName"));
-                r.setExportTypeName(rs.getString("ExportTypeName"));
+                r.setSubTypeName(rs.getString("SubTypeName"));
                 list.add(r);
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }

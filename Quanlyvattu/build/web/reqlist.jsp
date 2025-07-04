@@ -93,7 +93,7 @@
                     </c:otherwise>
                 </c:choose>
 
-              
+
                 <form action="reqlist" method="get">
                     <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 ml-auto">
                         Show All Requests
@@ -124,16 +124,15 @@
                             <td class="border border-gray-300 px-3 py-2">${r.requestDate}</td>
                             <td class="border border-gray-300 px-3 py-2">
                                 ${r.requestTypeName}
-                                <c:if test="${r.requestTypeName == 'Export'}">
-                                    (<i>${r.exportTypeName}</i>)
-                                </c:if>
-                                <c:if test="${r.requestTypeName == 'Import'}">
-                                    (<i>${r.importTypeName}</i>)
+                                <c:if test="${r.requestTypeName == 'Export' || r.requestTypeName == 'Import'}">
+                                    <c:if test="${not empty r.subTypeName}">
+                                        (<i>${r.subTypeName}</i>)
+                                    </c:if>
                                 </c:if>
                             </td>
+
                             <td class="border border-gray-300 px-3 py-2">${r.note}</td>
                             <td class="border border-gray-300 px-3 py-2">${r.status}</td>
-
                             <td class="border border-gray-300 px-3 py-2">${r.approvedByName}</td>
                             <td class="border border-gray-300 px-3 py-2">${r.approvalNote}</td>
                             <td class="border border-gray-300 px-3 py-2">
@@ -142,20 +141,59 @@
                         </tr>
                     </c:forEach>
                 </tbody>
-            </table>    
+
+            </table>   
+
+            <%
+                int currentPage = (int) request.getAttribute("currentPage");
+                int totalPage = (int) request.getAttribute("totalPage");
+                int startPage = (int) request.getAttribute("startPage");
+                int endPage = (int) request.getAttribute("endPage");
+                String baseParams = (String) request.getAttribute("baseParams");
+            %>
+
+            <!-- Pagination -->
+            <div class="flex justify-between items-center mt-4">
+                <div class="text-sm text-gray-600">
+                    Showing page <%= currentPage%> of <%= totalPage%>
+                </div>
+                <div class="space-x-1">
+                    <% if (currentPage > 1) {%>
+                    <a href="reqlist?page=<%= currentPage - 1%><%= baseParams%>" class="px-3 py-1 border rounded">«</a>
+                    <% } else { %>
+                    <span class="px-3 py-1 border rounded text-gray-400 cursor-not-allowed">«</span>
+                    <% } %>
+
+                    <% for (int i = startPage; i <= endPage; i++) { %>
+                    <% if (i == currentPage) {%>
+                    <span class="px-3 py-1 border rounded bg-blue-600 text-white"><%= i%></span>
+                    <% } else {%>
+                    <a href="reqlist?page=<%= i%><%= baseParams%>" class="px-3 py-1 border rounded hover:bg-gray-100"><%= i%></a>
+                    <% } %>
+                    <% } %>
+
+                    <% if (currentPage < totalPage) {%>
+                    <a href="reqlist?page=<%= currentPage + 1%><%= baseParams%>" class="px-3 py-1 border rounded">»</a>
+                    <% } else { %>
+                    <span class="px-3 py-1 border rounded text-gray-400 cursor-not-allowed">»</span>
+                    <% }%>
+                </div>
+            </div>
+
+
         </div>
 
     </body>
 
     <script>
         <c:if test="${not empty sessionScope.successMessage}">
-       Swal.fire({
-           icon: 'success',
-           title: 'Success',
-           text: '${sessionScope.successMessage}',
-           showConfirmButton: false,
-           timer: 2000
-       });
+        Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            text: '${sessionScope.successMessage}',
+            showConfirmButton: false,
+            timer: 2000
+        });
             <c:remove var="successMessage" scope="session" />
         </c:if>
     </script>
