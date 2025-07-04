@@ -124,16 +124,15 @@
                             <td class="border border-gray-300 px-3 py-2">${r.requestDate}</td>
                             <td class="border border-gray-300 px-3 py-2">
                                 ${r.requestTypeName}
-                                <c:if test="${r.requestTypeName == 'Export'}">
-                                    (<i>${r.exportTypeName}</i>)
-                                </c:if>
-                                <c:if test="${r.requestTypeName == 'Import'}">
-                                    (<i>${r.importTypeName}</i>)
+                                <c:if test="${r.requestTypeName == 'Export' || r.requestTypeName == 'Import'}">
+                                    <c:if test="${not empty r.subTypeName}">
+                                        (<i>${r.subTypeName}</i>)
+                                    </c:if>
                                 </c:if>
                             </td>
+
                             <td class="border border-gray-300 px-3 py-2">${r.note}</td>
                             <td class="border border-gray-300 px-3 py-2">${r.status}</td>
-
                             <td class="border border-gray-300 px-3 py-2">${r.approvedByName}</td>
                             <td class="border border-gray-300 px-3 py-2">${r.approvalNote}</td>
                             <td class="border border-gray-300 px-3 py-2">
@@ -142,6 +141,7 @@
                         </tr>
                     </c:forEach>
                 </tbody>
+
             </table>   
 
             <%

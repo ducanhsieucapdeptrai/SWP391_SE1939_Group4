@@ -73,13 +73,19 @@
             </div>
         </form>
     </div>
-
     <!-- Add Button -->
+    <div class="mb-6">
+        <a href="material-add" class="inline-block px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors">
+            <i class="fas fa-plus mr-1"></i> Add Category/SubCategory
+        </a>
+    </div>
+    
     <div class="mb-6">
         <a href="material-add" class="inline-block px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors">
             <i class="fas fa-plus mr-1"></i> Add New Material
         </a>
     </div>
+    
 </div>
 
 <!-- Table -->

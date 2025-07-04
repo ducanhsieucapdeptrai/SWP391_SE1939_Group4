@@ -32,8 +32,8 @@ public class RequestList {
     private String statusDescription;   // Tuỳ chọn: mô tả trạng thái từ RequestStatus
 
     private List<RequestDetail> requestDetails; // Tuỳ chọn: dùng nếu cần load chi tiết đi kèm
-    private String importTypeName;
-    private String exportTypeName;
+    private String subTypeName;
+
     private Date arrivalDate;
     private boolean isUpdated;
     private boolean isCompleted;
@@ -43,7 +43,7 @@ public class RequestList {
     public RequestList() {
     }
 
-    public RequestList(int requestId, int requestedBy, Date requestDate, int requestTypeId, String note, String status, int approvedBy, Date approvedDate, String approvalNote, int assignedStaffId, String assignedStaffName, RequestType requestType, String requestedByName, String approvedByName, String requestTypeName, String statusDescription, List<RequestDetail> requestDetails, String importTypeName, String exportTypeName, Date arrivalDate, boolean isUpdated, boolean isCompleted, boolean isTransferredToday, boolean hasPO, int poCount, String poStatus) {
+    public RequestList(int requestId, int requestedBy, Date requestDate, int requestTypeId, String note, String status, int approvedBy, Date approvedDate, String approvalNote, int assignedStaffId, String assignedStaffName, RequestType requestType, String requestedByName, String approvedByName, String requestTypeName, String statusDescription, List<RequestDetail> requestDetails, String subTypeName, Date arrivalDate, boolean isUpdated, boolean isCompleted, boolean isTransferredToday, boolean hasPO, int poCount, String poStatus) {
         this.requestId = requestId;
         this.requestedBy = requestedBy;
         this.requestDate = requestDate;
@@ -61,8 +61,7 @@ public class RequestList {
         this.requestTypeName = requestTypeName;
         this.statusDescription = statusDescription;
         this.requestDetails = requestDetails;
-        this.importTypeName = importTypeName;
-        this.exportTypeName = exportTypeName;
+        this.subTypeName = subTypeName;
         this.arrivalDate = arrivalDate;
         this.isUpdated = isUpdated;
         this.isCompleted = isCompleted;
@@ -72,7 +71,15 @@ public class RequestList {
         this.poStatus = poStatus;
     }
 
-    
+    public String getSubTypeName() {
+        return subTypeName;
+    }
+
+    public void setSubTypeName(String subTypeName) {
+        this.subTypeName = subTypeName;
+    }
+
+   
 
     public boolean isIsCompleted() {
         return isCompleted;
@@ -81,9 +88,6 @@ public class RequestList {
     public void setIsCompleted(boolean isCompleted) {
         this.isCompleted = isCompleted;
     }
-
-   
-    
 
     public Date getArrivalDate() {
         return arrivalDate;
@@ -125,22 +129,7 @@ public class RequestList {
         this.assignedStaffName = assignedStaffName;
     }
 
-    public String getImportTypeName() {
-        return importTypeName;
-    }
-
-    public void setImportTypeName(String importTypeName) {
-        this.importTypeName = importTypeName;
-    }
-
-    public String getExportTypeName() {
-        return exportTypeName;
-    }
-
-    public void setExportTypeName(String exportTypeName) {
-        this.exportTypeName = exportTypeName;
-    }
-
+  
     public int getRequestId() {
         return requestId;
     }

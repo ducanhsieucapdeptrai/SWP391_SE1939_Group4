@@ -18,21 +18,20 @@ public class RequestDAO extends DBContext {
 
     public RequestList getRequestById(int requestId) {
         RequestList request = null;
-        String sql = "SELECT r.RequestId, r.RequestDate, r.Note, r.Status, "
-                + "rt.RequestTypeName, rs.Description AS StatusDescription, "
-                + "u1.FullName AS RequestedByName, "
-                + "u2.FullName AS ApprovedByName, r.ApprovedDate, r.ApprovalNote, "
-                + "it.ImportTypeName, et.ExportTypeName "
-                + "FROM RequestList r "
-                + "JOIN RequestType rt ON r.RequestTypeId = rt.RequestTypeId "
-                + "JOIN RequestStatus rs ON r.Status = rs.StatusCode "
-                + "JOIN Users u1 ON r.RequestedBy = u1.UserId "
-                + "LEFT JOIN Users u2 ON r.ApprovedBy = u2.UserId "
-                + "LEFT JOIN ImportList il ON r.RequestId = il.RequestId "
-                + "LEFT JOIN ImportType it ON il.ImportTypeId = it.ImportTypeId "
-                + "LEFT JOIN ExportList el ON r.RequestId = el.RequestId "
-                + "LEFT JOIN ExportType et ON el.ExportTypeId = et.ExportTypeId "
-                + "WHERE r.RequestId = ?";
+        String sql = """
+        SELECT r.RequestId, r.RequestDate, r.Note, r.Status,
+               rt.RequestTypeName, rs.Description AS StatusDescription,
+               u1.FullName AS RequestedByName,
+               u2.FullName AS ApprovedByName, r.ApprovedDate, r.ApprovalNote,
+               rst.SubTypeName
+        FROM RequestList r
+        JOIN RequestType rt ON r.RequestTypeId = rt.RequestTypeId
+        JOIN RequestStatus rs ON r.Status = rs.StatusCode
+        JOIN Users u1 ON r.RequestedBy = u1.UserId
+        LEFT JOIN Users u2 ON r.ApprovedBy = u2.UserId
+        LEFT JOIN RequestSubType rst ON r.SubTypeId = rst.SubTypeId
+        WHERE r.RequestId = ?
+    """;
 
         try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, requestId);
@@ -49,15 +48,7 @@ public class RequestDAO extends DBContext {
                     request.setApprovedByName(rs.getString("ApprovedByName"));
                     request.setApprovedDate(rs.getTimestamp("ApprovedDate"));
                     request.setApprovalNote(rs.getString("ApprovalNote"));
-
-                    String importType = rs.getString("ImportTypeName");
-                    String exportType = rs.getString("ExportTypeName");
-                    if (importType != null) {
-                        request.setImportTypeName(importType);
-                    }
-                    if (exportType != null) {
-                        request.setExportTypeName(exportType);
-                    }
+                    request.setSubTypeName(rs.getString("SubTypeName"));
                 }
             }
         } catch (SQLException e) {
@@ -70,21 +61,18 @@ public class RequestDAO extends DBContext {
     public List<RequestList> getAllRequests() {
         List<RequestList> list = new ArrayList<>();
         String sql = """
-            SELECT r.RequestId, r.RequestDate, r.Note,
-                   rt.RequestTypeName, rs.Description AS StatusDescription,
-                   u1.FullName AS RequestedByName,
-                   u2.FullName AS ApprovedByName, r.ApprovedDate, r.ApprovalNote,
-                   it.ImportTypeName, et.ExportTypeName
-            FROM RequestList r
-            JOIN RequestType rt ON r.RequestTypeId = rt.RequestTypeId
-            JOIN RequestStatus rs ON r.Status = rs.StatusCode
-            JOIN Users u1 ON r.RequestedBy = u1.UserId
-            LEFT JOIN Users u2 ON r.ApprovedBy = u2.UserId
-            LEFT JOIN ImportList il ON r.RequestId = il.RequestId
-            LEFT JOIN ImportType it ON il.ImportTypeId = it.ImportTypeId
-            LEFT JOIN ExportList el ON r.RequestId = el.RequestId
-            LEFT JOIN ExportType et ON el.ExportTypeId = et.ExportTypeId
-        """;
+        SELECT r.RequestId, r.RequestDate, r.Note,
+               rt.RequestTypeName, rs.Description AS StatusDescription,
+               u1.FullName AS RequestedByName,
+               u2.FullName AS ApprovedByName, r.ApprovedDate, r.ApprovalNote,
+               rst.SubTypeName
+        FROM RequestList r
+        JOIN RequestType rt ON r.RequestTypeId = rt.RequestTypeId
+        JOIN RequestStatus rs ON r.Status = rs.StatusCode
+        JOIN Users u1 ON r.RequestedBy = u1.UserId
+        LEFT JOIN Users u2 ON r.ApprovedBy = u2.UserId
+        LEFT JOIN RequestSubType rst ON r.SubTypeId = rst.SubTypeId
+    """;
 
         try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             try (ResultSet rs = ps.executeQuery()) {
@@ -99,8 +87,7 @@ public class RequestDAO extends DBContext {
                     r.setApprovedByName(rs.getString("ApprovedByName"));
                     r.setApprovedDate(rs.getTimestamp("ApprovedDate"));
                     r.setApprovalNote(rs.getString("ApprovalNote"));
-                    r.setImportTypeName(rs.getString("ImportTypeName"));
-                    r.setExportTypeName(rs.getString("ExportTypeName"));
+                    r.setSubTypeName(rs.getString("SubTypeName"));
                     list.add(r);
                 }
             }
@@ -140,16 +127,13 @@ public class RequestDAO extends DBContext {
                 + "rt.RequestTypeName, rs.Description AS StatusDescription, "
                 + "u1.FullName AS RequestedByName, "
                 + "u2.FullName AS ApprovedByName, r.ApprovedDate, r.ApprovalNote, "
-                + "it.ImportTypeName, et.ExportTypeName "
+                + "rst.SubTypeName "
                 + "FROM RequestList r "
                 + "JOIN RequestType rt ON r.RequestTypeId = rt.RequestTypeId "
                 + "JOIN RequestStatus rs ON r.Status = rs.StatusCode "
                 + "JOIN Users u1 ON r.RequestedBy = u1.UserId "
                 + "LEFT JOIN Users u2 ON r.ApprovedBy = u2.UserId "
-                + "LEFT JOIN ImportList il ON r.RequestId = il.RequestId "
-                + "LEFT JOIN ImportType it ON il.ImportTypeId = it.ImportTypeId "
-                + "LEFT JOIN ExportList el ON r.RequestId = el.RequestId "
-                + "LEFT JOIN ExportType et ON el.ExportTypeId = et.ExportTypeId "
+                + "LEFT JOIN RequestSubType rst ON r.SubTypeId = rst.SubTypeId "
                 + "WHERE 1=1 "
         );
 
@@ -173,6 +157,7 @@ public class RequestDAO extends DBContext {
                 sql.append(" AND DATE(r.RequestDate) = ? ");
                 params.add(sqlDate);
             } catch (IllegalArgumentException e) {
+                // Ignore invalid date
             }
         }
 
@@ -193,15 +178,13 @@ public class RequestDAO extends DBContext {
                     r.setApprovedByName(rs.getString("ApprovedByName"));
                     r.setApprovedDate(rs.getTimestamp("ApprovedDate"));
                     r.setApprovalNote(rs.getString("ApprovalNote"));
-                    r.setImportTypeName(rs.getString("ImportTypeName"));
-                    r.setExportTypeName(rs.getString("ExportTypeName"));
+                    r.setSubTypeName(rs.getString("SubTypeName")); // << thay import/export
                     list.add(r);
                 }
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
         return list;
     }
 
@@ -834,20 +817,21 @@ public class RequestDAO extends DBContext {
 
     public List<RequestList> getUpdatedRequests() {
         List<RequestList> list = new ArrayList<>();
-        String sql = "SELECT r.RequestId, r.RequestDate, r.Note, r.Status, "
-                + "rt.RequestTypeName, rs.Description AS StatusDescription, "
-                + "u1.FullName AS RequestedByName, u2.FullName AS ApprovedByName, "
-                + "r.ApprovedDate, r.ApprovalNote, it.ImportTypeName, et.ExportTypeName "
-                + "FROM RequestList r "
-                + "JOIN RequestType rt ON r.RequestTypeId = rt.RequestTypeId "
-                + "JOIN RequestStatus rs ON r.Status = rs.StatusCode "
-                + "JOIN Users u1 ON r.RequestedBy = u1.UserId "
-                + "LEFT JOIN Users u2 ON r.ApprovedBy = u2.UserId "
-                + "LEFT JOIN ImportList il ON r.RequestId = il.RequestId "
-                + "LEFT JOIN ImportType it ON il.ImportTypeId = it.ImportTypeId "
-                + "LEFT JOIN ExportList el ON r.RequestId = el.RequestId "
-                + "LEFT JOIN ExportType et ON el.ExportTypeId = et.ExportTypeId "
-                + "WHERE r.IsUpdated = TRUE";
+        String sql = """
+        SELECT r.RequestId, r.RequestDate, r.Note, r.Status,
+               rt.RequestTypeName, rs.Description AS StatusDescription,
+               u1.FullName AS RequestedByName,
+               u2.FullName AS ApprovedByName,
+               r.ApprovedDate, r.ApprovalNote,
+               rst.SubTypeName
+        FROM RequestList r
+        JOIN RequestType rt ON r.RequestTypeId = rt.RequestTypeId
+        JOIN RequestStatus rs ON r.Status = rs.StatusCode
+        JOIN Users u1 ON r.RequestedBy = u1.UserId
+        LEFT JOIN Users u2 ON r.ApprovedBy = u2.UserId
+        LEFT JOIN RequestSubType rst ON r.SubTypeId = rst.SubTypeId
+        WHERE r.IsUpdated = TRUE
+    """;
 
         try (Connection conn = connection; PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
@@ -862,15 +846,7 @@ public class RequestDAO extends DBContext {
                 r.setApprovedByName(rs.getString("ApprovedByName"));
                 r.setApprovedDate(rs.getTimestamp("ApprovedDate"));
                 r.setApprovalNote(rs.getString("ApprovalNote"));
-
-                String importType = rs.getString("ImportTypeName");
-                String exportType = rs.getString("ExportTypeName");
-                if (importType != null) {
-                    r.setImportTypeName(importType);
-                }
-                if (exportType != null) {
-                    r.setExportTypeName(exportType);
-                }
+                r.setSubTypeName(rs.getString("SubTypeName")); // <- thay thế import/export type
 
                 list.add(r);
             }
@@ -1035,17 +1011,13 @@ public class RequestDAO extends DBContext {
                u2.FullName AS approvedByName,
                rt.RequestTypeName,
                rs.Description AS statusDescription,
-               it.ImportTypeName,
-               et.ExportTypeName
+               rst.SubTypeName
         FROM RequestList rl
         LEFT JOIN Users u1 ON rl.RequestedBy = u1.UserId
         LEFT JOIN Users u2 ON rl.ApprovedBy = u2.UserId
         LEFT JOIN RequestType rt ON rl.RequestTypeId = rt.RequestTypeId
         LEFT JOIN RequestStatus rs ON rl.Status = rs.StatusCode
-        LEFT JOIN ImportList il ON rl.RequestId = il.RequestId
-        LEFT JOIN ImportType it ON il.ImportTypeId = it.ImportTypeId
-        LEFT JOIN ExportList el ON rl.RequestId = el.RequestId
-        LEFT JOIN ExportType et ON el.ExportTypeId = et.ExportTypeId
+        LEFT JOIN RequestSubType rst ON rl.SubTypeId = rst.SubTypeId
         WHERE 1 = 1
     """);
 
@@ -1093,8 +1065,7 @@ public class RequestDAO extends DBContext {
                 r.setStatus(rs.getString("Status"));
                 r.setRequestTypeName(rs.getString("RequestTypeName"));
                 r.setStatusDescription(rs.getString("statusDescription"));
-                r.setImportTypeName(rs.getString("ImportTypeName"));
-                r.setExportTypeName(rs.getString("ExportTypeName"));
+                r.setSubTypeName(rs.getString("SubTypeName")); // <- thay thế cho export/import type
                 list.add(r);
             }
         } catch (Exception e) {

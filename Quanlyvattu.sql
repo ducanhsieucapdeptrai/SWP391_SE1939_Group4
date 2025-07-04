@@ -71,22 +71,20 @@ CREATE TABLE Materials (
     FOREIGN KEY (StatusId) REFERENCES MaterialStatus(StatusId)
 );
 
-CREATE TABLE ImportType (
-    ImportTypeId INT AUTO_INCREMENT PRIMARY KEY,
-    ImportTypeName VARCHAR(100) NOT NULL
-);
-
-CREATE TABLE ExportType (
-    ExportTypeId INT PRIMARY KEY AUTO_INCREMENT,
-    ExportTypeName VARCHAR(255) NOT NULL,
-    Description TEXT
-);
 
 CREATE TABLE RequestType (
     RequestTypeId INT AUTO_INCREMENT PRIMARY KEY,
     RequestTypeName VARCHAR(100)
 );
 
+
+CREATE TABLE RequestSubType (
+    SubTypeId INT AUTO_INCREMENT PRIMARY KEY,
+    RequestTypeId INT NOT NULL,
+    SubTypeName VARCHAR(100) NOT NULL,
+    Description TEXT,
+    FOREIGN KEY (RequestTypeId) REFERENCES RequestType(RequestTypeId)
+);
 
 CREATE TABLE RequestStatus (
     StatusCode VARCHAR(20) PRIMARY KEY,
@@ -98,22 +96,26 @@ CREATE TABLE RequestList (
     RequestedBy INT,
     RequestDate DATETIME DEFAULT CURRENT_TIMESTAMP,
     RequestTypeId INT,
+    SubTypeId INT,  -- Liên kết đến RequestSubType
     Note TEXT,
     Status VARCHAR(20) DEFAULT 'Pending',
     ApprovedBy INT,
     ApprovedDate DATETIME,
     ApprovalNote TEXT,
     AssignedStaffId INT,
+    ArrivalDate DATETIME,
     IsTransferredToday BOOLEAN DEFAULT FALSE,
     IsUpdated BOOLEAN DEFAULT FALSE NOT NULL,
-    ArrivalDate DATETIME,
     IsCompleted BOOLEAN DEFAULT FALSE,
+    
     FOREIGN KEY (RequestedBy) REFERENCES Users(UserId),
     FOREIGN KEY (RequestTypeId) REFERENCES RequestType(RequestTypeId),
+    FOREIGN KEY (SubTypeId) REFERENCES RequestSubType(SubTypeId),
     FOREIGN KEY (ApprovedBy) REFERENCES Users(UserId),
     FOREIGN KEY (AssignedStaffId) REFERENCES Users(UserId),
     FOREIGN KEY (Status) REFERENCES RequestStatus(StatusCode)
 );
+
 
 CREATE TABLE RequestDetail (
     RequestId INT,
@@ -125,54 +127,7 @@ CREATE TABLE RequestDetail (
     FOREIGN KEY (MaterialId) REFERENCES Materials(MaterialId)
 );
 
--- NHẬP KHO
-CREATE TABLE ImportList (
-    ImportId INT AUTO_INCREMENT PRIMARY KEY,
-    ImportDate DATETIME DEFAULT CURRENT_TIMESTAMP,
-    ImportedBy INT,
-    ImportTypeId INT,
-    Note TEXT,
-    RequestId INT,
-    FOREIGN KEY (ImportedBy) REFERENCES Users(UserId),
-    FOREIGN KEY (ImportTypeId) REFERENCES ImportType(ImportTypeId),
-    FOREIGN KEY (RequestId) REFERENCES RequestList(RequestId)
-);
 
-
-CREATE TABLE ImportDetail (
-    ImportDetailId INT AUTO_INCREMENT PRIMARY KEY,
-    ImportId INT,
-    MaterialId INT,
-    Quantity INT,
-    
-    Price DOUBLE,
-    FOREIGN KEY (ImportId) REFERENCES ImportList(ImportId),
-    FOREIGN KEY (MaterialId) REFERENCES Materials(MaterialId)
-);
-
-
-CREATE TABLE ExportList (
-    ExportId INT AUTO_INCREMENT PRIMARY KEY,
-    ExportDate DATETIME DEFAULT CURRENT_TIMESTAMP,
-    ExportedBy INT,
-    ExportTypeId INT,
-    Note TEXT,
-    RequestId INT,
-    FOREIGN KEY (ExportedBy) REFERENCES Users(UserId),
-    FOREIGN KEY (ExportTypeId) REFERENCES ExportType(ExportTypeId),
-    FOREIGN KEY (RequestId) REFERENCES RequestList(RequestId)
-);
-
-
-
-CREATE TABLE ExportDetail (
-    ExportDetailId INT AUTO_INCREMENT PRIMARY KEY,
-    ExportId INT,
-    MaterialId INT,
-    Quantity INT,
-    FOREIGN KEY (ExportId) REFERENCES ExportList(ExportId),
-    FOREIGN KEY (MaterialId) REFERENCES Materials(MaterialId)
-);
 
 
 -- ========== NOTIFICATIONS ==========
@@ -243,6 +198,29 @@ CREATE TABLE RepairDetail (
     Quantity INT,
     Price DECIMAL(15,2),
     FOREIGN KEY (RepairId) REFERENCES RepairList(RepairId),
+    FOREIGN KEY (MaterialId) REFERENCES Materials(MaterialId)
+);
+
+
+CREATE TABLE TaskLog (
+    TaskId INT AUTO_INCREMENT PRIMARY KEY,
+    RequestId INT,
+    RequestTypeId INT,
+    MaterialId INT,
+    StaffId INT,
+    Quantity INT,
+    CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (RequestId) REFERENCES RequestList(RequestId),
+    FOREIGN KEY (RequestTypeId) REFERENCES RequestType(RequestTypeId),
+    FOREIGN KEY (MaterialId) REFERENCES Materials(MaterialId),
+    FOREIGN KEY (StaffId) REFERENCES Users(UserId)
+);
+CREATE TABLE TaskSlipDetail (
+    SlipId INT AUTO_INCREMENT PRIMARY KEY,
+    TaskId INT,
+    MaterialId INT,
+    Quantity INT,
+    FOREIGN KEY (TaskId) REFERENCES TaskLog(TaskId),
     FOREIGN KEY (MaterialId) REFERENCES Materials(MaterialId)
 );
 
@@ -556,26 +534,26 @@ VALUES
 ('Completed', 'Successfull');
 
 
-INSERT INTO ExportType (ExportTypeName, Description)
-VALUES
-('For Construction', 'Export materials for ongoing construction projects'),
-('For Equipment Repair', 'Export parts/materials for repairing machines and tools');
-
-
-
-
-INSERT INTO ImportType (ImportTypeName)
-VALUES 
-('New purchase'),             -- 1
-('Returned from repair'),     -- 2
-('Returned from usage');      -- 3
-
 INSERT INTO RequestType (RequestTypeName)
 VALUES 
 ('Export'),
 ('Import'),
 ('Purchase'),
 ('Repair');
+
+
+-- Subtypes for Export (RequestTypeId = 1)
+INSERT INTO RequestSubType (RequestTypeId, SubTypeName) VALUES
+(1, 'For Construction'),
+(1, 'For Equipment Repair');
+
+
+-- Subtypes for Import (RequestTypeId = 2)
+INSERT INTO RequestSubType (RequestTypeId, SubTypeName) VALUES
+(2, 'New Purchase'),
+(2, 'Returned from Repair'),
+(2, 'Returned from Usage');
+
 
 
 
@@ -586,29 +564,46 @@ VALUES
 -- ========================================
 
 INSERT INTO RequestList 
-(RequestId, RequestedBy, RequestDate, RequestTypeId, Note, Status, ApprovedBy, ApprovedDate, ApprovalNote, AssignedStaffId, ArrivalDate, IsTransferredToday, IsUpdated,IsCompleted)
+(RequestId, RequestedBy, RequestDate, RequestTypeId, SubTypeId, Note, Status, ApprovedBy, ApprovedDate, ApprovalNote, AssignedStaffId, ArrivalDate, IsTransferredToday, IsUpdated, IsCompleted)
 VALUES
-(1, 10, '2025-05-20 08:00:00', 2, 'Request to import materials for Project A', 'Approved', 2, '2025-05-20 08:30:00', 'Approved - match delivery note.', 3, NOW(), TRUE, FALSE,FALSE),
-(2, 11, '2025-05-21 09:30:00', 2, 'Returned items after repair', 'Approved', 2, '2025-05-21 10:00:00', 'Valid receipt', NULL, NOW(), TRUE, FALSE,FALSE),
-(3, 12, '2025-05-25 07:30:00', 1, 'Export for foundation of Building A', 'Approved', 2, '2025-05-25 08:00:00', 'Approved on schedule', 5, '2025-05-25 09:00:00', FALSE, FALSE,FALSE),
-(4, 13, '2025-05-26 08:30:00', 1, 'Export finishing materials to site B', 'Approved', 2, '2025-05-26 09:00:00', 'Export approved.', NULL, NULL, FALSE, FALSE,FALSE),
-(5, 4, NOW(), 4, 'Purchase office air conditioners', 'Approved', 2, NOW(), 'Approved within budget.', 7, NULL, FALSE, FALSE,FALSE),
-(6, 5, NOW(), 1, 'Export leftover cement', 'Rejected', 2, NOW(), 'Not needed. Keep for future use.', NULL, NULL, FALSE, FALSE,FALSE),
-(7, 6, NOW(), 3, 'Repair broken drill machine', 'Rejected', 2, NOW(), 'Request denied. Out of budget.', NULL, NULL, FALSE, FALSE,FALSE),
-(8, 7, NOW(), 2, 'Import bricks for building site', 'Pending', NULL, NULL, NULL, NULL, NULL, FALSE, FALSE,FALSE),
-(9, 8, NOW(), 3, 'Repair water leakage at storage', 'Pending', NULL, NULL, NULL, NULL, NULL, FALSE, FALSE,FALSE),
-(10, 14, '2025-05-29 10:00:00', 3, 'Propose purchase of office chairs', 'Pending', NULL, NULL, NULL, NULL, NULL, FALSE, FALSE,FALSE),
-(11, 4, '2025-06-15 09:00:00', 2, 'Import lightweight bricks', 'Approved', 2, '2025-06-15 10:00:00', 'OK to proceed.', NULL, NOW(), TRUE, FALSE,FALSE),
-(12, 5, '2025-06-15 10:30:00', 1, 'Export granite stone to site D', 'Approved', 2, '2025-06-15 11:00:00', 'Site D confirmed.', 3, '2025-06-15 13:00:00', FALSE, FALSE,FALSE),
-(13, 6, '2025-06-16 08:15:00', 4, 'Repair concrete cutter', 'Approved', 2, '2025-06-16 08:45:00', 'Assigned for repair.', 5, NULL, FALSE, FALSE,FALSE),
-(14, 7, '2025-06-16 09:30:00', 3, 'Purchase new safety helmets', 'Pending', NULL, NULL, NULL, NULL, NULL, FALSE, FALSE,FALSE),
-(15, 8, '2025-06-17 08:45:00', 2, 'Import ceiling boards', 'Approved', 2, '2025-06-17 09:15:00', 'Approved for import.', 4, NOW(), TRUE, FALSE,FALSE),
-(16, 9, '2025-06-17 10:20:00', 1, 'Export timber for site C', 'Approved', 2, '2025-06-17 10:50:00', 'Export confirmed.', NULL, NULL, FALSE, FALSE,FALSE),
-(17, 10, '2025-06-18 09:00:00', 4, 'Repair lighting system', 'Approved', 2, '2025-06-18 09:30:00', 'Assigned to technician.', 6, NOW(), TRUE, FALSE,FALSE),
-(18, 11, '2025-06-18 11:00:00', 3, 'Purchase fire extinguishers', 'Approved', 2, '2025-06-18 11:20:00', 'Urgent purchase approved.', 7, NULL, FALSE, FALSE,FALSE),
-(19, 12, '2025-06-19 08:00:00', 1, 'Export wall tiles to branch B', 'Pending', NULL, NULL, NULL, NULL, NULL, FALSE, FALSE,FALSE),
-(20, 13, '2025-06-19 10:00:00', 2, 'Import steel rods for base', 'Approved', 2, '2025-06-19 10:30:00', 'Warehouse notified.', 4, NOW(), TRUE, FALSE,FALSE);
+(1, 10, '2025-05-20 08:00:00', 1, 1, 'Request to import materials for Project A', 'Approved', 2, '2025-05-20 08:30:00', 'Approved - match delivery note.', 3, NOW(), TRUE, FALSE, FALSE),
+(2, 11, '2025-05-21 09:30:00', 1, 2, 'Returned items after repair', 'Approved', 2, '2025-05-21 10:00:00', 'Valid receipt', NULL, NOW(), TRUE, FALSE, FALSE),
+(3, 12, '2025-05-25 07:30:00', 1, 1, 'Export for foundation of Building A', 'Approved', 2, '2025-05-25 08:00:00', 'Approved on schedule', 5, '2025-05-25 09:00:00', FALSE, FALSE, FALSE),
+(4, 13, '2025-05-26 08:30:00', 1, 1, 'Export finishing materials to site B', 'Approved', 2, '2025-05-26 09:00:00', 'Export approved.', NULL, NULL, FALSE, FALSE, FALSE),
+(5, 4, NOW(), 3, NULL, 'Purchase office air conditioners', 'Approved', 2, NOW(), 'Approved within budget.', 7, NULL, FALSE, FALSE, FALSE),
+(6, 5, NOW(), 1, 1, 'Export leftover cement', 'Rejected', 2, NOW(), 'Not needed. Keep for future use.', NULL, NULL, FALSE, FALSE, FALSE),
+(7, 6, NOW(), 4, NULL, 'Repair broken drill machine', 'Rejected', 2, NOW(), 'Request denied. Out of budget.', NULL, NULL, FALSE, FALSE, FALSE),
+(8, 7, NOW(), 1, 1, 'Import bricks for building site', 'Pending', NULL, NULL, NULL, NULL, NULL, FALSE, FALSE, FALSE),
+(9, 8, NOW(), 4, NULL, 'Repair water leakage at storage', 'Pending', NULL, NULL, NULL, NULL, NULL, FALSE, FALSE, FALSE),
+(10, 14, '2025-05-29 10:00:00', 3, NULL, 'Propose purchase of office chairs', 'Pending', NULL, NULL, NULL, NULL, NULL, FALSE, FALSE, FALSE),
+(11, 4, '2025-06-15 09:00:00', 1, 1, 'Import lightweight bricks', 'Approved', 2, '2025-06-15 10:00:00', 'OK to proceed.', NULL, NOW(), TRUE, FALSE, FALSE),
+(12, 5, '2025-06-15 10:30:00', 1, 1, 'Export granite stone to site D', 'Approved', 2, '2025-06-15 11:00:00', 'Site D confirmed.', 3, '2025-06-15 13:00:00', FALSE, FALSE, FALSE),
+(13, 6, '2025-06-16 08:15:00', 4, NULL, 'Repair concrete cutter', 'Approved', 2, '2025-06-16 08:45:00', 'Assigned for repair.', 5, NULL, FALSE, FALSE, FALSE),
+(14, 7, '2025-06-16 09:30:00', 3, NULL, 'Purchase new safety helmets', 'Pending', NULL, NULL, NULL, NULL, NULL, FALSE, FALSE, FALSE),
+(15, 8, '2025-06-17 08:45:00', 1, 1, 'Import ceiling boards', 'Approved', 2, '2025-06-17 09:15:00', 'Approved for import.', 4, NOW(), TRUE, FALSE, FALSE),
+(16, 9, '2025-06-17 10:20:00', 1, 1, 'Export timber for site C', 'Approved', 2, '2025-06-17 10:50:00', 'Export confirmed.', NULL, NULL, FALSE, FALSE, FALSE),
+(17, 10, '2025-06-18 09:00:00', 4, NULL, 'Repair lighting system', 'Approved', 2, '2025-06-18 09:30:00', 'Assigned to technician.', 6, NOW(), TRUE, FALSE, FALSE),
+(18, 11, '2025-06-18 11:00:00', 3, NULL, 'Purchase fire extinguishers', 'Approved', 2, '2025-06-18 11:20:00', 'Urgent purchase approved.', 7, NULL, FALSE, FALSE, FALSE),
+(19, 12, '2025-06-19 08:00:00', 1, 2, 'Export wall tiles to branch B', 'Pending', NULL, NULL, NULL, NULL, NULL, FALSE, FALSE, FALSE),
+(20, 13, '2025-06-19 10:00:00', 2, 3, 'Import steel rods for base', 'Approved', 2, '2025-06-19 10:30:00', 'Warehouse notified.', 4, NOW(), TRUE, FALSE, FALSE);
 
+SELECT 
+    rl.RequestId,
+    rl.RequestDate,
+    u1.FullName AS RequestedByName,
+    rt.RequestTypeName,
+    rst.SubTypeName,
+    rs.Description AS StatusDescription,
+    u2.FullName AS ApprovedByName,
+    rl.ApprovalNote,
+    rl.ArrivalDate
+FROM RequestList rl
+JOIN Users u1 ON rl.RequestedBy = u1.UserId
+JOIN RequestType rt ON rl.RequestTypeId = rt.RequestTypeId
+LEFT JOIN RequestSubType rst ON rl.SubTypeId = rst.SubTypeId
+LEFT JOIN Users u2 ON rl.ApprovedBy = u2.UserId
+LEFT JOIN RequestStatus rs ON rl.Status = rs.StatusCode
+ORDER BY rl.RequestDate DESC;
 
 
 
@@ -683,43 +678,9 @@ INSERT INTO RequestDetail (RequestId, MaterialId, Quantity, ActualQuantity) VALU
 
 
 
--- ========================================
--- 2. NHẬP KHO
--- ========================================
-
-INSERT INTO ImportList (ImportId, ImportDate, ImportedBy, ImportTypeId, Note, RequestId) VALUES
-(1, '2025-05-20 09:00:00', 3, 1, 'Imported materials for Project A', 1),
-(2, '2025-05-21 10:30:00', 4, 2, 'Returned after external repair', 2),
-(3, NOW(), 3, 1, '500 steel bars for new project', 8),
-(4, '2025-06-15 14:00:00', 3, 1, 'Bricks delivered from supplier', 11),
-(5, '2025-06-17 12:00:00', 4, 1, 'Ceiling boards for office site', 15),
-(6, '2025-06-19 14:00:00', 3, 1, 'Steel rods imported for base foundation', 20);
-
--- ImportDetail
-INSERT INTO ImportDetail (ImportId, MaterialId, Quantity, Price) VALUES
-(1, 1, 0, 1200000), (1, 2, 0, 950000), (1, 3, 0, 1800000),
-(2, 21, 0, 220000), (2, 18, 0, 550000),
-(4, 6, 0, 1500), (5, 17, 0, 120000), (6, 3, 0, 1800000);
-
--- ========================================
--- 3. XUẤT KHO
--- ========================================
-
--- ExportList (Đã sửa ExportTypeId = 5 ➝ 1 vì lý do liên quan đến clearance/construction)
-INSERT INTO ExportList (ExportId, ExportDate, ExportedBy, ExportTypeId, Note, RequestId) VALUES
-(1, '2025-05-25 09:00:00', 3, 1, 'Export for foundation of Building A', 3),
-(2, '2025-05-26 10:45:00', 4, 1, 'Export finishing materials to site B', 4),
-(3, NOW(), 5, 1, 'Leftover cement not needed, export for clearance', 6),  -- ❗️Sửa từ 5 ➝ 1
-(4, '2025-06-15 13:00:00', 3, 1, 'Granite stone to Site D', 12),
-(5, '2025-06-17 13:30:00', 4, 1, 'Timber for site C foundation', 16),
-(6, '2025-06-19 15:30:00', 3, 1, 'Export wall tiles to branch B', 19);
 
 
--- ExportDetail
-INSERT INTO ExportDetail (ExportId, MaterialId, Quantity) VALUES
-(1, 1, 0), (1, 3, 0), (2, 11, 0), (2, 13, 0),
-(4, 7, 0), (5, 9, 0),
-(6, 13, 0);
+
 
 -- ========================================
 -- 4. PHIẾU MUA HÀNG

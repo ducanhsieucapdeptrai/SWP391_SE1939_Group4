@@ -89,7 +89,6 @@
                                     </a>
                                     <ul id="taskSubmenu" class="hidden ml-4 mt-1">
                                         <li class="mb-1"><a href="${pageContext.request.contextPath}/tasklist" class="block px-3 py-2 rounded hover:bg-gray-600 text-gray-300 hover:text-white"><i class="fas fa-user-plus mr-2"></i> Task List</a></li>
-                                        <li class="mb-1"><a href="${pageContext.request.contextPath}/completed-tasks" class="block px-3 py-2 rounded hover:bg-gray-600 text-gray-300 hover:text-white"><i class="fas fa-check-circle mr-2"></i> Manage Task</a></li>
                                         <li class="mb-1"><a href="${pageContext.request.contextPath}/completed-tasks" class="block px-3 py-2 rounded hover:bg-gray-600 text-gray-300 hover:text-white"><i class="fas fa-check-circle mr-2"></i> Completed Task</a></li>
                                     </ul>
                                 </li>
