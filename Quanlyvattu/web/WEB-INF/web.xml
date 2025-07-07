@@ -5,10 +5,6 @@
         <servlet-class>controller.general.LoginServlet</servlet-class>
     </servlet>
     <servlet>
-        <servlet-name>GoogleLoginServlet</servlet-name>
-        <servlet-class>controller.general.GoogleLoginServlet</servlet-class>
-    </servlet>
-    <servlet>
         <servlet-name>RequestPasswordServlet</servlet-name>
         <servlet-class>controller.RequestPasswordServlet</servlet-class>
     </servlet>
@@ -41,10 +37,6 @@
         <url-pattern>/login</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
-        <servlet-name>GoogleLoginServlet</servlet-name>
-        <url-pattern>/google-login</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
         <servlet-name>RequestPasswordServlet</servlet-name>
         <url-pattern>/request-password</url-pattern>
     </servlet-mapping>
@@ -75,4 +67,7 @@
     <welcome-file-list>
         <welcome-file>index.jsp</welcome-file>
     </welcome-file-list>
+    
+  
+
 </web-app>

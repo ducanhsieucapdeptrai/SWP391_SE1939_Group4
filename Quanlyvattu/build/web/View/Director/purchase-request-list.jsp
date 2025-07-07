@@ -15,7 +15,6 @@
         <div class="max-w-7xl mx-auto p-6">
             <h1 class="text-3xl font-bold text-blue-800 mb-6 border-b pb-2">Purchase Request List</h1>
 
-            <!-- FILTER FORM -->
             <form method="get" action="purchase-request-list" class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6 bg-white p-4 rounded shadow">
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1">Created By (Name)</label>

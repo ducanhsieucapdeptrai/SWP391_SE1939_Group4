@@ -32,18 +32,18 @@ public class RequestList {
     private String statusDescription;   // Tuỳ chọn: mô tả trạng thái từ RequestStatus
 
     private List<RequestDetail> requestDetails; // Tuỳ chọn: dùng nếu cần load chi tiết đi kèm
-    private String importTypeName;
-    private String exportTypeName;
+    private String subTypeName;
+
     private Date arrivalDate;
     private boolean isUpdated;
     private boolean isCompleted;
-    private boolean IsTransferredToday;
+    private boolean isTransferredToday;
 // getters & setters
 
     public RequestList() {
     }
 
-    public RequestList(int requestId, int requestedBy, Date requestDate, int requestTypeId, String note, String status, int approvedBy, Date approvedDate, String approvalNote, int assignedStaffId, String assignedStaffName, RequestType requestType, String requestedByName, String approvedByName, String requestTypeName, String statusDescription, List<RequestDetail> requestDetails, String importTypeName, String exportTypeName, Date arrivalDate, boolean isUpdated, boolean isCompleted, boolean IsTransferredToday, boolean hasPO, int poCount, String poStatus) {
+    public RequestList(int requestId, int requestedBy, Date requestDate, int requestTypeId, String note, String status, int approvedBy, Date approvedDate, String approvalNote, int assignedStaffId, String assignedStaffName, RequestType requestType, String requestedByName, String approvedByName, String requestTypeName, String statusDescription, List<RequestDetail> requestDetails, String subTypeName, Date arrivalDate, boolean isUpdated, boolean isCompleted, boolean isTransferredToday, boolean hasPO, int poCount, String poStatus) {
         this.requestId = requestId;
         this.requestedBy = requestedBy;
         this.requestDate = requestDate;
@@ -61,16 +61,25 @@ public class RequestList {
         this.requestTypeName = requestTypeName;
         this.statusDescription = statusDescription;
         this.requestDetails = requestDetails;
-        this.importTypeName = importTypeName;
-        this.exportTypeName = exportTypeName;
+        this.subTypeName = subTypeName;
         this.arrivalDate = arrivalDate;
         this.isUpdated = isUpdated;
         this.isCompleted = isCompleted;
-        this.IsTransferredToday = IsTransferredToday;
+        this.isTransferredToday = isTransferredToday;
         this.hasPO = hasPO;
         this.poCount = poCount;
         this.poStatus = poStatus;
     }
+
+    public String getSubTypeName() {
+        return subTypeName;
+    }
+
+    public void setSubTypeName(String subTypeName) {
+        this.subTypeName = subTypeName;
+    }
+
+   
 
     public boolean isIsCompleted() {
         return isCompleted;
@@ -79,16 +88,6 @@ public class RequestList {
     public void setIsCompleted(boolean isCompleted) {
         this.isCompleted = isCompleted;
     }
-
-    public boolean isIsTransferredToday() {
-        return IsTransferredToday;
-    }
-
-    public void setIsTransferredToday(boolean IsTransferredToday) {
-        this.IsTransferredToday = IsTransferredToday;
-    }
-
-    
 
     public Date getArrivalDate() {
         return arrivalDate;
@@ -130,22 +129,7 @@ public class RequestList {
         this.assignedStaffName = assignedStaffName;
     }
 
-    public String getImportTypeName() {
-        return importTypeName;
-    }
-
-    public void setImportTypeName(String importTypeName) {
-        this.importTypeName = importTypeName;
-    }
-
-    public String getExportTypeName() {
-        return exportTypeName;
-    }
-
-    public void setExportTypeName(String exportTypeName) {
-        this.exportTypeName = exportTypeName;
-    }
-
+  
     public int getRequestId() {
         return requestId;
     }
@@ -286,6 +270,14 @@ public class RequestList {
 
     public void setPoStatus(String poStatus) {
         this.poStatus = poStatus;
+    }
+
+    public boolean isIsTransferredToday() {
+        return isTransferredToday;
+    }
+
+    public void setIsTransferredToday(boolean isTransferredToday) {
+        this.isTransferredToday = isTransferredToday;
     }
 
 }

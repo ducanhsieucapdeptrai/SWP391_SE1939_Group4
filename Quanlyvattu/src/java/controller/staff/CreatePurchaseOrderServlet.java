@@ -2,6 +2,7 @@ package controller.staff;
 
 import DAO.PurchaseOrderDAO;
 import DAO.RequestDAO;
+import Helper.AuthorizationHelper;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import model.PurchaseOrderDetail;
@@ -14,6 +15,16 @@ public class CreatePurchaseOrderServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
+        if (!AuthorizationHelper.isLoggedIn(request)) {
+            response.sendRedirect("login.jsp");
+            return;
+        }
+
+        if (!AuthorizationHelper.hasAnyRole(request, "Company Staff", "Warehouse Manager", "Warehouse Staff")) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied.");
+            return;
+        }
 
         HttpSession session = request.getSession();
         Integer userId = (Integer) session.getAttribute("userId");

@@ -5,9 +5,8 @@
 <div class="p-6">
     <h2 class="text-2xl font-bold mb-4 text-center">My Requests</h2>
 
-    <!-- Filter Form -->
     <form class="mb-4 flex flex-wrap gap-4 items-end" method="get" action="my-request">
-        <!-- Type Filter -->
+
         <div>
             <label for="typeFilter" class="block mb-1 font-medium">Type Request:</label>
             <select id="typeFilter" name="type" class="form-select w-48 p-2 rounded border border-gray-300">
@@ -15,10 +14,10 @@
                 <option value="Export" ${param.type == 'Export' ? "selected" : ""}>Export</option>
                 <option value="Import" ${param.type == 'Import' ? "selected" : ""}>Import</option>
                 <option value="Purchase" ${param.type == 'Purchase' ? "selected" : ""}>Purchase</option>
+                <option value="Repair" ${param.type == 'Repair' ? "selected" : ""}>Repair</option>
             </select>
         </div>
 
-        <!-- Status Filter -->
         <div>
             <label for="statusFilter" class="block mb-1 font-medium">Status Request:</label>
             <select id="statusFilter" name="status" class="form-select w-48 p-2 rounded border border-gray-300">
@@ -29,7 +28,6 @@
             </select>
         </div>
 
-        <!-- PO Status Filter -->
         <div>
             <label for="poStatusFilter" class="block mb-1 font-medium">Purchase Order Status:</label>
             <select id="poStatusFilter" name="poStatus" class="form-select w-48 p-2 rounded border border-gray-300">

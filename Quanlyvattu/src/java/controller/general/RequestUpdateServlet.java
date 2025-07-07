@@ -32,10 +32,7 @@ public class RequestUpdateServlet extends HttpServlet {
 
         } catch (Exception e) {
             e.printStackTrace();
-            request.setAttribute("message", "Error loading request details.");
-            request.setAttribute("messageType", "error");
-            request.setAttribute("pageContent", "/requestUpdate.jsp");
-            request.getRequestDispatcher("/layout/layout.jsp").forward(request, response);
+
         }
     }
 

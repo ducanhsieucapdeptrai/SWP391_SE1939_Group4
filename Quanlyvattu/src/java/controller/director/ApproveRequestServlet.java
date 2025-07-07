@@ -2,6 +2,7 @@ package controller.director;
 
 import DAO.MaterialDAO;
 import DAO.RequestDetailDAO;
+import Helper.AuthorizationHelper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
@@ -10,7 +11,6 @@ import java.util.List;
 import model.Material;
 import model.RequestDetail;
 import model.RequestList;
-import model.Users;
 
 @WebServlet(name = "ApproveRequestServlet", urlPatterns = {"/approve-request"})
 public class ApproveRequestServlet extends HttpServlet {
@@ -19,16 +19,7 @@ public class ApproveRequestServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        HttpSession session = request.getSession();
-        Users user = (Users) session.getAttribute("currentUser");
-
-        if (user == null || user.getRole() == null) {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "You must be logged in.");
-            return;
-        }
-
-        String roleName = user.getRole().getRoleName();
-        if (!"Director".equalsIgnoreCase(roleName) && !"Warehouse Manager".equalsIgnoreCase(roleName)) {
+        if (!AuthorizationHelper.hasAnyRole(request, "Director", "Warehouse Manager")) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied.");
             return;
         }
@@ -56,7 +47,7 @@ public class ApproveRequestServlet extends HttpServlet {
         }
 
         if (!"Pending".equalsIgnoreCase(requestInfo.getStatus()) && !"P".equalsIgnoreCase(requestInfo.getStatus())) {
-            session.setAttribute("errorMessage", "This request has already been processed.");
+            request.getSession().setAttribute("errorMessage", "This request has already been processed.");
             response.sendRedirect("request-detail?id=" + requestId);
             return;
         }
@@ -70,6 +61,7 @@ public class ApproveRequestServlet extends HttpServlet {
         request.setAttribute("currentRequestDetails", currentRequestDetails);
         request.setAttribute("materialList", materialList);
 
-        request.getRequestDispatcher("/View/Director/approve-request.jsp").forward(request, response);
+        request.setAttribute("pageContent", "/View/Director/approve-request.jsp");
+        request.getRequestDispatcher("/layout/layout.jsp").forward(request, response);
     }
 }

@@ -4,7 +4,6 @@
 
 <div class="max-w-6xl mx-auto bg-white p-6 mt-6 rounded shadow">
 
-    <!-- Tiêu đề + Tổng quan -->
     <h2 class="text-2xl font-bold text-blue-800 mb-4">Purchase Order Detail - PO#${po.poId}</h2>
 
     <div class="grid md:grid-cols-2 gap-4 text-sm mb-6">
@@ -31,7 +30,6 @@
         </p>
     </div>
 
-    <!-- Bảng chi tiết vật tư -->
     <div class="overflow-x-auto mb-10">
         <table class="w-full border-collapse text-sm text-gray-800">
             <thead>
@@ -64,7 +62,6 @@
         </table>
     </div>
 
-    <!-- Footer button -->
     <div class="flex justify-between items-center">
         <a href="purchase-request-list" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Back</a>
         <c:if test="${po.status == 'Pending'}">
@@ -77,7 +74,7 @@
             </form>
         </c:if>
     </div>
-    <!-- SweetAlert -->
+
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <c:if test="${not empty alertMessage}">
         <script>

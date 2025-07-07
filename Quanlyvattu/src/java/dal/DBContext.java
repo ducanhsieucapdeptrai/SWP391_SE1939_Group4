@@ -26,7 +26,6 @@ public class DBContext {
         return connection;
     }
 
-    // ✅ thêm phương thức an toàn để dùng riêng cho PurchaseOrderDAO
     public Connection getNewConnection() throws SQLException {
         String url = "jdbc:mysql://localhost:3306/quan_ly_vat_tu?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
         String user = "root";
