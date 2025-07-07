@@ -960,9 +960,11 @@ public class RequestDAO extends DBContext {
     }
 
     private List<RequestDetailItem> getRequestDetails(int requestId) throws SQLException {
+   public List<RequestDetailItem> getRequestDetails(int requestId) throws SQLException {
     List<RequestDetailItem> items = new ArrayList<>();
     String sql = "SELECT rd.RequestId, rd.MaterialId, rd.Quantity, rd.ActualQuantity, " +
             "m.MaterialName, rt.RequestTypeName, rl.Note, m.Quantity as StockQuantity, m.Price " + // ✅ thêm m.Price
+            "m.MaterialName, rt.RequestTypeName, rl.Note, m.Quantity as StockQuantity, m.Price, rl.Status " +
             "FROM RequestDetail rd " +
             "JOIN Materials m ON rd.MaterialId = m.MaterialId " +
             "JOIN RequestList rl ON rd.RequestId = rl.RequestId " +
@@ -984,11 +986,15 @@ public class RequestDAO extends DBContext {
             item.setNote(rs.getString("Note"));
             item.setStockQuantity(rs.getInt("StockQuantity"));
             item.setPrice(rs.getDouble("Price")); // ✅ thêm dòng này
+            item.setPrice(rs.getDouble("Price"));
+            item.setStatus(rs.getString("Status")); // ✅ Gán status
+
             items.add(item);
         }
     }
     return items;
 }
+
 
 
 
@@ -1017,5 +1023,25 @@ public class RequestDAO extends DBContext {
             return true;
         }
     }
+public void updateStatusIfCompleted(Connection conn, int requestId) throws SQLException {
+    String sql = """
+        UPDATE RequestList
+        SET Status = 'Completed'
+        WHERE RequestId = ?
+          AND NOT EXISTS (
+              SELECT 1
+              FROM RequestDetail
+              WHERE RequestId = ?
+                AND (ActualQuantity IS NULL OR ActualQuantity < Quantity)
+          )
+    """;
+
+    try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setInt(1, requestId);
+        ps.setInt(2, requestId);
+        ps.executeUpdate();
+    }
+}
+
 
 }
