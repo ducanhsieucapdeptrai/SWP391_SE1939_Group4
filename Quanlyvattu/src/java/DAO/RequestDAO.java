@@ -959,11 +959,9 @@ public class RequestDAO extends DBContext {
         return -1;
     }
 
-    private List<RequestDetailItem> getRequestDetails(int requestId) throws SQLException {
    public List<RequestDetailItem> getRequestDetails(int requestId) throws SQLException {
     List<RequestDetailItem> items = new ArrayList<>();
     String sql = "SELECT rd.RequestId, rd.MaterialId, rd.Quantity, rd.ActualQuantity, " +
-            "m.MaterialName, rt.RequestTypeName, rl.Note, m.Quantity as StockQuantity, m.Price " + // ✅ thêm m.Price
             "m.MaterialName, rt.RequestTypeName, rl.Note, m.Quantity as StockQuantity, m.Price, rl.Status " +
             "FROM RequestDetail rd " +
             "JOIN Materials m ON rd.MaterialId = m.MaterialId " +
@@ -985,7 +983,6 @@ public class RequestDAO extends DBContext {
             item.setActualQuantity(rs.getInt("ActualQuantity"));
             item.setNote(rs.getString("Note"));
             item.setStockQuantity(rs.getInt("StockQuantity"));
-            item.setPrice(rs.getDouble("Price")); // ✅ thêm dòng này
             item.setPrice(rs.getDouble("Price"));
             item.setStatus(rs.getString("Status")); // ✅ Gán status
 

@@ -14,10 +14,6 @@ public class RequestDetailItem {
 
     // Default constructor
     public RequestDetailItem() {}
-    
-    // Constructor with all fields
-    public RequestDetailItem(int requestId, int materialId, String materialName, 
-            String requestTypeName, int quantity, int actualQuantity, String note, int stockQuantity) {
 
     // Full constructor
     public RequestDetailItem(int requestId, int materialId, String materialName,
@@ -131,4 +127,4 @@ public class RequestDetailItem {
                 ", status='" + status + '\'' +
                 '}';
     }
-}}
+}
