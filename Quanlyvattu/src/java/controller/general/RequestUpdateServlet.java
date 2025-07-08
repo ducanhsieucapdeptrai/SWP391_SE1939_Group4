@@ -49,8 +49,13 @@ public class RequestUpdateServlet extends HttpServlet {
         try (Connection conn = new DBContext().getConnection()) {
 
             HttpSession session = request.getSession();
-            List<RequestDetailItem> parsedItems = parseRequestItems(request, requestId);
+            List<RequestDetailItem> parsedItems = new ArrayList<>();
             List<RequestDetailItem> requestItems;
+
+            // ✅ Only parse when needed
+            if ("edit".equals(mode) || "save".equals(mode)) {
+                parsedItems = parseRequestItems(request, requestId);
+            }
 
             switch (mode) {
                 case "edit" -> {
@@ -64,7 +69,7 @@ public class RequestUpdateServlet extends HttpServlet {
                         String requestType = getRequestTypeName(conn, requestId);
                         int listId = -1;
 
-                        // ✅ Lấy listId từ session
+                        // ✅ Get listId from session
                         if ("Import".equalsIgnoreCase(requestType)) {
                             Object obj = session.getAttribute("importId_" + requestId);
                             if (obj != null) listId = (int) obj;
@@ -73,7 +78,7 @@ public class RequestUpdateServlet extends HttpServlet {
                             if (obj != null) listId = (int) obj;
                         }
 
-                        // ✅ Nếu không có thì fallback lấy từ DB
+                        // ✅ Fallback to DB if needed
                         if (listId == -1) {
                             String listSql = "Import".equalsIgnoreCase(requestType)
                                     ? "SELECT ImportId FROM ImportList WHERE RequestId = ?"
@@ -87,7 +92,7 @@ public class RequestUpdateServlet extends HttpServlet {
                             }
                         }
 
-                        // ✅ Cập nhật Quantity vào ImportDetail/ExportDetail
+                        // ✅ Update ImportDetail or ExportDetail
                         if (listId != -1) {
                             String updateSql = "Import".equalsIgnoreCase(requestType)
                                     ? "UPDATE ImportDetail SET Quantity = ? WHERE ImportId = ? AND MaterialId = ?"
@@ -149,7 +154,6 @@ public class RequestUpdateServlet extends HttpServlet {
                         ps.executeBatch();
                     }
 
-                    // ✅ Lưu listId vào session
                     if ("Import".equalsIgnoreCase(requestType)) {
                         session.setAttribute("importId_" + requestId, listId);
                     } else {
