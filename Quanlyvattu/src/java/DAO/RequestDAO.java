@@ -945,36 +945,37 @@ public class RequestDAO extends DBContext {
         return -1;
     }
 
-    private List<RequestDetailItem> getRequestDetails(int requestId) throws SQLException {
-        List<RequestDetailItem> items = new ArrayList<>();
-        String sql = "SELECT rd.RequestId, rd.MaterialId, rd.Quantity, rd.ActualQuantity, "
-                + "m.MaterialName, rt.RequestTypeName, rl.Note, m.Quantity as StockQuantity, m.Price "
-                + // ✅ thêm m.Price
-                "FROM RequestDetail rd "
-                + "JOIN Materials m ON rd.MaterialId = m.MaterialId "
-                + "JOIN RequestList rl ON rd.RequestId = rl.RequestId "
-                + "JOIN RequestType rt ON rl.RequestTypeId = rt.RequestTypeId "
-                + "WHERE rd.RequestId = ?";
+    public List<RequestDetailItem> getRequestDetails(int requestId) throws SQLException {
+    List<RequestDetailItem> items = new ArrayList<>();
+    String sql = "SELECT rd.RequestId, rd.MaterialId, rd.Quantity, rd.ActualQuantity, " +
+            "m.MaterialName, rt.RequestTypeName, rl.Note, rl.Status, m.Quantity as StockQuantity, m.Price " +
+            "FROM RequestDetail rd " +
+            "JOIN Materials m ON rd.MaterialId = m.MaterialId " +
+            "JOIN RequestList rl ON rd.RequestId = rl.RequestId " +
+            "JOIN RequestType rt ON rl.RequestTypeId = rt.RequestTypeId " +
+            "WHERE rd.RequestId = ?";
 
-        try (Connection conn = new DBContext().getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, requestId);
-            ResultSet rs = pstmt.executeQuery();
-            while (rs.next()) {
-                RequestDetailItem item = new RequestDetailItem();
-                item.setRequestId(rs.getInt("RequestId"));
-                item.setMaterialId(rs.getInt("MaterialId"));
-                item.setMaterialName(rs.getString("MaterialName"));
-                item.setRequestTypeName(rs.getString("RequestTypeName"));
-                item.setQuantity(rs.getInt("Quantity"));
-                item.setActualQuantity(rs.getInt("ActualQuantity"));
-                item.setNote(rs.getString("Note"));
-                item.setStockQuantity(rs.getInt("StockQuantity"));
-                item.setPrice(rs.getDouble("Price")); // ✅ thêm dòng này
-                items.add(item);
-            }
+    try (Connection conn = new DBContext().getConnection();
+         PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        pstmt.setInt(1, requestId);
+        ResultSet rs = pstmt.executeQuery();
+        while (rs.next()) {
+            RequestDetailItem item = new RequestDetailItem();
+            item.setRequestId(rs.getInt("RequestId"));
+            item.setMaterialId(rs.getInt("MaterialId"));
+            item.setMaterialName(rs.getString("MaterialName"));
+            item.setRequestTypeName(rs.getString("RequestTypeName"));
+            item.setQuantity(rs.getInt("Quantity"));
+            item.setActualQuantity(rs.getInt("ActualQuantity"));
+            item.setNote(rs.getString("Note"));
+            item.setStatus(rs.getString("Status")); // ✅ thêm dòng này
+            item.setStockQuantity(rs.getInt("StockQuantity"));
+            item.setPrice(rs.getDouble("Price"));
+            items.add(item);
         }
-        return items;
     }
+    return items;
+}
 
 
     public boolean markRequestUpdated(int requestId) throws SQLException {

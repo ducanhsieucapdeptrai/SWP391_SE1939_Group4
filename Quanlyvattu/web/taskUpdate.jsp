@@ -63,30 +63,30 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Form nhập số lượng thực tế -->
         <div class="lg:col-span-2">
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-                <div class="p-6 border-b border-gray-200">
-                    <h2 class="text-lg font-semibold text-gray-900 flex items-center">
-                        <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor"
-                             viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                        </svg>
-                        Create Slip
-                    </h2>
-                </div>
+            <c:choose>
+                <c:when test="${requestStatus eq 'Completed'}">
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                        <p class="text-gray-500 italic">This request has been fully processed.</p>
+                    </div>
+                </c:when>
 
-                <c:choose>
-                    <c:when test="${requestStatus eq 'Completed'}">
-                        <div class="p-6">
-                            <p class="text-gray-500 italic">This request has been fully processed.</p>
+                <c:otherwise>
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                        <div class="p-6 border-b border-gray-200">
+                            <h2 class="text-lg font-semibold text-gray-900 flex items-center">
+                                <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor"
+                                     viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                                Create Slip
+                            </h2>
                         </div>
-                    </c:when>
 
-                    <c:otherwise>
                         <form method="post" action="taskUpdate" class="p-6">
                             <input type="hidden" name="action" value="createSlip">
                             <input type="hidden" name="requestId" value="${requestId}">
-                            <div class="overflow-x-auto">
+                            <div class="overflow-x-auto px-6">
                                 <table class="w-full">
                                     <thead>
                                     <tr class="border-b border-gray-200">
@@ -139,23 +139,23 @@
                                 </button>
                             </div>
                         </form>
-                    </c:otherwise>
-                </c:choose>
+                    </div>
+                </c:otherwise>
+            </c:choose>
 
-                <c:if test="${not empty taskLogs}">
-                    <form method="post" action="taskUpdate" class="p-6 pt-0">
-                        <input type="hidden" name="action" value="signSlip"/>
-                        <input type="hidden" name="requestId" value="${requestId}"/>
-                        <button type="submit"
-                                class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
-                            Sign & Print Bill
-                        </button>
-                    </form>
-                </c:if>
-            </div>
+            <c:if test="${not empty taskLogs}">
+                <form method="post" action="taskUpdate" class="p-6 pt-0 flex justify-end">
+                    <input type="hidden" name="action" value="signSlip"/>
+                    <input type="hidden" name="requestId" value="${requestId}"/>
+                    <button type="submit"
+                            class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                        Sign & Print Bill
+                    </button>
+                </form>
+            </c:if>
         </div>
 
-        <!-- Nhật ký xử lý -->
+        <!-- Processing History -->
         <div>
             <div class="bg-white rounded-lg shadow-sm border border-gray-200">
                 <div class="p-6 border-b border-gray-200">
