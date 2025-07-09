@@ -29,7 +29,7 @@
                         <select name="requestTypeId" required class="w-full border border-gray-300 rounded p-2" onchange="toggleStockCheck()">
                             <option value="">-- Select a type --</option>
                             <c:forEach var="type" items="${requestTypes}">
-                                 <c:if test="${type.requestTypeId != 3}">
+                                 <c:if test="${type.requestTypeId != 2}">
                                     <option value="${type.requestTypeId}">${type.requestTypeName}</option>
                                 </c:if>
                             </c:forEach>

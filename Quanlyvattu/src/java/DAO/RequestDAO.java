@@ -543,7 +543,7 @@ public class RequestDAO extends DBContext {
 
     public String getRequestNoteById(int requestId) {
         String sql = "SELECT Note FROM RequestList WHERE RequestId = ?";
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, requestId);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
