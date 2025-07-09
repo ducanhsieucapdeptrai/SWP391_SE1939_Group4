@@ -1143,5 +1143,34 @@ public void updateStatusIfCompleted(Connection conn, int requestId) throws SQLEx
         }
         return count;
     }
+public List<RequestList> getCompletedRequests() throws SQLException {
+        List<RequestList> list = new ArrayList<>();
+        String sql = """
+            SELECT r.RequestId, r.RequestDate, r.RequestTypeId, t.RequestTypeName,
+                   r.Status, s.Description AS StatusDescription, r.Note
+            FROM RequestList r
+            JOIN RequestType t ON r.RequestTypeId = t.RequestTypeId
+            JOIN RequestStatus s ON r.Status = s.StatusCode
+            WHERE r.Status = 'Completed'
+            ORDER BY r.RequestDate DESC
+        """;
+
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                RequestList req = new RequestList();
+                req.setRequestId(rs.getInt("RequestId"));
+                req.setRequestDate(rs.getTimestamp("RequestDate"));
+                req.setRequestTypeId(rs.getInt("RequestTypeId"));
+                req.setRequestTypeName(rs.getString("RequestTypeName"));
+                req.setStatus(rs.getString("Status"));
+                req.setStatusDescription(rs.getString("StatusDescription"));
+                req.setNote(rs.getString("Note"));
+                list.add(req);
+            }
+        }
+        return list;
+    }
 
 }
