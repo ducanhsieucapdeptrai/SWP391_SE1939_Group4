@@ -1,13 +1,4 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package model;
-
-/**
- *
- * @author Admin
- */
 
 import java.sql.Timestamp;
 
@@ -21,29 +12,9 @@ public class Users {
     private int roleId;
     private boolean isActive;
     private Role role;
-//    private Timestamp createdAt;
-
-    public Role getRole() {
-        return role;
-    }
-
-    public void setRole(Role role) {
-        this.role = role;
-    }
 
     // Constructors
-    public Users() {
-    }
-
-    
-//
-//    public Timestamp getCreatedAt() {
-//        return createdAt;
-//    }
-//
-//    public void setCreatedAt(Timestamp createdAt) {
-//        this.createdAt = createdAt;
-//    }
+    public Users() {}
 
     public Users(int userId, String fullName, String UserImage, String email, String phone, String password, int roleId, boolean isActive, Role role) {
         this.userId = userId;
@@ -57,6 +28,7 @@ public class Users {
         this.role = role;
     }
 
+    // Getters and Setters
     public int getUserId() {
         return userId;
     }
@@ -121,5 +93,21 @@ public class Users {
         this.isActive = isActive;
     }
 
-    
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
+    // ✅ New: Helper to get role name safely
+    public String getRoleName() {
+        return role != null ? role.getRoleName() : null;
+    }
+
+    // ✅ New: Helper to check if this user is Warehouse Staff
+    public boolean isWarehouseStaff() {
+        return "Warehouse Staff".equalsIgnoreCase(getRoleName());
+    }
 }

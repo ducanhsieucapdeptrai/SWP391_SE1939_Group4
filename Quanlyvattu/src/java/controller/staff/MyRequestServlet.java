@@ -1,6 +1,7 @@
 package controller.staff;
 
 import DAO.RequestDAO;
+import Helper.AuthorizationHelper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
@@ -18,13 +19,19 @@ public class MyRequestServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("userId") == null) {
+        if (!AuthorizationHelper.isLoggedIn(request)) {
             response.sendRedirect("login.jsp");
             return;
         }
 
+        if (!AuthorizationHelper.hasAnyRole(request, "Company Staff", "Warehouse Manager", "Warehouse Staff")) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied.");
+            return;
+        }
+
+        HttpSession session = request.getSession();
         int userId = (int) session.getAttribute("userId");
+
         String statusFilter = request.getParameter("status");
         String poStatusFilter = request.getParameter("poStatus");
         String typeFilter = request.getParameter("type");

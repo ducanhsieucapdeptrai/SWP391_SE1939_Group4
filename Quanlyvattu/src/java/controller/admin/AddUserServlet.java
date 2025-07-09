@@ -3,6 +3,7 @@ package controller.admin;
 import DAO.RoleDAO;
 import DAO.UserDAO;
 import Helper.ImageHelper;
+import Helper.AuthorizationHelper;
 import jakarta.mail.*;
 import jakarta.mail.internet.*;
 import jakarta.servlet.ServletException;
@@ -28,6 +29,12 @@ public class AddUserServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
+        if (!AuthorizationHelper.hasRole(request, "Warehouse Manager")) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied.");
+            return;
+        }
+
         RoleDAO roleDAO = new RoleDAO();
         List<Role> roles = roleDAO.getAllRoles();
         request.setAttribute("roleList", roles);
@@ -38,6 +45,11 @@ public class AddUserServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
+        if (!AuthorizationHelper.hasRole(request, "Warehouse Manager")) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied.");
+            return;
+        }
 
         String fullName = request.getParameter("fullName");
         String email = request.getParameter("email");

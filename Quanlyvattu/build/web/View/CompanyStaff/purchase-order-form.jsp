@@ -6,11 +6,21 @@
 <div class="max-w-5xl mx-auto bg-white rounded-lg shadow p-6">
     <h2 class="text-2xl font-bold text-blue-800 mb-6">Create Purchase Order</h2>
 
+    <c:if test="${not empty error}">
+        <div class="bg-red-100 text-red-700 border border-red-300 rounded p-3 mb-4">
+            ${error}
+        </div>
+    </c:if>
+
+    <p class="text-sm text-gray-700 mb-4">
+        <strong>Sender:</strong> ${senderName}
+    </p>
+
     <div class="overflow-x-auto">
         <table class="min-w-full bg-white border rounded text-sm">
             <thead class="bg-gray-100 text-gray-700">
                 <tr>
-                    <th class="p-2 border text-center">#</th>
+                    <th class="p-2 border text-center">No</th>
                     <th class="p-2 border text-left">Material</th>
                     <th class="p-2 border text-right">Quantity</th>
                     <th class="p-2 border text-right">Price</th>
@@ -43,26 +53,48 @@
         </table>
     </div>
 
-    <div class="mt-6 flex justify-end gap-4">
-        <form id="submitForm" action="create-po" method="post">
-            <input type="hidden" name="requestId" value="${requestId}" />
-            <input type="hidden" name="submit" value="true" />
-            <button type="submit"
+    <form id="submitForm" action="create-po" method="post" class="mt-6">
+        <input type="hidden" name="requestId" value="${requestId}" />
+        <input type="hidden" name="submitFlag" value="true" />
+
+        <div class="flex items-start gap-2 text-sm text-gray-700 mb-4">
+            <input type="checkbox" id="confirmCheckbox" class="h-4 w-4 mt-1 text-green-600" />
+            <label for="confirmCheckbox">
+                I confirm that I take full responsibility for this purchase request.
+            </label>
+        </div>
+
+        <div class="flex justify-end gap-4">
+            <!-- Submit button -->
+            <button type="button"
+                    onclick="confirmSubmit()"
                     class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg shadow">
                 Submit Purchase Order
             </button>
-        </form>
-        <form action="my-request" method="get">
-            <button type="submit"
+
+            <!-- Cancel button -->
+            <button type="button"
+                    onclick="window.location.href = 'my-request'"
                     class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg shadow">
                 Cancel
             </button>
-        </form>
-    </div>
+        </div>
+    </form>
 </div>
 
 <script>
     function confirmSubmit() {
+        const checkbox = document.getElementById('confirmCheckbox');
+        if (!checkbox.checked) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Confirmation Required',
+                text: 'You must confirm responsibility before submitting the order.',
+                confirmButtonText: 'OK'
+            });
+            return;
+        }
+
         Swal.fire({
             title: 'Confirm Submit',
             text: 'Are you sure you want to submit this Purchase Order?',
@@ -78,3 +110,19 @@
         });
     }
 </script>
+
+<c:if test="${poCreated}">
+    <script>
+        Swal.fire({
+            icon: 'success',
+            title: 'Success!',
+            text: 'Purchase Order has been created successfully.',
+            showConfirmButton: false,
+            timer: 2000
+        });
+
+        setTimeout(() => {
+            window.location.href = 'my-request';
+        }, 2000);
+    </script>
+</c:if>

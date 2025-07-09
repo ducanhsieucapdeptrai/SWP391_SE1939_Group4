@@ -543,7 +543,7 @@ public class RequestDAO extends DBContext {
 
     public String getRequestNoteById(int requestId) {
         String sql = "SELECT Note FROM RequestList WHERE RequestId = ?";
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, requestId);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
@@ -945,36 +945,38 @@ public class RequestDAO extends DBContext {
         return -1;
     }
 
-    private List<RequestDetailItem> getRequestDetails(int requestId) throws SQLException {
-        List<RequestDetailItem> items = new ArrayList<>();
-        String sql = "SELECT rd.RequestId, rd.MaterialId, rd.Quantity, rd.ActualQuantity, "
-                + "m.MaterialName, rt.RequestTypeName, rl.Note, m.Quantity as StockQuantity, m.Price "
-                + // ✅ thêm m.Price
-                "FROM RequestDetail rd "
-                + "JOIN Materials m ON rd.MaterialId = m.MaterialId "
-                + "JOIN RequestList rl ON rd.RequestId = rl.RequestId "
-                + "JOIN RequestType rt ON rl.RequestTypeId = rt.RequestTypeId "
-                + "WHERE rd.RequestId = ?";
+    public List<RequestDetailItem> getRequestDetails(int requestId) throws SQLException {
+    List<RequestDetailItem> items = new ArrayList<>();
+    String sql = "SELECT rd.RequestId, rd.MaterialId, rd.Quantity, rd.ActualQuantity, " +
+            "m.MaterialName, rt.RequestTypeName, rl.Note, rl.Status, m.Quantity as StockQuantity, m.Price " +
+            "FROM RequestDetail rd " +
+            "JOIN Materials m ON rd.MaterialId = m.MaterialId " +
+            "JOIN RequestList rl ON rd.RequestId = rl.RequestId " +
+            "JOIN RequestType rt ON rl.RequestTypeId = rt.RequestTypeId " +
+            "WHERE rd.RequestId = ?";
 
-        try (Connection conn = new DBContext().getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, requestId);
-            ResultSet rs = pstmt.executeQuery();
-            while (rs.next()) {
-                RequestDetailItem item = new RequestDetailItem();
-                item.setRequestId(rs.getInt("RequestId"));
-                item.setMaterialId(rs.getInt("MaterialId"));
-                item.setMaterialName(rs.getString("MaterialName"));
-                item.setRequestTypeName(rs.getString("RequestTypeName"));
-                item.setQuantity(rs.getInt("Quantity"));
-                item.setActualQuantity(rs.getInt("ActualQuantity"));
-                item.setNote(rs.getString("Note"));
-                item.setStockQuantity(rs.getInt("StockQuantity"));
-                item.setPrice(rs.getDouble("Price")); // ✅ thêm dòng này
-                items.add(item);
-            }
+    try (Connection conn = new DBContext().getConnection();
+         PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        pstmt.setInt(1, requestId);
+        ResultSet rs = pstmt.executeQuery();
+        while (rs.next()) {
+            RequestDetailItem item = new RequestDetailItem();
+            item.setRequestId(rs.getInt("RequestId"));
+            item.setMaterialId(rs.getInt("MaterialId"));
+            item.setMaterialName(rs.getString("MaterialName"));
+            item.setRequestTypeName(rs.getString("RequestTypeName"));
+            item.setQuantity(rs.getInt("Quantity"));
+            item.setActualQuantity(rs.getInt("ActualQuantity"));
+            item.setNote(rs.getString("Note"));
+            item.setStatus(rs.getString("Status")); // ✅ thêm dòng này
+            item.setStockQuantity(rs.getInt("StockQuantity"));
+            item.setPrice(rs.getDouble("Price"));
+            items.add(item);
         }
-        return items;
     }
+    return items;
+}
+
 
     public boolean markRequestUpdated(int requestId) throws SQLException {
         String sql = "UPDATE RequestList SET IsUpdated = TRUE WHERE RequestId = ?";
@@ -1002,6 +1004,26 @@ public class RequestDAO extends DBContext {
             return true;
         }
     }
+public void updateStatusIfCompleted(Connection conn, int requestId) throws SQLException {
+    String sql = """
+        UPDATE RequestList
+        SET Status = 'Completed'
+        WHERE RequestId = ?
+          AND NOT EXISTS (
+              SELECT 1
+              FROM RequestDetail
+              WHERE RequestId = ?
+                AND (ActualQuantity IS NULL OR ActualQuantity < Quantity)
+          )
+    """;
+
+    try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setInt(1, requestId);
+        ps.setInt(2, requestId);
+        ps.executeUpdate();
+    }
+}
+
 
     public List<RequestList> getFilteredRequestsByPage(String type, String status, String requestedBy, String requestDate, int offset, int pageSize) {
         List<RequestList> list = new ArrayList<>();
