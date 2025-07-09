@@ -47,7 +47,14 @@
                 Show All Requests
             </a>
         </div>
+            
+          
     </form>
+           <div class="flex items-center justify-between mb-4">
+                <a href="${pageContext.request.contextPath}/createrequest" class="inline-block px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors">
+                    + Create Request
+                </a> 
+           </div> 
 
     <c:if test="${empty myRequestList}">
         <div class="text-gray-500">You haven't submitted any requests yet.</div>
