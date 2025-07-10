@@ -7,9 +7,14 @@
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
         <div class="flex items-center justify-between">
             <div>
-                <h1 class="text-2xl font-bold text-gray-900">
-                    ${requestType} Request #${requestId}
-                </h1>
+                <h1 class="text-2xl font-bold text-gray-900">Task Update</h1>
+                <p class="text-sm text-gray-700 mt-1">
+                    <strong>Type:</strong> ${requestType}
+                    <span class="mx-2">|</span>
+                    <strong>Requested By:</strong> ${createdBy}
+                    <span class="mx-2">|</span>
+                    <strong>Date:</strong> <fmt:formatDate value="${createdAt}" pattern="dd/MM/yyyy HH:mm" />
+                </p>
                 <p class="text-gray-600 mt-1">${note}</p>
                 <p class="text-sm text-gray-500 mt-1">
                     Status:
@@ -21,6 +26,17 @@
                         ${requestStatus}
                     </span>
                 </p>
+
+                <c:if test="${not empty incompleteItems}">
+                    <div class="mt-2 text-sm text-yellow-700 bg-yellow-50 border border-yellow-200 rounded-md p-3">
+                        <strong>Warning:</strong> Some materials in this request are not fully processed:
+                        <ul class="list-disc list-inside mt-1">
+                            <c:forEach var="mat" items="${incompleteItems}">
+                                <li>${mat}</li>
+                            </c:forEach>
+                        </ul>
+                    </div>
+                </c:if>
             </div>
             <a href="tasklist"
                class="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">
@@ -61,31 +77,28 @@
     </c:if>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Form nhập số lượng thực tế -->
+        <!-- LEFT -->
         <div class="lg:col-span-2">
-            <c:choose>
-                <c:when test="${requestStatus eq 'Completed'}">
-                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                        <p class="text-gray-500 italic">This request has been fully processed.</p>
-                    </div>
-                </c:when>
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                <div class="p-6 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        Create Slip
+                    </h2>
+                </div>
 
-                <c:otherwise>
-                    <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-                        <div class="p-6 border-b border-gray-200">
-                            <h2 class="text-lg font-semibold text-gray-900 flex items-center">
-                                <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor"
-                                     viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                </svg>
-                                Create Slip
-                            </h2>
-                        </div>
-
+                <c:choose>
+                    <c:when test="${requestStatus eq 'Completed'}">
+                        <div class="p-6 text-gray-500 italic">This request has been fully processed.</div>
+                    </c:when>
+                    <c:otherwise>
                         <form method="post" action="taskUpdate" class="p-6">
-                            <input type="hidden" name="action" value="createSlip">
-                            <input type="hidden" name="requestId" value="${requestId}">
+                            <input type="hidden" name="action" value="createSlip"/>
+                            <input type="hidden" name="requestId" value="${requestId}"/>
+
                             <div class="overflow-x-auto px-6">
                                 <table class="w-full">
                                     <thead>
@@ -132,30 +145,30 @@
                                     </tbody>
                                 </table>
                             </div>
-                            <div class="mt-6">
+
+                            <div class="mt-6 px-6 flex justify-end gap-4">
                                 <button type="submit"
                                         class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
-                                    Create Slip
+                                    Sign & Save Slip
                                 </button>
                             </div>
                         </form>
-                    </div>
-                </c:otherwise>
-            </c:choose>
+                    </c:otherwise>
+                </c:choose>
 
-            <c:if test="${not empty taskLogs}">
-                <form method="post" action="taskUpdate" class="p-6 pt-0 flex justify-end">
-                    <input type="hidden" name="action" value="signSlip"/>
-                    <input type="hidden" name="requestId" value="${requestId}"/>
-                    <button type="submit"
-                            class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
-                        Sign & Print Bill
-                    </button>
-                </form>
-            </c:if>
+                <c:if test="${not empty taskLogs}">
+                    <form method="get" action="printSlip" class="mt-4 px-6 flex justify-end">
+                        <input type="hidden" name="requestId" value="${requestId}" />
+                        <button type="submit"
+                                class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                            Print Slip
+                        </button>
+                    </form>
+                </c:if>
+            </div>
         </div>
 
-        <!-- Processing History -->
+        <!-- RIGHT: History -->
         <div>
             <div class="bg-white rounded-lg shadow-sm border border-gray-200">
                 <div class="p-6 border-b border-gray-200">
@@ -185,6 +198,11 @@
                                             <li>${detail.materialName} – ${detail.quantity}</li>
                                         </c:forEach>
                                     </ul>
+                                    <div class="mt-2">
+                                        <a href="printSlip?taskId=${log.taskId}" class="text-sm text-blue-600 hover:underline">
+                                            Reprint Slip
+                                        </a>
+                                    </div>
                                 </div>
                             </c:forEach>
                         </c:when>

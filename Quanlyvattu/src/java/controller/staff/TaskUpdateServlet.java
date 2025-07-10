@@ -5,6 +5,8 @@ import DAO.TaskLogDAO;
 import model.RequestDetailItem;
 import model.Users;
 import model.TaskLog;
+import model.RequestList;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
@@ -21,6 +23,10 @@ public class TaskUpdateServlet extends HttpServlet {
     private final RequestDAO requestDAO = new RequestDAO();
     private final TaskLogDAO taskLogDAO = new TaskLogDAO();
 
+    private boolean isAuthorized(int roleId) {
+        return roleId == 1 || roleId == 2 || roleId == 3;
+    }
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -28,7 +34,7 @@ public class TaskUpdateServlet extends HttpServlet {
         HttpSession session = request.getSession();
         Users user = (Users) session.getAttribute("currentUser");
 
-        if (user == null || user.getRoleId() != 2) {
+        if (user == null || !isAuthorized(user.getRoleId())) {
             response.sendRedirect("login.jsp");
             return;
         }
@@ -50,7 +56,20 @@ public class TaskUpdateServlet extends HttpServlet {
                 return;
             }
 
+            List<String> incompleteItems = new ArrayList<>();
+            for (RequestDetailItem item : items) {
+                if (item.getActualQuantity() < item.getQuantity()) {
+                    incompleteItems.add(item.getMaterialName());
+                }
+            }
+
             List<TaskLog> taskLogs = taskLogDAO.getGroupedTaskLogsByRequestId(conn, requestId);
+
+            RequestList requestInfo = requestDAO.getRequestById(requestId);
+            if (requestInfo != null) {
+                request.setAttribute("createdBy", requestInfo.getRequestedByName());
+                request.setAttribute("createdAt", requestInfo.getRequestDate());
+            }
 
             String successMessage = (String) session.getAttribute("successMessage");
             String errorMessage = (String) session.getAttribute("errorMessage");
@@ -69,6 +88,7 @@ public class TaskUpdateServlet extends HttpServlet {
             request.setAttribute("requestType", items.get(0).getRequestTypeName());
             request.setAttribute("note", items.get(0).getNote());
             request.setAttribute("requestStatus", items.get(0).getStatus());
+            request.setAttribute("incompleteItems", incompleteItems);
 
             request.setAttribute("pageContent", "/taskUpdate.jsp");
             request.getRequestDispatcher("layout/layout.jsp").forward(request, response);
@@ -88,7 +108,7 @@ public class TaskUpdateServlet extends HttpServlet {
         HttpSession session = request.getSession();
         Users user = (Users) session.getAttribute("currentUser");
 
-        if (user == null || user.getRoleId() != 2) {
+        if (user == null || !isAuthorized(user.getRoleId())) {
             response.sendRedirect("login.jsp");
             return;
         }
@@ -136,22 +156,24 @@ public class TaskUpdateServlet extends HttpServlet {
             List<Integer> actualQuantities = new ArrayList<>();
             boolean hasValidData = false;
 
+            List<String> exceededMaterials = new ArrayList<>();
+            List<String> stockExceededMaterials = new ArrayList<>();
+            List<String> invalidQuantities = new ArrayList<>();
+
             for (RequestDetailItem item : items) {
                 String actualQtyStr = request.getParameter("actualQty_" + item.getMaterialId());
                 if (actualQtyStr != null && !actualQtyStr.trim().isEmpty()) {
                     try {
                         int actualQty = Integer.parseInt(actualQtyStr.trim());
                         if (actualQty > 0) {
+                            int remainingQty = item.getQuantity() - item.getActualQuantity();
+
                             if ("Export".equalsIgnoreCase(requestType) && actualQty > item.getStockQuantity()) {
-                                session.setAttribute("errorMessage", "Actual quantity cannot exceed stock: " + item.getMaterialName());
-                                response.sendRedirect("taskUpdate?requestId=" + requestId);
-                                return;
+                                stockExceededMaterials.add(item.getMaterialName());
                             }
 
-                            if (actualQty + item.getActualQuantity() > item.getQuantity()) {
-                                session.setAttribute("errorMessage", "Actual quantity exceeds requested amount for: " + item.getMaterialName());
-                                response.sendRedirect("taskUpdate?requestId=" + requestId);
-                                return;
+                            if (actualQty > remainingQty) {
+                                exceededMaterials.add(item.getMaterialName());
                             }
 
                             materialIds.add(item.getMaterialId());
@@ -159,11 +181,27 @@ public class TaskUpdateServlet extends HttpServlet {
                             hasValidData = true;
                         }
                     } catch (NumberFormatException e) {
-                        session.setAttribute("errorMessage", "Invalid quantity for material: " + item.getMaterialName());
-                        response.sendRedirect("taskUpdate?requestId=" + requestId);
-                        return;
+                        invalidQuantities.add(item.getMaterialName());
                     }
                 }
+            }
+
+            if (!invalidQuantities.isEmpty()) {
+                session.setAttribute("errorMessage", "Invalid quantity for: " + String.join(", ", invalidQuantities));
+                response.sendRedirect("taskUpdate?requestId=" + requestId);
+                return;
+            }
+
+            if (!exceededMaterials.isEmpty()) {
+                session.setAttribute("errorMessage", "Actual quantity exceeds remaining amount for: " + String.join(", ", exceededMaterials));
+                response.sendRedirect("taskUpdate?requestId=" + requestId);
+                return;
+            }
+
+            if (!stockExceededMaterials.isEmpty()) {
+                session.setAttribute("errorMessage", "Actual quantity exceeds stock for: " + String.join(", ", stockExceededMaterials));
+                response.sendRedirect("taskUpdate?requestId=" + requestId);
+                return;
             }
 
             if (!hasValidData) {
@@ -256,20 +294,19 @@ public class TaskUpdateServlet extends HttpServlet {
                                 int requestId, Users user) throws ServletException, IOException {
         try (Connection conn = new DBContext().getConnection()) {
             List<RequestDetailItem> items = requestDAO.getRequestDetails(requestId);
-            List<TaskLog> taskLogs = taskLogDAO.getGroupedTaskLogsByRequestId(conn, requestId);
+            TaskLog latestTaskLog = taskLogDAO.getLatestTaskLogByRequestId(conn, requestId);
 
-            if (items.isEmpty() || taskLogs.isEmpty()) {
-                request.getSession().setAttribute("errorMessage", "No slip data found to sign");
+            if (items.isEmpty() || latestTaskLog == null) {
+                request.getSession().setAttribute("errorMessage", "No slip data found to print");
                 response.sendRedirect("taskUpdate?requestId=" + requestId);
                 return;
             }
 
             request.setAttribute("requestId", requestId);
-            request.setAttribute("requestDetails", items);
-            request.setAttribute("taskLogs", taskLogs);
-            request.setAttribute("requestType", items.get(0).getRequestTypeName());
+            request.setAttribute("taskLog", latestTaskLog);
+            request.setAttribute("requestType", latestTaskLog.getRequestTypeName());
             request.setAttribute("note", items.get(0).getNote());
-            request.setAttribute("staffName", user.getFullName());
+            request.setAttribute("staffName", latestTaskLog.getStaffName());
             request.setAttribute("signDate", new java.util.Date());
 
             request.getRequestDispatcher("slip.jsp").forward(request, response);
