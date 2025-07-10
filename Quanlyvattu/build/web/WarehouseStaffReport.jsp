@@ -199,7 +199,7 @@
             <div class="card">
                 <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
                     <span>Actual Records</span>
-                    <a href="RequestUpdateServlet?requestId=${requestInfo.requestId}" class="btn btn-success btn-sm">Update Records</a>
+                    <a href="taskUpdate?requestId=${requestInfo.requestId}" class="btn btn-success btn-sm">Update Records</a>
                 </div>
                 <div class="card-body">
                     <c:choose>
