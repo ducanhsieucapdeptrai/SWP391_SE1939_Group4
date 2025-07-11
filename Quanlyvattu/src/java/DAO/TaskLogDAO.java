@@ -109,4 +109,72 @@ public class TaskLogDAO extends DBContext {
 
         return details;
     }
+    // ✅ Truy xuất slip mới nhất (một task log gần nhất của request)
+public TaskLog getLatestTaskLogByRequestId(Connection conn, int requestId) throws SQLException {
+    String sql = """
+        SELECT tl.TaskId, tl.RequestId, tl.RequestTypeId, tl.StaffId, tl.CreatedAt,
+               u.FullName AS StaffName, rt.RequestTypeName
+        FROM TaskLog tl
+        JOIN Users u ON tl.StaffId = u.UserId
+        JOIN RequestType rt ON tl.RequestTypeId = rt.RequestTypeId
+        WHERE tl.RequestId = ?
+        ORDER BY tl.CreatedAt DESC
+        LIMIT 1
+    """;
+
+    try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setInt(1, requestId);
+        ResultSet rs = ps.executeQuery();
+        if (rs.next()) {
+            TaskLog log = new TaskLog();
+            int taskId = rs.getInt("TaskId");
+            log.setTaskId(taskId);
+            log.setRequestId(rs.getInt("RequestId"));
+            log.setRequestTypeId(rs.getInt("RequestTypeId"));
+            log.setStaffId(rs.getInt("StaffId"));
+            log.setCreatedAt(rs.getTimestamp("CreatedAt"));
+            log.setStaffName(rs.getString("StaffName"));
+            log.setRequestTypeName(rs.getString("RequestTypeName"));
+
+            List<TaskSlipDetail> details = getSlipDetailsByTaskId(conn, taskId);
+            log.setSlipDetails(details);
+
+            return log;
+        }
+    }
+
+    return null;
+}
+public TaskLog getTaskLogByTaskId(Connection conn, int taskId) throws SQLException {
+    String sql = """
+        SELECT tl.TaskId, tl.RequestId, tl.RequestTypeId, tl.StaffId, tl.CreatedAt,
+               u.FullName AS StaffName, rt.RequestTypeName
+        FROM TaskLog tl
+        JOIN Users u ON tl.StaffId = u.UserId
+        JOIN RequestType rt ON tl.RequestTypeId = rt.RequestTypeId
+        WHERE tl.TaskId = ?
+    """;
+
+    try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setInt(1, taskId);
+        ResultSet rs = ps.executeQuery();
+        if (rs.next()) {
+            TaskLog log = new TaskLog();
+            log.setTaskId(taskId);
+            log.setRequestId(rs.getInt("RequestId"));
+            log.setRequestTypeId(rs.getInt("RequestTypeId"));
+            log.setStaffId(rs.getInt("StaffId"));
+            log.setCreatedAt(rs.getTimestamp("CreatedAt"));
+            log.setStaffName(rs.getString("StaffName"));
+            log.setRequestTypeName(rs.getString("RequestTypeName"));
+
+            List<TaskSlipDetail> details = getSlipDetailsByTaskId(conn, taskId);
+            log.setSlipDetails(details);
+
+            return log;
+        }
+    }
+    return null;
+}
+
 }
