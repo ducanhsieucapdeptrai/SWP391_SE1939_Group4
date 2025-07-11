@@ -1,276 +1,136 @@
 package DAO;
 
 import dal.DBContext;
-import java.sql.Connection;
+import model.RequestList;
+import model.RequestDetailItem;
+import model.TaskLog;
+import model.TaskSlipDetail;
+import model.RequestType;
+
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import model.*;
+import java.util.Map;
 
-public class WarehouseReportDAO {
+public class WarehouseReportDAO extends DBContext {
 
-    
+    // Get request info by ID
     public RequestList getRequestById(int requestId) {
-        String sql = "SELECT r.*, u1.FullName as RequestedByName, u2.FullName as ApprovedByName, rt.RequestTypeName " +
-                    "FROM RequestList r " +
-                    "LEFT JOIN Users u1 ON r.RequestedBy = u1.UserId " +
-                    "LEFT JOIN Users u2 ON r.ApprovedBy = u2.UserId " +
-                    "LEFT JOIN RequestType rt ON r.RequestTypeId = rt.RequestTypeId " +
-                    "WHERE r.RequestId = ?";
-        
-        try {
-            DBContext db = new DBContext();
-            Connection conn = db.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql);
+        String sql = "SELECT rl.RequestId, rl.RequestedBy, u.FullName AS RequestedByName, rl.RequestDate, "
+                + "rl.RequestTypeId, rt.RequestTypeName, rl.Note, rl.Status, rs.Description AS StatusDescription, "
+                + "rst.SubTypeName "
+                + "FROM RequestList rl JOIN Users u ON rl.RequestedBy = u.UserId "
+                + "JOIN RequestType rt ON rl.RequestTypeId = rt.RequestTypeId "
+                + "LEFT JOIN RequestSubType rst ON rl.SubTypeId = rst.SubTypeId "
+                + "LEFT JOIN RequestStatus rs ON rl.Status = rs.StatusCode "
+                + "WHERE rl.RequestId = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, requestId);
             ResultSet rs = ps.executeQuery();
-            
             if (rs.next()) {
                 RequestList request = new RequestList();
                 request.setRequestId(rs.getInt("RequestId"));
                 request.setRequestedBy(rs.getInt("RequestedBy"));
-                request.setRequestDate(rs.getDate("RequestDate"));
-                request.setRequestTypeId(rs.getInt("RequestTypeId"));
+                request.setRequestedByName(rs.getString("RequestedByName"));
+                request.setRequestDate(rs.getTimestamp("RequestDate"));
+                request.setRequestType(new RequestType(rs.getInt("RequestTypeId"), rs.getString("RequestTypeName")));
                 request.setNote(rs.getString("Note"));
                 request.setStatus(rs.getString("Status"));
-                request.setApprovedBy(rs.getInt("ApprovedBy"));
-                request.setApprovedDate(rs.getDate("ApprovedDate"));
-                request.setApprovalNote(rs.getString("ApprovalNote"));
-                request.setRequestedByName(rs.getString("RequestedByName"));
-                request.setApprovedByName(rs.getString("ApprovedByName"));
-                request.setRequestTypeName(rs.getString("RequestTypeName"));
-                
-                rs.close();
-                ps.close();
-                conn.close();
+                request.setStatusDescription(rs.getString("StatusDescription"));
+                request.setSubTypeName(rs.getString("SubTypeName"));
                 return request;
             }
-            rs.close();
-            ps.close();
-            conn.close();
-        } catch (Exception e) {
-            System.out.println("Error in getRequestById: " + e.getMessage());
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         return null;
     }
-    
-    
-    public List<RequestDetail> getRequestDetailsByRequestId(int requestId) {
-        List<RequestDetail> list = new ArrayList<>();
-        String sql = "SELECT rd.RequestId, rd.MaterialId, rd.Quantity, " +
-                    "m.MaterialName, m.Price, m.Image, m.Description, " +
-                    "sc.SubCategoryName, c.CategoryName " +
-                    "FROM RequestDetail rd " +
-                    "JOIN Materials m ON rd.MaterialId = m.MaterialId " +
-                    "JOIN SubCategories sc ON m.SubCategoryId = sc.SubCategoryId " +
-                    "JOIN Categories c ON sc.CategoryId = c.CategoryId " +
-                    "WHERE rd.RequestId = ?";
-        
-        try {
-            DBContext db = new DBContext();
-            Connection conn = db.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setInt(1, requestId);
-            ResultSet rs = ps.executeQuery();
-            
-            while (rs.next()) {
-                RequestDetail detail = new RequestDetail(
-                    rs.getInt("RequestId"),         
-                    rs.getInt("MaterialId"),        
-                    rs.getInt("Quantity"),         
-                    rs.getString("MaterialName"),  
-                    rs.getDouble("Price"),          
-                    rs.getString("Image"),          
-                    rs.getString("Description"),    
-                    rs.getString("SubCategoryName"), 
-                    rs.getString("CategoryName")    
-                );
-                list.add(detail);
-            }
-            rs.close();
-            ps.close();
-            conn.close();
-        } catch (Exception e) {
-            System.out.println("Error in getRequestDetailsByRequestId: " + e.getMessage());
-            e.printStackTrace();
-        }
-        return list;
-    }
-    
-   
-    public List<ImportList> getRelatedImportsByRequestId(int requestId) {
-        List<ImportList> list = new ArrayList<>();
-        String sql = "SELECT il.*, u.FullName as ImportedByName, it.ImportTypeName " +
-        "FROM ImportList il " +
-        "LEFT JOIN Users u ON il.ImportedBy = u.UserId " +
-        "LEFT JOIN ImportType it ON il.ImportTypeId = it.ImportTypeId " +
-        "WHERE il.RequestId = ? " +
-        "ORDER BY il.ImportDate DESC";
-        
-        try {
-            DBContext db = new DBContext();
-            Connection conn = db.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setInt(1, requestId);
-            ResultSet rs = ps.executeQuery();
-            
-            while (rs.next()) {
-                ImportList importList = new ImportList();
-                importList.setImportId(rs.getInt("ImportId"));
-                importList.setImportDate(rs.getDate("ImportDate"));
-                importList.setImportedBy(rs.getInt("ImportedBy"));
-                importList.setImportTypeId(rs.getInt("ImportTypeId"));
-                importList.setNote(rs.getString("Note"));
-                importList.setImportedByName(rs.getString("ImportedByName"));
-                importList.setImportTypeName(rs.getString("ImportTypeName"));
-                
-                list.add(importList);
-            }
-            rs.close();
-            ps.close();
-            conn.close();
-        } catch (Exception e) {
-            System.out.println("Error in getRelatedImportsByRequestId: " + e.getMessage());
-            e.printStackTrace();
-        }
-        return list;
-    }
-    
-    
-    public List<ImportDetail> getImportDetailsByImportId(int importId) {
-        List<ImportDetail> list = new ArrayList<>();
-        String sql = "SELECT id.*, m.MaterialName " +
-                    "FROM ImportDetail id " +
-                    "LEFT JOIN Materials m ON id.MaterialId = m.MaterialId " +
-                    "WHERE id.ImportId = ?";
-        
-        try {
-            DBContext db = new DBContext();
-            Connection conn = db.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setInt(1, importId);
-            ResultSet rs = ps.executeQuery();
-            
-            while (rs.next()) {
-                ImportDetail detail = new ImportDetail();
-                detail.setImportDetailId(rs.getInt("ImportDetailId"));
-                detail.setImportId(rs.getInt("ImportId"));
-                detail.setMaterialId(rs.getInt("MaterialId"));
-                detail.setQuantity(rs.getInt("Quantity"));
-                detail.setPrice(rs.getDouble("Price"));
-                detail.setMaterialName(rs.getString("MaterialName"));
-                
-                list.add(detail);
-            }
-            rs.close();
-            ps.close();
-            conn.close();
-        } catch (Exception e) {
-            System.out.println("Error in getImportDetailsByImportId: " + e.getMessage());
-            e.printStackTrace();
-        }
-        return list;
-    }
-    
-  
-    public List<ImportDetail> getRelatedImportDetailsByRequestId(int requestId) {
-        List<ImportDetail> list = new ArrayList<>();
-        String sql = "SELECT id.*, m.MaterialName " +
-      "FROM ImportDetail id " +
-      "LEFT JOIN Materials m ON id.MaterialId = m.MaterialId " +
-      "LEFT JOIN ImportList il ON id.ImportId = il.ImportId " +
-      "WHERE il.RequestId = ?  AND id.Quantity > 0 " + 
-      "ORDER BY il.ImportDate DESC, id.ImportDetailId";
-        
-        try {
-            DBContext db = new DBContext();
-            Connection conn = db.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setInt(1, requestId);
-            ResultSet rs = ps.executeQuery();
-            
-            while (rs.next()) {
-                ImportDetail detail = new ImportDetail();
-                detail.setImportDetailId(rs.getInt("ImportDetailId"));
-                detail.setImportId(rs.getInt("ImportId"));
-                detail.setMaterialId(rs.getInt("MaterialId"));
-                detail.setQuantity(rs.getInt("Quantity"));
-                detail.setPrice(rs.getDouble("Price"));
-                detail.setMaterialName(rs.getString("MaterialName"));
-                
-                list.add(detail);
-            }
-            rs.close();
-            ps.close();
-            conn.close();
-        } catch (Exception e) {
-            System.out.println("Error in getRelatedImportDetailsByRequestId: " + e.getMessage());
-            e.printStackTrace();
-        }
-        return list;
-    }
-    public List<ExportList> getRelatedExportsByRequestId(int requestId) {
-    List<ExportList> list = new ArrayList<>();
-    String sql =
-        "SELECT el.*, u.FullName as ExportedByName, et.ExportTypeName " +
-        "FROM ExportList el " +
-        "LEFT JOIN Users u ON el.ExportedBy = u.UserId " +
-        "LEFT JOIN ExportType et ON el.ExportTypeId = et.ExportTypeId " +
-        "WHERE el.RequestId = ? " +
-        "ORDER BY el.ExportDate DESC";
-    try (Connection conn = new DBContext().getConnection();
-         PreparedStatement ps = conn.prepareStatement(sql)) {
-        ps.setInt(1, requestId);
-        try (ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) {
-                ExportList ex = new ExportList();
-                ex.setExportId(rs.getInt("ExportId"));
-                ex.setExportDate(rs.getTimestamp("ExportDate"));
-                ex.setExportedBy(rs.getInt("ExportedBy"));
-                ex.setExportTypeId(rs.getInt("ExportTypeId"));
-                ex.setNote(rs.getString("Note"));
-                ex.setExportedByName(rs.getString("ExportedByName"));
-                ex.setExportTypeName(rs.getString("ExportTypeName"));
-                list.add(ex);
-            }
-        }
-    } catch (Exception e) {
-        System.out.println("Error in getRelatedExportsByRequestId: " + e.getMessage());
-        e.printStackTrace();
-    }
-    return list;
-}
 
-
-public List<ExportDetail> getRelatedExportDetailsByRequestId(int requestId) {
-    List<ExportDetail> list = new ArrayList<>();
-    String sql =
-        "SELECT ed.*, m.MaterialName " +
-        "FROM ExportDetail ed " +
-        "LEFT JOIN Materials m ON ed.MaterialId = m.MaterialId " +
-        "LEFT JOIN ExportList el ON ed.ExportId = el.ExportId " +
-        "WHERE el.RequestId = ? AND ed.Quantity > 0 " + 
-        "ORDER BY el.ExportDate DESC, ed.ExportDetailId";
-    try (Connection conn = new DBContext().getConnection();
-         PreparedStatement ps = conn.prepareStatement(sql)) {
-        ps.setInt(1, requestId);
-        try (ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) {
-                ExportDetail det = new ExportDetail();
-                det.setExportDetailId(rs.getInt("ExportDetailId"));
-                det.setExportId(rs.getInt("ExportId"));
-                det.setMaterialId(rs.getInt("MaterialId"));
-                det.setQuantity(rs.getInt("Quantity"));
-                det.setMaterialName(rs.getString("MaterialName"));
-                list.add(det);
+    // Get request details with material info and image
+    public List<RequestDetailItem> getRequestDetailsById(int requestId) {
+        List<RequestDetailItem> details = new ArrayList<>();
+        String sql = "SELECT rd.RequestId, rd.MaterialId, m.MaterialName, rd.Quantity, rd.ActualQuantity, "
+                + "m.Quantity AS StockQuantity, m.Image AS ImageUrl "
+                + "FROM RequestDetail rd "
+                + "JOIN Materials m ON rd.MaterialId = m.MaterialId "
+                + "WHERE rd.RequestId = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, requestId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    RequestDetailItem detail = new RequestDetailItem();
+                    detail.setRequestId(rs.getInt("RequestId"));
+                    detail.setMaterialId(rs.getInt("MaterialId"));
+                    detail.setMaterialName(rs.getString("MaterialName"));
+                    detail.setQuantity(rs.getInt("Quantity"));
+                    detail.setActualQuantity(rs.getInt("ActualQuantity"));
+                    detail.setStockQuantity(rs.getInt("StockQuantity"));
+                    detail.setImageUrl(rs.getString("ImageUrl"));
+                    details.add(detail);
+                }
             }
+            System.out.println("DEBUG: requestDetails.size() = " + details.size());
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-    } catch (Exception e) {
-        System.out.println("Error in getRelatedExportDetailsByRequestId: " + e.getMessage());
-        e.printStackTrace();
+        return details;
     }
-    return list;
-}
+
+    // Get task logs grouped by date
+    public Map<Date, List<TaskLog>> getTaskLogsByDate(int requestId) {
+        Map<Date, List<TaskLog>> taskLogsByDate = new HashMap<>();
+        String sql = "SELECT tl.TaskId, tl.RequestId, tl.RequestTypeId, rt.RequestTypeName, "
+                + "tl.StaffId, u.FullName AS StaffName, tl.CreatedAt "
+                + "FROM TaskLog tl JOIN Users u ON tl.StaffId = u.UserId "
+                + "JOIN RequestType rt ON tl.RequestTypeId = rt.RequestTypeId "
+                + "WHERE tl.RequestId = ? ORDER BY tl.CreatedAt";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, requestId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                TaskLog task = new TaskLog();
+                task.setTaskId(rs.getInt("TaskId"));
+                task.setRequestId(rs.getInt("RequestId"));
+                task.setRequestTypeId(rs.getInt("RequestTypeId"));
+                task.setRequestTypeName(rs.getString("RequestTypeName"));
+                task.setStaffId(rs.getInt("StaffId"));
+                task.setStaffName(rs.getString("StaffName"));
+                task.setCreatedAt(rs.getTimestamp("CreatedAt"));
+                task.setSlipDetails(getSlipDetails(task.getTaskId()));
+
+                // Group by date (truncate time)
+                Date date = new Date(rs.getTimestamp("CreatedAt").getTime());
+                taskLogsByDate.computeIfAbsent(date, k -> new ArrayList<>()).add(task);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return taskLogsByDate;
+    }
+
+    // Get slip details for a task
+    private List<TaskSlipDetail> getSlipDetails(int taskId) {
+        List<TaskSlipDetail> slipDetails = new ArrayList<>();
+        String sql = "SELECT tsd.MaterialId, m.MaterialName, tsd.Quantity "
+                + "FROM TaskSlipDetail tsd JOIN Materials m ON tsd.MaterialId = m.MaterialId "
+                + "WHERE tsd.TaskId = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, taskId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                TaskSlipDetail slip = new TaskSlipDetail();
+                slip.setMaterialId(rs.getInt("MaterialId"));
+                slip.setMaterialName(rs.getString("MaterialName"));
+                slip.setQuantity(rs.getInt("Quantity"));
+                slipDetails.add(slip);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return slipDetails;
+    }
 }
