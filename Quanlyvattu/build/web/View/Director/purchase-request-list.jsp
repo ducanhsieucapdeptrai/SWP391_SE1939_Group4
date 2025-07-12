@@ -7,17 +7,17 @@
 <html>
     <head>
         <meta charset="UTF-8">
-        <title>Purchase Request List</title>
+        <title>Purchase Order Request List</title>
         <script src="https://cdn.tailwindcss.com"></script>
     </head>
     <body class="bg-gray-100 font-sans">
 
         <div class="max-w-7xl mx-auto p-6">
-            <h1 class="text-3xl font-bold text-blue-800 mb-6 border-b pb-2">Purchase Request List</h1>
+            <h1 class="text-3xl font-bold text-blue-800 mb-6 border-b pb-2">Purchase Order Request List</h1>
 
             <form method="get" action="purchase-request-list" class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6 bg-white p-4 rounded shadow">
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Created By (Name)</label>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Order Creator</label>
                     <input type="text" name="createdByName" value="${filterCreatedByName}" placeholder="Enter name"
                            class="w-full border px-3 py-2 rounded">
                 </div>

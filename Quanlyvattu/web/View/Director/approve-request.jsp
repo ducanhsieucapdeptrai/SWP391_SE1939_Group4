@@ -20,7 +20,9 @@
 <select id="materialSelectTemplate" class="hidden">
     <option disabled selected value="">-- Select Material --</option>
     <c:forEach var="material" items="${materialList}">
-        <option value="${material.materialId}">${material.materialName}</option>
+        <option value="${material.materialId}">
+            ${material.materialName} (in stock: ${material.quantity})
+        </option>
     </c:forEach>
 </select>
 
@@ -112,7 +114,6 @@
         const tbody = document.getElementById("materialTableBody");
         const row = document.createElement("tr");
 
-        // Clone the select template
         const templateSelect = document.getElementById("materialSelectTemplate");
         const clonedSelect = templateSelect.cloneNode(true);
         clonedSelect.classList.remove("hidden");
@@ -120,7 +121,6 @@
         clonedSelect.name = "materialId[]";
         clonedSelect.classList.add("w-full", "border", "rounded", "px-2", "py-1");
 
-        // Build the row
         const indexCell = `<td class="px-4 py-2">New</td>`;
         const materialCell = `<td class="px-4 py-2"></td>`;
         const quantityCell = `
@@ -136,11 +136,9 @@
             </td>
         `;
 
-        // Append cells to row
         row.innerHTML = indexCell + materialCell + quantityCell + actionCell;
         tbody.appendChild(row);
 
-        // Insert the cloned select into the correct cell
         row.children[1].appendChild(clonedSelect);
     }
 </script>
