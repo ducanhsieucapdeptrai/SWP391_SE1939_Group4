@@ -53,11 +53,13 @@ public class WarehouseReportDAO extends DBContext {
     // Get request details with material info and image
     public List<RequestDetailItem> getRequestDetailsById(int requestId) {
         List<RequestDetailItem> details = new ArrayList<>();
-        String sql = "SELECT rd.RequestId, rd.MaterialId, m.MaterialName, rd.Quantity, rd.ActualQuantity, "
-                + "m.Quantity AS StockQuantity, m.Image AS ImageUrl "
-                + "FROM RequestDetail rd "
-                + "JOIN Materials m ON rd.MaterialId = m.MaterialId "
-                + "WHERE rd.RequestId = ?";
+        String sql = """
+            SELECT rd.RequestId, rd.MaterialId, m.MaterialName, rd.Quantity, rd.ActualQuantity,
+                   m.Quantity AS StockQuantity, m.Image  
+            FROM RequestDetail rd 
+            JOIN Materials m ON rd.MaterialId = m.MaterialId 
+            WHERE rd.RequestId = ?
+            """;
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, requestId);
             try (ResultSet rs = ps.executeQuery()) {
@@ -65,11 +67,11 @@ public class WarehouseReportDAO extends DBContext {
                     RequestDetailItem detail = new RequestDetailItem();
                     detail.setRequestId(rs.getInt("RequestId"));
                     detail.setMaterialId(rs.getInt("MaterialId"));
-                    detail.setMaterialName(rs.getString("MaterialName"));
+                    detail.setMaterialName(rs.getString("MaterialName")); 
                     detail.setQuantity(rs.getInt("Quantity"));
                     detail.setActualQuantity(rs.getInt("ActualQuantity"));
                     detail.setStockQuantity(rs.getInt("StockQuantity"));
-                    detail.setImageUrl(rs.getString("ImageUrl"));
+                    detail.setImage(rs.getString("Image"));
                     details.add(detail);
                 }
             }
@@ -84,7 +86,7 @@ public class WarehouseReportDAO extends DBContext {
     public Map<Date, List<TaskLog>> getTaskLogsByDate(int requestId) {
         Map<Date, List<TaskLog>> taskLogsByDate = new HashMap<>();
         String sql = "SELECT tl.TaskId, tl.RequestId, tl.RequestTypeId, rt.RequestTypeName, "
-                + "tl.StaffId, u.FullName AS StaffName, tl.CreatedAt "
+                + "tl.StaffId, u.FullName AS StaffName, tl.CreatedAt  "
                 + "FROM TaskLog tl JOIN Users u ON tl.StaffId = u.UserId "
                 + "JOIN RequestType rt ON tl.RequestTypeId = rt.RequestTypeId "
                 + "WHERE tl.RequestId = ? ORDER BY tl.CreatedAt";
@@ -100,6 +102,7 @@ public class WarehouseReportDAO extends DBContext {
                 task.setStaffId(rs.getInt("StaffId"));
                 task.setStaffName(rs.getString("StaffName"));
                 task.setCreatedAt(rs.getTimestamp("CreatedAt"));
+               
                 task.setSlipDetails(getSlipDetails(task.getTaskId()));
 
                 // Group by date (truncate time)
