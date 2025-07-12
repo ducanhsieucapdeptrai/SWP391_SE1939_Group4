@@ -1,279 +1,187 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <title>Actual Records Detail - Request #${requestInfo.requestId}</title>
-        <style>
-            body {
-                font-family: Arial, sans-serif;
-                margin: 0;
-                padding: 20px;
-                background-color: #f5f5f5;
-            }
-            .container {
-                max-width: 1200px;
-                margin: auto;
-            }
-            h3 {
-                margin-bottom: 0;
-            }
-            .card {
-                background-color: white;
-                border: 1px solid #ddd;
-                border-radius: 4px;
-                margin-bottom: 20px;
-                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            }
-            .card-header {
-                background-color: #007bff;
-                color: white;
-                padding: 10px 15px;
-                font-weight: bold;
-            }
-            .card-body {
-                padding: 15px;
-            }
-            table {
-                width: 100%;
-                border-collapse: collapse;
-            }
-            table th, table td {
-                border: 1px solid #ccc;
-                padding: 8px;
-                text-align: left;
-            }
-            table th {
-                background-color: #f1f1f1;
-            }
-            .text-muted {
-                color: #6c757d;
-            }
-            .group-header {
-                background-color: #e9ecef;
-                padding: 10px;
-                font-weight: bold;
-            }
-            .pagination {
-                display: flex;
-                justify-content: center;
-                list-style: none;
-                padding-left: 0;
-            }
-            .pagination li {
-                margin: 0 5px;
-            }
-            .pagination a {
-                padding: 6px 12px;
-                border: 1px solid #ccc;
-                text-decoration: none;
-                color: #007bff;
-            }
-            .pagination .active a {
-                background-color: #007bff;
-                color: white;
-                border-color: #007bff;
-            }
-            .pagination .disabled a {
-                color: #ccc;
-                pointer-events: none;
-            }
-            .btn {
-                display: inline-block;
-                padding: 6px 12px;
-                background-color: #007bff;
-                color: white;
-                text-decoration: none;
-                border-radius: 4px;
-            }
-            .btn-secondary {
-                background-color: #6c757d;
-            }
-            .btn-success {
-                background-color: #28a745;
-            }
-            .btn-sm {
-                padding: 4px 10px;
-                font-size: 14px;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                    <h3>Task Detail - Actual Report</h3>
-                    <p class="text-muted">Request ID: ${requestInfo.requestId}</p>
+
+
+<style>
+    th, td {
+        padding: 0.5rem;
+        vertical-align: middle;
+    }
+</style>
+
+<div class="container mx-auto p-6 space-y-6">
+    <!-- Header & Back -->
+    <div class="flex items-center justify-between ">
+        <h1 class="text-2xl font-bold">Request Detail – Actual Record</h1>
+        <a href="${pageContext.request.contextPath}/tasklist" class="bg-gray-300 hover:bg-gray-400 text-black font-semibold py-2 px-4 rounded inline-block">← Back </a>
+    </div>
+
+    <!-- Request Information -->
+    <section class="bg-white p-6 rounded shadow space-y-4 p-4 border-2 border-gray-300 rounded bg-gray-50 shadow-md mb-4">
+        <h2 class="text-xl font-semibold">Request Information</h2>
+        <table class="w-full text-sm border-collapse">
+            <tr><th class="text-left w-48">ID</th><td>${request.requestId}</td></tr>
+            <tr><th class="text-left">Requested By</th><td>${request.requestedByName}</td></tr>
+            <tr><th class="text-left">Date</th><td><fmt:formatDate value="${request.requestDate}" pattern="dd-MM-yyyy HH:mm"/></td></tr>
+            <tr><th class="text-left">Type</th><td>${request.requestType.requestTypeName}</td></tr>
+            <tr><th class="text-left">Sub Type</th><td>${request.subTypeName}</td></tr>
+            <tr><th class="text-left">Status</th><td>${request.statusDescription}</td></tr>
+            <tr><th class="text-left">Note</th><td>${request.note}</td></tr>
+        </table>
+    </section>
+
+    <!-- Request Details -->
+    <section class="bg-white p-6 rounded shadow p-4 border-2 border-gray-300 rounded bg-gray-50 shadow-md mb-4">
+        <h2 class="text-xl font-semibold mb-4">Request Details</h2>
+        <c:choose>
+            <c:when test="${empty requestDetails}">
+                <p class="text-red-500">No details found.</p>
+            </c:when>
+            <c:otherwise>
+                <div class="overflow-y-auto max-h-60 border rounded">
+                    <table class="w-full text-sm table-auto border-collapse ">
+                        <thead class="bg-gray-100 sticky top-0">
+                            <tr>
+                                <th class="text-center">Image</th>
+                                <th class="text-left">Material</th>
+                                <th class="text-center">ReqQuantity</th>
+                                <th class="text-center">Actual Quantity</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <c:set var="totalQty" value="0"/>
+                            <c:set var="totalActual" value="0"/>
+                            <c:forEach var="d" items="${requestDetails}">
+                                <tr class="border-t">
+                                    <td class="text-center">
+                                        <c:choose>
+                                            <c:when test="${not empty d.image}">
+                                                <img src="${pageContext.request.contextPath}/assets/images/materials/${d.image}" alt="${d.materialName}" class="w-12 mx-auto"/>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <img src="${pageContext.request.contextPath}/assets/images/materials/default.png" alt="No Image" class="w-12 mx-auto"/>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </td>
+                                    <td class="text-left">${d.materialName}</td>
+                                    <td class="text-center">${d.quantity}</td>
+                                    <td class="text-center">${d.actualQuantity}</td>
+                                </tr>
+                                <c:set var="totalQty" value="${totalQty + d.quantity}"/>
+                                <c:set var="totalActual" value="${totalActual + d.actualQuantity}"/>
+                            </c:forEach>
+                        </tbody>
+                    </table>
                 </div>
-                <div>
-                    <a href="javascript:history.back()" class="btn btn-secondary btn-sm">&larr; Back</a>
-                </div>
+            </c:otherwise>
+        </c:choose>
+    </section>
+
+    <!-- Summary -->
+    <section class="p-4 border-2 border-gray-300 rounded bg-gray-50 shadow-md mb-4">
+        <h2 class="font-semibold mb-2">Summary</h2>
+        <p>Total ReQuantity: <strong>${totalQty}</strong> — ActualQuantity: <strong>${totalActual}</strong></p>
+    </section>
+
+    <section class="bg-white p-6 rounded shadow">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-semibold">Actual Progress</h2>
+            <a href="RequestUpdateServlet?requestId=${request.requestId}"
+               class="bg-green-500 text-white px-4 py-2 rounded">
+                Create Task Slip
+            </a>
+        </div>
+
+
+        <div class="flex flex-col items-center mb-4">
+
+            <p class="text-gray-600 font-medium mb-2">
+                Total slips: <strong>${totalSlips}</strong>
+            </p>
+
+            <div class="flex space-x-2">
+                <button onclick="prevPage()" class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"><</button>
+                <button onclick="nextPage()" class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300">></button>
             </div>
+        </div>
 
-            <!-- Request Info & Summary -->
-            <div style="display: flex; gap: 20px;">
-                <div style="flex: 1;">
-                    <div class="card">
-                        <div class="card-header">Request Information</div>
-                        <div class="card-body">
-                            <p><strong>Type:</strong> ${requestInfo.requestTypeName}</p>
-                            <p><strong>Requested By:</strong> ${requestInfo.requestedByName}</p>
-                            <p><strong>Date:</strong> <fmt:formatDate value="${requestInfo.requestDate}" pattern="dd/MM/yyyy HH:mm"/></p>
-                            <p><strong>Status:</strong> ${requestInfo.status}</p>
-                            <c:if test="${not empty requestInfo.note}">
-                                <p><strong>Note:</strong> ${requestInfo.note}</p>
-                            </c:if>
-                        </div>
-                    </div>
-                    <div class="card">
-                        <div class="card-header">Summary</div>
-                        <div class="card-body">
-                            <div style="display: flex; justify-content: space-around;">
-                                <div>
-                                    <h5>${fn:length(requestDetails)}</h5>
-                                    <p>Items</p>
-                                </div>
-                                <div>
-                                    <c:set var="totalQty" value="0"/>
-                                    <c:forEach var="d" items="${requestDetails}">
-                                        <c:set var="totalQty" value="${totalQty + d.quantity}"/>
-                                    </c:forEach>
-                                    <h5>${totalQty}</h5>
-                                    <p>Total Qty</p>
-                                </div>
-                                <div>
-                                    <c:set var="totalValue" value="0"/>
-                                    <c:forEach var="d" items="${requestDetails}">
-                                        <c:set var="totalValue" value="${totalValue + d.totalValue}"/>
-                                    </c:forEach>
-                                    <h5><fmt:formatNumber value="${totalValue}" pattern="#\,##0"/>₫</h5>
-                                    <p>Total Value</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- Request Details -->
-                <div style="flex: 1.5;">
-                    <div class="card">
-                        <div class="card-header">Request Details</div>
-                        <div class="card-body" style="max-height: 400px; overflow-y: auto;">
-                            <table>
-                                <thead>
+        <div id="pagesContainer">
+            <c:set var="count" value="0"/>
+            <c:set var="pageIndex" value="0"/>
+            <c:forEach var="entry" items="${taskLogsByDate.entrySet()}">
+                <c:forEach var="task" items="${entry.value}">
+                    <c:if test="${count % 2 == 0}">
+                        <c:if test="${count != 0}">
+                        </div>
+                    </c:if>
+
+                    <div class="task-page" style="display: none;">
+                    </c:if>
+
+                    <!-- Task Box -->
+                    <div class="p-4 border-2 border-gray-300 rounded bg-gray-50 shadow-md mb-4">
+                        <div class="flex justify-between text-sm mb-2">
+                            <span class="font-semibold">Process #${task.taskId} – ${task.requestTypeName}</span>
+                            <span><fmt:formatDate value="${task.createdAt}" pattern="dd-MM-yyyy HH:mm"/></span>
+                        </div>
+                        <p class="text-sm mb-2"><strong>Staff:</strong> ${task.staffName}</p>
+                        <div class="overflow-y-auto max-h-60 border rounded">
+                            <table class="w-full text-sm table-auto border-collapse  " >
+                                <thead class="bg-gray-100 sticky top-0">
                                     <tr>
-                                        <th>Image</th>
-                                        <th>Material</th>
-                                        <th>Qty</th>
-                                        <th>Price</th>
-                                        <th>Total</th>
+                                        <th class="text-center w-12">STT</th>
+                                        <th class="text-left">Material</th>
+                                        <th class="text-center">Actual Quantity</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <c:forEach var="d" items="${requestDetails}">
-                                        <tr>
-                                            <td>
-                                                <c:choose>
-                                                    <c:when test="${not empty d.image}">
-                                                        <img src="${pageContext.request.contextPath}/assets/images/materials/${d.image}" width="40" height="40" style="object-fit:cover;"/>
-                                                    </c:when>
-                                                    <c:otherwise><span class="text-muted">N/A</span></c:otherwise>
-                                                </c:choose>
-                                            </td>
-                                            <td>${d.materialName}</td>
-                                            <td>${d.quantity}</td>
-                                            <td><fmt:formatNumber value="${d.price}" pattern="#\,##0"/>₫</td>
-                                            <td><strong><fmt:formatNumber value="${d.totalValue}" pattern="#\,##0"/>₫</strong></td>
+                                    <c:forEach var="s" items="${task.slipDetails}" varStatus="index">
+                                        <tr class="border-t">
+                                            <td class="text-center">${index.index + 1}</td>
+                                            <td class="text-left">${s.materialName}</td>
+                                            <td class="text-center">${s.quantity}</td>
                                         </tr>
                                     </c:forEach>
                                 </tbody>
                             </table>
                         </div>
                     </div>
-                </div>
-            </div>
 
-            <!-- Actual Records -->
-            <div class="card">
-                <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
-                    <span>Actual Records</span>
-                    <a href="taskUpdate?requestId=${requestInfo.requestId}" class="btn btn-success btn-sm">Update Records</a>
-                </div>
-                <div class="card-body">
-                    <c:choose>
-                        <c:when test="${not hasRecords}">
-                            <div class="text-muted" style="text-align:center; padding: 20px;">No import/export records yet.</div>
-                        </c:when>
-                        <c:otherwise>
-                            <c:set var="prevDate" value=""/>
-                            <c:forEach var="d" items="${actualDetails}" varStatus="st">
-                                <c:set var="rec" value="${actualLists[st.index]}"/>
-                                <c:choose>
-                                    <c:when test="${not empty rec.importDate}">
-                                        <fmt:formatDate var="recDate" value="${rec.importDate}" pattern="dd/MM/yyyy"/>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <fmt:formatDate var="recDate" value="${rec.exportDate}" pattern="dd/MM/yyyy"/>
-                                    </c:otherwise>
-                                </c:choose>
+                    <c:set var="count" value="${count + 1}"/>
+                </c:forEach>
+            </c:forEach>
+        </div> <!-- close last .task-page -->
+</div>
+</section>
+<script>
+    let currentPage = 0;
+    const pages = document.querySelectorAll('.task-page');
 
-                                <c:if test="${st.index == 0 || recDate != prevDate}">
-                                    <c:if test="${st.index != 0}"></tbody></table></div></c:if>
-                                <div class="group-header">${recDate}</div>
-                                <div class="table-responsive">
-                                    <table>
-                                        <thead>
-                                            <tr>
-                                                <th>#</th>
-                                                <th>Material</th>
-                                                <th>Requested</th>
-                                                <th>Actual</th>
-                                                <th>Note</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                        </c:if>
-                                        <tr>
-                                            <td>${st.index + 1}</td>
-                                            <td>${d.materialName}</td>
-                                            <td>${requestDetails[st.index].quantity}</td>
-                                            <td>${d.quantity}</td>
-                                            <td>
-                                                <c:choose>
-                                                    <c:when test="${not empty rec.note}">
-                                                        ${rec.note}
-                                                    </c:when>
-                                                    <c:otherwise><span class="text-muted">—</span></c:otherwise>
-                                                </c:choose>
-                                            </td>
-                                        </tr>
-                                        <c:set var="prevDate" value="${recDate}"/>
-                                    </c:forEach>
-                                </tbody></table></div>
+    function showPage(index) {
+        pages.forEach((page, i) => {
+            page.style.display = (i === index) ? 'block' : 'none';
+        });
+    }
 
-                        <!-- Pagination -->
-                        <ul class="pagination">
-                            <li class="page-item ${currentPage == 1 ? 'disabled' : ''}">
-                                <a href="?requestId=${requestInfo.requestId}&page=${currentPage-1}">&laquo; Prev</a>
-                            </li>
-                            <c:forEach var="p" begin="${startPage}" end="${endPage}">
-                                <li class="page-item ${p == currentPage ? 'active' : ''}">
-                                    <a href="?requestId=${requestInfo.requestId}&page=${p}">${p}</a>
-                                </li>
-                            </c:forEach>
-                            <li class="page-item ${currentPage == totalPages ? 'disabled' : ''}">
-                                <a href="?requestId=${requestInfo.requestId}&page=${currentPage+1}">Next &raquo;</a>
-                            </li>
-                        </ul>
-                        <div class="text-muted text-center">
-                            Showing ${startIndex+1}–${endIndex} of ${totalRecords}
-                        </div>
-                    </c:otherwise>
-                </c:choose>
-            </div>
-        </div>
-    </div>
-</body>
-</html>
+    function nextPage() {
+        if (currentPage < pages.length - 1) {
+            currentPage++;
+            showPage(currentPage);
+        }
+    }
+
+    function prevPage() {
+        if (currentPage > 0) {
+            currentPage--;
+            showPage(currentPage);
+        }
+    }
+
+    // Show first page on load
+    if (pages.length > 0)
+        showPage(0);
+</script>
+
+</div>
