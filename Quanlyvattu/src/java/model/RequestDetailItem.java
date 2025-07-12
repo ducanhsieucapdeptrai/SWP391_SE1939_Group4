@@ -9,6 +9,7 @@ public class RequestDetailItem {
     private int actualQuantity;
     private String note;
     private int stockQuantity;
+    private String image;
     private double price;
     private String status;
 
@@ -30,6 +31,29 @@ public class RequestDetailItem {
         this.price = price;
         this.status = status;
     }
+
+    public RequestDetailItem(int requestId, int materialId, String materialName, String requestTypeName, int quantity, int actualQuantity, String note, int stockQuantity, String image, double price, String status) {
+        this.requestId = requestId;
+        this.materialId = materialId;
+        this.materialName = materialName;
+        this.requestTypeName = requestTypeName;
+        this.quantity = quantity;
+        this.actualQuantity = actualQuantity;
+        this.note = note;
+        this.stockQuantity = stockQuantity;
+        this.image = image;
+        this.price = price;
+        this.status = status;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
+    }
+    
 
     // Getters and Setters
     public int getRequestId() {
@@ -128,3 +152,4 @@ public class RequestDetailItem {
                 '}';
     }
 }
+  
