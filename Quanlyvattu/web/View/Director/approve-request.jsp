@@ -17,7 +17,6 @@
     }
 </style>
 
-<!-- Template for adding material -->
 <select id="materialSelectTemplate" class="hidden">
     <option disabled selected value="">-- Select Material --</option>
     <c:forEach var="material" items="${materialList}">
@@ -34,7 +33,8 @@
             Approve Request
         </h1>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700 mb-6">
+        <!-- Grid info section -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-gray-700 mb-6">
             <div>
                 <p class="font-semibold">Requested By:</p>
                 <p class="text-lg text-gray-900">${requestInfo.requestedByName}</p>
@@ -45,8 +45,13 @@
                     <fmt:formatDate value="${requestInfo.requestDate}" pattern="dd/MM/yyyy HH:mm" />
                 </p>
             </div>
+            <div>
+                <p class="font-semibold">Request Type:</p>
+                <p class="text-lg text-gray-900">${requestInfo.requestTypeName}</p>
+            </div>
         </div>
 
+        <!-- FORM -->
         <form method="POST" action="approveandrejectrequest" id="approveForm">
             <input type="hidden" name="requestId" value="${requestInfo.requestId}" />
             <input type="hidden" name="action" value="approve" />
