@@ -17,6 +17,7 @@
     }
 </style>
 
+<!-- Template for adding material -->
 <select id="materialSelectTemplate" class="hidden">
     <option disabled selected value="">-- Select Material --</option>
     <c:forEach var="material" items="${materialList}">
@@ -25,7 +26,6 @@
         </option>
     </c:forEach>
 </select>
-
 
 <div class="p-6 bg-gray-50 min-h-screen">
     <div class="max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-8">
@@ -86,11 +86,14 @@
                 </table>
             </div>
 
-            <div class="mb-4">
-                <button type="button" onclick="addMaterialRow()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-                    <i class="fas fa-plus mr-1"></i> Add Material
-                </button>
-            </div>
+            <!-- Only show Add Material if requestTypeId == 3 -->
+            <c:if test="${requestInfo.requestTypeId == 3}">
+                <div class="mb-4">
+                    <button type="button" onclick="addMaterialRow()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                        <i class="fas fa-plus mr-1"></i> Add Material
+                    </button>
+                </div>
+            </c:if>
 
             <div class="mb-6">
                 <label class="block font-medium mb-2">Approval Note (optional):</label>
