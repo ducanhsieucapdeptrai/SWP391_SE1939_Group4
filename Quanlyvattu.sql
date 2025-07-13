@@ -20,7 +20,10 @@ CREATE TABLE Users (
     IsActive BOOLEAN,
     FOREIGN KEY (RoleId) REFERENCES Roles(RoleId)
 );
-
+ALTER TABLE Users
+  ADD COLUMN DateOfBirth DATE      NULL,
+  ADD COLUMN Gender      VARCHAR(10)  NULL,
+  ADD COLUMN Address     VARCHAR(255) NULL;
 
 CREATE TABLE Functions (
     FunctionId INT AUTO_INCREMENT PRIMARY KEY,
@@ -711,6 +714,51 @@ INSERT INTO RepairDetail (RepairId, MaterialId, Quantity, Price) VALUES
 (1, 3, 0, 500000),
 (2, 3, 0, 1800000),
 (3, 26, 0, 160000);
+
+
+
+  -- UserId = 1: Trần Quản Lý
+UPDATE Users
+SET DateOfBirth = '1978-04-12',
+    Gender      = 'Nam',
+    Address     = 'Hà Nội'
+WHERE UserId = 1;
+
+-- UserId = 2: Nguyễn Giám Đốc
+UPDATE Users
+SET DateOfBirth = '1975-09-30',
+    Gender      = 'Nam',
+    Address     = 'Hồ Chí Minh'
+WHERE UserId = 2;
+
+-- Warehouse Staff (UserId 3–10)
+UPDATE Users SET DateOfBirth = '1990-01-15', Gender = 'Nam', Address = 'Đà Nẵng'      WHERE UserId = 3;
+UPDATE Users SET DateOfBirth = '1988-03-22', Gender = 'Nam', Address = 'Hải Phòng'     WHERE UserId = 4;
+UPDATE Users SET DateOfBirth = '1992-07-05', Gender = 'Nam', Address = 'Cần Thơ'        WHERE UserId = 5;
+UPDATE Users SET DateOfBirth = '1989-11-11', Gender = 'Nữ', Address = 'Bình Dương'      WHERE UserId = 6;  -- Trần Thị D
+UPDATE Users SET DateOfBirth = '1991-02-28', Gender = 'Nam', Address = 'Đồng Nai'       WHERE UserId = 7;
+UPDATE Users SET DateOfBirth = '1987-06-17', Gender = 'Nam', Address = 'Khánh Hòa'     WHERE UserId = 8;
+UPDATE Users SET DateOfBirth = '1993-12-01', Gender = 'Nữ', Address = 'Hải Dương'     WHERE UserId = 9;  -- Lý Thị G
+UPDATE Users SET DateOfBirth = '1994-05-20', Gender = 'Nam', Address = 'Bắc Ninh'        WHERE UserId = 10;
+
+-- UserId = 11: Nguyễn Nhân Viên
+UPDATE Users
+SET DateOfBirth = '1990-10-10',
+    Gender      = 'Nam',
+    Address     = 'Quảng Ninh'
+WHERE UserId = 11;
+
+-- Company Staff (UserId 12–21)
+UPDATE Users SET DateOfBirth = '1992-08-08', Gender = 'Nữ', Address = 'Thanh Hóa'     WHERE UserId = 12;  -- Ngô Thị I
+UPDATE Users SET DateOfBirth = '1986-04-04', Gender = 'Nam', Address = 'Nghệ An'       WHERE UserId = 13;
+UPDATE Users SET DateOfBirth = '1991-09-09', Gender = 'Nữ', Address = 'Bình Định'     WHERE UserId = 14;  -- Đặng Thị K
+UPDATE Users SET DateOfBirth = '1985-12-12', Gender = 'Nam', Address = 'Thừa Thiên Huế'WHERE UserId = 15;
+UPDATE Users SET DateOfBirth = '1993-03-03', Gender = 'Nữ', Address = 'Quảng Nam'      WHERE UserId = 16;  -- Cao Thị M
+UPDATE Users SET DateOfBirth = '1989-07-07', Gender = 'Nam', Address = 'Long An'        WHERE UserId = 17;
+UPDATE Users SET DateOfBirth = '1994-02-02', Gender = 'Nữ', Address = 'Hà Tĩnh'        WHERE UserId = 18;  -- Đỗ Thị O
+UPDATE Users SET DateOfBirth = '1987-05-05', Gender = 'Nam', Address = 'Kiên Giang'     WHERE UserId = 19;
+UPDATE Users SET DateOfBirth = '1990-11-11', Gender = 'Nữ', Address = 'Bình Phước'     WHERE UserId = 20;  -- Mai Thị Q
+UPDATE Users SET DateOfBirth = '1988-06-06', Gender = 'Nam', Address = 'Đắc Lắk'       WHERE UserId = 21;  -- Lương Văn R
 
 
 
