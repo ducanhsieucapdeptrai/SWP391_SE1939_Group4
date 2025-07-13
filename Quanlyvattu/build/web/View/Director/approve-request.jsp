@@ -33,7 +33,6 @@
             Approve Request
         </h1>
 
-        <!-- Grid info section -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-gray-700 mb-6">
             <div>
                 <p class="font-semibold">Requested By:</p>
