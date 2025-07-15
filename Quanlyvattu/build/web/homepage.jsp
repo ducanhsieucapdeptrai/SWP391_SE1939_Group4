@@ -2,7 +2,53 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
+<style>
+    /*
+        ================================================================
+        THE MAGIC: Replicate Google Calendar's Week-Contained Events
+        ================================================================
+    */
 
+    /*
+     * TARGET 1: The end of the event segment that falls on a Saturday.
+     * We select the event harness inside any cell with the 'fc-day-sat' class.
+    */
+    .fc-day-sat .fc-daygrid-event-harness {
+        /*
+         * Force the right corners to be rounded, making it look like the event ends here.
+         * The !important is needed to override FullCalendar's default inline styles.
+        */
+        border-top-right-radius: 6px !important;
+        border-bottom-right-radius: 6px !important;
+        /* Add a small gap to create a visual break before Sunday */
+        margin-right: 2.5px !important;
+    }
+
+    /*
+     * TARGET 2: The start of the event segment that falls on a Sunday.
+     * We select the event harness inside any cell with the 'fc-day-sun' class.
+    */
+    .fc-day-sun .fc-daygrid-event-harness {
+        /*
+         * Force the left corners to be rounded, making it look like a new event is starting.
+        */
+        border-top-left-radius: 6px !important;
+        border-bottom-left-radius: 6px !important;
+    }
+
+    /*
+     * TARGET 3 (Cleanup): The main event element itself.
+     * We remove its default border-radius so our harness styles can take over.
+    */
+    .fc-daygrid-event {
+        border-radius: 0 !important;
+    }
+
+    /* Optional: Add a subtle box-shadow for a more modern, lifted feel like Google's */
+    .fc-daygrid-event-harness {
+        box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.08);
+    }
+</style>
 
 <div class="container mx-auto">
     <h2 class="text-2xl font-semibold mb-6">Dashboard</h2>
@@ -78,6 +124,10 @@
 
     <!-- Recent Material Entries -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <!-- FullCalendar Integration -->
+        <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet' />
+        <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js'></script>
+
         <!-- Recent Imports -->
         <div class="bg-white rounded-lg shadow-md p-6">
             <h3 class="text-lg font-semibold mb-4 text-blue-600">Recent Material Imports</h3>
@@ -158,20 +208,129 @@
             </c:choose>
         </div>
     </div>
-</div>
+
+    <!-- Calendar Section -->
+    <div class="bg-white rounded-lg shadow-md p-6 mt-8">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold text-gray-700">Your Calendar</h2>
+            <button onclick="openAddEventModal()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">Add Event</button>
+        </div>
+        <div id="calendar"></div>
+    </div>
+
+    <!-- Add Event Modal -->
+    <div id="addEventModal" class="fixed z-10 inset-0 overflow-y-auto hidden">
+        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+                <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+            </div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <form action="event-action" method="POST" class="mt-4">
+                    <input type="hidden" name="action" value="add">
+                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900">Add New Event</h3>
+                        <div class="mt-4">
+                            <label for="eventType" class="block text-sm font-medium text-gray-700">Event Type</label>
+                            <select id="eventType" name="eventType" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                                <option>Appointment</option>
+                                <option>Work</option>
+                                <option>Business Trip</option>
+                                <option>Leave Request</option>
+                            </select>
+                        </div>
+                        <div class="mt-4">
+                            <label for="title" class="block text-sm font-medium text-gray-700">Title</label>
+                            <input type="text" name="title" id="title" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" required>
+                        </div>
+                        <div class="mt-4">
+                            <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+                            <textarea id="description" name="description" rows="3" class="mt-1 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border border-gray-300 rounded-md"></textarea>
+                        </div>
+                        <div class="mt-4">
+                            <label for="startTime" class="block text-sm font-medium text-gray-700">Start Time</label>
+                            <input type="datetime-local" name="startTime" id="startTime" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" required>
+                        </div>
+                        <div class="mt-4">
+                            <label for="endTime" class="block text-sm font-medium text-gray-700">End Time</label>
+                            <input type="datetime-local" name="endTime" id="endTime" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                        <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">
+                            Add Event
+                        </button>
+                        <button type="button" onclick="closeModal()" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
 <!-- Chart data preparation -->
 <c:set var="chartLabelsJson" value="${chartLabels != null ? chartLabels : '[]'}" scope="request" />
 <c:set var="chartDataJson" value="${chartData != null ? chartData : '[]'}" scope="request" />
 
-<!-- Chart.js initialization -->
+<!-- Scripts for Calendar and Chart -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // Get chart data from hidden elements to avoid JSP/JS mixing issues
+    // Calendar Script
+    document.addEventListener('DOMContentLoaded', function() {
+        var calendarEl = document.getElementById('calendar');
+        if(calendarEl) {
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                events: 'calendar-data',
+                dateClick: function(info) {
+                    calendar.changeView('timeGridDay', info.dateStr);
+                },
+                eventContent: function(arg) {
+                    let bullet = document.createElement('div');
+                    bullet.classList.add('w-2', 'h-2', 'bg-blue-500', 'rounded-full', 'inline-block', 'mr-1');
+                    let title = document.createElement('div');
+                    title.classList.add('inline-block', 'truncate');
+                    title.innerText = arg.event.title;
+                    let container = document.createElement('div');
+                    container.appendChild(bullet);
+                    container.appendChild(title);
+                    return { domNodes: [container] };
+                },
+                eventClick: function(info) {
+                    alert('Event: ' + info.event.title + '\n' + 'Description: ' + info.event.extendedProps.description);
+                    // Here you can open a more detailed modal for viewing/editing the event
+                }
+            });
+            calendar.render();
+        }
+    });
+
+    function openAddEventModal() {
+        // Set current date and time as default for the modal
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = (now.getMonth() + 1).toString().padStart(2, '0');
+        const day = now.getDate().toString().padStart(2, '0');
+        const hours = now.getHours().toString().padStart(2, '0');
+        const minutes = now.getMinutes().toString().padStart(2, '0');
+        document.getElementById('startTime').value = `${year}-${month}-${day}T${hours}:${minutes}`;
+        document.getElementById('addEventModal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+        document.getElementById('addEventModal').classList.add('hidden');
+    }
+
+    // Chart.js initialization
     document.addEventListener('DOMContentLoaded', function() {
         const ctx = document.getElementById('materialChart').getContext('2d');
         
-        // Safe parsing of chart data
         let chartLabelsData = [];
         let chartValuesData = [];
         
@@ -187,7 +346,6 @@
             console.error('Error parsing chart data:', e);
         }
         
-        // Create chart
         const materialChart = new Chart(ctx, {
             type: 'bar',
             data: {
