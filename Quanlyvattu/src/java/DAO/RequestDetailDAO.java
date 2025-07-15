@@ -50,11 +50,14 @@ public class RequestDetailDAO {
 
     public RequestList getRequestById(int requestId) {
         String sql = "SELECT r.RequestId, r.RequestedBy, u.FullName, r.RequestTypeId, rt.RequestTypeName, "
+                + "r.SubTypeId, rst.SubTypeName, "
                 + "r.RequestDate, r.Status, r.Note, r.ApprovedBy, r.ApprovedDate, r.ApprovalNote "
                 + "FROM RequestList r "
                 + "JOIN Users u ON r.RequestedBy = u.UserId "
                 + "JOIN RequestType rt ON r.RequestTypeId = rt.RequestTypeId "
+                + "LEFT JOIN RequestSubType rst ON r.SubTypeId = rst.SubTypeId "
                 + "WHERE r.RequestId = ?";
+
         try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, requestId);
             try (ResultSet rs = ps.executeQuery()) {
@@ -65,6 +68,9 @@ public class RequestDetailDAO {
                     req.setRequestedByName(rs.getString("FullName"));
                     req.setRequestTypeId(rs.getInt("RequestTypeId"));
                     req.setRequestTypeName(rs.getString("RequestTypeName"));
+
+                    req.setSubTypeName(rs.getString("SubTypeName"));
+
                     req.setRequestDate(rs.getTimestamp("RequestDate"));
                     req.setStatus(rs.getString("Status"));
                     req.setNote(rs.getString("Note"));
@@ -82,7 +88,7 @@ public class RequestDetailDAO {
     }
 
     public String getRequestStatus(int requestId) {
-        String sql = "SELECT Status FROM requestlist WHERE RequestId = ?";
+        String sql = "SELECT Status FROM RequestList WHERE RequestId = ?";
         try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, requestId);
             ResultSet rs = ps.executeQuery();
@@ -100,7 +106,7 @@ public class RequestDetailDAO {
         try (Connection conn = new DBContext().getConnection()) {
             conn.setAutoCommit(false);
 
-            String updateRequest = "UPDATE requestlist SET Status = 'Approved', ApprovalNote = ?, ApprovedBy = ?, ApprovedDate = CURRENT_TIMESTAMP WHERE RequestId = ?";
+            String updateRequest = "UPDATE RequestList SET Status = 'Approved', ApprovalNote = ?, ApprovedBy = ?, ApprovedDate = CURRENT_TIMESTAMP WHERE RequestId = ?";
             try (PreparedStatement ps = conn.prepareStatement(updateRequest)) {
                 ps.setString(1, note);
                 ps.setInt(2, approvedBy);
@@ -133,7 +139,7 @@ public class RequestDetailDAO {
     }
 
     public void rejectRequest(int requestId, String reason, int approvedBy) {
-        String sql = "UPDATE requestlist SET Status = ?, RejectionReason = ?, ApprovedBy = ?, ApprovedDate = CURRENT_TIMESTAMP WHERE RequestId = ?";
+        String sql = "UPDATE RequestList SET Status = ?, RejectionReason = ?, ApprovedBy = ?, ApprovedDate = CURRENT_TIMESTAMP WHERE RequestId = ?";
         try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, "Rejected");
             ps.setString(2, reason);

@@ -109,11 +109,8 @@
                 <p class="text-lg font-semibold text-purple-700">
                     <i class="fas fa-tag mr-2"></i>
                     ${requestInfo.requestTypeName}
-                    <c:if test="${requestInfo.requestTypeName == 'Export' && not empty requestInfo.exportTypeName}">
-                        <br><span class="text-sm text-purple-600">(${requestInfo.exportTypeName})</span>
-                    </c:if>
-                    <c:if test="${requestInfo.requestTypeName == 'Import' && not empty requestInfo.importTypeName}">
-                        <br><span class="text-sm text-purple-600">(${requestInfo.importTypeName})</span>
+                    <c:if test="${not empty requestInfo.subTypeName}">
+                        <br><span class="text-sm text-purple-600">(${requestInfo.subTypeName})</span>
                     </c:if>
                 </p>
                 <p class="text-xs text-purple-600">Type ID: ${requestInfo.requestTypeId}</p>
