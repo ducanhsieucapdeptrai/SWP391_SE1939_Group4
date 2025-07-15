@@ -12,9 +12,9 @@ import model.Material;
 import model.Users;
 import model.MaterialStatus;
 import DAO.MaterialDAO;
-import DAO.CatalogDAO;
+import DAO.CategoryDAO;
 import DAO.MaterialStatusDAO;
-import model.Catalog;
+import model.Category;
 import model.SubCategory;
 
 import java.io.File;
@@ -48,11 +48,11 @@ public class AddMaterialServlet extends HttpServlet {
 
         try {
             // Fetch categories, subcategories, and statuses for dropdowns
-            CatalogDAO catalogDAO = new CatalogDAO();
+            CategoryDAO categoryDAO = new CategoryDAO();
             MaterialStatusDAO statusDAO = new MaterialStatusDAO();
             
-            List<Catalog> categories = catalogDAO.getAllCategories();
-            List<SubCategory> subcategories = catalogDAO.getAllSubCategories();
+            List<Category> categories = categoryDAO.getAllCategories();
+            List<SubCategory> subcategories = categoryDAO.getAllSubCategories();
             List<MaterialStatus> statuses = statusDAO.getAllStatuses();
             
             request.setAttribute("categories", categories);

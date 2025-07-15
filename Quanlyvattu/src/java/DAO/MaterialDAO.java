@@ -230,25 +230,6 @@ public class MaterialDAO extends DBContext {
         return false;
     }
 
-    /**
-     * Helper method to close database resources
-     */
-    private void closeResources(ResultSet rs, Statement stmt, Connection conn) {
-        try {
-            if (rs != null && !rs.isClosed()) {
-                rs.close();
-            }
-            if (stmt != null && !stmt.isClosed()) {
-                stmt.close();
-            }
-            if (conn != null && !conn.isClosed()) {
-                conn.close();
-            }
-        } catch (SQLException e) {
-            System.err.println("Error closing database resources: " + e.getMessage());
-        }
-    }
-
     // ✅ Add new material with proper connection handling and return generated ID
     public boolean addMaterial(Material material) {
         String sql = """
@@ -347,14 +328,9 @@ public class MaterialDAO extends DBContext {
             LIMIT 5
             """;
 
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
+        try (PreparedStatement ps = connection.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
 
-        try {
-            conn = connection;
-            ps = conn.prepareStatement(sql);
-            rs = ps.executeQuery();
             while (rs.next()) {
                 Material m = new Material();
                 m.setMaterialId(rs.getInt("MaterialId"));
@@ -368,8 +344,6 @@ public class MaterialDAO extends DBContext {
         } catch (SQLException e) {
             System.err.println("Error in getRecentImportMaterials: " + e.getMessage());
             e.printStackTrace();
-        } finally {
-            closeResources(rs, ps, conn);
         }
         return imports;
     }
@@ -388,14 +362,9 @@ public class MaterialDAO extends DBContext {
             LIMIT 5
             """;
 
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
+        try (PreparedStatement ps = connection.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
 
-        try {
-            conn = connection;
-            ps = conn.prepareStatement(sql);
-            rs = ps.executeQuery();
             while (rs.next()) {
                 Material m = new Material();
                 m.setMaterialId(rs.getInt("MaterialId"));
@@ -409,8 +378,6 @@ public class MaterialDAO extends DBContext {
         } catch (SQLException e) {
             System.err.println("Error in getRecentExportMaterials: " + e.getMessage());
             e.printStackTrace();
-        } finally {
-            closeResources(rs, ps, conn);
         }
         return exports;
     }

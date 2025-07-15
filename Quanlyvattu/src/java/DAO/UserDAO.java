@@ -96,6 +96,90 @@ public class UserDAO extends DBContext {
         return user;
     }
 
+    public List<Users> getUsers(String searchQuery, int roleId, int status, String sortBy, String sortOrder, int page, int pageSize) {
+        List<Users> list = new ArrayList<>();
+        StringBuilder sql = new StringBuilder("SELECT * FROM users WHERE 1=1");
+
+        if (searchQuery != null && !searchQuery.trim().isEmpty()) {
+            sql.append(" AND (fullName LIKE ? OR email LIKE ?)");
+        }
+        if (roleId > 0) {
+            sql.append(" AND roleId = ?");
+        }
+        if (status != -1) { // -1 for All, 0 for Inactive, 1 for Active
+            sql.append(" AND isActive = ?");
+        }
+
+        if (sortBy != null && !sortBy.isEmpty()) {
+            sql.append(" ORDER BY ").append(sortBy).append(" ").append(sortOrder);
+        } else {
+            sql.append(" ORDER BY userId ASC");
+        }
+
+        sql.append(" LIMIT ? OFFSET ?");
+
+        try (PreparedStatement ps = connection.prepareStatement(sql.toString())) {
+            int paramIndex = 1;
+            if (searchQuery != null && !searchQuery.trim().isEmpty()) {
+                ps.setString(paramIndex++, "%" + searchQuery + "%");
+                ps.setString(paramIndex++, "%" + searchQuery + "%");
+            }
+            if (roleId > 0) {
+                ps.setInt(paramIndex++, roleId);
+            }
+            if (status != -1) {
+                ps.setInt(paramIndex++, status);
+            }
+            ps.setInt(paramIndex++, pageSize);
+            ps.setInt(paramIndex++, (page - 1) * pageSize);
+
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Users user = new Users();
+                user.setUserId(rs.getInt("userId"));
+                user.setFullName(rs.getString("fullName"));
+                user.setEmail(rs.getString("email"));
+                user.setRoleId(rs.getInt("roleId"));
+                user.setIsActive(rs.getBoolean("isActive"));
+                list.add(user);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public int getUserCount(String searchQuery, int roleId, int status) {
+        int count = 0;
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM users WHERE 1=1");
+
+        if (searchQuery != null && !searchQuery.trim().isEmpty()) {
+            sql.append(" AND (fullName LIKE ? OR email LIKE ?)");
+        }
+
+        try (PreparedStatement ps = connection.prepareStatement(sql.toString())) {
+            int paramIndex = 1;
+            if (searchQuery != null && !searchQuery.trim().isEmpty()) {
+                ps.setString(paramIndex++, "%" + searchQuery + "%");
+                ps.setString(paramIndex++, "%" + searchQuery + "%");
+            }
+            if (roleId > 0) {
+                ps.setInt(paramIndex++, roleId);
+            }
+            if (status != -1) {
+                ps.setInt(paramIndex++, status);
+            }
+
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                count = rs.getInt(1);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return count;
+    }
+
     public List<Users> getAllUsers() {
         List<Users> list = new ArrayList<>();
         try {
