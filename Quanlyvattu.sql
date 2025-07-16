@@ -183,26 +183,52 @@ CREATE TABLE PurchaseOrderDetail (
     FOREIGN KEY (MaterialId) REFERENCES Materials(MaterialId)
 );
 
-CREATE TABLE RepairList (
-    RepairId INT AUTO_INCREMENT PRIMARY KEY,
-    RequestId INT NOT NULL,
-    RepairedBy INT,
-    RepairDate DATETIME DEFAULT CURRENT_TIMESTAMP,
-    Status VARCHAR(50),
-    Note TEXT,
-    FOREIGN KEY (RequestId) REFERENCES RequestList(RequestId),
-    FOREIGN KEY (RepairedBy) REFERENCES Users(UserId)
+
+
+-- Bảng lưu trạng thái phiếu sửa chữa
+CREATE TABLE RepairOrderStatus (
+    StatusCode VARCHAR(20) PRIMARY KEY,
+    Description VARCHAR(100)
 );
 
-CREATE TABLE RepairDetail (
-    RepairDetailId INT AUTO_INCREMENT PRIMARY KEY,
-    RepairId INT,
+-- Dữ liệu mẫu cho trạng thái phiếu sửa chữa
+INSERT INTO RepairOrderStatus (StatusCode, Description) VALUES
+('Pending', 'Waiting for director approval'),
+('Approved', 'Approved by director'),
+('Rejected', 'Rejected by director');
+
+-- Bảng danh sách phiếu sửa chữa
+CREATE TABLE RepairOrderList (
+    ROId INT AUTO_INCREMENT PRIMARY KEY,
+    RequestId INT NOT NULL,
+    CreatedBy INT NOT NULL,
+    CreatedDate DATETIME DEFAULT CURRENT_TIMESTAMP,
+    TotalPrice DOUBLE,
+     Status VARCHAR(20) DEFAULT 'Pending',
+      ApprovedBy INT,
+    ApprovedDate DATETIME,
+    Note TEXT,
+    FOREIGN KEY (RequestId) REFERENCES RequestList(RequestId),
+    FOREIGN KEY (CreatedBy) REFERENCES Users(UserId),
+    FOREIGN KEY (ApprovedBy) REFERENCES Users(UserId),
+    FOREIGN KEY (Status) REFERENCES RepairOrderStatus(StatusCode)
+);
+
+
+-- Bảng chi tiết phiếu sửa chữa
+CREATE TABLE RepairOrderDetail (
+    ROId INT,
     MaterialId INT,
     Quantity INT,
-    Price DECIMAL(15,2),
-    FOREIGN KEY (RepairId) REFERENCES RepairList(RepairId),
+    UnitPrice DOUBLE,
+	Total DOUBLE,	
+	PRIMARY KEY (ROId, MaterialId),
+    FOREIGN KEY (ROId) REFERENCES RepairOrderList(ROId),
     FOREIGN KEY (MaterialId) REFERENCES Materials(MaterialId)
 );
+
+
+
 
 
 CREATE TABLE TaskLog (
@@ -228,7 +254,15 @@ CREATE TABLE TaskSlipDetail (
 );
 
 
+CREATE TABLE PasswordResetRequest (
+    RequestId INT AUTO_INCREMENT PRIMARY KEY,
+    UserId INT NOT NULL,
+    RequestedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    Status VARCHAR(20) DEFAULT 'Pending',   -- 'Pending', 'Approved', 'Rejected'
+    ProcessedAt DATETIME,                   -- Thời điểm xử lý
 
+    FOREIGN KEY (UserId) REFERENCES Users(UserId)
+);
 
 
 
@@ -556,6 +590,10 @@ INSERT INTO RequestSubType (RequestTypeId, SubTypeName) VALUES
 (2, 'New Purchase'),
 (2, 'Returned from Repair'),
 (2, 'Returned from Usage');
+SELECT RequestId, RequestTypeId, SubTypeId, Status, Note, RequestDate
+FROM RequestList
+ORDER BY RequestId DESC
+LIMIT 5;
 
 
 
@@ -569,26 +607,29 @@ INSERT INTO RequestSubType (RequestTypeId, SubTypeName) VALUES
 INSERT INTO RequestList 
 (RequestId, RequestedBy, RequestDate, RequestTypeId, SubTypeId, Note, Status, ApprovedBy, ApprovedDate, ApprovalNote, AssignedStaffId, ArrivalDate, IsTransferredToday, IsUpdated, IsCompleted)
 VALUES
-(1, 10, '2025-05-20 08:00:00', 1, 1, 'Request to import materials for Project A', 'Approved', 2, '2025-05-20 08:30:00', 'Approved - match delivery note.', 3, NOW(), TRUE, FALSE, FALSE),
-(2, 11, '2025-05-21 09:30:00', 1, 2, 'Returned items after repair', 'Approved', 2, '2025-05-21 10:00:00', 'Valid receipt', NULL, NOW(), TRUE, FALSE, FALSE),
+-- Export (Approved)
 (3, 12, '2025-05-25 07:30:00', 1, 1, 'Export for foundation of Building A', 'Approved', 2, '2025-05-25 08:00:00', 'Approved on schedule', 5, '2025-05-25 09:00:00', FALSE, FALSE, FALSE),
 (4, 13, '2025-05-26 08:30:00', 1, 1, 'Export finishing materials to site B', 'Approved', 2, '2025-05-26 09:00:00', 'Export approved.', NULL, NULL, FALSE, FALSE, FALSE),
-(5, 4, NOW(), 3, NULL, 'Purchase office air conditioners', 'Approved', 2, NOW(), 'Approved within budget.', 7, NULL, FALSE, FALSE, FALSE),
 (6, 5, NOW(), 1, 1, 'Export leftover cement', 'Rejected', 2, NOW(), 'Not needed. Keep for future use.', NULL, NULL, FALSE, FALSE, FALSE),
-(7, 6, NOW(), 4, NULL, 'Repair broken drill machine', 'Rejected', 2, NOW(), 'Request denied. Out of budget.', NULL, NULL, FALSE, FALSE, FALSE),
-(8, 7, NOW(), 1, 1, 'Import bricks for building site', 'Pending', NULL, NULL, NULL, NULL, NULL, FALSE, FALSE, FALSE),
-(9, 8, NOW(), 4, NULL, 'Repair water leakage at storage', 'Pending', NULL, NULL, NULL, NULL, NULL, FALSE, FALSE, FALSE),
-(10, 14, '2025-05-29 10:00:00', 3, NULL, 'Propose purchase of office chairs', 'Pending', NULL, NULL, NULL, NULL, NULL, FALSE, FALSE, FALSE),
-(11, 4, '2025-06-15 09:00:00', 1, 1, 'Import lightweight bricks', 'Approved', 2, '2025-06-15 10:00:00', 'OK to proceed.', NULL, NOW(), TRUE, FALSE, FALSE),
 (12, 5, '2025-06-15 10:30:00', 1, 1, 'Export granite stone to site D', 'Approved', 2, '2025-06-15 11:00:00', 'Site D confirmed.', 3, '2025-06-15 13:00:00', FALSE, FALSE, FALSE),
-(13, 6, '2025-06-16 08:15:00', 4, NULL, 'Repair concrete cutter', 'Approved', 2, '2025-06-16 08:45:00', 'Assigned for repair.', 5, NULL, FALSE, FALSE, FALSE),
-(14, 7, '2025-06-16 09:30:00', 3, NULL, 'Purchase new safety helmets', 'Pending', NULL, NULL, NULL, NULL, NULL, FALSE, FALSE, FALSE),
-(15, 8, '2025-06-17 08:45:00', 1, 1, 'Import ceiling boards', 'Approved', 2, '2025-06-17 09:15:00', 'Approved for import.', 4, NOW(), TRUE, FALSE, FALSE),
 (16, 9, '2025-06-17 10:20:00', 1, 1, 'Export timber for site C', 'Approved', 2, '2025-06-17 10:50:00', 'Export confirmed.', NULL, NULL, FALSE, FALSE, FALSE),
-(17, 10, '2025-06-18 09:00:00', 4, NULL, 'Repair lighting system', 'Approved', 2, '2025-06-18 09:30:00', 'Assigned to technician.', 6, NOW(), TRUE, FALSE, FALSE),
-(18, 11, '2025-06-18 11:00:00', 3, NULL, 'Purchase fire extinguishers', 'Approved', 2, '2025-06-18 11:20:00', 'Urgent purchase approved.', 7, NULL, FALSE, FALSE, FALSE),
 (19, 12, '2025-06-19 08:00:00', 1, 2, 'Export wall tiles to branch B', 'Pending', NULL, NULL, NULL, NULL, NULL, FALSE, FALSE, FALSE),
-(20, 13, '2025-06-19 10:00:00', 2, 3, 'Import steel rods for base', 'Approved', 2, '2025-06-19 10:30:00', 'Warehouse notified.', 4, NOW(), TRUE, FALSE, FALSE);
+
+-- Purchase (Pending)
+(5, 4, NOW(), 3, NULL, 'Purchase office air conditioners', 'Pending', NULL, NULL, NULL, 7, NULL, FALSE, FALSE, FALSE),
+(10, 14, '2025-05-29 10:00:00', 3, NULL, 'Propose purchase of office chairs', 'Pending', NULL, NULL, NULL, NULL, NULL, FALSE, FALSE, FALSE),
+(14, 7, '2025-06-16 09:30:00', 3, NULL, 'Purchase new safety helmets', 'Pending', NULL, NULL, NULL, NULL, NULL, FALSE, FALSE, FALSE),
+(18, 11, '2025-06-18 11:00:00', 3, NULL, 'Purchase fire extinguishers', 'Pending', NULL, NULL, NULL, NULL, NULL, FALSE, FALSE, FALSE),
+
+-- Repair (Pending)
+(7, 6, NOW(), 4, NULL, 'Repair broken drill machine', 'Pending', NULL, NULL, NULL, NULL, NULL, FALSE, FALSE, FALSE),
+(9, 8, NOW(), 4, NULL, 'Repair water leakage at storage', 'Pending', NULL, NULL, NULL, NULL, NULL, FALSE, FALSE, FALSE),
+(13, 6, '2025-06-16 08:15:00', 4, NULL, 'Repair concrete cutter', 'Pending', NULL, NULL, NULL, 5, NULL, FALSE, FALSE, FALSE),
+(17, 10, '2025-06-18 09:00:00', 4, NULL, 'Repair lighting system', 'Pending', NULL, NULL, NULL, 6, NULL, FALSE, FALSE, FALSE);
+
+	
+
+
 
 SELECT 
     rl.RequestId,
@@ -612,72 +653,53 @@ ORDER BY rl.RequestDate DESC;
 
 -- RequestDetail (đầy đủ vật tư cho từng RequestId)
 INSERT INTO RequestDetail (RequestId, MaterialId, Quantity, ActualQuantity) VALUES
--- RequestId = 1 (Import)
-(1, 1, 50, NULL),
-(1, 2, 30, NULL),
-(1, 3, 20, NULL),
-
--- RequestId = 2 (Import + Purchase)
-(2, 21, 10, NULL),
-(2, 18, 30, NULL),
-
 -- RequestId = 3 (Export)
-(3, 1, 20, NULL),
-(3, 3, 10, NULL),
+(3, 1, 20, 0),
+(3, 3, 10, 0),
 
 -- RequestId = 4 (Export)
-(4, 11, 100, NULL),
-(4, 13, 50, NULL),
+(4, 11, 100, 0),
+(4, 13, 50, 0),
 
 -- RequestId = 5 (Purchase)
-(5, 15, 3, NULL),
-(5, 11, 150, NULL),
+(5, 15, 3, 0),
+(5, 11, 150, 0),
 
 -- RequestId = 6 (Export)
-(6, 16, 50, NULL),
+(6, 16, 50, 0),
 
 -- RequestId = 7 (Repair)
-(7, 17, 1, NULL),
-(7, 3, 2, NULL),
-
--- RequestId = 8 (Import)
-(8, 18, 200, NULL),
+(7, 17, 1, 0),
+(7, 3, 2, 0),
 
 -- RequestId = 9 (Repair)
-(9, 19, 1, NULL),
+(9, 19, 1, 0),
 
 -- RequestId = 10 (Purchase)
-(10, 25, 5, NULL),
-
--- RequestId = 11 (Import)
-(11, 6, 500, NULL),
+(10, 25, 5, 0),
 
 -- RequestId = 12 (Export)
-(12, 7, 50, NULL),
+(12, 7, 50, 0),
 
 -- RequestId = 13 (Repair)
-(13, 3, 1, NULL),
+(13, 3, 1, 0),
 
 -- RequestId = 14 (Purchase)
-(14, 35, 20, NULL),
-
--- RequestId = 15 (Import)
-(15, 17, 200, NULL),
+(14, 35, 20, 0),
 
 -- RequestId = 16 (Export)
-(16, 9, 80, NULL),
+(16, 9, 80, 0),
 
 -- RequestId = 17 (Repair)
-(17, 26, 1, NULL),
+(17, 26, 1, 0),
 
 -- RequestId = 18 (Purchase)
-(18, 28, 30, NULL),
+(18, 28, 30, 0),
 
 -- RequestId = 19 (Export)
-(19, 13, 100, NULL),
+(19, 13, 100, 0);
 
--- RequestId = 20 (Import)
-(20, 3, 100, NULL);
+
 
 
 
@@ -689,31 +711,27 @@ INSERT INTO RequestDetail (RequestId, MaterialId, Quantity, ActualQuantity) VALU
 -- 4. PHIẾU MUA HÀNG
 -- ========================================
 
-INSERT INTO PurchaseOrderList (RequestId, CreatedBy, CreatedDate, TotalPrice, Status, Note)
-VALUES
-(2, 12, NOW(), 1100000, 'Pending', 'Đề nghị mua Ceiling Exhaust Fan'),
-(5, 8, NOW(), 12000000, 'Pending', 'Đề nghị mua gạch lát nền'),
-(18, 11, NOW(), 6600000, 'Pending', 'Purchase fire extinguishers urgently');
+INSERT INTO PurchaseOrderList (POId, RequestId, CreatedBy, CreatedDate, TotalPrice, Status, Note) VALUES
+(1, 5, 4, NOW(), 12180000, 'Pending', 'Purchase office air conditioners'),
+(2, 18, 11, NOW(), 6600000, 'Pending', 'Purchase fire extinguishers urgently'),
+(3, 10, 14, NOW(), 1260000, 'Pending', 'Propose purchase of office chairs');
+
 
 INSERT INTO PurchaseOrderDetail (POId, MaterialId, Quantity, UnitPrice, Total) VALUES
-(1, 21, 0, 220000, 0),
-(2, 11, 0, 80000, 0),
-(3, 28, 0, 220000, 0);
+(1, 15, 3, 60000, 180000),
+(1, 11, 150, 80000, 12000000),
+
+(2, 28, 30, 220000, 6600000),
+
+(3, 25, 5, 12000, 60000),
+(3, 17, 10, 120000, 1200000); 
+
 -- ========================================
 -- 5. SỬA CHỮA
 -- ========================================
+-- Ví dụ RequestId = 1, RepairedBy = 3
 
-INSERT INTO RepairList (RequestId, RepairedBy, RepairDate, Status, Note)
-VALUES
-(7, 6, NOW(), 'In Progress', 'Đang tháo lắp để kiểm tra nguyên nhân'),
-(13, 5, '2025-06-16 11:00:00', 'In Progress', 'Inspection ongoing.'),
-(17, 6, '2025-06-18 13:00:00', 'Pending', 'Awaiting parts.');
 
--- RepairDetail
-INSERT INTO RepairDetail (RepairId, MaterialId, Quantity, Price) VALUES
-(1, 3, 0, 500000),
-(2, 3, 0, 1800000),
-(3, 26, 0, 160000);
 
 
 

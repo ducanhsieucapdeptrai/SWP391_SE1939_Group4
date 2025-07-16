@@ -11,11 +11,20 @@ public class MaterialDAO extends DBContext {
 
     public List<Material> getAllMaterials() {
         List<Material> list = new ArrayList<>();
-        String sql = "SELECT * FROM Materials";
+        String sql = """
+            SELECT m.MaterialId, m.MaterialName, m.SubCategoryId, m.StatusId, 
+                   m.Image, m.Description, m.Quantity, m.MinQuantity, m.Price, 
+                   m.CreatedAt, m.UpdatedAt,
+                   sc.CategoryId, sc.SubCategoryName,
+                   c.CategoryName, 
+                   s.StatusName
+            FROM Materials m
+            JOIN SubCategories sc ON m.SubCategoryId = sc.SubCategoryId
+            JOIN Categories c ON sc.CategoryId = c.CategoryId
+            JOIN MaterialStatus s ON m.StatusId = s.StatusId
+        """;
 
-        try {
-            PreparedStatement st = connection.prepareStatement(sql);
-            ResultSet rs = st.executeQuery();
+        try (PreparedStatement st = connection.prepareStatement(sql); ResultSet rs = st.executeQuery()) {
             while (rs.next()) {
                 Material m = new Material();
                 m.setMaterialId(rs.getInt("MaterialId"));
@@ -29,9 +38,13 @@ public class MaterialDAO extends DBContext {
                 m.setPrice(rs.getDouble("Price"));
                 m.setCreatedAt(rs.getTimestamp("CreatedAt"));
                 m.setUpdatedAt(rs.getTimestamp("UpdatedAt"));
+                m.setSubCategoryName(rs.getString("SubCategoryName"));
+                m.setCategoryName(rs.getString("CategoryName"));
+                m.setStatusName(rs.getString("StatusName"));
+                m.setCategoryId(rs.getInt("CategoryId"));  // ✅ ensure included
                 list.add(m);
             }
-        } catch (SQLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -42,17 +55,16 @@ public class MaterialDAO extends DBContext {
     public List<Material> getMaterialsByPage(int offset, int pageSize) {
         List<Material> list = new ArrayList<>();
         String sql = """
-    SELECT m.*, s.StatusName, sc.SubCategoryName, c.CategoryName
-    FROM Materials m
-    JOIN MaterialStatus s ON m.StatusId = s.StatusId
-    JOIN SubCategories sc ON m.SubCategoryId = sc.SubCategoryId
-    JOIN Categories c ON sc.CategoryId = c.CategoryId
-    ORDER BY m.MaterialId
-    LIMIT ? OFFSET ?
-""";
+            SELECT m.*, s.StatusName, sc.SubCategoryName, c.CategoryName, c.CategoryId
+            FROM Materials m
+            JOIN MaterialStatus s ON m.StatusId = s.StatusId
+            JOIN SubCategories sc ON m.SubCategoryId = sc.SubCategoryId
+            JOIN Categories c ON sc.CategoryId = c.CategoryId
+            ORDER BY m.MaterialId
+            LIMIT ? OFFSET ?
+        """;
 
-        try {
-            PreparedStatement st = connection.prepareStatement(sql);
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
             st.setInt(1, pageSize);
             st.setInt(2, offset);
             ResultSet rs = st.executeQuery();
@@ -72,6 +84,7 @@ public class MaterialDAO extends DBContext {
                 m.setStatusName(rs.getString("StatusName"));
                 m.setSubCategoryName(rs.getString("SubCategoryName"));
                 m.setCategoryName(rs.getString("CategoryName"));
+                m.setCategoryId(rs.getInt("CategoryId")); // ✅ thêm vào
                 list.add(m);
             }
         } catch (SQLException e) {
@@ -164,13 +177,13 @@ public class MaterialDAO extends DBContext {
 
     public Material getMaterialById(int id) {
         String sql = """
-        SELECT m.*, s.StatusName, sc.SubCategoryName, c.CategoryName
-        FROM Materials m
-        JOIN MaterialStatus s ON m.StatusId = s.StatusId
-        JOIN SubCategories sc ON m.SubCategoryId = sc.SubCategoryId
-        JOIN Categories c ON sc.CategoryId = c.CategoryId
-        WHERE m.MaterialId = ?
-    """;
+            SELECT m.*, s.StatusName, sc.SubCategoryName, c.CategoryName, c.CategoryId
+            FROM Materials m
+            JOIN MaterialStatus s ON m.StatusId = s.StatusId
+            JOIN SubCategories sc ON m.SubCategoryId = sc.SubCategoryId
+            JOIN Categories c ON sc.CategoryId = c.CategoryId
+            WHERE m.MaterialId = ?
+        """;
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, id);
@@ -192,6 +205,7 @@ public class MaterialDAO extends DBContext {
                 m.setStatusName(rs.getString("StatusName"));
                 m.setSubCategoryName(rs.getString("SubCategoryName"));
                 m.setCategoryName(rs.getString("CategoryName"));
+                m.setCategoryId(rs.getInt("CategoryId")); // ✅ added
                 return m;
             }
 
@@ -413,6 +427,27 @@ public class MaterialDAO extends DBContext {
             closeResources(rs, ps, conn);
         }
         return exports;
+    }
+
+    public void addCategory(String name) {
+        String sql = "INSERT INTO Categories (CategoryName) VALUES (?)";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, name);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void addSubCategory(int categoryId, String subCategoryName) {
+        String sql = "INSERT INTO SubCategories (SubCategoryName, CategoryId) VALUES (?, ?)";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, subCategoryName);
+            ps.setInt(2, categoryId);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     // Có thể thêm: deleteMaterialById()

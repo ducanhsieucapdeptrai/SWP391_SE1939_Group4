@@ -226,22 +226,32 @@ public class PurchaseOrderDAO extends DBContext {
     }
 
     public boolean updateStatus(int poId, String status, int approvedBy) {
-        String sql = """
+    String sql = """
         UPDATE PurchaseOrderList
         SET Status = ?, ApprovedBy = ?, ApprovedDate = CURRENT_TIMESTAMP
         WHERE POId = ?
     """;
 
-        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, status);
-            ps.setInt(2, approvedBy);
-            ps.setInt(3, poId);
-            return ps.executeUpdate() > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
+    try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setString(1, status);
+        ps.setInt(2, approvedBy);
+        ps.setInt(3, poId);
+        boolean updated = ps.executeUpdate() > 0;
+
+        // ✅ Nếu duyệt thì tạo mới Import Request
+        if (updated && "Approved".equalsIgnoreCase(status)) {
+            PurchaseOrderList po = getPurchaseOrderById(poId);
+            if (po != null) {
+                po.setApprovedBy(approvedBy); // Gán để truyền vào insert
+                createImportRequestFromPO(po);
+            }
         }
-        return false;
+        return updated;
+    } catch (SQLException e) {
+        e.printStackTrace();
     }
+    return false;
+}
 
     public List<PurchaseOrderList> getFilteredPurchaseOrdersPaged(String status, String createdDate, String createdByName, int offset, int pageSize) {
         List<PurchaseOrderList> list = new ArrayList<>();
@@ -348,5 +358,67 @@ public class PurchaseOrderDAO extends DBContext {
 
         return 0;
     }
+
+    public boolean createImportRequestFromPO(PurchaseOrderList po) {
+    String insertRequestSql = """
+        INSERT INTO RequestList (
+            RequestedBy, RequestDate, RequestTypeId, SubTypeId, Note, 
+            Status, ApprovedBy, ApprovedDate
+        )
+        VALUES (?, CURRENT_TIMESTAMP, ?, ?, ?, 'Approved', ?, CURRENT_TIMESTAMP)
+    """;
+
+    String insertDetailSql = """
+        INSERT INTO RequestDetail (RequestId, MaterialId, Quantity, ActualQuantity)
+        VALUES (?, ?, ?, 0)
+    """;
+
+    try (Connection conn = getNewConnection()) {
+        conn.setAutoCommit(false);
+
+        if (po == null || po.getDetails() == null || po.getDetails().isEmpty()) {
+            return false;
+        }
+
+        int requestId = 0;
+        try (PreparedStatement ps = conn.prepareStatement(insertRequestSql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setInt(1, po.getCreatedBy());     // RequestedBy
+            ps.setInt(2, 2);                     // RequestTypeId = 2 (Import)
+            ps.setInt(3, 1);                     // SubTypeId = 1 (New Purchase)
+            ps.setString(4, po.getNote());       // Note
+            ps.setInt(5, po.getApprovedBy());    // ApprovedBy
+
+            ps.executeUpdate();
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                if (rs.next()) {
+                    requestId = rs.getInt(1);
+                }
+            }
+        }
+
+        if (requestId == 0) {
+            conn.rollback();
+            return false;
+        }
+
+        try (PreparedStatement psDetail = conn.prepareStatement(insertDetailSql)) {
+            for (PurchaseOrderDetail d : po.getDetails()) {
+                psDetail.setInt(1, requestId);
+                psDetail.setInt(2, d.getMaterialId());
+                psDetail.setInt(3, d.getQuantity());
+                psDetail.addBatch();
+            }
+            psDetail.executeBatch();
+        }
+
+        conn.commit();
+        return true;
+
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+
+    return false;
+}
 
 }

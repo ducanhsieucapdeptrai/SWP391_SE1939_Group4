@@ -39,9 +39,12 @@
                     <select name="requestType" class="px-3 py-2 border rounded w-48">
                         <option value="">All</option>
                         <c:forEach var="type" items="${requestTypes}">
-                            <option value="${type}" ${type == filterType ? 'selected' : ''}>${type}</option>
+                            <c:if test="${type != 'Import'}">
+                                <option value="${type}" ${type == filterType ? 'selected' : ''}>${type}</option>
+                            </c:if>
                         </c:forEach>
                     </select>
+
                 </div>
 
                 <div>

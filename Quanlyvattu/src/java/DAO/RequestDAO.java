@@ -1025,9 +1025,9 @@ public void updateStatusIfCompleted(Connection conn, int requestId) throws SQLEx
 }
 
 
-    public List<RequestList> getFilteredRequestsByPage(String type, String status, String requestedBy, String requestDate, int offset, int pageSize) {
-        List<RequestList> list = new ArrayList<>();
-        StringBuilder sql = new StringBuilder("""
+ public List<RequestList> getFilteredRequestsByPage(String type, String status, String requestedBy, String requestDate, int offset, int pageSize) {
+    List<RequestList> list = new ArrayList<>();
+    StringBuilder sql = new StringBuilder("""
         SELECT rl.*, 
                u1.FullName AS requestedByName,
                u2.FullName AS approvedByName,
@@ -1040,109 +1040,111 @@ public void updateStatusIfCompleted(Connection conn, int requestId) throws SQLEx
         LEFT JOIN RequestType rt ON rl.RequestTypeId = rt.RequestTypeId
         LEFT JOIN RequestStatus rs ON rl.Status = rs.StatusCode
         LEFT JOIN RequestSubType rst ON rl.SubTypeId = rst.SubTypeId
-        WHERE 1 = 1
+        WHERE rt.RequestTypeName IN ('Export', 'Purchase', 'Repair')
     """);
 
-        if (type != null && !type.isEmpty()) {
-            sql.append(" AND rt.RequestTypeName LIKE ?");
-        }
-        if (status != null && !status.isEmpty()) {
-            sql.append(" AND rl.Status LIKE ?");
-        }
-        if (requestedBy != null && !requestedBy.isEmpty()) {
-            sql.append(" AND u1.FullName LIKE ?");
-        }
-        if (requestDate != null && !requestDate.isEmpty()) {
-            sql.append(" AND DATE(rl.RequestDate) = ?");
-        }
-
-        sql.append(" ORDER BY rl.RequestDate DESC LIMIT ? OFFSET ?");
-
-        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
-            int index = 1;
-            if (type != null && !type.isEmpty()) {
-                ps.setString(index++, type);
-            }
-            if (status != null && !status.isEmpty()) {
-                ps.setString(index++, status);
-            }
-            if (requestedBy != null && !requestedBy.isEmpty()) {
-                ps.setString(index++, "%" + requestedBy + "%");
-            }
-            if (requestDate != null && !requestDate.isEmpty()) {
-                ps.setString(index++, requestDate);
-            }
-            ps.setInt(index++, pageSize);
-            ps.setInt(index, offset);
-
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                RequestList r = new RequestList();
-                r.setRequestId(rs.getInt("RequestId"));
-                r.setRequestDate(rs.getTimestamp("RequestDate"));
-                r.setRequestedByName(rs.getString("requestedByName"));
-                r.setApprovedByName(rs.getString("approvedByName"));
-                r.setNote(rs.getString("Note"));
-                r.setApprovalNote(rs.getString("ApprovalNote"));
-                r.setStatus(rs.getString("Status"));
-                r.setRequestTypeName(rs.getString("RequestTypeName"));
-                r.setStatusDescription(rs.getString("statusDescription"));
-                r.setSubTypeName(rs.getString("SubTypeName")); // <- thay thế cho export/import type
-                list.add(r);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return list;
+    if (type != null && !type.isEmpty()) {
+        sql.append(" AND rt.RequestTypeName LIKE ?");
+    }
+    if (status != null && !status.isEmpty()) {
+        sql.append(" AND rl.Status LIKE ?");
+    }
+    if (requestedBy != null && !requestedBy.isEmpty()) {
+        sql.append(" AND u1.FullName LIKE ?");
+    }
+    if (requestDate != null && !requestDate.isEmpty()) {
+        sql.append(" AND DATE(rl.RequestDate) = ?");
     }
 
+    sql.append(" ORDER BY rl.RequestDate DESC LIMIT ? OFFSET ?");
+
+    try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        int index = 1;
+        if (type != null && !type.isEmpty()) {
+            ps.setString(index++, type);
+        }
+        if (status != null && !status.isEmpty()) {
+            ps.setString(index++, status);
+        }
+        if (requestedBy != null && !requestedBy.isEmpty()) {
+            ps.setString(index++, "%" + requestedBy + "%");
+        }
+        if (requestDate != null && !requestDate.isEmpty()) {
+            ps.setString(index++, requestDate);
+        }
+        ps.setInt(index++, pageSize);
+        ps.setInt(index, offset);
+
+        ResultSet rs = ps.executeQuery();
+        while (rs.next()) {
+            RequestList r = new RequestList();
+            r.setRequestId(rs.getInt("RequestId"));
+            r.setRequestDate(rs.getTimestamp("RequestDate"));
+            r.setRequestedByName(rs.getString("requestedByName"));
+            r.setApprovedByName(rs.getString("approvedByName"));
+            r.setNote(rs.getString("Note"));
+            r.setApprovalNote(rs.getString("ApprovalNote"));
+            r.setStatus(rs.getString("Status"));
+            r.setRequestTypeName(rs.getString("RequestTypeName"));
+            r.setStatusDescription(rs.getString("statusDescription"));
+            r.setSubTypeName(rs.getString("SubTypeName"));
+            list.add(r);
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+    return list;
+}
+
+
     public int countFilteredRequests(String type, String status, String requestedBy, String requestDate) {
-        int count = 0;
-        StringBuilder sql = new StringBuilder("""
+    int count = 0;
+    StringBuilder sql = new StringBuilder("""
         SELECT COUNT(*) 
         FROM RequestList rl
         LEFT JOIN Users u1 ON rl.RequestedBy = u1.UserId
         LEFT JOIN RequestType rt ON rl.RequestTypeId = rt.RequestTypeId
-        WHERE 1 = 1
+        WHERE rt.RequestTypeName IN ('Export', 'Purchase', 'Repair')
     """);
 
+    if (type != null && !type.isEmpty()) {
+        sql.append(" AND rt.RequestTypeName LIKE ?");
+    }
+    if (status != null && !status.isEmpty()) {
+        sql.append(" AND rl.Status LIKE ?");
+    }
+    if (requestedBy != null && !requestedBy.isEmpty()) {
+        sql.append(" AND u1.FullName LIKE ?");
+    }
+    if (requestDate != null && !requestDate.isEmpty()) {
+        sql.append(" AND DATE(rl.RequestDate) = ?");
+    }
+
+    try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        int index = 1;
         if (type != null && !type.isEmpty()) {
-            sql.append(" AND rt.RequestTypeName LIKE ?");
+            ps.setString(index++, type);
         }
         if (status != null && !status.isEmpty()) {
-            sql.append(" AND rl.Status LIKE ?");
+            ps.setString(index++, status);
         }
         if (requestedBy != null && !requestedBy.isEmpty()) {
-            sql.append(" AND u1.FullName LIKE ?");
+            ps.setString(index++, "%" + requestedBy + "%");
         }
         if (requestDate != null && !requestDate.isEmpty()) {
-            sql.append(" AND DATE(rl.RequestDate) = ?");
+            ps.setString(index++, requestDate);
         }
 
-        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
-            int index = 1;
-            if (type != null && !type.isEmpty()) {
-                ps.setString(index++, type);
-            }
-            if (status != null && !status.isEmpty()) {
-                ps.setString(index++, status);
-            }
-            if (requestedBy != null && !requestedBy.isEmpty()) {
-                ps.setString(index++, "%" + requestedBy + "%");
-            }
-            if (requestDate != null && !requestDate.isEmpty()) {
-                ps.setString(index++, requestDate);
-            }
-
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                count = rs.getInt(1);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        ResultSet rs = ps.executeQuery();
+        if (rs.next()) {
+            count = rs.getInt(1);
         }
-        return count;
+    } catch (Exception e) {
+        e.printStackTrace();
     }
+    return count;
+}
+
 public List<RequestList> getCompletedRequests() throws SQLException {
         List<RequestList> list = new ArrayList<>();
         String sql = """
