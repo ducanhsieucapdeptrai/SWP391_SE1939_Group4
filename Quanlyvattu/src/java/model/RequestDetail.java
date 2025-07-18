@@ -26,7 +26,11 @@ public class RequestDetail {
         this.materialId = materialId;
         this.quantity = quantity;
     }
-
+public RequestDetail(int materialId, int quantity, String materialName) {
+        this.materialId = materialId;
+        this.quantity = quantity;
+        this.materialName = materialName;
+    }
     
     public RequestDetail(int requestId, int materialId, int quantity, String materialName, 
                         double price, String image, String description, String subCategoryName, 
@@ -42,7 +46,10 @@ public class RequestDetail {
         this.categoryName = categoryName;
     }
 
-   
+   public RequestDetail(int materialId, int quantity) {
+        this.materialId = materialId;
+        this.quantity = quantity;
+    }
     public int getRequestId() {
         return requestId;
     }
