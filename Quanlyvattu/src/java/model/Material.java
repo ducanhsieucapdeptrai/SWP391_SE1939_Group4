@@ -22,6 +22,7 @@ public class Material {
     private Timestamp exportDate;
     private int importQuantity;
     private int exportQuantity;
+     private int categoryId;
 
     public Material(int materialId, String materialName, int subCategoryId, int statusId, String image, String description, int quantity, int minQuantity, double price, Timestamp createdAt, Timestamp updatedAt, String categoryName, String subCategoryName, String statusName) {
         this.materialId = materialId;
@@ -39,7 +40,22 @@ public class Material {
         this.subCategoryName = subCategoryName;
         this.statusName = statusName;
     }
+ public Material(int materialId, int subCategoryId, String materialName, int quantity, int minQuantity) {
+        this.materialId = materialId;
+        this.materialName = materialName;
+        this.subCategoryId = subCategoryId;
+        this.quantity = quantity;
+        this.minQuantity = minQuantity;
+    }
 
+    public Material(int materialId, int subCategoryId, String materialName, int quantity) {
+        this.materialId = materialId;
+        this.materialName = materialName;
+        this.subCategoryId = subCategoryId;
+        this.quantity = quantity;
+    }
+
+    
     public Material() {
     }
     
@@ -186,6 +202,14 @@ public class Material {
 
     public void setStatusName(String statusName) {
         this.statusName = statusName;
+    }
+    
+    public int getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(int categoryId) {
+        this.categoryId = categoryId;
     }
     // Alias methods for JSP compatibility
     public Timestamp getCreatedDate() {
