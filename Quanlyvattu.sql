@@ -99,7 +99,7 @@ CREATE TABLE RequestList (
     RequestedBy INT,
     RequestDate DATETIME DEFAULT CURRENT_TIMESTAMP,
     RequestTypeId INT,
-    SubTypeId INT,  -- Liên kết đến RequestSubType
+    SubTypeId INT NULL,  -- Liên kết đến RequestSubType
     Note TEXT,
     Status VARCHAR(20) DEFAULT 'Pending',
     ApprovedBy INT,
@@ -203,7 +203,6 @@ CREATE TABLE RepairOrderList (
     RequestId INT NOT NULL,
     CreatedBy INT NOT NULL,
     CreatedDate DATETIME DEFAULT CURRENT_TIMESTAMP,
-    TotalPrice DOUBLE,
      Status VARCHAR(20) DEFAULT 'Pending',
       ApprovedBy INT,
     ApprovedDate DATETIME,
@@ -221,12 +220,11 @@ CREATE TABLE RepairOrderDetail (
     MaterialId INT,
     Quantity INT,
     UnitPrice DOUBLE,
-	Total DOUBLE,	
+    MNote TEXT,
 	PRIMARY KEY (ROId, MaterialId),
     FOREIGN KEY (ROId) REFERENCES RepairOrderList(ROId),
     FOREIGN KEY (MaterialId) REFERENCES Materials(MaterialId)
 );
-
 
 
 
@@ -266,6 +264,30 @@ CREATE TABLE PasswordResetRequest (
 
 
 
+
+
+
+
+
+
+
+
+
+
+SELECT rl.RequestId, rt.RequestTypeName, rst.SubTypeName, rl.Status, rl.IsTransferredToday, rl.Note
+FROM RequestList rl
+JOIN RequestType rt ON rl.RequestTypeId = rt.RequestTypeId
+LEFT JOIN RequestSubType rst ON rl.SubTypeId = rst.SubTypeId
+WHERE rl.Note = ''
+ORDER BY rl.RequestId DESC;
+
+
+SELECT rl.RequestId, rt.RequestTypeName, rst.SubTypeName, rl.Status, rl.IsTransferredToday, rl.Note
+FROM RequestList rl
+JOIN RequestType rt ON rl.RequestTypeId = rt.RequestTypeId
+LEFT JOIN RequestSubType rst ON rl.SubTypeId = rst.SubTypeId
+WHERE rt.RequestTypeName = 'Export'
+ORDER BY rl.RequestId DESC;
 
 INSERT INTO Roles (RoleId, RoleName)
 VALUES 
@@ -581,23 +603,24 @@ VALUES
 
 -- Subtypes for Export (RequestTypeId = 1)
 INSERT INTO RequestSubType (RequestTypeId, SubTypeName) VALUES
-(1, 'For Construction'),
-(1, 'For Equipment Repair');
+(1, 'For Construction'),         -- 1
+
+(1, 'For Equipment Repair');	-- 2
 
 
 -- Subtypes for Import (RequestTypeId = 2)
 INSERT INTO RequestSubType (RequestTypeId, SubTypeName) VALUES
-(2, 'New Purchase'),
-(2, 'Returned from Repair'),
-(2, 'Returned from Usage');
-SELECT RequestId, RequestTypeId, SubTypeId, Status, Note, RequestDate
+(2, 'New Purchase'),	-- 3
+(2, 'Returned from Repair'),-- 4
+(2, 'Returned from Usage');-- 5
+
+SELECT RequestId, RequestTypeId, SubTypeId, Note, Status, RequestDate
 FROM RequestList
-ORDER BY RequestId DESC
-LIMIT 5;
-
-
-
-
+WHERE SubTypeId IN (
+    SELECT SubTypeId FROM RequestSubType
+    WHERE SubTypeName = 'For Equipment Repair'
+)
+ORDER BY RequestId DESC;
 
 
 -- ========================================
@@ -778,5 +801,8 @@ UPDATE Users SET DateOfBirth = '1987-05-05', Gender = 'Nam', Address = 'Kiên Gi
 UPDATE Users SET DateOfBirth = '1990-11-11', Gender = 'Nữ', Address = 'Bình Phước'     WHERE UserId = 20;  -- Mai Thị Q
 UPDATE Users SET DateOfBirth = '1988-06-06', Gender = 'Nam', Address = 'Đắc Lắk'       WHERE UserId = 21;  -- Lương Văn R
 
+SELECT IS_NULLABLE 
+FROM INFORMATION_SCHEMA.COLUMNS 
+WHERE TABLE_NAME = 'RequestList' AND COLUMN_NAME = 'SubTypeId';
 
 

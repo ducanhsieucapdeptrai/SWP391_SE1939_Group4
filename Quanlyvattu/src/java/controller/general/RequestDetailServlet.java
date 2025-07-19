@@ -3,14 +3,17 @@ package controller.general;
 import DAO.RequestDetailDAO;
 import DAO.MaterialDAO;
 import DAO.RequestDAO;
+import DAO.RepairOrderDAO;
 import model.Material;
 import model.RequestDetail;
 import model.RequestList;
+import model.RepairOrderDetail;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.annotation.WebServlet;
+
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -33,21 +36,12 @@ public class RequestDetailServlet extends HttpServlet {
                 return;
             }
 
-            int requestId;
-            try {
-                requestId = Integer.parseInt(idParam.trim());
-                if (requestId <= 0) {
-                    throw new NumberFormatException("ID must be positive");
-                }
-            } catch (NumberFormatException e) {
-                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid request ID format: " + idParam);
-                return;
-            }
+            int requestId = Integer.parseInt(idParam.trim());
 
             // Lấy thông tin request
             RequestDAO requestDAO = new RequestDAO();
             RequestList requestInfo = requestDAO.getRequestById(requestId);
-            
+
             // Lấy chi tiết materials
             RequestDetailDAO dao = new RequestDetailDAO();
             List<RequestDetail> details = dao.getRequestDetailsByRequestId(requestId);
@@ -92,17 +86,7 @@ public class RequestDetailServlet extends HttpServlet {
                 return;
             }
 
-            int requestId;
-            try {
-                requestId = Integer.parseInt(requestIdParam.trim());
-                if (requestId <= 0) {
-                    throw new NumberFormatException("ID must be positive");
-                }
-            } catch (NumberFormatException e) {
-                request.setAttribute("errorMessage", "Invalid request ID format");
-                doGet(request, response);
-                return;
-            }
+            int requestId = Integer.parseInt(requestIdParam.trim());
 
             if ("approve".equals(action)) {
                 handleApprove(request, response, requestId);
@@ -121,7 +105,7 @@ public class RequestDetailServlet extends HttpServlet {
         }
     }
 
-    private void handleApprove(HttpServletRequest request, HttpServletResponse response, int requestId)
+    protected void handleApprove(HttpServletRequest request, HttpServletResponse response, int requestId)
             throws ServletException, IOException {
 
         String note = request.getParameter("note");
@@ -130,9 +114,26 @@ public class RequestDetailServlet extends HttpServlet {
         }
 
         try {
-            boolean success = updateRequestStatus(requestId, "APPROVED", note);
+            boolean success = updateRequestStatus(requestId, "Approved", note);
 
             if (success) {
+                RequestDAO requestDAO = new RequestDAO();
+                RequestList req = requestDAO.getRequestById(requestId);
+
+                // ✅ Nếu là loại Repair, tạo Repair Order (không đổi status Request)
+                if (req.getRequestTypeId() == 4) {
+                    RepairOrderDAO roDAO = new RepairOrderDAO();
+                    List<RepairOrderDetail> details = roDAO.getRepairPreviewByRequest(requestId);
+
+                    int roId = roDAO.insertRepairOrderWithStatus(requestId, req.getRequestedBy(), note, "Pending");
+
+                    for (RepairOrderDetail d : details) {
+                        roDAO.insertRepairDetail(roId, d);
+                    }
+
+                    System.out.println("✅ Repair Order #" + roId + " created from Request #" + requestId);
+                }
+
                 request.setAttribute("successMessage", "Request has been approved successfully!");
             } else {
                 request.setAttribute("errorMessage", "Failed to approve request. Please try again.");
@@ -151,7 +152,6 @@ public class RequestDetailServlet extends HttpServlet {
             throws ServletException, IOException {
 
         String reason = request.getParameter("reason");
-
         if (reason == null || reason.trim().isEmpty()) {
             request.setAttribute("errorMessage", "Reason for rejection is required");
             doGet(request, response);
@@ -180,7 +180,6 @@ public class RequestDetailServlet extends HttpServlet {
         String sql = "UPDATE Requests SET Status = ?, Note = ?, UpdatedDate = GETDATE() WHERE RequestId = ?";
 
         try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-
             ps.setString(1, status);
             ps.setString(2, note);
             ps.setInt(3, requestId);

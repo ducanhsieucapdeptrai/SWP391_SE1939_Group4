@@ -20,6 +20,7 @@ import dal.DBContext;
 
 @WebServlet("/taskUpdate")
 public class TaskUpdateServlet extends HttpServlet {
+
     private final RequestDAO requestDAO = new RequestDAO();
     private final TaskLogDAO taskLogDAO = new TaskLogDAO();
 
@@ -137,7 +138,7 @@ public class TaskUpdateServlet extends HttpServlet {
     }
 
     private void handleCreateSlip(HttpServletRequest request, HttpServletResponse response,
-                                  int requestId, Users user) throws IOException {
+            int requestId, Users user) throws IOException {
 
         HttpSession session = request.getSession();
 
@@ -217,17 +218,17 @@ public class TaskUpdateServlet extends HttpServlet {
 
                 if (success) {
                     success = taskLogDAO.insertTaskLogWithDetails(
-                        conn,
-                        requestId,
-                        requestTypeId,
-                        user.getUserId(),
-                        materialIds,
-                        actualQuantities
+                            conn,
+                            requestId,
+                            requestTypeId,
+                            user.getUserId(),
+                            materialIds,
+                            actualQuantities
                     );
                 }
 
                 if (success) {
-                    requestDAO.updateStatusIfCompleted(conn, requestId);
+                    requestDAO.updateStatusIfCompleted(conn, requestId, user.getUserId());
                 }
 
                 if (success) {
@@ -251,8 +252,8 @@ public class TaskUpdateServlet extends HttpServlet {
     }
 
     private boolean updateStockAndQuantities(Connection conn, int requestId,
-                                             List<Integer> materialIds, List<Integer> quantities,
-                                             String requestType) throws SQLException {
+            List<Integer> materialIds, List<Integer> quantities,
+            String requestType) throws SQLException {
 
         String updateDetailSql = "UPDATE RequestDetail SET ActualQuantity = ActualQuantity + ? WHERE RequestId = ? AND MaterialId = ?";
         try (var detailStmt = conn.prepareStatement(updateDetailSql)) {
@@ -283,7 +284,9 @@ public class TaskUpdateServlet extends HttpServlet {
             }
             int[] results = stockStmt.executeBatch();
             for (int result : results) {
-                if (result <= 0) return false;
+                if (result <= 0) {
+                    return false;
+                }
             }
         }
 
@@ -291,7 +294,7 @@ public class TaskUpdateServlet extends HttpServlet {
     }
 
     private void handleSignSlip(HttpServletRequest request, HttpServletResponse response,
-                                int requestId, Users user) throws ServletException, IOException {
+            int requestId, Users user) throws ServletException, IOException {
         try (Connection conn = new DBContext().getConnection()) {
             List<RequestDetailItem> items = requestDAO.getRequestDetails(requestId);
             TaskLog latestTaskLog = taskLogDAO.getLatestTaskLogByRequestId(conn, requestId);

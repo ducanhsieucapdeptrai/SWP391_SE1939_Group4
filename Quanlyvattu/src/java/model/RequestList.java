@@ -1,16 +1,8 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package model;
 
 import java.util.Date;
 import java.util.List;
 
-/**
- *
- * @author anhdu
- */
 public class RequestList {
 
     private int requestId;
@@ -22,28 +14,38 @@ public class RequestList {
     private int approvedBy;
     private Date approvedDate;
     private String approvalNote;
-    private int assignedStaffId;           // ✅ Thêm trường này
+
+    private int assignedStaffId;
     private String assignedStaffName;
+
+    private String requestedByName;
+    private String approvedByName;
+    private String requestTypeName;
+    private String statusDescription;
+
     private RequestType requestType;
+    private List<RequestDetail> requestDetails;
 
-    private String requestedByName;     // Tuỳ chọn: dùng để hiển thị tên người gửi
-    private String approvedByName;      // Tuỳ chọn: dùng để hiển thị tên người duyệt
-    private String requestTypeName;     // Tuỳ chọn: để hiển thị tên loại yêu cầu
-    private String statusDescription;   // Tuỳ chọn: mô tả trạng thái từ RequestStatus
-
-    private List<RequestDetail> requestDetails; // Tuỳ chọn: dùng nếu cần load chi tiết đi kèm
     private String subTypeName;
-
     private Date arrivalDate;
     private boolean isUpdated;
     private boolean isCompleted;
     private boolean isTransferredToday;
-// getters & setters
+
+    // ✅ Purchase Order-related fields
+    private boolean hasPO;
+    private int poCount;
+    private String poStatus;
+
+    // 🔧 Repair Order-related fields
+    private boolean hasRO;
+    private int roCount;
+    private String roStatus;
 
     public RequestList() {
     }
 
-    public RequestList(int requestId, int requestedBy, Date requestDate, int requestTypeId, String note, String status, int approvedBy, Date approvedDate, String approvalNote, int assignedStaffId, String assignedStaffName, RequestType requestType, String requestedByName, String approvedByName, String requestTypeName, String statusDescription, List<RequestDetail> requestDetails, String subTypeName, Date arrivalDate, boolean isUpdated, boolean isCompleted, boolean isTransferredToday, boolean hasPO, int poCount, String poStatus) {
+    public RequestList(int requestId, int requestedBy, Date requestDate, int requestTypeId, String note, String status, int approvedBy, Date approvedDate, String approvalNote, int assignedStaffId, String assignedStaffName, String requestedByName, String approvedByName, String requestTypeName, String statusDescription, RequestType requestType, List<RequestDetail> requestDetails, String subTypeName, Date arrivalDate, boolean isUpdated, boolean isCompleted, boolean isTransferredToday, boolean hasPO, int poCount, String poStatus, boolean hasRO, int roCount, String roStatus) {
         this.requestId = requestId;
         this.requestedBy = requestedBy;
         this.requestDate = requestDate;
@@ -55,11 +57,11 @@ public class RequestList {
         this.approvalNote = approvalNote;
         this.assignedStaffId = assignedStaffId;
         this.assignedStaffName = assignedStaffName;
-        this.requestType = requestType;
         this.requestedByName = requestedByName;
         this.approvedByName = approvedByName;
         this.requestTypeName = requestTypeName;
         this.statusDescription = statusDescription;
+        this.requestType = requestType;
         this.requestDetails = requestDetails;
         this.subTypeName = subTypeName;
         this.arrivalDate = arrivalDate;
@@ -69,67 +71,38 @@ public class RequestList {
         this.hasPO = hasPO;
         this.poCount = poCount;
         this.poStatus = poStatus;
+        this.hasRO = hasRO;
+        this.roCount = roCount;
+        this.roStatus = roStatus;
     }
 
-    public String getSubTypeName() {
-        return subTypeName;
+    public boolean isHasRO() {
+        return hasRO;
     }
 
-    public void setSubTypeName(String subTypeName) {
-        this.subTypeName = subTypeName;
+    public void setHasRO(boolean hasRO) {
+        this.hasRO = hasRO;
+    }
+
+    public int getRoCount() {
+        return roCount;
+    }
+
+    public void setRoCount(int roCount) {
+        this.roCount = roCount;
+    }
+
+    public String getRoStatus() {
+        return roStatus;
+    }
+
+    public void setRoStatus(String roStatus) {
+        this.roStatus = roStatus;
     }
 
    
 
-    public boolean isIsCompleted() {
-        return isCompleted;
-    }
-
-    public void setIsCompleted(boolean isCompleted) {
-        this.isCompleted = isCompleted;
-    }
-
-    public Date getArrivalDate() {
-        return arrivalDate;
-    }
-
-    public void setArrivalDate(Date arrivalDate) {
-        this.arrivalDate = arrivalDate;
-    }
-
-    public boolean isIsUpdated() {
-        return isUpdated;
-    }
-
-    public void setIsUpdated(boolean isUpdated) {
-        this.isUpdated = isUpdated;
-    }
-
-    public RequestType getRequestType() {
-        return requestType;
-    }
-
-    public void setRequestType(RequestType requestType) {
-        this.requestType = requestType;
-    }
-
-    public int getAssignedStaffId() {
-        return assignedStaffId;
-    }
-
-    public void setAssignedStaffId(int assignedStaffId) {
-        this.assignedStaffId = assignedStaffId;
-    }
-
-    public String getAssignedStaffName() {
-        return assignedStaffName;
-    }
-
-    public void setAssignedStaffName(String assignedStaffName) {
-        this.assignedStaffName = assignedStaffName;
-    }
-
-  
+    // ==== GETTERS & SETTERS ====
     public int getRequestId() {
         return requestId;
     }
@@ -202,6 +175,22 @@ public class RequestList {
         this.approvalNote = approvalNote;
     }
 
+    public int getAssignedStaffId() {
+        return assignedStaffId;
+    }
+
+    public void setAssignedStaffId(int assignedStaffId) {
+        this.assignedStaffId = assignedStaffId;
+    }
+
+    public String getAssignedStaffName() {
+        return assignedStaffName;
+    }
+
+    public void setAssignedStaffName(String assignedStaffName) {
+        this.assignedStaffName = assignedStaffName;
+    }
+
     public String getRequestedByName() {
         return requestedByName;
     }
@@ -234,6 +223,14 @@ public class RequestList {
         this.statusDescription = statusDescription;
     }
 
+    public RequestType getRequestType() {
+        return requestType;
+    }
+
+    public void setRequestType(RequestType requestType) {
+        this.requestType = requestType;
+    }
+
     public List<RequestDetail> getRequestDetails() {
         return requestDetails;
     }
@@ -242,34 +239,36 @@ public class RequestList {
         this.requestDetails = requestDetails;
     }
 
-    private boolean hasPO;
-
-    public boolean isHasPO() {
-        return hasPO;
+    public String getSubTypeName() {
+        return subTypeName;
     }
 
-    public void setHasPO(boolean hasPO) {
-        this.hasPO = hasPO;
+    public void setSubTypeName(String subTypeName) {
+        this.subTypeName = subTypeName;
     }
 
-    private int poCount;
-
-    public int getPoCount() {
-        return poCount;
+    public Date getArrivalDate() {
+        return arrivalDate;
     }
 
-    public void setPoCount(int poCount) {
-        this.poCount = poCount;
+    public void setArrivalDate(Date arrivalDate) {
+        this.arrivalDate = arrivalDate;
     }
 
-    private String poStatus;
-
-    public String getPoStatus() {
-        return poStatus;
+    public boolean isIsUpdated() {
+        return isUpdated;
     }
 
-    public void setPoStatus(String poStatus) {
-        this.poStatus = poStatus;
+    public void setIsUpdated(boolean isUpdated) {
+        this.isUpdated = isUpdated;
+    }
+
+    public boolean isIsCompleted() {
+        return isCompleted;
+    }
+
+    public void setIsCompleted(boolean isCompleted) {
+        this.isCompleted = isCompleted;
     }
 
     public boolean isIsTransferredToday() {
@@ -280,4 +279,27 @@ public class RequestList {
         this.isTransferredToday = isTransferredToday;
     }
 
+    public boolean isHasPO() {
+        return hasPO;
+    }
+
+    public void setHasPO(boolean hasPO) {
+        this.hasPO = hasPO;
+    }
+
+    public int getPoCount() {
+        return poCount;
+    }
+
+    public void setPoCount(int poCount) {
+        this.poCount = poCount;
+    }
+
+    public String getPoStatus() {
+        return poStatus;
+    }
+
+    public void setPoStatus(String poStatus) {
+        this.poStatus = poStatus;
+    }
 }

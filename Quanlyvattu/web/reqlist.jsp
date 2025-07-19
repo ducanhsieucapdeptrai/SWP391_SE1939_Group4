@@ -77,6 +77,10 @@
                 <a href="${pageContext.request.contextPath}/createrequest" class="inline-block px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors">
                     + Create Request
                 </a>
+                    
+                <a href="${pageContext.request.contextPath}/create-repair-request" class="inline-block px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors">
+                    + Create Repair Request
+                </a>
 
                 <c:choose>
                     <c:when test="${filterType == 'Purchase'}">
