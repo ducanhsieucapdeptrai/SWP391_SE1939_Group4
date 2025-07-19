@@ -13,33 +13,51 @@
     </script>
 </c:if>
 
-<div class="max-w-3xl mx-auto bg-white p-8 rounded shadow mt-6">
-    <h2 class="text-xl font-bold mb-4 text-blue-600">➕ Add Category</h2>
-    <form action="add-category" method="post" class="mb-8 flex gap-4">
-        <input type="hidden" name="action" value="category" />
-        <input type="text" name="categoryName" placeholder="Enter category name"
-               class="border px-4 py-2 flex-1 rounded" required />
-        <button type="submit"
-                class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Add</button>
-    </form>
+<div class="max-w-3xl mx-auto bg-white p-8 rounded shadow mt-6 space-y-10">
 
-    <h2 class="text-xl font-bold mb-4 text-green-600">➕ Add SubCategory</h2>
-    <form action="add-category" method="post" class="space-y-4">
-        <input type="hidden" name="action" value="subcategory" />
-        <label class="block font-semibold">Parent Category</label>
-        <select name="parentCategoryId" class="border px-4 py-2 w-full rounded" required>
-            <option value="">-- Select Category --</option>
-            <c:forEach var="cat" items="${categories}">
-                <option value="${cat.categoryId}">${cat.categoryName}</option>
-            </c:forEach>
-        </select>
+    <!-- Add Category Form -->
+    <div>
+        <h2 class="text-xl font-bold mb-4 text-blue-600">➕ Add Category</h2>
+        <form action="add-category" method="post" class="space-y-4">
+            <input type="hidden" name="action" value="category" />
+            <div>
+                <label class="block mb-1 text-sm font-medium text-gray-700">Category Name</label>
+                <input type="text" name="categoryName" placeholder="Enter category name"
+                       class="border px-4 py-2 w-full rounded focus:outline-none focus:ring focus:border-blue-300" required />
+            </div>
+            <button type="submit"
+                    class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded shadow">
+                Add Category
+            </button>
+        </form>
+    </div>
 
-        <input type="text" name="subCategoryName" placeholder="Subcategory name"
-               class="border px-4 py-2 w-full rounded" required />
+    <!-- Add SubCategory Form -->
+    <div>
+        <h2 class="text-xl font-bold mb-4 text-green-600">➕ Add SubCategory</h2>
+        <form action="add-category" method="post" class="space-y-4">
+            <input type="hidden" name="action" value="subcategory" />
 
-        <button type="submit"
-                class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">
-            Add SubCategory
-        </button>
-    </form>
+            <div>
+                <label class="block mb-1 text-sm font-medium text-gray-700">Parent Category</label>
+                <select name="parentCategoryId" class="border px-4 py-2 w-full rounded focus:outline-none focus:ring focus:border-green-300" required>
+                    <option value="">-- Select Category --</option>
+                    <c:forEach var="cat" items="${categories}">
+                        <option value="${cat.categoryId}">${cat.categoryName}</option>
+                    </c:forEach>
+                </select>
+            </div>
+
+            <div>
+                <label class="block mb-1 text-sm font-medium text-gray-700">SubCategory Name</label>
+                <input type="text" name="subCategoryName" placeholder="Enter subcategory name"
+                       class="border px-4 py-2 w-full rounded focus:outline-none focus:ring focus:border-green-300" required />
+            </div>
+
+            <button type="submit"
+                    class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded shadow">
+                Add SubCategory
+            </button>
+        </form>
+    </div>
 </div>
