@@ -111,39 +111,99 @@
 <body>
  
 
-  <c:if test="${not empty error}">
-    <div class="message error">${error}</div>
-  </c:if>
-  <c:if test="${not empty message}">
-    <div class="message success">${message}</div>
-  </c:if>
-    
-    <div class="border border-gray-200 rounded-lg shadow-sm bg-white p-6">
-        
-        
-  <form id="frmRequest" action="createrequest" method="post">
-    <!-- Request Type & SubType -->
-    <div class="form-group" style="display: flex; gap: 20px; margin-bottom: 20px;">
-      <div>
-        <label style="display: block; margin-bottom: 5px;">Request Type:</label>
-        <select id="typeId" name="typeId" required style="width: 200px;">
-          <option class="text-center" value="">--Select Type--</option>
-          <c:forEach var="t" items="${types}">
-              <c:if test="${t.requestTypeId!=2&&t.requestTypeId!=4}">
-            <option value="${t.requestTypeId}">${t.requestTypeName}</option>
-              </c:if>
-          </c:forEach>
-        </select>
-      </div>
-      <div>
-        <label style="display: block; margin-bottom: 5px;">SubType:</label>
-        <select id="subTypeId" name="subTypeId" required style="width: 200px;">
-          <option class="text-center" value="">--Select--</option>
-        </select>
-      </div>
-        <div class="ml-auto">
-            
-        <a href="${pageContext.request.contextPath}/replit" style="text-decoration: none; color: black; ">&lt; Back</a>
+                <!-- Form -->
+                <form method="post" action="createrequest" class="space-y-6">
+                    <!-- Request Type -->
+                    <div>
+                        <label class="block font-medium mb-1">Request Type <span class="text-red-500">*</span></label>
+                        <select name="requestTypeId" required class="w-full border border-gray-300 rounded p-2" onchange="toggleStockCheck()">
+                            <option value="">-- Select a type --</option>
+                            <c:forEach var="type" items="${requestTypes}">
+                                 <c:if test="${type.requestTypeId != 2}">
+                                    <option value="${type.requestTypeId}">${type.requestTypeName}</option>
+                                </c:if>
+                            </c:forEach>
+                        </select>
+                    </div>
+                    <!-- Project -->
+                    <div>
+                        <label class="block font-medium mb-1">Project</label>
+                        <select name="projectId" class="w-full border border-gray-300 rounded p-2">
+                            <option value="">-- None --</option>
+                            <c:forEach var="p" items="${projects}">
+                                <option value="${p.projectId}">${p.projectName}</option>
+                            </c:forEach>
+                        </select>
+                    </div>
+                    <!-- Category & SubCategory Filters -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block font-medium mb-1">Category</label>
+                            <select id="categoryFilter" class="w-full border border-gray-300 rounded p-2">
+                                <option value="">All Categories</option>
+                                <c:forEach var="cat" items="${categories}">
+                                    <option value="${cat.categoryId}">${cat.categoryName}</option>
+                                </c:forEach>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-medium mb-1">Sub‑Category</label>
+                            <select id="subCategoryFilter" class="w-full border border-gray-300 rounded p-2">
+                                <option value="">All Sub‑Categories</option>
+                                <c:forEach var="sc" items="${subCategories}">
+                                    <option value="${sc.subCategoryId}" data-cat="${sc.categoryId}">
+                                        ${sc.subCategoryName}
+                                    </option>
+                                </c:forEach>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Material List -->
+                    <div id="materialList" class="space-y-4">
+                        <div class="material-item grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+                            <div class="md:col-span-6">
+                                <label class="block font-medium mb-1">Material <span class="text-red-500">*</span></label>
+                                <select name="materialId" class="form-select w-full border border-gray-300 rounded p-2" required>
+                                    <option value="">-- Select material --</option>
+                                    <c:forEach var="m" items="${materials}">
+                                        <option value="${m.materialId}"
+                                                data-sub="${m.subCategoryId}"
+                                                data-stock="${m.quantity}">
+                                            ${m.materialName} (In stock: ${m.quantity})
+                                        </option>
+                                    </c:forEach>
+                                </select>
+                            </div>
+                            <div class="md:col-span-4">
+                                <label class="block font-medium mb-1">Quantity</label>
+                                <input type="number" name="quantity" class="w-full border border-gray-300 rounded p-2 quantity-input" min="1" required placeholder="Enter quantity" oninput="validateQuantity(this)">
+                                <small class="text-gray-500 stock-info"></small>
+                            </div>
+                            <div class="md:col-span-2">
+                                <button type="button" class="remove-material hidden text-white bg-red-500 hover:bg-red-600 rounded px-3 py-2 text-sm w-full">Remove</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Add Material Button -->
+                    <button type="button" onclick="addMaterial()" class="bg-gray-200 text-gray-800 hover:bg-gray-300 rounded px-4 py-2 text-sm">
+                        + Add another material
+                    </button>
+
+                    <!-- Note -->
+                    <div>
+                        <label class="block font-medium mb-1 mt-3">Note (optional)</label>
+                        <textarea name="note" rows="3" class="w-full border border-gray-300 rounded p-2" placeholder="Reason for request..."></textarea>
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="flex justify-between items-center mt-4">
+                        <a href="javascript:history.back()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded">Back</a>
+                        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded" onclick="return validateForm()">Submit Request</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
