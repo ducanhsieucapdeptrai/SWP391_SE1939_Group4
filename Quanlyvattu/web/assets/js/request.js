@@ -1,14 +1,19 @@
-document.addEventListener('DOMContentLoaded', function() {
+$(document).ready(function() {
+    console.log('Request.js loaded and DOM ready');
+    
+    // Initialize form to clean state
+    initializeForm();
+    
     // Event handlers for dropdowns
-    document.getElementById('typeId').addEventListener('change', loadSubTypes);
-    document.getElementById('catId').addEventListener('change', loadSubCategories);
-    document.getElementById('subCatId').addEventListener('change', loadMaterials);
-    document.getElementById('materialId').addEventListener('change', updateStockInfo);
-    document.getElementById('btnAdd').addEventListener('click', addMaterial);
-    document.getElementById('btnFilter').addEventListener('click', resetFilter);
+    $('#typeId').on('change', loadSubTypes);
+    $('#catId').on('change', loadSubCategories);
+    $('#subCatId').on('change', loadMaterials);
+    $('#materialId').on('change', updateStockInfo);
+    $('#btnAdd').on('click', addMaterial);
+    $('#btnFilter').on('click', resetFilter);
 
     // Form submit handler with validation
-    document.getElementById('frmRequest').addEventListener('submit', function(e) {
+    $('#frmRequest').on('submit', function(e) {
         console.log('Form submission started');
         
         // Debug: Check materials data before submission
@@ -32,6 +37,30 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+// Initialize form to clean state
+function initializeForm() {
+    console.log('Initializing form...');
+    
+    // Reset all dropdowns to default state
+    $('#subTypeId').html('<option value="">--Select--</option>');
+    $('#subCatId').html('<option value="">--All--</option>');
+    $('#materialId').html('<option value="">--Select--</option>');
+    
+    // Clear material info
+    clearMaterialInfo();
+    
+    // Clear selected materials table
+    $('#tblItems tbody').empty();
+    
+    // Reset form fields
+    $('#note').val('');
+    
+    // Show subtype field (might be hidden for purchase requests)
+    $('#subTypeId').closest('div').show();
+    
+    console.log('Form initialized successfully');
+}
 
 function loadSubTypes() {
     const typeId = $('#typeId').val();
@@ -175,6 +204,25 @@ function resetFilter() {
     $('#subCatId').html('<option value="">--All--</option>');
     $('#materialId').html('<option value="">--Select--</option>');
     clearMaterialInfo();
+}
+
+// Reset entire form to initial state
+function resetFormToInitialState() {
+    console.log('Resetting form to initial state...');
+    
+    // Reset all form fields
+    $('#typeId').val('');
+    $('#subTypeId').html('<option value="">--Select--</option>').closest('div').show();
+    $('#catId').val('');
+    $('#subCatId').html('<option value="">--All--</option>');
+    $('#materialId').html('<option value="">--Select--</option>');
+    $('#note').val('');
+    
+    // Clear material info and table
+    clearMaterialInfo();
+    $('#tblItems tbody').empty();
+    
+    console.log('Form reset completed');
 }
 
 function editQuantity(button) {
