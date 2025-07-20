@@ -3,7 +3,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 
 <div class="bg-white rounded-xl p-6 shadow max-w-6xl mx-auto">
-    <h2 class="text-2xl font-bold mb-6 text-blue-800">Pending Password Reset Requests</h2>
+    <h2 class="text-2xl font-bold mb-6 text-blue-800">List Request Reset Pasword</h2>
 
     <c:if test="${empty resetRequests}">
         <div class="bg-blue-100 text-blue-800 px-4 py-3 rounded shadow-sm">
@@ -70,7 +70,6 @@
     </div>
 </div>
 
-<!-- SweetAlert + Modal logic -->
 <script>
     function openResetModal(userId, requestId, fullName) {
         document.getElementById('modalUserId').value = userId;

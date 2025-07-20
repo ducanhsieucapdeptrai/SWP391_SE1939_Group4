@@ -4,7 +4,7 @@
 
 <div class="max-w-6xl mx-auto bg-white p-6 mt-6 rounded shadow">
 
-    <h2 class="text-2xl font-bold text-blue-800 mb-4">Purchase Order Detail - PO#${po.poId}</h2>
+    <h2 class="text-2xl font-bold text-blue-800 mb-4">Purchase Order Detail - No.${po.poId}</h2>
 
     <div class="grid md:grid-cols-2 gap-4 text-sm mb-6">
         <p><strong>Request ID:</strong> ${po.requestId}</p>

@@ -3,7 +3,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 
 <meta charset="UTF-8">
-<title>Approve Material Request</title>
+<title>Approve Request</title>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -50,7 +50,6 @@
             </div>
         </div>
 
-        <!-- FORM -->
         <form method="POST" action="approveandrejectrequest" id="approveForm">
             <input type="hidden" name="requestId" value="${requestInfo.requestId}" />
             <input type="hidden" name="action" value="approve" />

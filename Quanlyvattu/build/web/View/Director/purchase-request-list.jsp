@@ -7,13 +7,13 @@
 <html>
     <head>
         <meta charset="UTF-8">
-        <title>Purchase Order Request List</title>
+        <title>Purchase Order List</title>
         <script src="https://cdn.tailwindcss.com"></script>
     </head>
     <body class="bg-gray-100 font-sans">
 
         <div class="max-w-7xl mx-auto p-6">
-            <h1 class="text-3xl font-bold text-blue-800 mb-6 border-b pb-2">Purchase Order Request List</h1>
+            <h1 class="text-3xl font-bold text-blue-800 mb-6 border-b pb-2">Purchase Order List</h1>
 
             <form method="get" action="purchase-request-list" class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6 bg-white p-4 rounded shadow">
                 <div>
