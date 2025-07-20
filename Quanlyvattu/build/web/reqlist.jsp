@@ -25,7 +25,7 @@
         </c:if>
 
         <div class="p-6">
-            <h1 class="text-2xl font-bold mb-6">Request List</h1>
+            <h1 class="text-2xl font-bold mb-6">All Requests</h1>
             <c:if test="${filterType == 'Purchase'}">
                 <div class="text-sm text-gray-600 mb-2 italic">
                     Currently showing: <strong>Purchase Requests</strong>

@@ -35,7 +35,7 @@
 <div id="materiallist-page" class="page">
     <div class="flex justify-between items-center mb-4">
         <form method="get" action="materiallist" class="grid grid-cols-4 gap-4 items-center mb-4 w-full">
-            <h2 class="col-span-4 text-2xl font-bold text-gray-800">Material List</h2>
+            <h2 class="col-span-4 text-2xl font-bold text-gray-800">Inventory</h2>
 
             <!-- Category -->
             <select name="category" id="category" class="border px-3 py-2 rounded-lg shadow-sm">

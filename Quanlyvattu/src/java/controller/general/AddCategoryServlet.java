@@ -1,6 +1,7 @@
 package controller.general;
 
 import DAO.MaterialDAO;
+import DAO.NotificationDAO;
 import java.io.IOException;
 import java.util.List;
 import jakarta.servlet.ServletException;
@@ -36,7 +37,6 @@ public class AddCategoryServlet extends HttpServlet {
         request.getRequestDispatcher("/layout/layout.jsp").forward(request, response);
     }
 
-
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -47,6 +47,15 @@ public class AddCategoryServlet extends HttpServlet {
             String name = request.getParameter("categoryName");
             if (name != null && !name.trim().isEmpty()) {
                 dao.addCategory(name);
+
+                // 🔔 Gửi thông báo toàn hệ thống
+                try {
+                    NotificationDAO notiDAO = new NotificationDAO();
+                    notiDAO.insertNotification(null, "Danh mục mới '" + name + "' đã được thêm.", "material-category");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
                 response.sendRedirect("add-category?success=category");
                 return;
             }
@@ -57,6 +66,15 @@ public class AddCategoryServlet extends HttpServlet {
 
                 if (subCategoryName != null && !subCategoryName.trim().isEmpty()) {
                     dao.addSubCategory(categoryId, subCategoryName);
+
+                    // 🔔 Gửi thông báo toàn hệ thống
+                    try {
+                        NotificationDAO notiDAO = new NotificationDAO();
+                        notiDAO.insertNotification(null, "Danh mục con mới '" + subCategoryName + "' đã được thêm.", "material-category");
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
                     response.sendRedirect("add-category?success=subcategory");
                     return;
                 }

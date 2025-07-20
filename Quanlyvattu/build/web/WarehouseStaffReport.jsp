@@ -13,7 +13,7 @@
 <div class="container mx-auto p-6 space-y-6">
     <!-- Header & Back -->
     <div class="flex items-center justify-between ">
-        <h1 class="text-2xl font-bold">Request Detail – Actual Record</h1>
+        <h1 class="text-2xl font-bold">Task Detail – Actual Record</h1>
         <a href="${pageContext.request.contextPath}/tasklist" class="bg-gray-300 hover:bg-gray-400 text-black font-semibold py-2 px-4 rounded inline-block">← Back </a>
     </div>
 

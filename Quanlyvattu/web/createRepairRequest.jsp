@@ -10,7 +10,7 @@
         <div class="max-w-3xl mx-auto mt-8 px-4">
             <div class="bg-white shadow-md rounded-lg overflow-hidden">
                 <div class="bg-blue-600 text-white p-4">
-                    <h2 class="text-xl font-semibold">Create Material Request</h2>
+                    <h2 class="text-xl font-semibold">Create Repair Request</h2>
                 </div>
                 <div class="p-6">
                     <!-- Alert messages -->

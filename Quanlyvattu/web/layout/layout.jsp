@@ -30,6 +30,8 @@
                         <div class="relative">
                             <button id="bell-icon" class="text-xl focus:outline-none">
                                 <i class="fas fa-bell"></i>
+                                <span id="notification-count" class="absolute top-0 right-0 bg-red-600 text-white rounded-full text-xs px-1 hidden">0</span>
+
                             </button>
                             <div id="notificationDropdown" class="hidden absolute right-0 mt-2 w-80 bg-white text-black border rounded shadow-lg z-50">
                                 <ul id="notification-list" class="max-h-80 overflow-y-auto divide-y">
@@ -37,6 +39,38 @@
                                 </ul>
                             </div>
                         </div>
+                        <script>
+                            document.getElementById('bell-icon').addEventListener('click', function () {
+                                const dropdown = document.getElementById('notificationDropdown');
+                                dropdown.classList.toggle('hidden');
+
+                                const list = document.getElementById('notification-list');
+                                list.innerHTML = '<li class="px-4 py-2 text-center text-gray-400">Đang tải...</li>';
+
+                                fetch('get-notifications') // gọi servlet bên dưới
+                                        .then(res => res.json())
+                                        .then(data => {
+                                            list.innerHTML = '';
+                                            const countSpan = document.getElementById('notification-count');
+
+                                            if (data.length === 0) {
+                                                list.innerHTML = '<li class="px-4 py-2 text-center text-gray-400">Không có thông báo mới</li>';
+                                                countSpan.classList.add('hidden');
+                                                return;
+                                            }
+
+                                            data.forEach(n => {
+                                                const li = document.createElement('li');
+                                                li.className = 'px-4 py-2 hover:bg-gray-100 cursor-pointer';
+                                                li.innerHTML = `<a href="${n.url}" class="block">${n.message}</a>`;
+                                                list.appendChild(li);
+                                            });
+
+                                            countSpan.textContent = data.length;
+                                            countSpan.classList.remove('hidden');
+                                        });
+                            });
+                        </script>
                         <!-- User Menu -->
                         <div class="relative ml-4">
                             <button id="userMenuBtn" class="flex items-center focus:outline-none">
