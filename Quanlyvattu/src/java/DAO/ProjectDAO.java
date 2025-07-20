@@ -368,5 +368,20 @@ public List<Project> getFilteredProjectsPaged(String projectName, String manager
 
     return list;
 }
+public boolean isProjectNameExists(String projectName) {
+    String sql = "SELECT COUNT(*) FROM Project WHERE ProjectName = ? AND IsDeleted = 0";
+    try (Connection conn = new DBContext().getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setString(1, projectName);
+        try (ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1) > 0;    
+            }
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return false;
+}
 
 }

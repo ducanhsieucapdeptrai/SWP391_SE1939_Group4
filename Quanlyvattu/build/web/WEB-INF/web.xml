@@ -52,6 +52,10 @@
         <servlet-name>StatisticsServlet</servlet-name>
         <url-pattern>/statistics</url-pattern>
     </servlet-mapping>
+    <servlet>
+        <servlet-name>CategoryServlet</servlet-name>
+        <servlet-class>controller.general.CategoryServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>CategoryServlet</servlet-name>
         <url-pattern>/catalog-management</url-pattern>

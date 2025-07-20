@@ -10,7 +10,6 @@ import java.util.*;
 
 public class TaskLogDAO extends DBContext {
 
-    // ✅ Ghi 1 dòng log chính + chi tiết vào TaskSlipDetail
     public boolean insertTaskLogWithDetails(Connection conn, int requestId, int requestTypeId, int staffId,
                                         List<Integer> materialIds, List<Integer> quantities,
                                         String slipCode) throws SQLException {
@@ -49,47 +48,6 @@ public class TaskLogDAO extends DBContext {
 }
 
 
-    // ✅ Đọc danh sách slip đã tạo (grouped log), kèm theo vật liệu chi tiết
-    public List<TaskLog> getGroupedTaskLogsByRequestId(Connection conn, int requestId) throws SQLException {
-        List<TaskLog> taskLogs = new ArrayList<>();
-
-        // 1. Lấy danh sách log (slip)
-        String mainLogSql = """
-            SELECT tl.TaskId, tl.RequestId, tl.RequestTypeId, tl.StaffId, tl.CreatedAt,
-                   u.FullName AS StaffName, rt.RequestTypeName
-            FROM TaskLog tl
-            JOIN Users u ON tl.StaffId = u.UserId
-            JOIN RequestType rt ON tl.RequestTypeId = rt.RequestTypeId
-            WHERE tl.RequestId = ?
-            ORDER BY tl.CreatedAt DESC
-        """;
-
-        try (PreparedStatement ps = conn.prepareStatement(mainLogSql)) {
-            ps.setInt(1, requestId);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                TaskLog log = new TaskLog();
-                int taskId = rs.getInt("TaskId");
-                log.setTaskId(taskId);
-                log.setRequestId(rs.getInt("RequestId"));
-                log.setRequestTypeId(rs.getInt("RequestTypeId"));
-                log.setStaffId(rs.getInt("StaffId"));
-                log.setCreatedAt(rs.getTimestamp("CreatedAt"));
-                log.setStaffName(rs.getString("StaffName"));
-                log.setRequestTypeName(rs.getString("RequestTypeName"));
-
-                // 2. Lấy danh sách vật liệu chi tiết của từng log
-                List<TaskSlipDetail> details = getSlipDetailsByTaskId(conn, taskId);
-                log.setSlipDetails(details);
-
-                taskLogs.add(log);
-            }
-        }
-
-        return taskLogs;
-    }
-
-    // ✅ Truy xuất danh sách vật liệu chi tiết của một slip (log)
     public List<TaskSlipDetail> getSlipDetailsByTaskId(Connection conn, int taskId) throws SQLException {
         List<TaskSlipDetail> details = new ArrayList<>();
         String sql = """
@@ -113,18 +71,6 @@ public class TaskLogDAO extends DBContext {
 
         return details;
     }
-    // ✅ Truy xuất slip mới nhất (một task log gần nhất của request)
-public TaskLog getLatestTaskLogByRequestId(Connection conn, int requestId) throws SQLException {
-    String sql = """
-        SELECT tl.TaskId, tl.RequestId, tl.RequestTypeId, tl.StaffId, tl.CreatedAt,
-               u.FullName AS StaffName, rt.RequestTypeName
-        FROM TaskLog tl
-        JOIN Users u ON tl.StaffId = u.UserId
-        JOIN RequestType rt ON tl.RequestTypeId = rt.RequestTypeId
-        WHERE tl.RequestId = ?
-        ORDER BY tl.CreatedAt DESC
-        LIMIT 1
-    """;
 
     public TaskLog getLatestTaskLogByRequestId(Connection conn, int requestId) throws SQLException {
     String sql = """
@@ -255,6 +201,14 @@ public TaskLog getLatestTaskLogByRequestId(Connection conn, int requestId) throw
             }
             return String.format("%s-%06d", prefix, nextNumber);
         }
+    }
+}
+public List<TaskLog> getGroupedTaskLogsByRequestId(int requestId) {
+    try (Connection conn = new DBContext().getConnection()) {
+        return getGroupedTaskLogsByRequestId(conn, requestId);
+    } catch (SQLException e) {
+        e.printStackTrace();
+        return new ArrayList<>();
     }
 }
 
