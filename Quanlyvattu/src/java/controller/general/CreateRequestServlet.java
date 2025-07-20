@@ -85,6 +85,8 @@ public class CreateRequestServlet extends HttpServlet {
             e.printStackTrace();
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error loading form data");
         }
+
+        doGet(req, resp);
     }
 
     @Override

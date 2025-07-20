@@ -366,6 +366,30 @@ public class UserDAO extends DBContext {
             return false;
         }
     }
+    public List<Users> getUsersByRoleNames(List<String> roleNames) {
+        List<Users> list = new ArrayList<>();
+        if (roleNames == null || roleNames.isEmpty()) return list;
+
+        String placeholders = String.join(",", java.util.Collections.nCopies(roleNames.size(), "?"));
+        String sql = "SELECT u.*, r.RoleName FROM Users u JOIN Roles r ON u.RoleId = r.RoleId WHERE r.RoleName IN (" + placeholders + ")";
+
+        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            for (int i = 0; i < roleNames.size(); i++) {
+                ps.setString(i + 1, roleNames.get(i));
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Users user = extractUserFromResultSet(rs);
+                    list.add(user);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
 
     public static void main(String[] args) {
         UserDAO dao = new UserDAO();
@@ -378,5 +402,4 @@ public class UserDAO extends DBContext {
 
         System.out.println(u.getEmail());
     }
-
 }
