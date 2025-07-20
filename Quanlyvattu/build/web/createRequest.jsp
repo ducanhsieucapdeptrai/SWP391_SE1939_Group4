@@ -1,25 +1,115 @@
-<%@ page contentType="text/html; charset=UTF-8" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Create Material Request</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8">
+  <title>Create Request</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <script src="assets/js/request.js"></script>
+  <style>
+    .top-bar { 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        margin-bottom: 20px;
+        padding: 10px;
+        background: #f5f5f5;
+    }
+    .filter-panel { 
+        margin: 20px 0;
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+    }
+    .filter-panel select, .filter-panel input { 
+        margin-right: 10px;
+        padding: 5px;
+        min-width: 150px;
+    }
+    table { 
+        width: 100%; 
+        border-collapse: collapse; 
+        margin-top: 10px; 
+    }
+    table, th, td { 
+        border: 1px solid #ccc; 
+    }
+    th { 
+        background: #f5f5f5;
+        padding: 10px 8px;
+    }
+    td { 
+        padding: 8px; 
+        text-align: left; 
+    }
+    .scroll-box { 
+        max-height: 200px; 
+        overflow-y: auto;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        margin: 10px 0;
+    }
+    .action-btn { 
+        margin-right: 5px;
+        padding: 5px 10px;
+        background: #dc3545;
+        color: white;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+    }
+    #btnAdd, #btnCreate {
+        background: #007bff;
+        color: white;
+        padding: 8px 15px;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+    }
+    #btnFilter {
+        background: #6c757d;
+        color: white;
+        padding: 5px 10px;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+    }
+    input[type="number"], input[type="text"] {
+        padding: 5px;
+        border: 1px solid #ddd;
+        border-radius: 3px;
+    }
+    textarea {
+        border: 1px solid #ddd;
+        border-radius: 3px;
+        padding: 8px;
+    }
+    .form-group {
+        margin-bottom: 15px;
+    }
+    .error {
+        color: #dc3545;
+        margin-top: 5px;
+    }
+    .message {
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 3px;
+    }
+    .success {
+        background: #d4edda;
+        color: #155724;
+    }
+    .error {
+        background: #f8d7da;
+        color: #721c24;
+    }
+  </style>
 </head>
-<body class="bg-gray-100">
-    <div class="max-w-3xl mx-auto mt-8 px-4">
-        <div class="bg-white shadow-md rounded-lg overflow-hidden">
-            <div class="bg-blue-600 text-white p-4">
-                <h2 class="text-xl font-semibold">Create Material Request</h2>
-            </div>
-            <div class="p-6">
-                <!-- Alert messages -->
-                <c:if test="${not empty error}">
-                    <div class="bg-red-100 text-red-700 p-3 mb-4 rounded">${error}</div>
-                </c:if>
-                <c:if test="${not empty success}">
-                    <div class="bg-green-100 text-green-700 p-3 mb-4 rounded">${success}</div>
-                </c:if>
+<body>
+ 
 
                 <!-- Form -->
                 <form method="post" action="createrequest" class="space-y-6">
@@ -35,7 +125,16 @@
                             </c:forEach>
                         </select>
                     </div>
-
+                    <!-- Project -->
+                    <div>
+                        <label class="block font-medium mb-1">Project</label>
+                        <select name="projectId" class="w-full border border-gray-300 rounded p-2">
+                            <option value="">-- None --</option>
+                            <c:forEach var="p" items="${projects}">
+                                <option value="${p.projectId}">${p.projectName}</option>
+                            </c:forEach>
+                        </select>
+                    </div>
                     <!-- Category & SubCategory Filters -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
@@ -108,261 +207,95 @@
         </div>
     </div>
 
-    <script>
-        // Global variables
-        let stockCheckRequired = false;
-        let materialStockData = {};
+    <!-- Filter panel -->
+    <fieldset class="filter-panel">
+      <legend>Filter Materials</legend>
+      <label>Category:
+        <select id="catId">
+          <option class="text-center" value="">--All--</option>
+          <c:forEach var="c" items="${categories}">
+            <option value="${c.categoryId}">${c.categoryName}</option>
+          </c:forEach>
+        </select>
+      </label>
+      <label>SubCategory:
+        <select id="subCatId">
+          <option class="text-center" value="">--All--</option>
+        </select>
+      </label>
+      <label>Material:
+        <select id="materialId">
+          <option class="text-center" value="">--Select--</option>
+        </select>
+      </label>
+      <button type="button" id="btnFilter">Reset Filter</button>
+    </fieldset>
 
-        // Khởi tạo khi DOM đã load
-        document.addEventListener('DOMContentLoaded', function() {
-            initFilters();
-            updateRemoveButtons();
-            filterMaterials();
-            initMaterialStockData();
-        });
+    <!-- Stock / MinQuantity / Quantity -->
+    <div style="display: flex; gap: 15px; align-items: center; margin: 20px 0;">
+      <div>
+        <label for="stock" style="display: block; margin-bottom: 5px;">Stock:</label>
+        <input type="text" id="stock" readonly style="background: #f5f5f5;" />
+      </div>
+      <div>
+        <label for="minQty" style="display: block; margin-bottom: 5px;">Min Quantity:</label>
+        <input type="text" id="minQty" readonly style="background: #f5f5f5;" />
+      </div>
+      <div>
+        <label for="quantity" style="display: block; margin-bottom: 5px;">Quantity:</label>
+        <input type="number" id="quantity" min="1" value="1" style="width: 100px;" />
+      </div>
+      <div style="align-self: flex-end;">
+        <button type="button" id="btnAdd">Add Material</button>
+      </div>
+    </div>
 
-        function initMaterialStockData() {
-            // Initialize stock data from options
-            const firstSelect = document.querySelector('select[name="materialId"]');
-            const options = firstSelect.querySelectorAll('option');
-            options.forEach(function(opt) {
-                if (opt.value) {
-                    const stock = opt.getAttribute('data-stock');
-                    materialStockData[opt.value] = parseInt(stock) || 0;
-                }
-            });
-        }
+    <!-- Selected Items -->
+    <h4>Selected Materials</h4>
+    <div class="scroll-box">
+      <table id="tblItems">
+        <thead>
+          <tr>
+            <th>STT</th>
+            <th>Image</th>
+            <th>Name</th>
+            <th>Quantity</th>
+            <th style="min-width: 150px;">Action</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
 
-        function toggleStockCheck() {
-            const requestTypeId = document.querySelector('select[name="requestTypeId"]').value;
-            stockCheckRequired = (requestTypeId === '1' || requestTypeId === '4'); // Emergency or Special
-            
-            // Update all quantity inputs
-            const quantityInputs = document.querySelectorAll('.quantity-input');
-            quantityInputs.forEach(function(input) {
-                validateQuantity(input);
-            });
-        }
+    <!-- Note and Create -->
+    <div style="margin: 20px 0;">
+      <label for="note" style="display: block; margin-bottom: 5px;">Note:</label>
+      <textarea name="note" id="note" rows="3" style="width:100%; resize: vertical;"></textarea>
+    </div>
 
-        function validateQuantity(input) {
-            const materialRow = input.closest('.material-item');
-            const materialSelect = materialRow.querySelector('select[name="materialId"]');
-            const stockInfo = materialRow.querySelector('.stock-info');
-            const materialId = materialSelect.value;
-            const quantity = parseInt(input.value) || 0;
-            
-            // Clear previous states
-            stockInfo.textContent = '';
-            input.classList.remove('border-red-500', 'border-green-500');
-            
-            // Only validate if material is selected and quantity is entered
-            if (!materialId || !quantity) {
-                return;
-            }
-            
-            const availableStock = materialStockData[materialId] || 0;
-            
-            // Only show warning for Emergency/Special requests when quantity exceeds stock
-            if (stockCheckRequired && quantity > availableStock) {
-                input.classList.add('border-red-500');
-                stockInfo.textContent = `Quantity exceeds available stock (${availableStock} available)`;
-                stockInfo.className = 'text-red-500 text-sm stock-info';
-            } else {
-                // Don't show any message for valid quantities
-                input.classList.add('border-green-500');
-                stockInfo.textContent = '';
-            }
-        }
-
-        function initFilters() {
-            // Event listener cho category filter
-            const categoryFilter = document.getElementById('categoryFilter');
-            if (categoryFilter) {
-                categoryFilter.addEventListener('change', function() {
-                    const catId = this.value;
-                    const subCategoryFilter = document.getElementById('subCategoryFilter');
-                    
-                    // Ẩn/hiện subcategory options
-                    const subOptions = subCategoryFilter.querySelectorAll('option');
-                    subOptions.forEach(function(opt) {
-                        if (opt.value === '') {
-                            opt.style.display = 'block'; // Always show "All Sub-Categories"
-                        } else {
-                            const optCat = opt.getAttribute('data-cat');
-                            opt.style.display = (!catId || optCat === catId) ? 'block' : 'none';
-                        }
-                    });
-                    
-                    // Reset subcategory selection
-                    subCategoryFilter.value = '';
-                    filterMaterials();
-                });
-            }
-
-            // Event listener cho subcategory filter
-            const subCategoryFilter = document.getElementById('subCategoryFilter');
-            if (subCategoryFilter) {
-                subCategoryFilter.addEventListener('change', filterMaterials);
-            }
-
-            // Event delegation cho material selects
-            const materialList = document.getElementById('materialList');
-            if (materialList) {
-                materialList.addEventListener('change', function(e) {
-                    if (e.target.name === 'materialId') {
-                        checkDuplicate(e.target);
-                        filterMaterials();
-                        // Update stock info when material changes
-                        const quantityInput = e.target.closest('.material-item').querySelector('.quantity-input');
-                        validateQuantity(quantityInput);
-                    }
-                });
-            }
-        }
-
-        function addMaterial() {
-            const list = document.getElementById('materialList');
-            const firstItem = list.querySelector('.material-item');
-            const newItem = firstItem.cloneNode(true);
-            
-            // Reset values
-            const select = newItem.querySelector('select[name="materialId"]');
-            const input = newItem.querySelector('input[name="quantity"]');
-            const stockInfo = newItem.querySelector('.stock-info');
-            if (select) select.value = '';
-            if (input) {
-                input.value = '';
-                input.classList.remove('border-red-500', 'border-green-500');
-            }
-            if (stockInfo) stockInfo.textContent = '';
-            
-            list.appendChild(newItem);
-            updateRemoveButtons();
-            filterMaterials();
-        }
-
-        function removeMaterial(btn) {
-            const items = document.querySelectorAll('.material-item');
-            if (items.length > 1) {
-                const item = btn.closest('.material-item');
-                item.remove();
-                updateRemoveButtons();
-                filterMaterials();
-            }
-        }
-
-        function updateRemoveButtons() {
-            const items = document.querySelectorAll('.material-item');
-            const removeButtons = document.querySelectorAll('.remove-material');
-            
-            removeButtons.forEach(function(btn) {
-                if (items.length > 1) {
-                    btn.style.display = 'block';
-                    btn.onclick = function() { removeMaterial(btn); };
-                } else {
-                    btn.style.display = 'none';
-                }
-            });
-        }
-
-        function filterMaterials() {
-            const catId = document.getElementById('categoryFilter').value;
-            const subId = document.getElementById('subCategoryFilter').value;
-            const selects = document.querySelectorAll('select[name="materialId"]');
-            
-            // Get all selected material IDs
-            const selectedIds = [];
-            selects.forEach(function(select) {
-                if (select.value) {
-                    selectedIds.push(select.value);
-                }
-            });
-
-            selects.forEach(function(select) {
-                const currentValue = select.value;
-                const options = select.querySelectorAll('option');
-                
-                options.forEach(function(opt) {
-                    if (!opt.value) {
-                        // Always show placeholder option
-                        opt.style.display = 'block';
-                        return;
-                    }
-
-                    const optSub = opt.getAttribute('data-sub');
-                    let optCat = '';
-                    
-                    // Find category for this subcategory
-                    if (optSub) {
-                        const subOption = document.querySelector('#subCategoryFilter option[value="' + optSub + '"]');
-                        if (subOption) {
-                            optCat = subOption.getAttribute('data-cat');
-                        }
-                    }
-
-                    // Check filters
-                    const matchesCategory = !catId || optCat === catId;
-                    const matchesSubCategory = !subId || optSub === subId;
-                    const isDuplicate = selectedIds.includes(opt.value) && opt.value !== currentValue;
-
-                    // Show/hide option
-                    if (matchesCategory && matchesSubCategory && !isDuplicate) {
-                        opt.style.display = 'block';
-                    } else {
-                        opt.style.display = 'none';
-                    }
-                });
-            });
-        }
-
-        function checkDuplicate(select) {
-            if (!select.value) return;
-            
-            const allSelects = document.querySelectorAll('select[name="materialId"]');
-            let isDuplicate = false;
-            
-            allSelects.forEach(function(otherSelect) {
-                if (otherSelect !== select && otherSelect.value === select.value) {
-                    isDuplicate = true;
-                }
-            });
-            
-            if (isDuplicate) {
-                alert('This material is already selected!');
-                select.value = '';
-            }
-        }
-
-        function validateForm() {
-            // Check if any materials are selected
-            const materialSelects = document.querySelectorAll('select[name="materialId"]');
-            let hasValidMaterial = false;
-            
-            for (let select of materialSelects) {
-                if (select.value) {
-                    hasValidMaterial = true;
-                    break;
-                }
-            }
-            
-            if (!hasValidMaterial) {
-                alert('Please select at least one material.');
-                return false;
-            }
-            
-            // Check stock validation for Emergency/Special requests
-            if (stockCheckRequired) {
-                const quantityInputs = document.querySelectorAll('.quantity-input');
-                for (let input of quantityInputs) {
-                    if (input.classList.contains('border-red-500')) {
-                        alert('Please fix quantity issues before submitting.');
-                        return false;
-                    }
-                }
-            }
-            
-            return true;
-        }
-    </script>
+    <div style="margin-top: 20px; text-align: center;">
+      <button type="submit" id="btnCreate" style="min-width: 150px;">Create Request</button>
+    </div>
+  </form>
+    </div>
+  <script>
+    // Show error message if request failed
+    <c:if test="${not empty error}">
+      $(document).ready(function() {
+        setTimeout(function() {
+          $('.error').fadeOut('slow');
+        }, 5000);
+      });
+    </c:if>
+    
+    // Show success message
+    <c:if test="${not empty message}">
+      $(document).ready(function() {
+        setTimeout(function() {
+          $('.success').fadeOut('slow');
+        }, 3000);
+      });
+    </c:if>
+  </script>
 </body>
 </html>

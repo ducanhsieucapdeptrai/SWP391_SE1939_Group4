@@ -30,7 +30,7 @@ public class RequestList {
     private String approvedByName;      // Tuỳ chọn: dùng để hiển thị tên người duyệt
     private String requestTypeName;     // Tuỳ chọn: để hiển thị tên loại yêu cầu
     private String statusDescription;   // Tuỳ chọn: mô tả trạng thái từ RequestStatus
-
+    private int projectId;
     private List<RequestDetail> requestDetails; // Tuỳ chọn: dùng nếu cần load chi tiết đi kèm
     private String subTypeName;
 
@@ -280,4 +280,14 @@ public class RequestList {
         this.isTransferredToday = isTransferredToday;
     }
 
+    public void setFinishedDate(Date finishedDate) {
+        this.finishedDate = finishedDate;
+    }
+    public int getProjectId() {
+    return projectId;
+    }
+
+    public void setProjectId(int projectId) {
+        this.projectId = projectId;
+    }
 }

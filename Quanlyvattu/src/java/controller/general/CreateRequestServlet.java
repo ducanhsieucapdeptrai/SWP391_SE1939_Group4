@@ -1,141 +1,110 @@
 package controller.general;
 
-import DAO.CreateRequestExport_PurcharDAO;
+import DAO.RequestDAO;
+import DAO.ProjectDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
-import model.*;
+import model.RequestDetail;
+import model.Users;
+
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-@WebServlet("/createrequest")
+@WebServlet(name = "CreateRequestServlet", urlPatterns = {"/createrequest"})
 public class CreateRequestServlet extends HttpServlet {
-    
-    private final CreateRequestExport_PurcharDAO dao = new CreateRequestExport_PurcharDAO();
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException {
-        
-        String action = request.getParameter("action");
-        
-        if (action != null) {
-            response.setContentType("text/html;charset=UTF-8");
-            PrintWriter out = response.getWriter();
-            
-            try {
-                switch (action) {
-                    case "getSubTypes":
-                        int typeId = Integer.parseInt(request.getParameter("typeId"));
-                        List<RequestSubType> subTypes = dao.getAllRequestSubtypes();
-                        out.println("<option value=''>--Select--</option>");
-                        for (RequestSubType st : subTypes) {
-                            if (st.getRequestTypeId() == typeId) {
-                                out.println("<option value='" + st.getSubTypeId() + "'>" 
-                                    + st.getSubTypeName() + "</option>");
-                            }
-                        }
-                        break;
-                        
-                    case "getSubCategories":
-                        int catId = Integer.parseInt(request.getParameter("catId"));
-                        List<SubCategory> subCats = dao.getSubCategoriesByCategoryId(catId);
-                        out.println("<option value=''>--All--</option>");
-                        for (SubCategory sc : subCats) {
-                            out.println("<option value='" + sc.getSubCategoryId() + "'>" 
-                                + sc.getSubCategoryName() + "</option>");
-                        }
-                        break;
-                        
-                    case "getMaterials":
-                        int subCatId = Integer.parseInt(request.getParameter("subCatId"));
-                        List<Material> materials = dao.getMaterialsBySubCategoryId(subCatId);
-                        out.println("<option value=''>--Select--</option>");
-                        for (Material m : materials) {
-                            out.println("<option value='" + m.getMaterialId() + "' "
-                                + "data-stock='" + m.getQuantity() + "' "
-                                + "data-min='" + m.getMinQuantity() + "' "
-                                + "data-name='" + m.getMaterialName() + "' "
-                                + "data-img='assets/images/materials/" + m.getImage() + "'>"
-                                + m.getMaterialName() + "</option>");
-                        }
-                        break;
-                }
-                return;
-                
-            } catch (NumberFormatException e) {
-                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid parameter");
-                return;
-            }
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        // Check logged‑in user
+        HttpSession session = req.getSession();
+        Users user = (Users) session.getAttribute("currentUser");
+        if (user == null) {
+            resp.sendRedirect("login.jsp");
+            return;
         }
 
-        // Load initial data
-        try {
-            List<RequestType> types = dao.getAllRequestTypes();
-            List<Category> categories = dao.getAllCategories();
-            
-            request.setAttribute("types", types);
-            request.setAttribute("categories", categories);
-           request.setAttribute("pageContent", "/createRequest.jsp");
-        request.getRequestDispatcher("/layout/layout.jsp").forward(request, response);
-            
-        } catch (Exception e) {
-            e.printStackTrace();
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error loading form data");
-        }
+        RequestDAO dao = new RequestDAO();
+        req.setAttribute("categories", dao.getAllCategories());
+        req.setAttribute("subCategories", dao.getAllSubCategories());
+        req.setAttribute("requestTypes", dao.getAllRequestType());
+        req.setAttribute("materials", dao.getAllMaterials());
+        req.setAttribute("projects", new ProjectDAO().getAllProjects());
+        req.setAttribute("pageContent", "/createRequest.jsp");
+        req.getRequestDispatcher("/layout/layout.jsp").forward(req, resp);
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException {
-        
-        HttpSession session = request.getSession();
-        Integer userId = (Integer) session.getAttribute("userId");
-        
-        if (userId == null) {
-            response.sendRedirect("login");
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        req.setCharacterEncoding("UTF-8");
+
+        HttpSession session = req.getSession();
+        Users user = (Users) session.getAttribute("currentUser");
+        if (user == null) {
+            resp.sendRedirect("login.jsp");
             return;
         }
 
         try {
-            int typeId = Integer.parseInt(request.getParameter("typeId"));
-            int subTypeId = Integer.parseInt(request.getParameter("subTypeId"));
-            String note = request.getParameter("note");
-            
-            String[] materialIds = request.getParameterValues("materialId[]");
-            String[] quantities = request.getParameterValues("quantity[]");
-            
-            if (materialIds == null || quantities == null || materialIds.length == 0 
-                    || materialIds.length != quantities.length) {
-                throw new ServletException("Invalid materials data");
+            int requestTypeId = Integer.parseInt(req.getParameter("requestTypeId"));
+            String note = req.getParameter("note");
+
+            String[] materialIds = req.getParameterValues("materialId");
+            String[] quantities = req.getParameterValues("quantity");
+
+            if (materialIds == null || quantities == null || materialIds.length != quantities.length) {
+                req.setAttribute("error", "Please select at least one material and enter a valid quantity.");
+                doGet(req, resp);
+                return;
             }
-            
-            // Create details list
+
+            boolean checkStock = (requestTypeId == 1 || requestTypeId == 4);
+            RequestDAO dao = new RequestDAO();
             List<RequestDetail> details = new ArrayList<>();
+
             for (int i = 0; i < materialIds.length; i++) {
-                RequestDetail detail = new RequestDetail();
-                detail.setMaterialId(Integer.parseInt(materialIds[i]));
-                detail.setQuantity(Integer.parseInt(quantities[i]));
-                details.add(detail);
+                int materialId = Integer.parseInt(materialIds[i]);
+                int qty = Integer.parseInt(quantities[i]);
+                if (qty <= 0) throw new NumberFormatException();
+
+                if (checkStock) {
+                    int stock = dao.getMaterialStock(materialId);
+                    if (qty > stock) {
+                        req.setAttribute("error",
+                                String.format("Material ID %d only has %d in stock, cannot request %d.",
+                                        materialId, stock, qty));
+                        doGet(req, resp);
+                        return;
+                    }
+                }
+
+                RequestDetail d = new RequestDetail();
+                d.setMaterialId(materialId);
+                d.setQuantity(qty);
+                details.add(d);
             }
-            
-            // Create request
-            int requestId = dao.createRequest(userId, typeId, subTypeId, note, details);
-            
-            if (requestId > 0) {
-                session.setAttribute("message", "Request created successfully!");
-                response.sendRedirect("reqlist");
+
+            // ✅ Xử lý ProjectId an toàn
+            int projectId = 0;
+            String projectParam = req.getParameter("projectId");
+            if (projectParam != null && !projectParam.isEmpty()) {
+                projectId = Integer.parseInt(projectParam);
+            }
+
+            boolean success = dao.createRequest(user.getUserId(), requestTypeId, note, projectId, details);
+            if (success) {
+                req.setAttribute("success", "Your request has been created and sent for approval.");
             } else {
-                request.setAttribute("error", "Failed to create request");
-                doGet(request, response);
+                req.setAttribute("error", "An error occurred while creating your request.");
             }
-            
+
+        } catch (NumberFormatException e) {
+            req.setAttribute("error", "Invalid data format. Please check your inputs.");
         } catch (Exception e) {
-            e.printStackTrace();
-            request.setAttribute("error", "Error: " + e.getMessage());
-            doGet(request, response);
+            req.setAttribute("error", "Error: " + e.getMessage());
         }
+
+        doGet(req, resp);
     }
 }
