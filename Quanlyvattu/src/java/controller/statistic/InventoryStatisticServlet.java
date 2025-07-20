@@ -1,4 +1,4 @@
-package controller.general;
+package controller.statistic;
 
 import DAO.MaterialDAO;
 import DAO.StatisticDAO;
@@ -18,17 +18,15 @@ import java.util.stream.Collectors;
 import model.Material;
 import model.Statistic;
 
-@WebServlet(name = "StatisticsServlet", urlPatterns = {"/statistics"})
-public class StatisticsServlet extends HttpServlet {
+@WebServlet(name = "InventoryStatisticServlet", urlPatterns = {"/inventory-statistics"})
+public class InventoryStatisticServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         MaterialDAO materialDAO = new MaterialDAO();
         List<Material> materials = materialDAO.getAllMaterials();
         request.setAttribute("materials", materials);
-        // Forward to the JSP page that will be included in the layout
-        request.setAttribute("pageContent", "/statistics.jsp");
-        request.getRequestDispatcher("/layout/layout.jsp").forward(request, response);
+        request.getRequestDispatcher("/statistic.jsp").forward(request, response);
     }
 
     @Override
@@ -43,20 +41,19 @@ public class StatisticsServlet extends HttpServlet {
             String endDateString = request.getParameter("endDate");
 
             List<Integer> materialIds = null;
-            if (materialIdStrings != null && materialIdStrings.length > 0) {
+            if (materialIdStrings != null && materialIdStrings.length > 0 && !Arrays.asList(materialIdStrings).contains("")) {
                 materialIds = Arrays.stream(materialIdStrings)
+                                    .filter(s -> !s.isEmpty())
                                     .map(Integer::parseInt)
                                     .collect(Collectors.toList());
             }
 
-            // Default to today if dates are not provided or are empty
-            Date startDate = (startDateString == null || startDateString.isEmpty()) ? new Date() : sdf.parse(startDateString);
-            Date endDate = (endDateString == null || endDateString.isEmpty()) ? new Date() : sdf.parse(endDateString);
+            Date startDate = (startDateString == null || startDateString.isEmpty()) ? new Date(0) : sdf.parse(startDateString); // Start of epoch if empty
+            Date endDate = (endDateString == null || endDateString.isEmpty()) ? new Date() : sdf.parse(endDateString); // Today if empty
 
             List<Statistic> statistics = statisticDAO.getInventoryStatistics(materialIds, startDate, endDate);
 
             request.setAttribute("statistics", statistics);
-            request.setAttribute("materials", materialDAO.getAllMaterials()); // For repopulating the filter
             request.setAttribute("selectedMaterialIds", materialIds != null ? materialIds : new ArrayList<>());
             request.setAttribute("selectedStartDate", startDateString);
             request.setAttribute("selectedEndDate", endDateString);
@@ -66,8 +63,8 @@ public class StatisticsServlet extends HttpServlet {
             e.printStackTrace();
         }
 
-        // Forward back to the JSP page, which will be included in the layout
-        request.setAttribute("pageContent", "/statistics.jsp");
-        request.getRequestDispatcher("/layout/layout.jsp").forward(request, response);
+        // Always forward back to the JSP, providing materials for the filter dropdown
+        request.setAttribute("materials", materialDAO.getAllMaterials()); 
+        request.getRequestDispatcher("/statistic.jsp").forward(request, response);
     }
 }

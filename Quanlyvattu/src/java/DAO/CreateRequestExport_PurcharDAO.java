@@ -11,17 +11,41 @@ public class CreateRequestExport_PurcharDAO extends DBContext {
     public List<RequestType> getAllRequestTypes() {
         List<RequestType> list = new ArrayList<>();
         String sql = "SELECT RequestTypeId, RequestTypeName FROM RequestType";
-        try (PreparedStatement st = connection.prepareStatement(sql)) {
+        
+        System.out.println("[DAO DEBUG] getAllRequestTypes() called");
+        System.out.println("[DAO DEBUG] Connection null: " + (connection == null));
+        
+        if (connection == null) {
+            System.out.println("[DAO DEBUG] Connection is null! Cannot execute query.");
+            return list;
+        }
+        
+        try {
+            System.out.println("[DAO DEBUG] Connection closed: " + connection.isClosed());
+            System.out.println("[DAO DEBUG] Executing SQL: " + sql);
+            
+            PreparedStatement st = connection.prepareStatement(sql);
             ResultSet rs = st.executeQuery();
+            
+            int count = 0;
             while (rs.next()) {
                 RequestType type = new RequestType();
                 type.setRequestTypeId(rs.getInt("RequestTypeId"));
                 type.setRequestTypeName(rs.getString("RequestTypeName")); 
                 list.add(type);
+                count++;
             }
+            
+            System.out.println("[DAO DEBUG] Found " + count + " request types");
+            rs.close();
+            st.close();
+            
         } catch (SQLException e) {
+            System.out.println("[DAO DEBUG] SQLException in getAllRequestTypes: " + e.getMessage());
             e.printStackTrace();
         }
+        
+        System.out.println("[DAO DEBUG] Returning list with size: " + list.size());
         return list;
     }
 
@@ -46,17 +70,41 @@ public class CreateRequestExport_PurcharDAO extends DBContext {
     public List<Category> getAllCategories() {
         List<Category> list = new ArrayList<>();
         String sql = "SELECT CategoryId, CategoryName FROM Categories";
-        try (PreparedStatement st = connection.prepareStatement(sql)) {
+        
+        System.out.println("[DAO DEBUG] getAllCategories() called");
+        System.out.println("[DAO DEBUG] Connection null: " + (connection == null));
+        
+        if (connection == null) {
+            System.out.println("[DAO DEBUG] Connection is null! Cannot execute query.");
+            return list;
+        }
+        
+        try {
+            System.out.println("[DAO DEBUG] Connection closed: " + connection.isClosed());
+            System.out.println("[DAO DEBUG] Executing SQL: " + sql);
+            
+            PreparedStatement st = connection.prepareStatement(sql);
             ResultSet rs = st.executeQuery();
+            
+            int count = 0;
             while (rs.next()) {
                 Category cat = new Category();
                 cat.setCategoryId(rs.getInt("CategoryId"));
                 cat.setCategoryName(rs.getString("CategoryName"));
                 list.add(cat);
+                count++;
             }
+            
+            System.out.println("[DAO DEBUG] Found " + count + " categories");
+            rs.close();
+            st.close();
+            
         } catch (SQLException e) {
+            System.out.println("[DAO DEBUG] SQLException in getAllCategories: " + e.getMessage());
             e.printStackTrace();
         }
+        
+        System.out.println("[DAO DEBUG] Returning list with size: " + list.size());
         return list;
     }
 
@@ -123,7 +171,7 @@ public class CreateRequestExport_PurcharDAO extends DBContext {
         return list;
     }
 
-    public int createRequest(int userId, int typeId, int subTypeId, String note, List<RequestDetail> details) {
+    public int createRequest(int userId, int typeId, Integer subTypeId, String note, List<RequestDetail> details) {
         String sqlRequest = "INSERT INTO RequestList (RequestedBy, RequestTypeId, SubTypeId, Note, Status, RequestDate) "
                 + "VALUES (?, ?, ?, ?, 'Pending', CURRENT_TIMESTAMP)";
         String sqlDetail = "INSERT INTO RequestDetail (RequestId, MaterialId, Quantity) VALUES (?, ?, ?)";
@@ -136,7 +184,12 @@ public class CreateRequestExport_PurcharDAO extends DBContext {
                 PreparedStatement stReq = conn.prepareStatement(sqlRequest, Statement.RETURN_GENERATED_KEYS);
                 stReq.setInt(1, userId);
                 stReq.setInt(2, typeId);
-                stReq.setInt(3, subTypeId);
+                // Handle nullable subTypeId for Purchase requests
+                if (subTypeId != null) {
+                    stReq.setInt(3, subTypeId);
+                } else {
+                    stReq.setNull(3, java.sql.Types.INTEGER);
+                }
                 stReq.setString(4, note);
                 stReq.executeUpdate();
 
