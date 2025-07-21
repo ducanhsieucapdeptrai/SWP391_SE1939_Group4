@@ -35,41 +35,6 @@ public class AuditLogDAO {
         try {
             conn = dbContext.getConnection();
             
-            // Check if audit_log table exists, if not create it
-            try {
-                String checkTableSql = "SELECT 1 FROM audit_log LIMIT 1";
-                PreparedStatement checkStmt = conn.prepareStatement(checkTableSql);
-                checkStmt.executeQuery();
-                checkStmt.close();
-            } catch (SQLException e) {
-                // Table doesn't exist, create it
-                String createTableSql = "CREATE TABLE IF NOT EXISTS `audit_log` (" +
-                    "`id` INT AUTO_INCREMENT PRIMARY KEY, " +
-                    "`action` VARCHAR(255) NOT NULL, " +
-                    "`user_id` INT NOT NULL, " +
-                    "`timestamp` TIMESTAMP DEFAULT CURRENT_TIMESTAMP, " +
-                    "`details` TEXT, " +
-                    "FOREIGN KEY (user_id) REFERENCES Users(UserId))";
-                
-                PreparedStatement createStmt = conn.prepareStatement(createTableSql);
-                createStmt.executeUpdate();
-                createStmt.close();
-                
-                // Insert sample data
-                String insertSql = "INSERT INTO `audit_log` (`action`, `user_id`, `details`) VALUES " +
-                    "('Login', 1, 'User logged in successfully'), " +
-                    "('Update Material', 1, 'Updated material ID 5'), " +
-                    "('Create Material', 1, 'Created new material')";
-                
-                try {
-                    PreparedStatement insertStmt = conn.prepareStatement(insertSql);
-                    insertStmt.executeUpdate();
-                    insertStmt.close();
-                } catch (SQLException ex) {
-                    // Ignore if insert fails (e.g., if user_id 1 doesn't exist)
-                }
-            }
-            
             String sql = "SELECT al.*, u.FullName AS user_name FROM audit_log al "
                     + "LEFT JOIN Users u ON al.user_id = u.UserId "
                     + "ORDER BY al.timestamp " + ("asc".equalsIgnoreCase(sortOrder) ? "ASC" : "DESC");

@@ -35,7 +35,7 @@
                     id="categoryId" name="categoryId" required>
                 <option value="">Select Category</option>
                 <c:forEach var="category" items="${categories}">
-                    <option value="${category.id}">${category.name}</option>
+                    <option value="${category.categoryId}">${category.categoryName}</option>
                 </c:forEach>
             </select>
         </div>

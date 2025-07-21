@@ -52,8 +52,12 @@
         <servlet-name>StatisticsServlet</servlet-name>
         <url-pattern>/statistics</url-pattern>
     </servlet-mapping>
+    <servlet>
+        <servlet-name>CategoryServlet</servlet-name>
+        <servlet-class>controller.general.CategoryServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
-        <servlet-name>CatalogServlet</servlet-name>
+        <servlet-name>CategoryServlet</servlet-name>
         <url-pattern>/catalog-management</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
@@ -64,6 +68,33 @@
         <servlet-name>CreatePurchaseOrderServlet</servlet-name>
         <url-pattern>/create-po</url-pattern>
     </servlet-mapping>
+    <servlet>
+        <servlet-name>EventActionServlet</servlet-name>
+        <servlet-class>controller.calendar.EventActionServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>EventActionServlet</servlet-name>
+        <url-pattern>/event-action</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>CalendarDataServlet</servlet-name>
+        <servlet-class>controller.calendar.CalendarDataServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>CalendarDataServlet</servlet-name>
+        <url-pattern>/calendar-data</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>InventoryStatisticServlet</servlet-name>
+        <servlet-class>controller.statistic.InventoryStatisticServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>InventoryStatisticServlet</servlet-name>
+        <url-pattern>/inventory-statistics</url-pattern>
+    </servlet-mapping>
+
     <welcome-file-list>
         <welcome-file>index.jsp</welcome-file>
     </welcome-file-list>

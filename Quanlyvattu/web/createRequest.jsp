@@ -1,368 +1,167 @@
-<%@ page contentType="text/html; charset=UTF-8" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Create Material Request</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100">
-    <div class="max-w-3xl mx-auto mt-8 px-4">
-        <div class="bg-white shadow-md rounded-lg overflow-hidden">
-            <div class="bg-blue-600 text-white p-4">
-                <h2 class="text-xl font-semibold">Create Material Request</h2>
-            </div>
-            <div class="p-6">
-                <!-- Alert messages -->
-                <c:if test="${not empty error}">
-                    <div class="bg-red-100 text-red-700 p-3 mb-4 rounded">${error}</div>
-                </c:if>
-                <c:if test="${not empty success}">
-                    <div class="bg-green-100 text-green-700 p-3 mb-4 rounded">${success}</div>
-                </c:if>
+<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<!-- This page is included in layout.jsp, using Tailwind CSS from layout -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="${pageContext.request.contextPath}/assets/js/request.js"></script>
 
-                <!-- Form -->
-                <form method="post" action="createrequest" class="space-y-6">
-                    <!-- Request Type -->
-                    <div>
-                        <label class="block font-medium mb-1">Request Type <span class="text-red-500">*</span></label>
-                        <select name="requestTypeId" required class="w-full border border-gray-300 rounded p-2" onchange="toggleStockCheck()">
-                            <option value="">-- Select a type --</option>
-                            <c:forEach var="type" items="${requestTypes}">
-                                 <c:if test="${type.requestTypeId != 2}">
-                                    <option value="${type.requestTypeId}">${type.requestTypeName}</option>
-                                </c:if>
-                            </c:forEach>
-                        </select>
-                    </div>
+<!-- Messages -->
+<c:if test="${not empty error}">
+  <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">${error}</div>
+</c:if>
+<c:if test="${not empty message}">
+  <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">${message}</div>
+</c:if>
 
-                    <!-- Category & SubCategory Filters -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block font-medium mb-1">Category</label>
-                            <select id="categoryFilter" class="w-full border border-gray-300 rounded p-2">
-                                <option value="">All Categories</option>
-                                <c:forEach var="cat" items="${categories}">
-                                    <option value="${cat.categoryId}">${cat.categoryName}</option>
-                                </c:forEach>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block font-medium mb-1">Sub‑Category</label>
-                            <select id="subCategoryFilter" class="w-full border border-gray-300 rounded p-2">
-                                <option value="">All Sub‑Categories</option>
-                                <c:forEach var="sc" items="${subCategories}">
-                                    <option value="${sc.subCategoryId}" data-cat="${sc.categoryId}">
-                                        ${sc.subCategoryName}
-                                    </option>
-                                </c:forEach>
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- Material List -->
-                    <div id="materialList" class="space-y-4">
-                        <div class="material-item grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-                            <div class="md:col-span-6">
-                                <label class="block font-medium mb-1">Material <span class="text-red-500">*</span></label>
-                                <select name="materialId" class="form-select w-full border border-gray-300 rounded p-2" required>
-                                    <option value="">-- Select material --</option>
-                                    <c:forEach var="m" items="${materials}">
-                                        <option value="${m.materialId}"
-                                                data-sub="${m.subCategoryId}"
-                                                data-stock="${m.quantity}">
-                                            ${m.materialName} (In stock: ${m.quantity})
-                                        </option>
-                                    </c:forEach>
-                                </select>
-                            </div>
-                            <div class="md:col-span-4">
-                                <label class="block font-medium mb-1">Quantity</label>
-                                <input type="number" name="quantity" class="w-full border border-gray-300 rounded p-2 quantity-input" min="1" required placeholder="Enter quantity" oninput="validateQuantity(this)">
-                                <small class="text-gray-500 stock-info"></small>
-                            </div>
-                            <div class="md:col-span-2">
-                                <button type="button" class="remove-material hidden text-white bg-red-500 hover:bg-red-600 rounded px-3 py-2 text-sm w-full">Remove</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Add Material Button -->
-                    <button type="button" onclick="addMaterial()" class="bg-gray-200 text-gray-800 hover:bg-gray-300 rounded px-4 py-2 text-sm">
-                        + Add another material
-                    </button>
-
-                    <!-- Note -->
-                    <div>
-                        <label class="block font-medium mb-1 mt-3">Note (optional)</label>
-                        <textarea name="note" rows="3" class="w-full border border-gray-300 rounded p-2" placeholder="Reason for request..."></textarea>
-                    </div>
-
-                    <!-- Buttons -->
-                    <div class="flex justify-between items-center mt-4">
-                        <a href="javascript:history.back()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded">Back</a>
-                        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded" onclick="return validateForm()">Submit Request</button>
-                    </div>
-                </form>
-            </div>
-        </div>
+<div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+  <!-- Debug info removed - issue resolved -->
+  
+  <!-- Header with Back button -->
+  <div class="flex justify-between items-center mb-6">
+    <h2 class="text-xl font-semibold text-gray-800">Create Request</h2>
+    <a href="${pageContext.request.contextPath}/reqlist" class="text-blue-600 hover:text-blue-800 flex items-center">
+      <i class="fas fa-arrow-left mr-2"></i> Back
+    </a>
+  </div>
+  
+  <form id="frmRequest" action="createrequest" method="post">
+    <!-- Request Type & SubType -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Request Type:</label>
+        <!-- Debug: Types count = ${fn:length(types)} -->
+        <select id="typeId" name="typeId" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <option value="">--Select Type--</option>
+          <c:forEach var="t" items="${types}">
+            <c:if test="${t.requestTypeId!=2&&t.requestTypeId!=4}">
+              <option value="${t.requestTypeId}">${t.requestTypeName}</option>
+            </c:if>
+          </c:forEach>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">SubType:</label>
+        <select id="subTypeId" name="subTypeId" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <option value="">--Select--</option>
+        </select>
+      </div>
     </div>
 
-    <script>
-        // Global variables
-        let stockCheckRequired = false;
-        let materialStockData = {};
+    <!-- Filter Materials Panel -->
+    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
+      <h3 class="text-lg font-medium text-gray-800 mb-4">Filter Materials</h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Category:</label>
+          <select id="catId" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="">--All--</option>
+            <c:forEach var="c" items="${categories}">
+              <option value="${c.categoryId}">${c.categoryName}</option>
+            </c:forEach>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">SubCategory:</label>
+          <select id="subCatId" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="">--All--</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Material:</label>
+          <select id="materialId" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="">--Select--</option>
+          </select>
+        </div>
+      </div>
+      <button type="button" id="btnFilter" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md">Reset Filter</button>
+    </div>
 
-        // Khởi tạo khi DOM đã load
-        document.addEventListener('DOMContentLoaded', function() {
-            initFilters();
-            updateRemoveButtons();
-            filterMaterials();
-            initMaterialStockData();
-        });
+    <!-- Stock Info & Quantity -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end mb-6">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Stock:</label>
+        <input type="text" id="stock" readonly class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md">
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Min Quantity:</label>
+        <input type="text" id="minQty" readonly class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md">
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Quantity:</label>
+        <input type="number" id="quantity" min="1" value="1" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+      </div>
+      <div>
+        <button type="button" id="btnAdd" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md w-full">Add Material</button>
+      </div>
+    </div>
 
-        function initMaterialStockData() {
-            // Initialize stock data from options
-            const firstSelect = document.querySelector('select[name="materialId"]');
-            const options = firstSelect.querySelectorAll('option');
-            options.forEach(function(opt) {
-                if (opt.value) {
-                    const stock = opt.getAttribute('data-stock');
-                    materialStockData[opt.value] = parseInt(stock) || 0;
-                }
-            });
-        }
+    <!-- Selected Materials Table -->
+    <div class="mb-6">
+      <h3 class="text-lg font-medium text-gray-800 mb-4">Selected Materials</h3>
+      <div class="overflow-x-auto border border-gray-200 rounded-lg">
+        <table id="tblItems" class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">STT</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <!-- Dynamic content will be added here -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <!-- Project -->
+    <div class="mb-6">
+      <label class="block text-sm font-medium text-gray-700 mb-2">Project:</label>
+      <select name="projectId" id="projectId"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <option value="">-- No Project --</option>
+        <c:forEach var="p" items="${projectList}">
+          <option value="${p.projectId}">${p.projectName}</option>
+        </c:forEach>
+      </select>
+    </div>
+    <!-- Note -->
+    <div class="mb-6">
+      <label class="block text-sm font-medium text-gray-700 mb-2">Note:</label>
+      <textarea name="note" id="note" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-vertical"></textarea>
+    </div>
 
-        function toggleStockCheck() {
-            const requestTypeId = document.querySelector('select[name="requestTypeId"]').value;
-            stockCheckRequired = (requestTypeId === '1' || requestTypeId === '4'); // Emergency or Special
-            
-            // Update all quantity inputs
-            const quantityInputs = document.querySelectorAll('.quantity-input');
-            quantityInputs.forEach(function(input) {
-                validateQuantity(input);
-            });
-        }
+    <!-- Submit Button -->
+    <div class="text-center">
+      <button type="submit" id="btnCreate" class="bg-blue-500 hover:bg-blue-600 text-white px-8 py-3 rounded-md font-medium">Create Request</button>
+    </div>
+  </form>
+</div>
 
-        function validateQuantity(input) {
-            const materialRow = input.closest('.material-item');
-            const materialSelect = materialRow.querySelector('select[name="materialId"]');
-            const stockInfo = materialRow.querySelector('.stock-info');
-            const materialId = materialSelect.value;
-            const quantity = parseInt(input.value) || 0;
-            
-            // Clear previous states
-            stockInfo.textContent = '';
-            input.classList.remove('border-red-500', 'border-green-500');
-            
-            // Only validate if material is selected and quantity is entered
-            if (!materialId || !quantity) {
-                return;
-            }
-            
-            const availableStock = materialStockData[materialId] || 0;
-            
-            // Only show warning for Emergency/Special requests when quantity exceeds stock
-            if (stockCheckRequired && quantity > availableStock) {
-                input.classList.add('border-red-500');
-                stockInfo.textContent = `Quantity exceeds available stock (${availableStock} available)`;
-                stockInfo.className = 'text-red-500 text-sm stock-info';
-            } else {
-                // Don't show any message for valid quantities
-                input.classList.add('border-green-500');
-                stockInfo.textContent = '';
-            }
-        }
+<c:if test="${not empty error}">
+<script>
+$(document).ready(function() {
+  // Show error message and auto-hide
+  setTimeout(function() {
+    $('.bg-red-100').fadeOut('slow');
+  }, 5000);
+});
+</script>
+</c:if>
 
-        function initFilters() {
-            // Event listener cho category filter
-            const categoryFilter = document.getElementById('categoryFilter');
-            if (categoryFilter) {
-                categoryFilter.addEventListener('change', function() {
-                    const catId = this.value;
-                    const subCategoryFilter = document.getElementById('subCategoryFilter');
-                    
-                    // Ẩn/hiện subcategory options
-                    const subOptions = subCategoryFilter.querySelectorAll('option');
-                    subOptions.forEach(function(opt) {
-                        if (opt.value === '') {
-                            opt.style.display = 'block'; // Always show "All Sub-Categories"
-                        } else {
-                            const optCat = opt.getAttribute('data-cat');
-                            opt.style.display = (!catId || optCat === catId) ? 'block' : 'none';
-                        }
-                    });
-                    
-                    // Reset subcategory selection
-                    subCategoryFilter.value = '';
-                    filterMaterials();
-                });
-            }
-
-            // Event listener cho subcategory filter
-            const subCategoryFilter = document.getElementById('subCategoryFilter');
-            if (subCategoryFilter) {
-                subCategoryFilter.addEventListener('change', filterMaterials);
-            }
-
-            // Event delegation cho material selects
-            const materialList = document.getElementById('materialList');
-            if (materialList) {
-                materialList.addEventListener('change', function(e) {
-                    if (e.target.name === 'materialId') {
-                        checkDuplicate(e.target);
-                        filterMaterials();
-                        // Update stock info when material changes
-                        const quantityInput = e.target.closest('.material-item').querySelector('.quantity-input');
-                        validateQuantity(quantityInput);
-                    }
-                });
-            }
-        }
-
-        function addMaterial() {
-            const list = document.getElementById('materialList');
-            const firstItem = list.querySelector('.material-item');
-            const newItem = firstItem.cloneNode(true);
-            
-            // Reset values
-            const select = newItem.querySelector('select[name="materialId"]');
-            const input = newItem.querySelector('input[name="quantity"]');
-            const stockInfo = newItem.querySelector('.stock-info');
-            if (select) select.value = '';
-            if (input) {
-                input.value = '';
-                input.classList.remove('border-red-500', 'border-green-500');
-            }
-            if (stockInfo) stockInfo.textContent = '';
-            
-            list.appendChild(newItem);
-            updateRemoveButtons();
-            filterMaterials();
-        }
-
-        function removeMaterial(btn) {
-            const items = document.querySelectorAll('.material-item');
-            if (items.length > 1) {
-                const item = btn.closest('.material-item');
-                item.remove();
-                updateRemoveButtons();
-                filterMaterials();
-            }
-        }
-
-        function updateRemoveButtons() {
-            const items = document.querySelectorAll('.material-item');
-            const removeButtons = document.querySelectorAll('.remove-material');
-            
-            removeButtons.forEach(function(btn) {
-                if (items.length > 1) {
-                    btn.style.display = 'block';
-                    btn.onclick = function() { removeMaterial(btn); };
-                } else {
-                    btn.style.display = 'none';
-                }
-            });
-        }
-
-        function filterMaterials() {
-            const catId = document.getElementById('categoryFilter').value;
-            const subId = document.getElementById('subCategoryFilter').value;
-            const selects = document.querySelectorAll('select[name="materialId"]');
-            
-            // Get all selected material IDs
-            const selectedIds = [];
-            selects.forEach(function(select) {
-                if (select.value) {
-                    selectedIds.push(select.value);
-                }
-            });
-
-            selects.forEach(function(select) {
-                const currentValue = select.value;
-                const options = select.querySelectorAll('option');
-                
-                options.forEach(function(opt) {
-                    if (!opt.value) {
-                        // Always show placeholder option
-                        opt.style.display = 'block';
-                        return;
-                    }
-
-                    const optSub = opt.getAttribute('data-sub');
-                    let optCat = '';
-                    
-                    // Find category for this subcategory
-                    if (optSub) {
-                        const subOption = document.querySelector('#subCategoryFilter option[value="' + optSub + '"]');
-                        if (subOption) {
-                            optCat = subOption.getAttribute('data-cat');
-                        }
-                    }
-
-                    // Check filters
-                    const matchesCategory = !catId || optCat === catId;
-                    const matchesSubCategory = !subId || optSub === subId;
-                    const isDuplicate = selectedIds.includes(opt.value) && opt.value !== currentValue;
-
-                    // Show/hide option
-                    if (matchesCategory && matchesSubCategory && !isDuplicate) {
-                        opt.style.display = 'block';
-                    } else {
-                        opt.style.display = 'none';
-                    }
-                });
-            });
-        }
-
-        function checkDuplicate(select) {
-            if (!select.value) return;
-            
-            const allSelects = document.querySelectorAll('select[name="materialId"]');
-            let isDuplicate = false;
-            
-            allSelects.forEach(function(otherSelect) {
-                if (otherSelect !== select && otherSelect.value === select.value) {
-                    isDuplicate = true;
-                }
-            });
-            
-            if (isDuplicate) {
-                alert('This material is already selected!');
-                select.value = '';
-            }
-        }
-
-        function validateForm() {
-            // Check if any materials are selected
-            const materialSelects = document.querySelectorAll('select[name="materialId"]');
-            let hasValidMaterial = false;
-            
-            for (let select of materialSelects) {
-                if (select.value) {
-                    hasValidMaterial = true;
-                    break;
-                }
-            }
-            
-            if (!hasValidMaterial) {
-                alert('Please select at least one material.');
-                return false;
-            }
-            
-            // Check stock validation for Emergency/Special requests
-            if (stockCheckRequired) {
-                const quantityInputs = document.querySelectorAll('.quantity-input');
-                for (let input of quantityInputs) {
-                    if (input.classList.contains('border-red-500')) {
-                        alert('Please fix quantity issues before submitting.');
-                        return false;
-                    }
-                }
-            }
-            
-            return true;
-        }
-    </script>
-</body>
-</html>
+<c:if test="${not empty message}">
+<script>
+$(document).ready(function() {
+  // Reset form after showing success message
+  if (typeof resetFormToInitialState === 'function') {
+    resetFormToInitialState();
+  }
+  
+  // Auto-hide success message
+  setTimeout(function() {
+    $('.bg-green-100').fadeOut('slow');
+  }, 3000);
+});
+</script>
+</c:if>

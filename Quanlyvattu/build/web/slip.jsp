@@ -30,9 +30,13 @@
 <div id="print-area" class="max-w-4xl mx-auto p-8 bg-white border border-gray-300 shadow-sm rounded-lg mt-10">
     <!-- Header -->
     <div class="text-center mb-8">
-        <h1 class="text-3xl font-bold">Warehouse Invoice</h1>
-        <p class="text-gray-600 mt-2">${requestType} Request #${requestId}</p>
-    </div>
+    <h1 class="text-3xl font-bold">Warehouse Invoice</h1>
+    <p class="text-sm text-gray-600 mt-1">Request Type: <strong>${requestType}</strong></p>
+    <p class="text-sm text-gray-600">Request ID: <strong>#${requestId}</strong></p>
+    <p class="text-sm text-gray-800 mt-1">
+        Slip ID: <span class="font-mono font-semibold text-blue-700">${taskLog.slipCode}</span>
+    </p>
+</div>
 
     <!-- Request Info -->
     <div class="grid grid-cols-2 gap-4 mb-6 text-sm">
@@ -42,7 +46,7 @@
         </div>
         <div>
             <p><strong>Processed by:</strong> ${staffName}</p>
-            <p><strong>Note:</strong> ${note}</p>
+            <p><strong>Description:</strong> ${note}</p>
         </div>
     </div>
 

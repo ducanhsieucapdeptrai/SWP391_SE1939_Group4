@@ -6,19 +6,7 @@
     <h2 class="text-2xl font-semibold mb-6">Advanced Dashboard</h2>
     
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <!-- Audit Log Button Card -->
-        <div class="bg-white rounded-lg shadow-md p-6 transition-transform transform hover:scale-105">
-            <div class="flex flex-col items-center text-center">
-                <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-                    <i class="fas fa-history text-blue-600 text-2xl"></i>
-                </div>
-                <h3 class="text-lg font-semibold mb-2">Audit Log</h3>
-                <p class="text-gray-600 mb-4">View system activity logs and track user actions.</p>
-                <a href="${pageContext.request.contextPath}/audit-log" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition duration-300">
-                    View Logs
-                </a>
-            </div>
-        </div>
+      
         
         <!-- Statistics Button Card -->
         <div class="bg-white rounded-lg shadow-md p-6 transition-transform transform hover:scale-105">
@@ -27,8 +15,8 @@
                     <i class="fas fa-chart-pie text-green-600 text-2xl"></i>
                 </div>
                 <h3 class="text-lg font-semibold mb-2">Statistics</h3>
-                <p class="text-gray-600 mb-4">View detailed material statistics and analytics.</p>
-                <a href="${pageContext.request.contextPath}/statistics" class="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg transition duration-300">
+                <p class="text-gray-600 mb-4">Xem thống kê chi tiết về nhập, xuất, tồn kho vật tư.</p>
+                <a href="${pageContext.request.contextPath}/material-statistics" class="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg transition duration-300">
                     View Statistics
                 </a>
             </div>
@@ -49,88 +37,7 @@
         </div>
     </div>
     
-    <!-- Recent Material Entries -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <!-- Recent Imports -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <h3 class="text-lg font-semibold mb-4 text-blue-600">Recent Material Imports</h3>
-            <c:choose>
-                <c:when test="${not empty recentImports}">
-                    <table class="w-full">
-                        <thead>
-                            <tr class="bg-gray-100 text-left">
-                                <th class="p-2">Material</th>
-                                <th class="p-2">Quantity</th>
-                                <th class="p-2">Date</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <c:forEach var="material" items="${recentImports}" varStatus="status">
-                                <tr class="${status.index % 2 == 0 ? 'bg-white' : 'bg-gray-50'}">
-                                    <td class="p-2">
-                                        <div class="font-medium">${material.materialName}</div>
-                                        <div class="text-sm text-gray-500">${material.categoryName} / ${material.subCategoryName}</div>
-                                    </td>
-                                    <td class="p-2 font-medium">${material.importQuantity}</td>
-                                    <td class="p-2">
-                                        <div class="font-medium">
-                                            <fmt:formatDate value="${material.importDate}" pattern="dd/MM/yyyy"/>
-                                        </div>
-                                        <div class="text-sm text-gray-500">
-                                            <fmt:formatDate value="${material.importDate}" pattern="HH:mm"/>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </c:forEach>
-                        </tbody>
-                    </table>
-                </c:when>
-                <c:otherwise>
-                    <p class="text-gray-500 text-center">No recent imports today</p>
-                </c:otherwise>
-            </c:choose>
-        </div>
-        
-        <!-- Recent Exports -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <h3 class="text-lg font-semibold mb-4 text-red-600">Recent Material Exports</h3>
-            <c:choose>
-                <c:when test="${not empty recentExports}">
-                    <table class="w-full">
-                        <thead>
-                            <tr class="bg-gray-100 text-left">
-                                <th class="p-2">Material</th>
-                                <th class="p-2">Quantity</th>
-                                <th class="p-2">Date</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <c:forEach var="material" items="${recentExports}" varStatus="status">
-                                <tr class="${status.index % 2 == 0 ? 'bg-white' : 'bg-gray-50'}">
-                                    <td class="p-2">
-                                        <div class="font-medium">${material.materialName}</div>
-                                        <div class="text-sm text-gray-500">${material.categoryName} / ${material.subCategoryName}</div>
-                                    </td>
-                                    <td class="p-2 font-medium">${material.exportQuantity}</td>
-                                    <td class="p-2">
-                                        <div class="font-medium">
-                                            <fmt:formatDate value="${material.exportDate}" pattern="dd/MM/yyyy"/>
-                                        </div>
-                                        <div class="text-sm text-gray-500">
-                                            <fmt:formatDate value="${material.exportDate}" pattern="HH:mm"/>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </c:forEach>
-                        </tbody>
-                    </table>
-                </c:when>
-                <c:otherwise>
-                    <p class="text-gray-500 text-center">No recent exports today</p>
-                </c:otherwise>
-            </c:choose>
-        </div>
-    </div>
+
     
     <!-- Back to Dashboard Button -->
     <div class="text-center mt-8">

@@ -64,7 +64,7 @@
             </div>
             <div class="flex justify-end gap-2">
                 <button type="button" onclick="closeResetModal()" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Cancel</button>
-                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Submit</button>
+                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Send new Password to email</button>
             </div>
         </form>
     </div>

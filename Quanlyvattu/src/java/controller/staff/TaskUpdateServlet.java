@@ -13,6 +13,7 @@ import jakarta.servlet.http.*;
 
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -42,19 +43,32 @@ public class TaskUpdateServlet extends HttpServlet {
 
         String requestIdStr = request.getParameter("requestId");
         if (requestIdStr == null || requestIdStr.isEmpty()) {
-            response.sendRedirect("tasklist.jsp");
+            response.sendRedirect(request.getContextPath() + "/tasklist");
             return;
         }
 
-        try (Connection conn = new DBContext().getConnection()) {
+        try {
             int requestId = Integer.parseInt(requestIdStr);
 
-            List<RequestDetailItem> items = requestDAO.getRequestDetails(requestId);
-            if (items.isEmpty()) {
-                request.setAttribute("errorMessage", "Request not found or has no details");
-                request.setAttribute("pageContent", "tasklist.jsp");
-                request.getRequestDispatcher("layout/layout.jsp").forward(request, response);
+            RequestDAO dao = requestDAO();
+            RequestList requestInfo = dao.getRequestById(requestId);
+            List<RequestDetailItem> items = dao.getRequestDetails(requestId);
+
+            if (requestInfo == null || items.isEmpty()) {
+                session.setAttribute("errorMessage", "Request not found.");
+                response.sendRedirect(request.getContextPath() + "/tasklist");
                 return;
+            }
+
+            if ("Pending".equalsIgnoreCase(requestInfo.getStatus())) {
+                session.setAttribute("errorMessage", "This request is still pending and cannot be processed.");
+                response.sendRedirect(request.getContextPath() + "/tasklist");
+                return;
+            }
+
+            List<TaskLog> taskLogs;
+            try (Connection conn = new DBContext().getConnection()) {
+                taskLogs = taskLogDAO.getGroupedTaskLogsByRequestId(conn, requestId);
             }
 
             List<String> incompleteItems = new ArrayList<>();
@@ -64,13 +78,8 @@ public class TaskUpdateServlet extends HttpServlet {
                 }
             }
 
-            List<TaskLog> taskLogs = taskLogDAO.getGroupedTaskLogsByRequestId(conn, requestId);
-
-            RequestList requestInfo = requestDAO.getRequestById(requestId);
-            if (requestInfo != null) {
-                request.setAttribute("createdBy", requestInfo.getRequestedByName());
-                request.setAttribute("createdAt", requestInfo.getRequestDate());
-            }
+            request.setAttribute("createdBy", requestInfo.getRequestedByName());
+            request.setAttribute("createdAt", requestInfo.getRequestDate());
 
             String successMessage = (String) session.getAttribute("successMessage");
             String errorMessage = (String) session.getAttribute("errorMessage");
@@ -96,9 +105,8 @@ public class TaskUpdateServlet extends HttpServlet {
 
         } catch (NumberFormatException | SQLException e) {
             e.printStackTrace();
-            request.setAttribute("errorMessage", "Error loading request details");
-            request.setAttribute("pageContent", "tasklist.jsp");
-            request.getRequestDispatcher("layout/layout.jsp").forward(request, response);
+            session.setAttribute("errorMessage", "Error loading request details");
+            response.sendRedirect(request.getContextPath() + "/tasklist");
         }
     }
 
@@ -118,7 +126,7 @@ public class TaskUpdateServlet extends HttpServlet {
         String requestIdStr = request.getParameter("requestId");
 
         if (requestIdStr == null || requestIdStr.isEmpty()) {
-            response.sendRedirect("tasklist.jsp");
+            response.sendRedirect(request.getContextPath() + "/tasklist");
             return;
         }
 
@@ -133,7 +141,7 @@ public class TaskUpdateServlet extends HttpServlet {
 
         } catch (NumberFormatException e) {
             e.printStackTrace();
-            response.sendRedirect("tasklist.jsp");
+            response.sendRedirect(request.getContextPath() + "/tasklist");
         }
     }
 
@@ -143,7 +151,8 @@ public class TaskUpdateServlet extends HttpServlet {
         HttpSession session = request.getSession();
 
         try {
-            List<RequestDetailItem> items = requestDAO.getRequestDetails(requestId);
+            RequestDAO dao = requestDAO();
+            List<RequestDetailItem> items = dao.getRequestDetails(requestId);
             if (items.isEmpty()) {
                 session.setAttribute("errorMessage", "Request not found");
                 response.sendRedirect("taskUpdate?requestId=" + requestId);
@@ -153,59 +162,24 @@ public class TaskUpdateServlet extends HttpServlet {
             String requestType = items.get(0).getRequestTypeName();
             int requestTypeId = "Import".equalsIgnoreCase(requestType) ? 1 : 2;
 
-            List<Integer> materialIds = new ArrayList<>();
-            List<Integer> actualQuantities = new ArrayList<>();
-            boolean hasValidData = false;
+            ParsedSlipData parsed = parseSlipInput(request, requestId, requestType, dao);
 
-            List<String> exceededMaterials = new ArrayList<>();
-            List<String> stockExceededMaterials = new ArrayList<>();
-            List<String> invalidQuantities = new ArrayList<>();
-
-            for (RequestDetailItem item : items) {
-                String actualQtyStr = request.getParameter("actualQty_" + item.getMaterialId());
-                if (actualQtyStr != null && !actualQtyStr.trim().isEmpty()) {
-                    try {
-                        int actualQty = Integer.parseInt(actualQtyStr.trim());
-                        if (actualQty > 0) {
-                            int remainingQty = item.getQuantity() - item.getActualQuantity();
-
-                            if ("Export".equalsIgnoreCase(requestType) && actualQty > item.getStockQuantity()) {
-                                stockExceededMaterials.add(item.getMaterialName());
-                            }
-
-                            if (actualQty > remainingQty) {
-                                exceededMaterials.add(item.getMaterialName());
-                            }
-
-                            materialIds.add(item.getMaterialId());
-                            actualQuantities.add(actualQty);
-                            hasValidData = true;
-                        }
-                    } catch (NumberFormatException e) {
-                        invalidQuantities.add(item.getMaterialName());
-                    }
-                }
-            }
-
-            if (!invalidQuantities.isEmpty()) {
-                session.setAttribute("errorMessage", "Invalid quantity for: " + String.join(", ", invalidQuantities));
+            if (!parsed.invalidQuantities.isEmpty()) {
+                session.setAttribute("errorMessage", "Invalid quantity for: " + String.join(", ", parsed.invalidQuantities));
                 response.sendRedirect("taskUpdate?requestId=" + requestId);
                 return;
             }
-
-            if (!exceededMaterials.isEmpty()) {
-                session.setAttribute("errorMessage", "Actual quantity exceeds remaining amount for: " + String.join(", ", exceededMaterials));
+            if (!parsed.exceededMaterials.isEmpty()) {
+                session.setAttribute("errorMessage", "Actual quantity exceeds remaining amount for: " + String.join(", ", parsed.exceededMaterials));
                 response.sendRedirect("taskUpdate?requestId=" + requestId);
                 return;
             }
-
-            if (!stockExceededMaterials.isEmpty()) {
-                session.setAttribute("errorMessage", "Actual quantity exceeds stock for: " + String.join(", ", stockExceededMaterials));
+            if (!parsed.stockExceededMaterials.isEmpty()) {
+                session.setAttribute("errorMessage", "Actual quantity exceeds stock for: " + String.join(", ", parsed.stockExceededMaterials));
                 response.sendRedirect("taskUpdate?requestId=" + requestId);
                 return;
             }
-
-            if (!hasValidData) {
+            if (!parsed.hasValidData) {
                 session.setAttribute("errorMessage", "Please enter at least one valid actual quantity");
                 response.sendRedirect("taskUpdate?requestId=" + requestId);
                 return;
@@ -214,9 +188,11 @@ public class TaskUpdateServlet extends HttpServlet {
             try (Connection conn = new DBContext().getConnection()) {
                 conn.setAutoCommit(false);
 
-                boolean success = updateStockAndQuantities(conn, requestId, materialIds, actualQuantities, requestType);
+                boolean success = updateStockAndQuantities(conn, requestId, parsed.materialIds, parsed.actualQuantities, requestType);
 
                 if (success) {
+                    String slipCode = taskLogDAO.generateSlipCode(conn);
+
                     success = taskLogDAO.insertTaskLogWithDetails(
                             conn,
                             requestId,
@@ -256,7 +232,7 @@ public class TaskUpdateServlet extends HttpServlet {
             String requestType) throws SQLException {
 
         String updateDetailSql = "UPDATE RequestDetail SET ActualQuantity = ActualQuantity + ? WHERE RequestId = ? AND MaterialId = ?";
-        try (var detailStmt = conn.prepareStatement(updateDetailSql)) {
+        try (PreparedStatement detailStmt = conn.prepareStatement(updateDetailSql)) {
             for (int i = 0; i < materialIds.size(); i++) {
                 detailStmt.setInt(1, quantities.get(i));
                 detailStmt.setInt(2, requestId);
@@ -266,21 +242,18 @@ public class TaskUpdateServlet extends HttpServlet {
             detailStmt.executeBatch();
         }
 
-        String stockSql;
         if ("Import".equalsIgnoreCase(requestType)) {
-            stockSql = "UPDATE Materials SET Quantity = Quantity + ? WHERE MaterialId = ?";
-        } else {
-            stockSql = "UPDATE Materials SET Quantity = Quantity - ? WHERE MaterialId = ? AND Quantity >= ?";
-        }
-
-        try (var stockStmt = conn.prepareStatement(stockSql)) {
-            for (int i = 0; i < materialIds.size(); i++) {
-                stockStmt.setInt(1, quantities.get(i));
-                stockStmt.setInt(2, materialIds.get(i));
-                if ("Export".equalsIgnoreCase(requestType)) {
-                    stockStmt.setInt(3, quantities.get(i));
+            String stockSql = "UPDATE Materials SET Quantity = Quantity + ? WHERE MaterialId = ?";
+            try (PreparedStatement stockStmt = conn.prepareStatement(stockSql)) {
+                for (int i = 0; i < materialIds.size(); i++) {
+                    stockStmt.setInt(1, quantities.get(i));
+                    stockStmt.setInt(2, materialIds.get(i));
+                    stockStmt.addBatch();
                 }
-                stockStmt.addBatch();
+                int[] results = stockStmt.executeBatch();
+                for (int result : results) {
+                    if (result <= 0) return false;
+                }
             }
             int[] results = stockStmt.executeBatch();
             for (int result : results) {
@@ -299,24 +272,74 @@ public class TaskUpdateServlet extends HttpServlet {
             List<RequestDetailItem> items = requestDAO.getRequestDetails(requestId);
             TaskLog latestTaskLog = taskLogDAO.getLatestTaskLogByRequestId(conn, requestId);
 
-            if (items.isEmpty() || latestTaskLog == null) {
-                request.getSession().setAttribute("errorMessage", "No slip data found to print");
-                response.sendRedirect("taskUpdate?requestId=" + requestId);
-                return;
+        try {
+            List<RequestDetailItem> items = requestDAO().getRequestDetails(requestId);
+
+            try (Connection conn = new DBContext().getConnection()) {
+                TaskLog latestTaskLog = taskLogDAO.getLatestTaskLogByRequestId(conn, requestId);
+
+                if (items.isEmpty() || latestTaskLog == null) {
+                    session.setAttribute("errorMessage", "No slip data found to print");
+                    response.sendRedirect("taskUpdate?requestId=" + requestId);
+                    return;
+                }
+
+                request.setAttribute("requestId", requestId);
+                request.setAttribute("taskLog", latestTaskLog);
+                request.setAttribute("requestType", latestTaskLog.getRequestTypeName());
+                request.setAttribute("note", items.get(0).getNote());
+                request.setAttribute("staffName", latestTaskLog.getStaffName());
+                request.setAttribute("signDate", new java.util.Date());
+
+                request.getRequestDispatcher("slip.jsp").forward(request, response);
             }
 
-            request.setAttribute("requestId", requestId);
-            request.setAttribute("taskLog", latestTaskLog);
-            request.setAttribute("requestType", latestTaskLog.getRequestTypeName());
-            request.setAttribute("note", items.get(0).getNote());
-            request.setAttribute("staffName", latestTaskLog.getStaffName());
-            request.setAttribute("signDate", new java.util.Date());
-
-            request.getRequestDispatcher("slip.jsp").forward(request, response);
         } catch (SQLException e) {
             e.printStackTrace();
-            request.getSession().setAttribute("errorMessage", "Error generating slip");
+            session.setAttribute("errorMessage", "Error generating slip");
             response.sendRedirect("taskUpdate?requestId=" + requestId);
         }
+    }
+
+    public static class ParsedSlipData {
+        public List<RequestDetailItem> items;
+        public List<Integer> materialIds = new ArrayList<>();
+        public List<Integer> actualQuantities = new ArrayList<>();
+        public boolean hasValidData = false;
+        public List<String> exceededMaterials = new ArrayList<>();
+        public List<String> stockExceededMaterials = new ArrayList<>();
+        public List<String> invalidQuantities = new ArrayList<>();
+    }
+
+    public static ParsedSlipData parseSlipInput(HttpServletRequest request, int requestId, String requestType, RequestDAO requestDAO) throws SQLException {
+        ParsedSlipData data = new ParsedSlipData();
+        data.items = requestDAO.getRequestDetails(requestId);
+
+        for (RequestDetailItem item : data.items) {
+            String actualQtyStr = request.getParameter("actualQty_" + item.getMaterialId());
+            if (actualQtyStr != null && !actualQtyStr.trim().isEmpty()) {
+                try {
+                    int actualQty = Integer.parseInt(actualQtyStr.trim());
+                    if (actualQty > 0) {
+                        int remainingQty = item.getQuantity() - item.getActualQuantity();
+
+                        if ("Export".equalsIgnoreCase(requestType) && actualQty > item.getStockQuantity()) {
+                            data.stockExceededMaterials.add(item.getMaterialName());
+                        }
+                        if (actualQty > remainingQty) {
+                            data.exceededMaterials.add(item.getMaterialName());
+                        }
+
+                        data.materialIds.add(item.getMaterialId());
+                        data.actualQuantities.add(actualQty);
+                        data.hasValidData = true;
+                    }
+                } catch (NumberFormatException e) {
+                    data.invalidQuantities.add(item.getMaterialName());
+                }
+            }
+        }
+
+        return data;
     }
 }

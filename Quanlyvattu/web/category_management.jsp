@@ -3,7 +3,7 @@
 
 <div class="container mx-auto">
     <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl font-semibold">Catalog Management</h2>
+        <h2 class="text-2xl font-semibold">Category Management</h2>
         <div>
             <a href="${pageContext.request.contextPath}/advanced-dashboard" class="inline-flex items-center text-blue-600 hover:text-blue-800">
                 <i class="fas fa-arrow-left mr-2"></i> Back to Advanced Dashboard
@@ -27,8 +27,8 @@
     <!-- Search and Sort Section -->
     <div class="flex justify-between items-center mb-6">
         <div class="flex-grow mr-4">
-            <form action="${pageContext.request.contextPath}/catalog-management" method="get" class="flex">
-                <input type="text" name="search" placeholder="Search catalog items" 
+            <form action="${pageContext.request.contextPath}/category-management" method="get" class="flex">
+                <input type="text" name="search" placeholder="Search categories" 
                        value="${searchTerm}" 
                        class="w-full px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                 <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-r-md">
@@ -38,7 +38,7 @@
         </div>
         
         <div>
-            <select onchange="location.href='${pageContext.request.contextPath}/catalog-management?sortBy=' + this.value" 
+            <select onchange="location.href='${pageContext.request.contextPath}/category-management?sortBy=' + this.value" 
                     class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                 <option value="CategoryId" ${sortBy == 'CategoryId' ? 'selected' : ''}>Sort by ID</option>
                 <option value="CategoryName" ${sortBy == 'CategoryName' ? 'selected' : ''}>Sort by Name</option>
@@ -48,7 +48,7 @@
         <div class="ml-4">
             <button type="button" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition duration-300" 
                     onclick="openAddModal()">
-                <i class="fas fa-plus mr-2"></i> Add New Catalog Item
+                <i class="fas fa-plus mr-2"></i> Add New Category
             </button>
         </div>
     </div>
@@ -59,7 +59,7 @@
             <thead class="bg-gray-50">
                 <tr>
                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        <a href="${pageContext.request.contextPath}/catalog-management?sortBy=CategoryId" class="flex items-center">
+                        <a href="${pageContext.request.contextPath}/category-management?sortBy=CategoryId" class="flex items-center">
                             ID 
                             <c:if test="${sortBy == 'CategoryId'}">
                                 <i class="fas fa-sort-down ml-2"></i>
@@ -67,32 +67,30 @@
                         </a>
                     </th>
                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        <a href="${pageContext.request.contextPath}/catalog-management?sortBy=CategoryName" class="flex items-center">
+                        <a href="${pageContext.request.contextPath}/category-management?sortBy=CategoryName" class="flex items-center">
                             Name 
                             <c:if test="${sortBy == 'CategoryName'}">
                                 <i class="fas fa-sort-down ml-2"></i>
                             </c:if>
                         </a>
                     </th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
                 <c:choose>
-                    <c:when test="${not empty catalogItems}">
-                        <c:forEach var="item" items="${catalogItems}">
+                    <c:when test="${not empty categories}">
+                        <c:forEach var="category" items="${categories}">
                             <tr class="hover:bg-gray-50">
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${item.id}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${item.name}</td>
-                                <td class="px-6 py-4 text-sm text-gray-500">${item.description}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${category.categoryId}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${category.categoryName}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                     <button type="button" class="text-blue-600 hover:text-blue-900 mr-3" 
-                                            data-id="${item.id}" data-name="${item.name}" data-description="${item.description}" onclick="editItem(this)">
+                                            data-id="${category.categoryId}" data-name="${category.categoryName}" onclick="editItem(this)">
                                         <i class="fas fa-edit"></i> Edit
                                     </button>
                                     <button type="button" class="text-red-600 hover:text-red-900" 
-                                            data-id="${item.id}" data-name="${item.name}" onclick="deleteItem(this)">
+                                            data-id="${category.categoryId}" data-name="${category.categoryName}" onclick="deleteItem(this)">
                                         <i class="fas fa-trash-alt"></i> Delete
                                     </button>
                                 </td>
@@ -101,8 +99,8 @@
                     </c:when>
                     <c:otherwise>
                         <tr>
-                            <td colspan="4" class="px-6 py-4 text-center text-sm text-gray-500">
-                                No catalog items found. Add your first item using the button above.
+                            <td colspan="3" class="px-6 py-4 text-center text-sm text-gray-500">
+                                No categories found. Add your first category using the button above.
                             </td>
                         </tr>
                     </c:otherwise>
@@ -116,12 +114,12 @@
 <div id="addModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50 hidden">
     <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
         <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-semibold">Add New Catalog Item</h3>
+            <h3 class="text-lg font-semibold">Add New Category</h3>
             <button type="button" class="text-gray-400 hover:text-gray-600" onclick="closeAddModal()">
                 <i class="fas fa-times"></i>
             </button>
         </div>
-        <form action="${pageContext.request.contextPath}/catalog-management" method="post">
+        <form action="${pageContext.request.contextPath}/category-management" method="post">
             <input type="hidden" name="action" value="add">
             
             <div class="mb-4">
@@ -130,19 +128,13 @@
                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
             </div>
             
-            <div class="mb-4">
-                <label for="addDescription" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                <textarea id="addDescription" name="description" rows="3"
-                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
-            </div>
-            
             <div class="flex justify-end">
                 <button type="button" class="bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 px-4 rounded-lg mr-2" 
                         onclick="closeAddModal()">
                     Cancel
                 </button>
                 <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg">
-                    Add Item
+                    Add Category
                 </button>
             </div>
         </form>
@@ -153,12 +145,12 @@
 <div id="editModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50 hidden">
     <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
         <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-semibold">Edit Catalog Item</h3>
+            <h3 class="text-lg font-semibold">Edit Category</h3>
             <button type="button" class="text-gray-400 hover:text-gray-600" onclick="closeEditModal()">
                 <i class="fas fa-times"></i>
             </button>
         </div>
-        <form action="${pageContext.request.contextPath}/catalog-management" method="post">
+        <form action="${pageContext.request.contextPath}/category-management" method="post">
             <input type="hidden" name="action" value="edit">
             <input type="hidden" id="editId" name="id">
             
@@ -168,19 +160,13 @@
                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
             </div>
             
-            <div class="mb-4">
-                <label for="editDescription" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                <textarea id="editDescription" name="description" rows="3"
-                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
-            </div>
-            
             <div class="flex justify-end">
                 <button type="button" class="bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 px-4 rounded-lg mr-2" 
                         onclick="closeEditModal()">
                     Cancel
                 </button>
                 <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg">
-                    Update Item
+                    Update Category
                 </button>
             </div>
         </form>
@@ -196,8 +182,8 @@
                 <i class="fas fa-times"></i>
             </button>
         </div>
-        <p class="mb-4">Are you sure you want to delete the catalog item: <span id="deleteItemName" class="font-semibold"></span>?</p>
-        <form action="${pageContext.request.contextPath}/catalog-management" method="post">
+        <p class="mb-4">Are you sure you want to delete the category: <span id="deleteItemName" class="font-semibold"></span>?</p>
+        <form action="${pageContext.request.contextPath}/category-management" method="post">
             <input type="hidden" name="action" value="delete">
             <input type="hidden" id="deleteId" name="id">
             
@@ -224,18 +210,15 @@
     function closeAddModal() {
         document.getElementById('addModal').classList.add('hidden');
         document.getElementById('addName').value = '';
-        document.getElementById('addDescription').value = '';
     }
     
     // Edit Modal Functions
     function editItem(button) {
         const id = button.getAttribute('data-id');
         const name = button.getAttribute('data-name');
-        const description = button.getAttribute('data-description');
         
         document.getElementById('editId').value = id;
         document.getElementById('editName').value = name;
-        document.getElementById('editDescription').value = description;
         document.getElementById('editModal').classList.remove('hidden');
     }
     

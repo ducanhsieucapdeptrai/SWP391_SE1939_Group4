@@ -59,7 +59,7 @@ public class UserDAO extends DBContext {
     public Users getUserByEmail(String email) {
         Users user = null;
         String sql = "SELECT u.*, r.RoleName FROM Users u JOIN Roles r ON u.RoleID = r.RoleID WHERE u.Email = ?";
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, email);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -94,6 +94,90 @@ public class UserDAO extends DBContext {
             e.printStackTrace();
         }
         return user;
+    }
+
+    public List<Users> getUsers(String searchQuery, int roleId, int status, String sortBy, String sortOrder, int page, int pageSize) {
+        List<Users> list = new ArrayList<>();
+        StringBuilder sql = new StringBuilder("SELECT * FROM users WHERE 1=1");
+
+        if (searchQuery != null && !searchQuery.trim().isEmpty()) {
+            sql.append(" AND (fullName LIKE ? OR email LIKE ?)");
+        }
+        if (roleId > 0) {
+            sql.append(" AND roleId = ?");
+        }
+        if (status != -1) { // -1 for All, 0 for Inactive, 1 for Active
+            sql.append(" AND isActive = ?");
+        }
+
+        if (sortBy != null && !sortBy.isEmpty()) {
+            sql.append(" ORDER BY ").append(sortBy).append(" ").append(sortOrder);
+        } else {
+            sql.append(" ORDER BY userId ASC");
+        }
+
+        sql.append(" LIMIT ? OFFSET ?");
+
+        try (PreparedStatement ps = connection.prepareStatement(sql.toString())) {
+            int paramIndex = 1;
+            if (searchQuery != null && !searchQuery.trim().isEmpty()) {
+                ps.setString(paramIndex++, "%" + searchQuery + "%");
+                ps.setString(paramIndex++, "%" + searchQuery + "%");
+            }
+            if (roleId > 0) {
+                ps.setInt(paramIndex++, roleId);
+            }
+            if (status != -1) {
+                ps.setInt(paramIndex++, status);
+            }
+            ps.setInt(paramIndex++, pageSize);
+            ps.setInt(paramIndex++, (page - 1) * pageSize);
+
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Users user = new Users();
+                user.setUserId(rs.getInt("userId"));
+                user.setFullName(rs.getString("fullName"));
+                user.setEmail(rs.getString("email"));
+                user.setRoleId(rs.getInt("roleId"));
+                user.setIsActive(rs.getBoolean("isActive"));
+                list.add(user);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public int getUserCount(String searchQuery, int roleId, int status) {
+        int count = 0;
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM users WHERE 1=1");
+
+        if (searchQuery != null && !searchQuery.trim().isEmpty()) {
+            sql.append(" AND (fullName LIKE ? OR email LIKE ?)");
+        }
+
+        try (PreparedStatement ps = connection.prepareStatement(sql.toString())) {
+            int paramIndex = 1;
+            if (searchQuery != null && !searchQuery.trim().isEmpty()) {
+                ps.setString(paramIndex++, "%" + searchQuery + "%");
+                ps.setString(paramIndex++, "%" + searchQuery + "%");
+            }
+            if (roleId > 0) {
+                ps.setInt(paramIndex++, roleId);
+            }
+            if (status != -1) {
+                ps.setInt(paramIndex++, status);
+            }
+
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                count = rs.getInt(1);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return count;
     }
 
     public List<Users> getAllUsers() {
@@ -282,6 +366,30 @@ public class UserDAO extends DBContext {
             return false;
         }
     }
+    public List<Users> getUsersByRoleNames(List<String> roleNames) {
+        List<Users> list = new ArrayList<>();
+        if (roleNames == null || roleNames.isEmpty()) return list;
+
+        String placeholders = String.join(",", java.util.Collections.nCopies(roleNames.size(), "?"));
+        String sql = "SELECT u.*, r.RoleName FROM Users u JOIN Roles r ON u.RoleId = r.RoleId WHERE r.RoleName IN (" + placeholders + ")";
+
+        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            for (int i = 0; i < roleNames.size(); i++) {
+                ps.setString(i + 1, roleNames.get(i));
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Users user = extractUserFromResultSet(rs);
+                    list.add(user);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
 
     public static void main(String[] args) {
         UserDAO dao = new UserDAO();
@@ -294,5 +402,4 @@ public class UserDAO extends DBContext {
 
         System.out.println(u.getEmail());
     }
-
 }

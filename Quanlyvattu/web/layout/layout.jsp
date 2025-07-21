@@ -253,20 +253,103 @@
                 </main>
             </div>
         </div>
-        <script>
-            function toggleSubmenu(id) {
-                const submenu = document.getElementById(id);
-                submenu.classList.toggle("hidden");
+    </header>
 
-                const chevron = event.currentTarget.querySelector("i.fas.fa-chevron-down");
-                if (chevron) {
-                    chevron.classList.toggle("rotate-180");
-                }
-            }
+    <!-- Layout -->
+    <div class="flex flex-1">
+        <!-- Sidebar -->
+        <aside class="bg-blue-800 text-white w-64 p-4 hidden md:block">
+            <nav>
+                <ul>
+                    <li class="mb-2"><a href="${pageContext.request.contextPath}/dashboard" class="flex items-center px-4 py-2 rounded hover:bg-gray-700"><i class="fas fa-tachometer-alt mr-2"></i> Dashboard</a></li>
+                    <li class="mb-2"><a href="${pageContext.request.contextPath}/materiallist" class="flex items-center px-4 py-2 rounded hover:bg-gray-700"><i class="fas fa-boxes mr-2"></i> Inventory</a></li>
 
-            document.getElementById("userMenuBtn")?.addEventListener("click", () => {
-                document.getElementById("userMenu")?.classList.toggle("hidden");
-            });
-        </script>
-    </body>
+                    <c:if test="${sessionScope.userRole == 'Warehouse Staff'}">
+                        <li class="mb-1">
+                            <a href="${pageContext.request.contextPath}/tasklist" class="block px-4 py-2 rounded hover:bg-gray-700">
+                                <i class="fas fa-tasks mr-2"></i> Task List
+                            </a>
+                        </li>
+                    </c:if>
+
+                    <c:if test="${sessionScope.userRole == 'Warehouse Manager' || sessionScope.userRole == 'Director'}">
+                        <li class="mb-1">
+                            <a href="#" onclick="toggleSubmenu('reqSubmenu')" class="block px-4 py-2 rounded hover:bg-gray-700">
+                                <i class="fas fa-tasks mr-2"></i> Request
+                                <i class="fas fa-chevron-down float-right"></i>
+                            </a>
+                            <ul id="reqSubmenu" class="hidden ml-4 mt-1">
+                                <li class="mb-1"><a href="${pageContext.request.contextPath}/reqlist" class="block px-3 py-2 rounded hover:bg-gray-600 text-gray-300 hover:text-white"><i class="fas fa-user-plus mr-2"></i> Request List</a></li>
+                                <li class="mb-1"><a href="${pageContext.request.contextPath}/purchase-request-list" class="block px-3 py-2 rounded hover:bg-gray-600 text-gray-300 hover:text-white"><i class="fas fa-shopping-cart mr-2"></i> Order Requests</a></li>
+                                <li class="mb-1"><a href="${pageContext.request.contextPath}/my-request" class="block px-3 py-2 rounded hover:bg-gray-600 text-gray-300 hover:text-white"><i class="fas fa-check-circle mr-2"></i> My Request</a></li>
+                            </ul>
+                        </li>
+
+                        <li class="mb-1">
+                            <a href="#" onclick="toggleSubmenu('taskSubmenu')" class="block px-4 py-2 rounded hover:bg-gray-700">
+                                <i class="fas fa-tasks mr-2"></i> Task
+                                <i class="fas fa-chevron-down float-right"></i>
+                            </a>
+                            <ul id="taskSubmenu" class="hidden ml-4 mt-1">
+                                <li class="mb-1"><a href="${pageContext.request.contextPath}/tasklist" class="block px-3 py-2 rounded hover:bg-gray-600 text-gray-300 hover:text-white"><i class="fas fa-user-plus mr-2"></i> Task List</a></li>
+                                <li class="mb-1"><a href="${pageContext.request.contextPath}/completedTasks" class="block px-3 py-2 rounded hover:bg-gray-600 text-gray-300 hover:text-white"><i class="fas fa-check-circle mr-2"></i> Completed Task</a></li>
+                            </ul>
+                        </li>
+
+                        <!-- Project menu -->
+                        <li class="mb-1">
+                            <a href="${pageContext.request.contextPath}/project" class="flex items-center px-4 py-2 rounded hover:bg-gray-700">
+                                <i class="fas fa-tasks mr-2"></i> Project
+                            </a>
+                        </li>
+                    </c:if>
+
+                    <c:if test="${sessionScope.userRole == 'Warehouse Manager'}">
+                        <li class="mb-2">
+                            <a href="#" onclick="toggleSubmenu('userManagerSubmenu')" class="flex items-center px-4 py-2 rounded hover:bg-gray-700">
+                                <i class="fas fa-users mr-2"></i> User Manager
+                                <i class="fas fa-chevron-down ml-auto"></i>
+                            </a>
+                            <ul id="userManagerSubmenu" class="ml-4 mt-2 hidden">
+                                <li class="mb-1"><a href="${pageContext.request.contextPath}/userlist" class="block px-3 py-2 rounded hover:bg-gray-600">User List</a></li>
+                                <li><a href="${pageContext.request.contextPath}/reset-pass-list" class="block px-3 py-2 rounded hover:bg-gray-600">Requests Reset Password</a></li>
+                                <li><a href="${pageContext.request.contextPath}/user-matrix" class="block px-3 py-2 rounded hover:bg-gray-600">Authorization</a></li>
+                            </ul>
+                        </li>
+                    </c:if>
+
+                    <c:if test="${sessionScope.userRole == 'Company Staff'}">
+                        <li class="mb-2"><a href="${pageContext.request.contextPath}/my-request" class="flex items-center px-4 py-2 rounded hover:bg-gray-700"><i class="fas fa-envelope-open-text mr-2"></i> My Request</a></li>
+                    </c:if>
+
+                    <li><a href="advanced-dashboard" class="flex items-center px-4 py-2 rounded hover:bg-gray-700"><i class="fas fa-clipboard-list mr-2"></i> More</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 bg-gray-100 p-6 overflow-auto">
+            <c:if test="${not empty pageContent}">
+                <jsp:include page="${pageContent}" />
+            </c:if>
+        </main>
+    </div>
+</div>
+
+<script>
+    function toggleSubmenu(id) {
+        const submenu = document.getElementById(id);
+        submenu.classList.toggle("hidden");
+
+        const chevron = event.currentTarget.querySelector("i.fas.fa-chevron-down");
+        if (chevron) {
+            chevron.classList.toggle("rotate-180");
+        }
+    }
+
+    document.getElementById("userMenuBtn")?.addEventListener("click", () => {
+        document.getElementById("userMenu")?.classList.toggle("hidden");
+    });
+</script>
+</body>
 </html>

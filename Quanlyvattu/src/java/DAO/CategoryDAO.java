@@ -1,7 +1,7 @@
 package DAO;
 
 import dal.DBContext;
-import model.Catalog;
+import model.Category;
 import model.SubCategory;
 
 import java.sql.PreparedStatement;
@@ -11,35 +11,28 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Data Access Object for Categories table (used as catalog)
+ * Data Access Object for Categories table
  */
-public class CatalogDAO extends DBContext{
-   
-
+public class CategoryDAO {
+    private final DBContext dbContext = new DBContext();
 
     /**
-     * Retrieves all catalog items from the database
-     * @return List of Catalog objects
+     * Retrieves all categories from the database
+     * @return List of Category objects
      * @throws SQLException if a database error occurs
      */
-    /**
-     * Retrieves all catalog items from the database
-     * @return List of Catalog objects
-     * @throws SQLException if a database error occurs
-     */
-    public List<Catalog> getAllCatalogItems() throws SQLException {
-        List<Catalog> categories = new ArrayList<>();
+    public List<Category> getAllCategories() throws SQLException {
+        List<Category> categories = new ArrayList<>();
         
         try (
-             PreparedStatement stmt = connection.prepareStatement(
+             PreparedStatement stmt = dbContext.getConnection().prepareStatement(
                      "SELECT CategoryId, CategoryName FROM Categories ORDER BY CategoryName");
              ResultSet rs = stmt.executeQuery()) {
             
             while (rs.next()) {
-                Catalog category = new Catalog();
-                category.setId(rs.getInt("CategoryId"));
-                category.setName(rs.getString("CategoryName"));
-                category.setDescription(""); // Set empty description since the column doesn't exist
+                Category category = new Category();
+                category.setCategoryId(rs.getInt("CategoryId"));
+                category.setCategoryName(rs.getString("CategoryName"));
                 categories.add(category);
             }
         }
@@ -48,73 +41,66 @@ public class CatalogDAO extends DBContext{
     }
     
     /**
-     * Retrieves catalog items with sorting and optional filtering
+     * Retrieves categories with sorting and optional filtering
      * @param sortBy Column to sort by (default: CategoryId)
      * @param searchTerm Optional search term to filter categories
-     * @return List of Catalog objects
+     * @return List of Category objects
      * @throws SQLException if a database error occurs
      */
-    public List<Catalog> getCatalogItems(String sortBy, String searchTerm) throws SQLException {
-        List<Catalog> catalogItems = new ArrayList<>();
+    public List<Category> getCategories(String sortBy, String searchTerm) throws SQLException {
+        List<Category> categories = new ArrayList<>();
         
-        // Validate and sanitize sortBy parameter
         String validSortColumns = "CategoryId, CategoryName";
         if (sortBy == null || !validSortColumns.contains(sortBy)) {
             sortBy = "CategoryId";
         }
         
-        // Build SQL query with optional search and sorting
-        // Note: Using empty string for Description since the column doesn't exist in the database
         StringBuilder sql = new StringBuilder(
             "SELECT CategoryId, CategoryName FROM Categories ");
         
-        // Add search condition if searchTerm is provided
         boolean hasSearchTerm = searchTerm != null && !searchTerm.trim().isEmpty();
         if (hasSearchTerm) {
             sql.append("WHERE CategoryName LIKE ? ");
         }
         
-        // Add sorting
         sql.append("ORDER BY ").append(sortBy).append(" ASC");
         
         try (
-             PreparedStatement stmt = connection.prepareStatement(sql.toString())) {
+             PreparedStatement stmt = dbContext.getConnection().prepareStatement(sql.toString())) {
             
-            // Set search parameter if provided
             if (hasSearchTerm) {
                 stmt.setString(1, "%" + searchTerm.trim() + "%");
             }
             
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
-                    Catalog item = new Catalog();
-                    item.setId(rs.getInt("CategoryId"));
-                    item.setName(rs.getString("CategoryName"));
-                    item.setDescription(""); // Set empty description since the column doesn't exist
-                    catalogItems.add(item);
+                    Category category = new Category();
+                    category.setCategoryId(rs.getInt("CategoryId"));
+                    category.setCategoryName(rs.getString("CategoryName"));
+                    categories.add(category);
                 }
             }
         }
         
-        return catalogItems;
+        return categories;
     }
     
     /**
-     * Adds a new catalog item to the database
-     * @param item The catalog item to add
+     * Adds a new category to the database
+     * @param category The category to add
      * @return true if successful, false otherwise
      */
-    public boolean addCatalogItem(Catalog item) {
-        if (item == null) {
+    public boolean addCategory(Category category) {
+        if (category == null) {
             return false;
         }
         
         String sql = "INSERT INTO Categories (CategoryName) VALUES (?)";
         
         try (
-             PreparedStatement stmt = connection.prepareStatement(sql)) {
+             PreparedStatement stmt = dbContext.getConnection().prepareStatement(sql)) {
             
-            stmt.setString(1, item.getName());
+            stmt.setString(1, category.getCategoryName());
             int rowsAffected = stmt.executeUpdate();
             return rowsAffected > 0;
             
@@ -125,22 +111,22 @@ public class CatalogDAO extends DBContext{
     }
     
     /**
-     * Updates an existing catalog item in the database
-     * @param item The catalog item to update
+     * Updates an existing category in the database
+     * @param category The category to update
      * @return true if successful, false otherwise
      */
-    public boolean updateCatalogItem(Catalog item) {
-        if (item == null) {
+    public boolean updateCategory(Category category) {
+        if (category == null) {
             return false;
         }
         
         String sql = "UPDATE Categories SET CategoryName = ? WHERE CategoryId = ?";
         
         try (
-             PreparedStatement stmt = connection.prepareStatement(sql)) {
+             PreparedStatement stmt = dbContext.getConnection().prepareStatement(sql)) {
             
-            stmt.setString(1, item.getName());
-            stmt.setInt(2, item.getId());
+            stmt.setString(1, category.getCategoryName());
+            stmt.setInt(2, category.getCategoryId());
             
             int rowsAffected = stmt.executeUpdate();
             return rowsAffected > 0;
@@ -152,28 +138,25 @@ public class CatalogDAO extends DBContext{
     }
     
     /**
-     * Deletes a catalog item from the database
-     * @param id The ID of the catalog item to delete
+     * Deletes a category from the database
+     * @param id The ID of the category to delete
      * @return true if successful, false otherwise
      */
-    public boolean deleteCatalogItem(int id) {
-        // First check if there are any subcategories using this category
+    public boolean deleteCategory(int id) {
         String checkSql = "SELECT COUNT(*) FROM SubCategories WHERE CategoryId = ?";
         
         try (
-             PreparedStatement checkStmt = connection.prepareStatement(checkSql)) {
+             PreparedStatement checkStmt = dbContext.getConnection().prepareStatement(checkSql)) {
             
             checkStmt.setInt(1, id);
             try (ResultSet rs = checkStmt.executeQuery()) {
                 if (rs.next() && rs.getInt(1) > 0) {
-                    // Cannot delete category with subcategories
                     return false;
                 }
             }
             
-            // If no subcategories, proceed with deletion
             String deleteSql = "DELETE FROM Categories WHERE CategoryId = ?";
-            try (PreparedStatement deleteStmt = connection.prepareStatement(deleteSql)) {
+            try (PreparedStatement deleteStmt = dbContext.getConnection().prepareStatement(deleteSql)) {
                 deleteStmt.setInt(1, id);
                 int rowsAffected = deleteStmt.executeUpdate();
                 return rowsAffected > 0;
@@ -186,25 +169,24 @@ public class CatalogDAO extends DBContext{
     }
     
     /**
-     * Gets a catalog item by its ID
-     * @param id The ID of the catalog item to retrieve
-     * @return The Catalog object, or null if not found
+     * Gets a category by its ID
+     * @param id The ID of the category to retrieve
+     * @return The Category object, or null if not found
      */
-    public Catalog getCatalogItemById(int id) {
+    public Category getCategoryById(int id) {
         String sql = "SELECT CategoryId, CategoryName FROM Categories WHERE CategoryId = ?";
         
         try (
-             PreparedStatement stmt = connection.prepareStatement(sql)) {
+             PreparedStatement stmt = dbContext.getConnection().prepareStatement(sql)) {
             
             stmt.setInt(1, id);
             
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    Catalog item = new Catalog();
-                    item.setId(rs.getInt("CategoryId"));
-                    item.setName(rs.getString("CategoryName"));
-                    item.setDescription(""); // No description field in Categories table
-                    return item;
+                    Category category = new Category();
+                    category.setCategoryId(rs.getInt("CategoryId"));
+                    category.setCategoryName(rs.getString("CategoryName"));
+                    return category;
                 }
             }
             
@@ -214,15 +196,6 @@ public class CatalogDAO extends DBContext{
             e.printStackTrace();
             return null;
         }
-    }
-
-    /**
-     * Retrieves all categories
-     * @return List of all categories
-     * @throws SQLException if a database error occurs
-     */
-    public List<Catalog> getAllCategories() throws SQLException {
-        return getAllCatalogItems();
     }
 
     /**
@@ -240,7 +213,7 @@ public class CatalogDAO extends DBContext{
         """;
         
         try (
-             PreparedStatement stmt = connection.prepareStatement(sql);
+             PreparedStatement stmt = dbContext.getConnection().prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
             
             while (rs.next()) {
@@ -248,7 +221,6 @@ public class CatalogDAO extends DBContext{
                 subCategory.setSubCategoryId(rs.getInt("SubCategoryId"));
                 subCategory.setSubCategoryName(rs.getString("SubCategoryName"));
                 subCategory.setCategoryId(rs.getInt("CategoryId"));
-                subCategory.setDescription(""); // SubCategories table does not have a Description column
                 subCategory.setCategoryName(rs.getString("CategoryName"));
                 
                 subCategories.add(subCategory);

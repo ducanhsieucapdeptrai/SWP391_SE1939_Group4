@@ -1,13 +1,13 @@
 package controller.general;
 
-import DAO.CatalogDAO;
+import DAO.CategoryDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import model.Catalog;
+import model.Category;
 import model.Users;
 
 import java.io.IOException;
@@ -15,17 +15,16 @@ import java.sql.SQLException;
 import java.util.List;
 
 /**
- * Servlet for handling the Catalog Management page
- * Supports CRUD operations for catalog items
+ * Servlet for handling the Category Management page
+ * Supports CRUD operations for categories
  */
-@WebServlet(name = "CatalogServlet", urlPatterns = {"/catalog-management"})
-public class CatalogServlet extends HttpServlet {
+@WebServlet(name = "CategoryServlet", urlPatterns = {"/category-management"})
+public class CategoryServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
-        // Check if user is logged in
         HttpSession session = request.getSession(false);
         Users currentUser = (session != null) ? (Users) session.getAttribute("currentUser") : null;
 
@@ -35,28 +34,24 @@ public class CatalogServlet extends HttpServlet {
         }
         
         try {
-            // Fetch catalog items from database with sorting and filtering
-            CatalogDAO catalogDAO = new CatalogDAO();
+            CategoryDAO categoryDAO = new CategoryDAO();
             
-            // Get sorting and search parameters
             String sortBy = request.getParameter("sortBy");
             String searchTerm = request.getParameter("search");
             
-            List<Catalog> catalogItems = catalogDAO.getCatalogItems(sortBy, searchTerm);
+            List<Category> categories = categoryDAO.getCategories(sortBy, searchTerm);
             
-            // Set attributes for JSP
-            request.setAttribute("catalogItems", catalogItems);
+            request.setAttribute("categories", categories);
             request.setAttribute("sortBy", sortBy);
             request.setAttribute("searchTerm", searchTerm);
             
-            // Set the page content and forward to the layout
-            request.setAttribute("pageContent", "/catalog_management.jsp");
+            request.setAttribute("pageContent", "/category_management.jsp");
             request.getRequestDispatcher("/layout/layout.jsp").forward(request, response);
             
         } catch (SQLException e) {
             e.printStackTrace();
-            request.setAttribute("errorMessage", "Error fetching catalog items: " + e.getMessage());
-            request.setAttribute("pageContent", "/catalog_management.jsp");
+            request.setAttribute("errorMessage", "Error fetching categories: " + e.getMessage());
+            request.setAttribute("pageContent", "/category_management.jsp");
             request.getRequestDispatcher("/layout/layout.jsp").forward(request, response);
         }
     }
@@ -64,7 +59,6 @@ public class CatalogServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // Check if user is logged in
         HttpSession session = request.getSession(false);
         Users currentUser = (session != null) ? (Users) session.getAttribute("currentUser") : null;
 
@@ -73,88 +67,78 @@ public class CatalogServlet extends HttpServlet {
             return;
         }
         
-        // Get action parameter
         String action = request.getParameter("action");
         
         try {
-            CatalogDAO catalogDAO = new CatalogDAO();
+            CategoryDAO categoryDAO = new CategoryDAO();
             
             if ("add".equals(action)) {
-                // Add new catalog item
                 String name = request.getParameter("name");
-                String description = request.getParameter("description");
                 
                 if (name != null && !name.trim().isEmpty()) {
-                    Catalog newItem = new Catalog();
-                    newItem.setName(name);
-                    newItem.setDescription(description);
+                    Category newCategory = new Category();
+                    newCategory.setCategoryName(name);
                     
-                    boolean success = catalogDAO.addCatalogItem(newItem);
+                    boolean success = categoryDAO.addCategory(newCategory);
                     if (success) {
-                        request.setAttribute("successMessage", "Catalog item added successfully.");
+                        request.setAttribute("successMessage", "Category added successfully.");
                     } else {
-                        request.setAttribute("errorMessage", "Failed to add catalog item.");
+                        request.setAttribute("errorMessage", "Failed to add category.");
                     }
                 } else {
                     request.setAttribute("errorMessage", "Name is required.");
                 }
             } else if ("edit".equals(action)) {
-                // Edit existing catalog item
                 String idStr = request.getParameter("id");
                 String name = request.getParameter("name");
-                String description = request.getParameter("description");
                 
                 if (idStr != null && name != null && !name.trim().isEmpty()) {
                     int id = Integer.parseInt(idStr);
                     
-                    Catalog item = new Catalog();
-                    item.setId(id);
-                    item.setName(name);
-                    item.setDescription(description);
+                    Category category = new Category();
+                    category.setCategoryId(id);
+                    category.setCategoryName(name);
                     
-                    boolean success = catalogDAO.updateCatalogItem(item);
+                    boolean success = categoryDAO.updateCategory(category);
                     if (success) {
-                        request.setAttribute("successMessage", "Catalog item updated successfully.");
+                        request.setAttribute("successMessage", "Category updated successfully.");
                     } else {
-                        request.setAttribute("errorMessage", "Failed to update catalog item.");
+                        request.setAttribute("errorMessage", "Failed to update category.");
                     }
                 } else {
                     request.setAttribute("errorMessage", "ID and name are required.");
                 }
             } else if ("delete".equals(action)) {
-                // Delete catalog item
                 String idStr = request.getParameter("id");
                 
                 if (idStr != null) {
                     int id = Integer.parseInt(idStr);
                     
-                    boolean success = catalogDAO.deleteCatalogItem(id);
+                    boolean success = categoryDAO.deleteCategory(id);
                     if (success) {
-                        request.setAttribute("successMessage", "Catalog item deleted successfully.");
+                        request.setAttribute("successMessage", "Category deleted successfully.");
                     } else {
-                        request.setAttribute("errorMessage", "Failed to delete catalog item.");
+                        request.setAttribute("errorMessage", "Failed to delete category. Make sure no subcategories are using it.");
                     }
                 } else {
                     request.setAttribute("errorMessage", "ID is required for deletion.");
                 }
             }
             
-            // Fetch updated catalog items
-            List<Catalog> catalogItems = catalogDAO.getAllCatalogItems();
-            request.setAttribute("catalogItems", catalogItems);
+            List<Category> categories = categoryDAO.getAllCategories();
+            request.setAttribute("categories", categories);
             
         } catch (Exception e) {
             e.printStackTrace();
             request.setAttribute("errorMessage", "Error processing request: " + e.getMessage());
         }
         
-        // Forward back to the catalog management page
-        request.setAttribute("pageContent", "/catalog_management.jsp");
+        request.setAttribute("pageContent", "/category_management.jsp");
         request.getRequestDispatcher("/layout/layout.jsp").forward(request, response);
     }
 
     @Override
     public String getServletInfo() {
-        return "Handles the CRUD operations for catalog management";
+        return "Handles the CRUD operations for category management";
     }
 }

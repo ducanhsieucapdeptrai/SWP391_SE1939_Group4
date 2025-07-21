@@ -34,12 +34,35 @@ public class UserListController extends HttpServlet {
 protected void doGet(HttpServletRequest request, HttpServletResponse response)
         throws ServletException, IOException {
     UserDAO userDAO = new UserDAO();
-    List<Users> userList = userDAO.getAllUsers();
+
+    // Get search, filter, sort, and pagination parameters
+    String searchQuery = request.getParameter("search");
+    int roleId = request.getParameter("roleId") == null ? 0 : Integer.parseInt(request.getParameter("roleId"));
+    int status = request.getParameter("status") == null ? -1 : Integer.parseInt(request.getParameter("status"));
+    String sortBy = request.getParameter("sortBy") == null ? "userId" : request.getParameter("sortBy");
+    String sortOrder = request.getParameter("sortOrder") == null ? "ASC" : request.getParameter("sortOrder");
+    String pageStr = request.getParameter("page");
+    int page = (pageStr == null) ? 1 : Integer.parseInt(pageStr);
+    int pageSize = 10; // Number of users per page
+
+    // Fetch paginated and filtered/sorted users and total count
+    List<Users> userList = userDAO.getUsers(searchQuery, roleId, status, sortBy, sortOrder, page, pageSize);
+    int totalUsers = userDAO.getUserCount(searchQuery, roleId, status);
+    int totalPages = (int) Math.ceil((double) totalUsers / pageSize);
+
+    // Fetch all roles for the dropdowns/labels
     List<Role> roleList = userDAO.getAllRoles();
 
-
+    // Set attributes for the JSP
     request.setAttribute("userList", userList);
     request.setAttribute("roleList", roleList);
+    request.setAttribute("currentPage", page);
+    request.setAttribute("totalPages", totalPages);
+    request.setAttribute("searchQuery", searchQuery);
+    request.setAttribute("roleId", roleId);
+    request.setAttribute("status", status);
+    request.setAttribute("sortBy", sortBy);
+    request.setAttribute("sortOrder", sortOrder);
     request.setAttribute("pageContent", "/UserList.jsp");
 
 
