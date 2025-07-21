@@ -87,7 +87,7 @@
     <section class="bg-white p-6 rounded shadow">
         <div class="flex items-center justify-between mb-4">
             <h2 class="text-xl font-semibold">Actual Progress</h2>
-            <a href="RequestUpdateServlet?requestId=${request.requestId}"
+            <a href="taskUpdate?requestId=${request.requestId}"
                class="bg-green-500 text-white px-4 py-2 rounded">
                 Create Task Slip
             </a>

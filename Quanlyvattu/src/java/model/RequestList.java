@@ -25,7 +25,7 @@ public class RequestList {
     private int assignedStaffId;           // ✅ Thêm trường này
     private String assignedStaffName;
     private RequestType requestType;
-
+    private Date finishedDate;
     private String requestedByName;     // Tuỳ chọn: dùng để hiển thị tên người gửi
     private String approvedByName;      // Tuỳ chọn: dùng để hiển thị tên người duyệt
     private String requestTypeName;     // Tuỳ chọn: để hiển thị tên loại yêu cầu
@@ -278,6 +278,9 @@ public class RequestList {
 
     public void setIsTransferredToday(boolean isTransferredToday) {
         this.isTransferredToday = isTransferredToday;
+    }
+    public Date getFinishedDate() {
+        return finishedDate;
     }
 
     public void setFinishedDate(Date finishedDate) {

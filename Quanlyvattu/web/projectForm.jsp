@@ -9,7 +9,11 @@
             <c:otherwise>New Project</c:otherwise>
         </c:choose>
     </h2>
-
+    <c:if test="${not empty error}">
+        <div class="bg-red-100 text-red-700 border border-red-400 px-4 py-2 rounded mb-4">
+            ${error}
+        </div>
+    </c:if>
     <!-- ✅ THÊM enctype để upload file -->
     <form method="post" action="project" enctype="multipart/form-data">
         <c:if test="${not empty project and project.projectId > 0}">
