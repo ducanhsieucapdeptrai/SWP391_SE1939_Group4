@@ -227,14 +227,14 @@
                                     <% if (AuthorizationHelper.hasPermission(request, "/purchase-request-list")) { %>
                                     <li class="mb-1">
                                         <a href="${pageContext.request.contextPath}/purchase-request-list" class="block px-3 py-2 rounded hover:bg-gray-600 text-gray-300 hover:text-white">
-                                            <i class="fas fa-shopping-cart mr-2"></i> Purchase Requests
+                                            <i class="fas fa-shopping-cart mr-2"></i> Purchase Order List
                                         </a>
                                     </li>
                                     <% } %>
                                     <% if (AuthorizationHelper.hasPermission(request, "/repair-request-list")) { %>
                                     <li class="mb-1">
                                         <a href="${pageContext.request.contextPath}/repair-request-list" class="block px-3 py-2 rounded hover:bg-gray-600 text-gray-300 hover:text-white">
-                                            <i class="fas fa-wrench mr-2"></i> Repair Requests
+                                            <i class="fas fa-wrench mr-2"></i> Repair Order List
                                         </a>
                                     </li>
                                     <% } %>
@@ -279,6 +279,15 @@
                             </li>
                             <% } %>
 
+                             <!-- Inventory - Check permission -->
+                            <% if (AuthorizationHelper.hasPermission(request, "/project")) { %>
+                            <li class="mb-2">
+                                <a href="${pageContext.request.contextPath}/project" class="flex items-center px-4 py-2 rounded hover:bg-gray-700">
+                                    <i class="fas fa-boxes mr-2"></i> Project
+                                </a>
+                            </li>
+                            <% } %>
+                            
                             <!-- User Management Menu - Check if user has user management permissions -->
                             <%
                                 boolean hasUserMgmtPermissions = AuthorizationHelper.hasPermission(request, "/userlist")

@@ -679,6 +679,41 @@ INSERT INTO PurchaseOrderDetail (POId, MaterialId, Quantity, UnitPrice, Total) V
 
 -- Insert Functions based on layout.jsp menu structure with proper ModuleId and URL
 INSERT INTO Functions (FunctionName, Url, ModuleId) VALUES
+('View users', NULL, 1),
+('Add user', NULL, 1),
+('Delete user', NULL, 1),
+('View user details', NULL, 1),
+('Edit user details (including password)', NULL, 1),
+('Toggle user status (active/inactive)', NULL, 1),
+('Assign user roles', NULL, 1),
+('View material categories/subcategories', NULL, 2),
+('Add new material category', NULL, 2),
+('View material list', NULL, 2),
+('Add new material', NULL, 2),
+('Delete material', NULL, 2),
+('Edit material information', NULL, 2),
+('Export materials', NULL, 3),
+('Print export form', NULL, 3),
+('Import materials', NULL, 3),
+('General material statistics', NULL, 5),
+('Request material export', NULL, 4),
+('Request material import', NULL, 4),
+('Request to purchase materials', NULL, 4),
+('Request material repair', NULL, 4),
+('Approve request (Director only)', NULL, 5),
+('Reject request (Director only)', NULL, 5),
+('View all requests (pending or approved)', NULL, 4),
+('View exported materials by date', NULL, 5),
+('View imported materials by date', NULL, 5),
+('Export statistics', NULL, 5),
+('Import statistics', NULL, 5),
+('Stock inventory statistics', NULL, 5),
+('Purchased material statistics', NULL, 5),
+('Repaired material statistics', NULL, 5),
+('Cost statistics', NULL, 5),
+('Request password reset', NULL, 1),
+('Manage role-function assignments', NULL, 1),
+-- Các chức năng có URL từ layout.jsp menu structure, đảm bảo không trùng lặp FunctionName
 ('User List', '/userlist', 1),
 ('Reset Password Requests', '/reset-pass-list', 1),
 ('Authorization Matrix', '/user-matrix', 1),
@@ -686,14 +721,16 @@ INSERT INTO Functions (FunctionName, Url, ModuleId) VALUES
 ('Create Request', '/createrequest', 3),
 ('Warehouse Report', '/warehousereport', 3),
 ('Request List', '/reqlist', 4),
-('Purchase Request List', '/purchase-request-list', 4),
+('Purchase Request List', '/purchase-request-list', 4), -- Đã sửa tên để khớp với các INSERT INTO RoleFunction
+('Repair Order List', '/repair-request-list', 4), -- Đảm bảo tên này khớp với các INSERT INTO RoleFunction
 ('My Requests', '/my-request', 4),
 ('Task List', '/tasklist', 4),
+('Project', '/project', 4),
 ('Completed Tasks', '/completedTasks', 4),
 ('Advanced Dashboard', '/advanced-dashboard', 5),
 ('Dashboard', '/dashboard', 5);
 
--- Insert RoleFunction permissions based on typical role responsibilities
+-- Insert RoleFunction permissions (đảm bảo tất cả FunctionName đều tồn tại trong bảng Functions)
 INSERT INTO RoleFunction (RoleId, FunctionId, IsActive) VALUES
 (1, (SELECT FunctionId FROM Functions WHERE FunctionName = 'User List'), 1),
 (1, (SELECT FunctionId FROM Functions WHERE FunctionName = 'Reset Password Requests'), 1),
@@ -719,6 +756,7 @@ INSERT INTO RoleFunction (RoleId, FunctionId, IsActive) VALUES
 (3, (SELECT FunctionId FROM Functions WHERE FunctionName = 'Material Inventory'), 1),
 (3, (SELECT FunctionId FROM Functions WHERE FunctionName = 'Request List'), 1),
 (3, (SELECT FunctionId FROM Functions WHERE FunctionName = 'Purchase Request List'), 1),
+(3, (SELECT FunctionId FROM Functions WHERE FunctionName = 'Repair Order List'), 1),
 (3, (SELECT FunctionId FROM Functions WHERE FunctionName = 'My Requests'), 1),
 (3, (SELECT FunctionId FROM Functions WHERE FunctionName = 'Completed Tasks'), 1),
 (3, (SELECT FunctionId FROM Functions WHERE FunctionName = 'Advanced Dashboard'), 1),
@@ -729,7 +767,7 @@ INSERT INTO RoleFunction (RoleId, FunctionId, IsActive) VALUES
 (4, (SELECT FunctionId FROM Functions WHERE FunctionName = 'My Requests'), 1),
 (4, (SELECT FunctionId FROM Functions WHERE FunctionName = 'Dashboard'), 1);
 
--- Optional: Add some inactive permissions for testing status filter
+-- Tùy chọn: Thêm một số quyền không hoạt động để kiểm tra bộ lọc trạng thái
 INSERT INTO RoleFunction (RoleId, FunctionId, IsActive) VALUES
 (2, (SELECT FunctionId FROM Functions WHERE FunctionName = 'User List'), 0),
 (2, (SELECT FunctionId FROM Functions WHERE FunctionName = 'Reset Password Requests'), 0),
