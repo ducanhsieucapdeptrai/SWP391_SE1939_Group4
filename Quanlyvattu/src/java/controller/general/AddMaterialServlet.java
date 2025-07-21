@@ -15,8 +15,10 @@ import DAO.MaterialDAO;
 import DAO.CategoryDAO;
 import DAO.MaterialStatusDAO;
 import DAO.NotificationDAO;
-import model.Catalog;
+import model.Category;
 import model.SubCategory;
+
+import java.util.List;
 
 import java.io.File;
 import java.io.IOException;
@@ -51,7 +53,7 @@ public class AddMaterialServlet extends HttpServlet {
             // Fetch categories, subcategories, and statuses for dropdowns
             CategoryDAO categoryDAO = new CategoryDAO();
             MaterialStatusDAO statusDAO = new MaterialStatusDAO();
-            
+
             List<Category> categories = categoryDAO.getAllCategories();
             List<SubCategory> subcategories = categoryDAO.getAllSubCategories();
             List<MaterialStatus> statuses = statusDAO.getAllStatuses();
@@ -169,7 +171,6 @@ public class AddMaterialServlet extends HttpServlet {
             material.setPrice(price);
             material.setDescription(description);
             material.setImage(imagePath);
-
 
             // Add material to database
             MaterialDAO materialDAO = new MaterialDAO();

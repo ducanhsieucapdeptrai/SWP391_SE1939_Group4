@@ -25,10 +25,7 @@ public class RequestList {
 
     private RequestType requestType;
     private Date finishedDate;
-    private String requestedByName;     // Tuỳ chọn: dùng để hiển thị tên người gửi
-    private String approvedByName;      // Tuỳ chọn: dùng để hiển thị tên người duyệt
-    private String requestTypeName;     // Tuỳ chọn: để hiển thị tên loại yêu cầu
-    private String statusDescription;   // Tuỳ chọn: mô tả trạng thái từ RequestStatus
+
     private int projectId;
     private List<RequestDetail> requestDetails; // Tuỳ chọn: dùng nếu cần load chi tiết đi kèm
     private String subTypeName;
@@ -309,6 +306,7 @@ public class RequestList {
 
     public void setPoStatus(String poStatus) {
         this.poStatus = poStatus;
+    }
     public void setFinishedDate(Date finishedDate) {
         this.finishedDate = finishedDate;
     }

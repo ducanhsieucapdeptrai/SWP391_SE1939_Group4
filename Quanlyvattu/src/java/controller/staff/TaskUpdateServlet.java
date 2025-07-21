@@ -21,9 +21,11 @@ import dal.DBContext;
 
 @WebServlet("/taskUpdate")
 public class TaskUpdateServlet extends HttpServlet {
+    private TaskLogDAO taskLogDAO = new TaskLogDAO();
 
-    private final RequestDAO requestDAO = new RequestDAO();
-    private final TaskLogDAO taskLogDAO = new TaskLogDAO();
+    private RequestDAO requestDAO() {
+        return new RequestDAO();
+    }
 
     private boolean isAuthorized(int roleId) {
         return roleId == 1 || roleId == 2 || roleId == 3;
@@ -82,7 +84,7 @@ public class TaskUpdateServlet extends HttpServlet {
             request.setAttribute("createdAt", requestInfo.getRequestDate());
 
             String successMessage = (String) session.getAttribute("successMessage");
-            String errorMessage = (String) session.getAttribute("errorMessage");
+String errorMessage = (String) session.getAttribute("errorMessage");
             if (successMessage != null) {
                 request.setAttribute("successMessage", successMessage);
                 session.removeAttribute("successMessage");
@@ -146,7 +148,7 @@ public class TaskUpdateServlet extends HttpServlet {
     }
 
     private void handleCreateSlip(HttpServletRequest request, HttpServletResponse response,
-            int requestId, Users user) throws IOException {
+                                  int requestId, Users user) throws IOException {
 
         HttpSession session = request.getSession();
 
@@ -154,7 +156,7 @@ public class TaskUpdateServlet extends HttpServlet {
             RequestDAO dao = requestDAO();
             List<RequestDetailItem> items = dao.getRequestDetails(requestId);
             if (items.isEmpty()) {
-                session.setAttribute("errorMessage", "Request not found");
+session.setAttribute("errorMessage", "Request not found");
                 response.sendRedirect("taskUpdate?requestId=" + requestId);
                 return;
             }
@@ -198,13 +200,14 @@ public class TaskUpdateServlet extends HttpServlet {
                             requestId,
                             requestTypeId,
                             user.getUserId(),
-                            materialIds,
-                            actualQuantities
+                            parsed.materialIds,
+                            parsed.actualQuantities,
+                            slipCode
                     );
                 }
 
                 if (success) {
-                    requestDAO.updateStatusIfCompleted(conn, requestId, user.getUserId());
+                    requestDAO().updateStatusIfCompleted(conn, requestId);
                 }
 
                 if (success) {
@@ -218,8 +221,7 @@ public class TaskUpdateServlet extends HttpServlet {
                 e.printStackTrace();
                 session.setAttribute("errorMessage", "Database error occurred");
             }
-
-        } catch (SQLException e) {
+} catch (SQLException e) {
             e.printStackTrace();
             session.setAttribute("errorMessage", "Error processing request");
         }
@@ -228,8 +230,8 @@ public class TaskUpdateServlet extends HttpServlet {
     }
 
     private boolean updateStockAndQuantities(Connection conn, int requestId,
-            List<Integer> materialIds, List<Integer> quantities,
-            String requestType) throws SQLException {
+                                             List<Integer> materialIds, List<Integer> quantities,
+                                             String requestType) throws SQLException {
 
         String updateDetailSql = "UPDATE RequestDetail SET ActualQuantity = ActualQuantity + ? WHERE RequestId = ? AND MaterialId = ?";
         try (PreparedStatement detailStmt = conn.prepareStatement(updateDetailSql)) {
@@ -255,10 +257,18 @@ public class TaskUpdateServlet extends HttpServlet {
                     if (result <= 0) return false;
                 }
             }
-            int[] results = stockStmt.executeBatch();
-            for (int result : results) {
-                if (result <= 0) {
-                    return false;
+        } else {
+            String stockSql = "UPDATE Materials SET Quantity = Quantity - ? WHERE MaterialId = ? AND Quantity >= ?";
+            try (PreparedStatement stockStmt = conn.prepareStatement(stockSql)) {
+                for (int i = 0; i < materialIds.size(); i++) {
+                    stockStmt.setInt(1, quantities.get(i));
+                    stockStmt.setInt(2, materialIds.get(i));
+                    stockStmt.setInt(3, quantities.get(i));
+                    stockStmt.addBatch();
+                }
+                int[] results = stockStmt.executeBatch();
+                for (int result : results) {
+                    if (result <= 0) return false;
                 }
             }
         }
@@ -267,18 +277,15 @@ public class TaskUpdateServlet extends HttpServlet {
     }
 
     private void handleSignSlip(HttpServletRequest request, HttpServletResponse response,
-            int requestId, Users user) throws ServletException, IOException {
-        try (Connection conn = new DBContext().getConnection()) {
-            List<RequestDetailItem> items = requestDAO.getRequestDetails(requestId);
-            TaskLog latestTaskLog = taskLogDAO.getLatestTaskLogByRequestId(conn, requestId);
+                                int requestId, Users user) throws ServletException, IOException {
+        HttpSession session = request.getSession();
 
         try {
             List<RequestDetailItem> items = requestDAO().getRequestDetails(requestId);
 
             try (Connection conn = new DBContext().getConnection()) {
                 TaskLog latestTaskLog = taskLogDAO.getLatestTaskLogByRequestId(conn, requestId);
-
-                if (items.isEmpty() || latestTaskLog == null) {
+if (items.isEmpty() || latestTaskLog == null) {
                     session.setAttribute("errorMessage", "No slip data found to print");
                     response.sendRedirect("taskUpdate?requestId=" + requestId);
                     return;
@@ -341,5 +348,5 @@ public class TaskUpdateServlet extends HttpServlet {
         }
 
         return data;
-    }
+}
 }

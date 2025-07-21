@@ -30,6 +30,8 @@ public class CreateRepairReqServlet extends HttpServlet {
         req.setAttribute("categories", dao.getAllCategories());
         req.setAttribute("subCategories", dao.getAllSubCategories());
         req.setAttribute("requestTypes", dao.getAllRequestType());
+        req.setAttribute("projectList", dao.getAllProjects());
+
         req.setAttribute("materials", dao.getAllMaterials());
         req.setAttribute("pageContent", "/createRepairRequest.jsp");
         req.getRequestDispatcher("/layout/layout.jsp").forward(req, resp);
@@ -48,6 +50,9 @@ public class CreateRepairReqServlet extends HttpServlet {
         try {
             int requestTypeId = Integer.parseInt(req.getParameter("requestTypeId"));
             String note = req.getParameter("note");
+
+            // ✅ Đọc projectId từ form (bạn cần đảm bảo form có input name="projectId")
+            int projectId = Integer.parseInt(req.getParameter("projectId"));
 
             String[] materialIds = req.getParameterValues("materialId");
             String[] quantities = req.getParameterValues("quantity");
@@ -86,7 +91,9 @@ public class CreateRepairReqServlet extends HttpServlet {
                 details.add(d);
             }
 
-            boolean success = dao.createRequest(user.getUserId(), requestTypeId, note, details);
+            // ✅ Gọi đúng hàm với projectId
+            boolean success = dao.createRequest(user.getUserId(), requestTypeId, note, projectId, details);
+
             if (success) {
                 req.setAttribute("success", "Your repair request has been created and sent for approval.");
 
