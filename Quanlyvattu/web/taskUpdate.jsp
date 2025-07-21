@@ -139,7 +139,7 @@
                                                             </span>
                                                         </c:when>
                                                         <c:otherwise>
-                                                            <fmt:formatNumber value="${item.price}" type="currency" currencySymbol="$"/>
+                                                            <fmt:formatNumber value="${item.price}" type="number" groupingUsed="true" maxFractionDigits="0"/> VND
                                                         </c:otherwise>
                                                     </c:choose>
                                                 </td>

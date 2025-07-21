@@ -1330,11 +1330,12 @@ public class RequestDAO extends DBContext {
         List<RequestList> list = new ArrayList<>();
         StringBuilder sql = new StringBuilder("""
         SELECT r.RequestId, r.RequestDate, r.Note, u.FullName AS RequestedByName,
-               r.RequestTypeId, rt.RequestTypeName,
+               r.RequestTypeId, rt.RequestTypeName, r.Status, rs.Description AS StatusDescription,
                MAX(tl.CreatedAt) AS FinishedDate
         FROM RequestList r
         JOIN Users u ON r.RequestedBy = u.UserId
         JOIN RequestType rt ON r.RequestTypeId = rt.RequestTypeId
+        JOIN RequestStatus rs ON r.Status = rs.StatusCode
         LEFT JOIN TaskLog tl ON r.RequestId = tl.RequestId
         WHERE r.Status = 'Completed'
     """);
@@ -1363,7 +1364,7 @@ public class RequestDAO extends DBContext {
 
         sql.append("""
         GROUP BY r.RequestId, r.RequestDate, r.Note, u.FullName,
-                 r.RequestTypeId, rt.RequestTypeName
+                 r.RequestTypeId, rt.RequestTypeName, r.Status, rs.Description
     """);
 
         // ✅ Validate sort column
