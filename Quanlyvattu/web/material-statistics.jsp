@@ -12,7 +12,7 @@
         <h1 class="text-3xl font-bold text-gray-800">Material Statistics</h1>
         <a href="${pageContext.request.contextPath}/advanced-dashboard" 
            class="inline-flex items-center text-blue-600 hover:text-blue-800">
-            <i class="fas fa-arrow-left mr-2"></i> Quay lại Advanced Dashboard
+            <i class="fas fa-arrow-left mr-2"></i> Back to Advanced Dashboard
         </a>
     </div>
 
@@ -21,7 +21,7 @@
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
             <!-- Report Type -->
             <div class="md:col-span-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Loại Báo cáo</label>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Report Type</label>
                 <input type="hidden" name="reportType" id="reportTypeInput" value="${not empty selectedReportType ? selectedReportType : 'inventory'}">
                 <div id="report-type-buttons" class="flex rounded-md shadow-sm">
                     <button type="button" data-type="inventory" class="report-type-btn relative inline-flex items-center px-4 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
@@ -31,7 +31,7 @@
                         Warehouse Report
                     </button>
                     <button type="button" data-type="export" class="report-type-btn -ml-px relative inline-flex items-center px-4 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
-                        Warehouse Report
+                        goods issue
                     </button>
                 </div>
             </div>
@@ -181,7 +181,7 @@
             <c:otherwise>
                 <div class="p-8 text-center text-gray-500">
                     <i class="fas fa-inbox text-4xl mb-4"></i>
-                    <p>Không có dữ liệu thống kê cho bộ lọc đã chọn.</p>
+                    <p>No statistics available for the selected filter.</p>
                 </div>
             </c:otherwise>
         </c:choose>
