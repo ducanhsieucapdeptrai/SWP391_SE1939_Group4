@@ -194,8 +194,8 @@
         var multipleCancelButton = new Choices('select[name="materialIds"]', {
             removeItemButton: true,
             placeholder: true,
-            placeholderValue: 'Chọn một hoặc nhiều vật tư',
-            searchPlaceholderValue: 'Tìm kiếm vật tư',
+            placeholderValue: 'Select one or more materials',
+            searchPlaceholderValue: 'Search for materials',
         });
 
         // Report type button group logic
