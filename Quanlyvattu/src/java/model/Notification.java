@@ -13,33 +13,34 @@ import java.sql.Timestamp;
 public class Notification {
 
     private int notificationId;
-    private Integer userId; // null nếu toàn hệ thống
+    private Integer userId;
     private int typeId;
     private String typeName;
     private String title;
     private String message;
     private String url;
-    private Integer relatedId; // ID của đối tượng liên quan
-    private String relatedType; // Loại đối tượng liên quan
-    private boolean isRead;
+    private Integer relatedId;
+    private String relatedType;
     private String priority;
-    private Timestamp createdAt;
+    private boolean isRead;
+    private String createdAt; // hoặc String createdAtFormatted
 
+// + các getter/setter tương ứng
     public Notification() {
     }
 
-    public Notification(int notificationId, Integer userId, int typeId, String title, String message, String url, 
-                       Integer relatedId, String relatedType, boolean isRead, String priority, Timestamp createdAt) {
+    public Notification(int notificationId, Integer userId, int typeId, String typeName, String title, String message, String url, Integer  relatedId, String relatedType, String priority, boolean isRead, String createdAt) {
         this.notificationId = notificationId;
         this.userId = userId;
         this.typeId = typeId;
+        this.typeName = typeName;
         this.title = title;
         this.message = message;
         this.url = url;
         this.relatedId = relatedId;
         this.relatedType = relatedType;
-        this.isRead = isRead;
         this.priority = priority;
+        this.isRead = isRead;
         this.createdAt = createdAt;
     }
 
@@ -59,37 +60,7 @@ public class Notification {
         this.userId = userId;
     }
 
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
-    public boolean isIsRead() {
-        return isRead;
-    }
-
-    public void setIsRead(boolean isRead) {
-        this.isRead = isRead;
-    }
-
-    public Timestamp getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Timestamp createdAt) {
-        this.createdAt = createdAt;
-    }
+  
 
     public int getTypeId() {
         return typeId;
@@ -115,11 +86,27 @@ public class Notification {
         this.title = title;
     }
 
-    public Integer getRelatedId() {
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public int getRelatedId() {
         return relatedId;
     }
 
-    public void setRelatedId(Integer relatedId) {
+    public void setRelatedId(Integer  relatedId) {
         this.relatedId = relatedId;
     }
 
@@ -138,4 +125,22 @@ public class Notification {
     public void setPriority(String priority) {
         this.priority = priority;
     }
+
+    public boolean isIsRead() {
+        return isRead;
+    }
+
+    public void setIsRead(boolean isRead) {
+        this.isRead = isRead;
+    }
+
+    public String getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(String createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    
 }

@@ -21,7 +21,8 @@ public class GetNotificationsServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        Users user = (Users) request.getSession().getAttribute("user"); // ✅ Sửa đúng tên class Users
+// Sửa lại đúng theo session đã set
+        Users user = (Users) request.getSession().getAttribute("currentUser");
 
         if (user == null) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);

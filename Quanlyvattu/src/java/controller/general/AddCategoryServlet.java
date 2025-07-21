@@ -43,46 +43,44 @@ public class AddCategoryServlet extends HttpServlet {
 
         String action = request.getParameter("action");
 
-        if ("category".equals(action)) {
-            String name = request.getParameter("categoryName");
-            if (name != null && !name.trim().isEmpty()) {
-                dao.addCategory(name);
+       if ("category".equals(action)) {
+    String name = request.getParameter("categoryName");
+    if (name != null && !name.trim().isEmpty()) {
+        dao.addCategory(name);
 
-                // 🔔 Gửi thông báo toàn hệ thống
-                try {
-                    NotificationDAO notiDAO = new NotificationDAO();
-                    notiDAO.insertNotification(null, "Danh mục mới '" + name + "' đã được thêm.", "material-category");
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-                response.sendRedirect("add-category?success=category");
-                return;
-            }
-        } else if ("subcategory".equals(action)) {
-            try {
-                int categoryId = Integer.parseInt(request.getParameter("parentCategoryId"));
-                String subCategoryName = request.getParameter("subCategoryName");
-
-                if (subCategoryName != null && !subCategoryName.trim().isEmpty()) {
-                    dao.addSubCategory(categoryId, subCategoryName);
-
-                    // 🔔 Gửi thông báo toàn hệ thống
-                    try {
-                        NotificationDAO notiDAO = new NotificationDAO();
-                        notiDAO.insertNotification(null, "Danh mục con mới '" + subCategoryName + "' đã được thêm.", "material-category");
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-
-                    response.sendRedirect("add-category?success=subcategory");
-                    return;
-                }
-            } catch (NumberFormatException e) {
-                e.printStackTrace();
-            }
+        // 🔔 Thông báo danh mục mới
+        try {
+            NotificationDAO notiDAO = new NotificationDAO();
+            notiDAO.createCategoryNotification(name, false); // false = là Category
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
-        response.sendRedirect("add-category");
+        response.sendRedirect("add-category?success=category");
+        return;
     }
-}
+} else if ("subcategory".equals(action)) {
+    try {
+        int categoryId = Integer.parseInt(request.getParameter("parentCategoryId"));
+        String subCategoryName = request.getParameter("subCategoryName");
+
+        if (subCategoryName != null && !subCategoryName.trim().isEmpty()) {
+            dao.addSubCategory(categoryId, subCategoryName);
+
+            // 🔔 Thông báo danh mục con mới
+            try {
+                NotificationDAO notiDAO = new NotificationDAO();
+                notiDAO.createCategoryNotification(subCategoryName, true); // true = là SubCategory
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            response.sendRedirect("add-category?success=subcategory");
+            return;
+        }
+    } catch (NumberFormatException e) {
+        e.printStackTrace();
+    }
+}}}
+
+
