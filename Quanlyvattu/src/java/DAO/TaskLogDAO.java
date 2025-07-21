@@ -72,7 +72,7 @@ public class TaskLogDAO extends DBContext {
         return details;
     }
 
-    public  taskLogByRequestId(Connection conn, int requestId) throws SQLException {
+    public TaskLog getLatestTaskLogByRequestId(Connection conn, int requestId) throws SQLException {
     String sql = """
         SELECT tl.TaskId, tl.RequestId, tl.RequestTypeId, tl.StaffId, tl.CreatedAt,
                tl.SlipCode,
@@ -145,13 +145,13 @@ public class TaskLogDAO extends DBContext {
 }
 
 
-    public List<TaskLog> getGroTaskLogsupedTaskLogsByRequestId(Connection conn, int requestId) throws SQLException {
+    public List<TaskLog> getGroupedTaskLogsByRequestId(Connection conn, int requestId) throws SQLException {
     List<TaskLog> taskLogs = new ArrayList<>();
     String sql = """
         SELECT tl.TaskId, tl.RequestId, tl.RequestTypeId, tl.StaffId, tl.CreatedAt,
                tl.SlipCode,
                u.FullName AS StaffName, rt.RequestTypeName
-        FROM TaskLog tl 
+        FROM TaskLog tl
         JOIN Users u ON tl.StaffId = u.UserId
         JOIN RequestList rl ON tl.RequestId = rl.RequestId
         JOIN RequestSubType rst ON rl.SubTypeId = rst.SubTypeId

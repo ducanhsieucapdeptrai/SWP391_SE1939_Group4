@@ -79,7 +79,7 @@
                             <c:out value="${r.note}" default="-" />
                         </td>
                         <td class="px-4 py-2">
-                            <a href="taskUpdate?requestId=${r.requestId}" 
+                            <a href="warehousereport?requestId=${r.requestId}" 
                                class="inline-block bg-blue-600 text-white text-xs font-semibold px-3 py-1 rounded hover:bg-blue-700 transition">
                                 Here
                             </a>

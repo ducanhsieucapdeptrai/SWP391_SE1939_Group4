@@ -43,7 +43,7 @@
                             </div>
                         </c:if>
                     </div>
-                    <a href="tasklist"
+                    <a href="warehousereport?requestId=${requestId}"
                        class="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
