@@ -5,14 +5,42 @@ CREATE TABLE Roles (
     RoleId INT PRIMARY KEY,
     RoleName VARCHAR(100) NOT NULL
 );
+
 CREATE TABLE Modules (
-    ModuleId   INT AUTO_INCREMENT PRIMARY KEY,
-    ModuleName VARCHAR(100) NOT NULL
+    ModuleId INT AUTO_INCREMENT PRIMARY KEY,
+    ModuleName VARCHAR(100) NOT NULL,
+    Description VARCHAR(255) NULL
 );
+
+CREATE TABLE Functions (
+    FunctionId INT AUTO_INCREMENT PRIMARY KEY,
+    FunctionName VARCHAR(100) NOT NULL,
+    Url VARCHAR(255) NULL, -- Made NULLABLE to allow initial inserts without URL
+    ModuleId INT NULL,    -- Made NULLABLE to allow initial inserts without ModuleId
+    FOREIGN KEY (ModuleId) REFERENCES Modules(ModuleId)
+);
+
+CREATE TABLE RoleFunction (
+    RoleId INT NOT NULL,
+    FunctionId INT NOT NULL,
+    IsActive TINYINT(1) NOT NULL DEFAULT 1,
+    PRIMARY KEY (RoleId, FunctionId),
+    FOREIGN KEY (RoleId) REFERENCES Roles(RoleId),
+    FOREIGN KEY (FunctionId) REFERENCES Functions(FunctionId)
+);
+
+INSERT INTO Modules (ModuleName)
+VALUES
+  ('User Management'),
+  ('Material Management'),
+  ('Import/Export Materials'),
+  ('Material Requests'),
+  ('Statistics & Reports');
+
 CREATE TABLE Users (
     UserId INT PRIMARY KEY AUTO_INCREMENT,
     FullName VARCHAR(100),
-  UserImage VARCHAR(100),
+    UserImage VARCHAR(100),
     Email VARCHAR(100) UNIQUE,
     Phone VARCHAR(20),
     Password VARCHAR(100),
@@ -20,26 +48,11 @@ CREATE TABLE Users (
     IsActive BOOLEAN,
     FOREIGN KEY (RoleId) REFERENCES Roles(RoleId)
 );
+
 ALTER TABLE Users
-  ADD COLUMN DateOfBirth DATE      NULL,
-  ADD COLUMN Gender      VARCHAR(10)  NULL,
-  ADD COLUMN Address     VARCHAR(255) NULL;
-
-CREATE TABLE Functions (
-    FunctionId INT AUTO_INCREMENT PRIMARY KEY,
-    FunctionName VARCHAR(100) NOT NULL
-);
-ALTER TABLE Functions
-  ADD COLUMN ModuleId INT NULL,
-  ADD FOREIGN KEY (ModuleId) REFERENCES Modules(ModuleId);
-
-CREATE TABLE FunctionDetails (
-    RoleId INT,
-    FunctionId INT,
-    PRIMARY KEY (RoleId, FunctionId),
-    FOREIGN KEY (RoleId) REFERENCES Roles(RoleId),
-    FOREIGN KEY (FunctionId) REFERENCES Functions(FunctionId)
-);
+  ADD COLUMN DateOfBirth DATE NULL,
+  ADD COLUMN Gender VARCHAR(10) NULL,
+  ADD COLUMN Address VARCHAR(255) NULL;
 
 CREATE TABLE Categories (
     CategoryId INT AUTO_INCREMENT PRIMARY KEY,
@@ -74,12 +87,22 @@ CREATE TABLE Materials (
     FOREIGN KEY (StatusId) REFERENCES MaterialStatus(StatusId)
 );
 
+CREATE TABLE Project (
+    ProjectId INT PRIMARY KEY AUTO_INCREMENT,
+    ProjectName VARCHAR(255) NOT NULL,
+    Description TEXT,
+    StartDate DATE,
+    EndDate DATE,
+    ManagerId INT,
+    IsDeleted BOOLEAN DEFAULT 0,
+    Status VARCHAR(50) DEFAULT 'Active',
+    FOREIGN KEY (ManagerId) REFERENCES Users(UserId)
+);
 
 CREATE TABLE RequestType (
     RequestTypeId INT AUTO_INCREMENT PRIMARY KEY,
     RequestTypeName VARCHAR(100)
 );
-
 
 CREATE TABLE RequestSubType (
     SubTypeId INT AUTO_INCREMENT PRIMARY KEY,
@@ -99,7 +122,7 @@ CREATE TABLE RequestList (
     RequestedBy INT,
     RequestDate DATETIME DEFAULT CURRENT_TIMESTAMP,
     RequestTypeId INT,
-    SubTypeId INT NULL,  -- Liên kết đến RequestSubType
+    SubTypeId INT NULL,
     Note TEXT,
     Status VARCHAR(20) DEFAULT 'Pending',
     ApprovedBy INT,
@@ -110,7 +133,8 @@ CREATE TABLE RequestList (
     IsTransferredToday BOOLEAN DEFAULT FALSE,
     IsUpdated BOOLEAN DEFAULT FALSE NOT NULL,
     IsCompleted BOOLEAN DEFAULT FALSE,
-    
+    ProjectId INT NULL, -- Made NULLABLE
+    FOREIGN KEY (ProjectId) REFERENCES Project(ProjectId),
     FOREIGN KEY (RequestedBy) REFERENCES Users(UserId),
     FOREIGN KEY (RequestTypeId) REFERENCES RequestType(RequestTypeId),
     FOREIGN KEY (SubTypeId) REFERENCES RequestSubType(SubTypeId),
@@ -118,7 +142,6 @@ CREATE TABLE RequestList (
     FOREIGN KEY (AssignedStaffId) REFERENCES Users(UserId),
     FOREIGN KEY (Status) REFERENCES RequestStatus(StatusCode)
 );
-
 
 CREATE TABLE RequestDetail (
     RequestId INT,
@@ -130,21 +153,41 @@ CREATE TABLE RequestDetail (
     FOREIGN KEY (MaterialId) REFERENCES Materials(MaterialId)
 );
 
-
-
-
 -- ========== NOTIFICATIONS ==========
-CREATE TABLE Notifications (
-    NotificationId INT AUTO_INCREMENT PRIMARY KEY,
-    UserId INT NOT NULL,
-    Message VARCHAR(255) NOT NULL,
-    IsRead BOOLEAN DEFAULT FALSE,
-    CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-    RequestId INT,
-    FOREIGN KEY (UserId) REFERENCES Users(UserId),
-    FOREIGN KEY (RequestId) REFERENCES RequestList(RequestId)
+CREATE TABLE NotificationTypes (
+    TypeId INT AUTO_INCREMENT PRIMARY KEY,
+    TypeName VARCHAR(255) NOT NULL
 );
 
+CREATE TABLE Notifications (
+    NotificationId INT AUTO_INCREMENT PRIMARY KEY,
+    UserId INT,
+    TypeId INT NOT NULL,
+    Title VARCHAR(255),
+    Message VARCHAR(255) NOT NULL,
+    Url VARCHAR(255),
+    RelatedId INT,
+    RelatedType VARCHAR(50),
+    Priority VARCHAR(20) DEFAULT 'MEDIUM',
+    IsRead BOOLEAN DEFAULT FALSE,
+    CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (UserId) REFERENCES Users(UserId),
+    FOREIGN KEY (TypeId) REFERENCES NotificationTypes(TypeId)
+);
+
+INSERT INTO NotificationTypes (TypeName) VALUES
+('CATEGORY_ADDED'),
+('SUBCATEGORY_ADDED'),
+('MATERIAL_ADDED'),
+('REQUEST_CREATED'),
+('REQUEST_APPROVED'),
+('REQUEST_REJECTED'),
+('ORDER_CREATED'),
+('ORDER_APPROVED'),
+('ORDER_REJECTED'),
+('TASK_COMPLETED'),
+('TASK_STARTED'),
+('SYSTEM');
 
 CREATE TABLE PurchaseOrderStatus (
     StatusCode VARCHAR(20) PRIMARY KEY,
@@ -183,8 +226,6 @@ CREATE TABLE PurchaseOrderDetail (
     FOREIGN KEY (MaterialId) REFERENCES Materials(MaterialId)
 );
 
-
-
 -- Bảng lưu trạng thái phiếu sửa chữa
 CREATE TABLE RepairOrderStatus (
     StatusCode VARCHAR(20) PRIMARY KEY,
@@ -203,8 +244,8 @@ CREATE TABLE RepairOrderList (
     RequestId INT NOT NULL,
     CreatedBy INT NOT NULL,
     CreatedDate DATETIME DEFAULT CURRENT_TIMESTAMP,
-     Status VARCHAR(20) DEFAULT 'Pending',
-      ApprovedBy INT,
+    Status VARCHAR(20) DEFAULT 'Pending',
+    ApprovedBy INT,
     ApprovedDate DATETIME,
     Note TEXT,
     FOREIGN KEY (RequestId) REFERENCES RequestList(RequestId),
@@ -213,7 +254,6 @@ CREATE TABLE RepairOrderList (
     FOREIGN KEY (Status) REFERENCES RepairOrderStatus(StatusCode)
 );
 
-
 -- Bảng chi tiết phiếu sửa chữa
 CREATE TABLE RepairOrderDetail (
     ROId INT,
@@ -221,13 +261,10 @@ CREATE TABLE RepairOrderDetail (
     Quantity INT,
     UnitPrice DOUBLE,
     MNote TEXT,
-	PRIMARY KEY (ROId, MaterialId),
+    PRIMARY KEY (ROId, MaterialId),
     FOREIGN KEY (ROId) REFERENCES RepairOrderList(ROId),
     FOREIGN KEY (MaterialId) REFERENCES Materials(MaterialId)
 );
-
-
-
 
 CREATE TABLE TaskLog (
     TaskId INT AUTO_INCREMENT PRIMARY KEY,
@@ -236,12 +273,14 @@ CREATE TABLE TaskLog (
     MaterialId INT,
     StaffId INT,
     Quantity INT,
+    SlipCode VARCHAR(30) UNIQUE,
     CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (RequestId) REFERENCES RequestList(RequestId),
     FOREIGN KEY (RequestTypeId) REFERENCES RequestType(RequestTypeId),
     FOREIGN KEY (MaterialId) REFERENCES Materials(MaterialId),
     FOREIGN KEY (StaffId) REFERENCES Users(UserId)
 );
+
 CREATE TABLE TaskSlipDetail (
     SlipId INT AUTO_INCREMENT PRIMARY KEY,
     TaskId INT,
@@ -251,69 +290,38 @@ CREATE TABLE TaskSlipDetail (
     FOREIGN KEY (MaterialId) REFERENCES Materials(MaterialId)
 );
 
-
 CREATE TABLE PasswordResetRequest (
     RequestId INT AUTO_INCREMENT PRIMARY KEY,
     UserId INT NOT NULL,
     RequestedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-    Status VARCHAR(20) DEFAULT 'Pending',   -- 'Pending', 'Approved', 'Rejected'
-    ProcessedAt DATETIME,                   -- Thời điểm xử lý
-
+    Status VARCHAR(20) DEFAULT 'Pending',
+    ProcessedAt DATETIME,
     FOREIGN KEY (UserId) REFERENCES Users(UserId)
 );
 
-
-
-
-
-
-
-
-
-
-
-
-
-SELECT rl.RequestId, rt.RequestTypeName, rst.SubTypeName, rl.Status, rl.IsTransferredToday, rl.Note
-FROM RequestList rl
-JOIN RequestType rt ON rl.RequestTypeId = rt.RequestTypeId
-LEFT JOIN RequestSubType rst ON rl.SubTypeId = rst.SubTypeId
-WHERE rl.Note = ''
-ORDER BY rl.RequestId DESC;
-
-
-SELECT rl.RequestId, rt.RequestTypeName, rst.SubTypeName, rl.Status, rl.IsTransferredToday, rl.Note
-FROM RequestList rl
-JOIN RequestType rt ON rl.RequestTypeId = rt.RequestTypeId
-LEFT JOIN RequestSubType rst ON rl.SubTypeId = rst.SubTypeId
-WHERE rt.RequestTypeName = 'Export'
-ORDER BY rl.RequestId DESC;
+CREATE TABLE Events (
+    EventId INT AUTO_INCREMENT PRIMARY KEY,
+    UserId INT NOT NULL,
+    Title VARCHAR(255) NOT NULL,
+    Description TEXT,
+    StartTime DATETIME NOT NULL,
+    EndTime DATETIME,
+    EventType VARCHAR(50),
+    CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (UserId) REFERENCES Users(UserId)
+);
 
 INSERT INTO Roles (RoleId, RoleName)
-VALUES 
+VALUES
 (1, 'Warehouse Manager'),
 (2, 'Warehouse Staff'),
 (3, 'Director'),
 (4, 'Company Staff');
 
-INSERT INTO Modules (ModuleName)
-VALUES 
-  ('User Management'),
-  ('Material Management'),
-  ('Import/Export Materials'),
-  ('Material Requests'),
-  ('Statistics & Reports');
-
-
 INSERT INTO Users (FullName, UserImage, Email, Phone, Password, RoleId, IsActive)
 VALUES
--- Quản lý kho (1 người)
 ('Trần Quản Lý', 'warehousemanager.png','quanlyvattu4@gmail.com', '0900000000', 'quanly123', 1, TRUE),
-
--- Giám đốc công ty (1 người)
 ('Nguyễn Giám Đốc',  'director.png','giamdoc@example.com', '0911111111', 'giamdoc123', 3, TRUE),
-
--- Nhân viên kho (8 người)
 ('Nguyễn Văn A', 'warehousestaff.png', 'a1@example.com', '0900000001', 'pass1', 2, TRUE),
 ('Nguyễn Văn B',  'warehousestaff.png','a2@example.com', '0900000002', 'pass2', 2, TRUE),
 ('Nguyễn Văn C', 'warehousestaff.png', 'a3@example.com', '0900000003', 'pass3', 2, TRUE),
@@ -322,11 +330,7 @@ VALUES
 ('Hoàng Văn F', 'warehousestaff.png', 'a6@example.com', '0900000006', 'pass6', 2, TRUE),
 ('Lý Thị G', 'warehousestaff.png', 'a7@example.com', '0900000007', 'pass7', 2, TRUE),
 ('Đào Văn H', 'warehousestaff.png', 'a8@example.com', '0900000008', 'pass8', 2, TRUE),
-
- ('Nguyễn Nhân Viên', 'companystaff.png', 'nhanvienkho8686@gmail.com', '0912345678', 'nhanvien123', 2, TRUE),
-
-
--- Nhân viên công ty (10 người)
+('Nguyễn Nhân Viên', 'companystaff.png', 'nhanvienkho8686@gmail.com', '0912345678', 'nhanvien123', 2, TRUE),
 ('Ngô Thị I', 'companystaff.png', 'b1@example.com', '0900000011', 'pass11', 4, TRUE),
 ('Phạm Văn J', 'companystaff.png', 'b2@example.com', '0900000012', 'pass12', 4, TRUE),
 ('Đặng Thị K', 'companystaff.png', 'b3@example.com', '0900000013', 'pass13', 4, TRUE),
@@ -338,165 +342,167 @@ VALUES
 ('Mai Thị Q', 'companystaff.png', 'b9@example.com', '0900000019', 'pass19', 4, TRUE),
 ('Lương Văn R', 'companystaff.png', 'b10@example.com', '0900000020', 'pass20', 4, TRUE);
 
+-- Update user details
+UPDATE Users SET DateOfBirth = '1978-04-12', Gender = 'Nam', Address = 'Hà Nội' WHERE UserId = 1;
+UPDATE Users SET DateOfBirth = '1975-09-30', Gender = 'Nam', Address = 'Hồ Chí Minh' WHERE UserId = 2;
+UPDATE Users SET DateOfBirth = '1990-01-15', Gender = 'Nam', Address = 'Đà Nẵng' WHERE UserId = 3;
+UPDATE Users SET DateOfBirth = '1988-03-22', Gender = 'Nam', Address = 'Hải Phòng' WHERE UserId = 4;
+UPDATE Users SET DateOfBirth = '1992-07-05', Gender = 'Nam', Address = 'Cần Thơ' WHERE UserId = 5;
+UPDATE Users SET DateOfBirth = '1989-11-11', Gender = 'Nữ', Address = 'Bình Dương' WHERE UserId = 6;
+UPDATE Users SET DateOfBirth = '1991-02-28', Gender = 'Nam', Address = 'Đồng Nai' WHERE UserId = 7;
+UPDATE Users SET DateOfBirth = '1987-06-17', Gender = 'Nam', Address = 'Khánh Hòa' WHERE UserId = 8;
+UPDATE Users SET DateOfBirth = '1993-12-01', Gender = 'Nữ', Address = 'Hải Dương' WHERE UserId = 9;
+UPDATE Users SET DateOfBirth = '1994-05-20', Gender = 'Nam', Address = 'Bắc Ninh' WHERE UserId = 10;
+UPDATE Users SET DateOfBirth = '1990-10-10', Gender = 'Nam', Address = 'Quảng Ninh' WHERE UserId = 11;
+UPDATE Users SET DateOfBirth = '1992-08-08', Gender = 'Nữ', Address = 'Thanh Hóa' WHERE UserId = 12;
+UPDATE Users SET DateOfBirth = '1986-04-04', Gender = 'Nam', Address = 'Nghệ An' WHERE UserId = 13;
+UPDATE Users SET DateOfBirth = '1991-09-09', Gender = 'Nữ', Address = 'Bình Định' WHERE UserId = 14;
+UPDATE Users SET DateOfBirth = '1985-12-12', Gender = 'Nam', Address = 'Thừa Thiên Huế' WHERE UserId = 15;
+UPDATE Users SET DateOfBirth = '1993-03-03', Gender = 'Nữ', Address = 'Quảng Nam' WHERE UserId = 16;
+UPDATE Users SET DateOfBirth = '1989-07-07', Gender = 'Nam', Address = 'Long An' WHERE UserId = 17;
+UPDATE Users SET DateOfBirth = '1994-02-02', Gender = 'Nữ', Address = 'Hà Tĩnh' WHERE UserId = 18;
+UPDATE Users SET DateOfBirth = '1987-05-05', Gender = 'Nam', Address = 'Kiên Giang' WHERE UserId = 19;
+UPDATE Users SET DateOfBirth = '1990-11-11', Gender = 'Nữ', Address = 'Bình Phước' WHERE UserId = 20;
+UPDATE Users SET DateOfBirth = '1988-06-06', Gender = 'Nam', Address = 'Đắc Lắk' WHERE UserId = 21;
 
+-- Insert Functions without ModuleId and Url initially
 INSERT INTO Functions (FunctionName)
 VALUES
-  ('View users'),                             -- 1
-  ('Add user'),                               -- 2
-  ('Delete user'),                            -- 3
-  ('View user details'),                      -- 4
-  ('Edit user details (including password)'), -- 5
-  ('Toggle user status (active/inactive)'),   -- 6
-  ('Assign user roles'),                      -- 7
-  ('View material categories/subcategories'), -- 8
-  ('Add new material category'),              -- 9
-  ('View material list'),                     -- 10
-  ('Add new material'),                       -- 11
-  ('Delete material'),                        -- 12
-  ('Edit material information'),              -- 13
-  ('Export materials'),                       -- 14
-  ('Print export form'),                      -- 15
-  ('Import materials'),                       -- 16
-  ('General material statistics'),            -- 17
-  ('Request material export'),                -- 18
-  ('Request material import'),                -- 19
-  ('Request to purchase materials'),          -- 20
-  ('Request material repair'),                -- 21
-  ('Approve request (Director only)'),        -- 22
-  ('Reject request (Director only)'),         -- 23
-  ('View all requests (pending or approved)'),-- 24
-  ('View exported materials by date'),        -- 25
-  ('View imported materials by date'),        -- 26
-  ('Export statistics'),                      -- 27
-  ('Import statistics'),                      -- 28
-  ('Stock inventory statistics'),             -- 29
-  ('Purchased material statistics'),          -- 30
-  ('Repaired material statistics'),           -- 31
-  ('Cost statistics'),                        -- 32
-  ('Request password reset'),                 -- 33
-  ('Manage role-function assignments');       -- 34
+  ('View users'),
+  ('Add user'),
+  ('Delete user'),
+  ('View user details'),
+  ('Edit user details (including password)'),
+  ('Toggle user status (active/inactive)'),
+  ('Assign user roles'),
+  ('View material categories/subcategories'),
+  ('Add new material category'),
+  ('View material list'),
+  ('Add new material'),
+  ('Delete material'),
+  ('Edit material information'),
+  ('Export materials'),
+  ('Print export form'),
+  ('Import materials'),
+  ('General material statistics'),
+  ('Request material export'),
+  ('Request material import'),
+  ('Request to purchase materials'),
+  ('Request material repair'),
+  ('Approve request (Director only)'),
+  ('Reject request (Director only)'),
+  ('View all requests (pending or approved)'),
+  ('View exported materials by date'),
+  ('View imported materials by date'),
+  ('Export statistics'),
+  ('Import statistics'),
+  ('Stock inventory statistics'),
+  ('Purchased material statistics'),
+  ('Repaired material statistics'),
+  ('Cost statistics'),
+  ('Request password reset'),
+  ('Manage role-function assignments');
 
+-- Update ModuleId for Functions
 UPDATE Functions SET ModuleId = 1 WHERE FunctionId IN (1,2,3,4,5,6,7,33,34);
 UPDATE Functions SET ModuleId = 2 WHERE FunctionId IN (8,9,10,11,12,13);
 UPDATE Functions SET ModuleId = 3 WHERE FunctionId IN (14,15,16);
 UPDATE Functions SET ModuleId = 4 WHERE FunctionId IN (18,19,20,21,24);
 UPDATE Functions SET ModuleId = 5 WHERE FunctionId IN (17,22,23,25,26,27,28,29,30,31,32);
 
-	INSERT INTO FunctionDetails (RoleId, FunctionId)
-	VALUES
-	(1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6), (1, 7),      -- RoleId = 1   Warehouse Manager  
-	(1, 8), (1, 9), (1, 10), (1, 11), (1, 12), (1, 13),
-	(1, 14), (1, 15), (1, 16), (1, 17),
-	(1, 18), (1, 19), (1, 20), (1, 21),
-	(1, 24), (1, 25), (1, 26),
-	(1, 27), (1, 28), (1, 29),
-	(1, 30), (1, 31), (1, 32),(1,33),(1,34);
-
-INSERT INTO FunctionDetails (RoleId, FunctionId)
+-- Insert RoleFunction permissions (previously FunctionDetails)
+INSERT INTO RoleFunction (RoleId, FunctionId)
 VALUES
-(2, 8), (2, 9), (2, 10), (2, 11), (2, 12), (2, 13),				-- RoleId = 2   Warehouse Staff 
+(1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6), (1, 7),
+(1, 8), (1, 9), (1, 10), (1, 11), (1, 12), (1, 13),
+(1, 14), (1, 15), (1, 16), (1, 17),
+(1, 18), (1, 19), (1, 20), (1, 21),
+(1, 24), (1, 25), (1, 26),
+(1, 27), (1, 28), (1, 29),
+(1, 30), (1, 31), (1, 32),(1,33),(1,34);
+
+INSERT INTO RoleFunction (RoleId, FunctionId)
+VALUES
+(2, 8), (2, 9), (2, 10), (2, 11), (2, 12), (2, 13),
 (2, 14), (2, 15), (2, 16), (2, 17),
 (2, 18), (2, 19), (2, 20), (2, 21),
 (2, 24), (2, 25), (2, 26),
 (2, 27), (2, 28), (2, 29),
 (2, 30), (2, 31), (2, 32);
 
-
-INSERT INTO FunctionDetails (RoleId, FunctionId)
+INSERT INTO RoleFunction (RoleId, FunctionId)
 VALUES
-(3, 21), -- Request material repair							-- RoleId = 3     Director
-(3, 22), -- Approve request
-(3, 23), -- Reject request
-(3, 24), -- View all requests
-(3, 25), (3, 26), -- View materials by date
-(3, 27), (3, 28), (3, 29), -- Stats
-(3, 30), (3, 31), (3, 32); -- Cost statistics
+(3, 21),
+(3, 22),
+(3, 23),
+(3, 24),
+(3, 25), (3, 26),
+(3, 27), (3, 28), (3, 29),
+(3, 30), (3, 31), (3, 32);
 
-
-
-INSERT INTO FunctionDetails (RoleId, FunctionId)
+INSERT INTO RoleFunction (RoleId, FunctionId)
 VALUES
-(4, 18), -- Request material export							-- RoleId = 4     Company Staff
-(4, 19), -- Request material import
-(4, 20), -- Request to purchase materials
-(4, 21), -- Request material repair
-(4, 24); -- View all requests
+(4, 18),
+(4, 19),
+(4, 20),
+(4, 21),
+(4, 24);
 
 INSERT INTO Categories (CategoryName)
-VALUES 
-('Structural Materials'),         -- 1
-('Finishing Materials'),          -- 2
-('Insulation & Waterproofing'),   -- 3
-('Mechanical & Electrical'),      -- 4
-('Interior Decoration'),          -- 5
-('Other Construction Materials'), -- 6
-('Hand Tools'),					-- 7
-('Construction Machinery'),-- 8
-('Safety Equipment');-- 9
+VALUES
+('Structural Materials'),
+('Finishing Materials'),
+('Insulation & Waterproofing'),
+('Mechanical & Electrical'),
+('Interior Decoration'),
+('Other Construction Materials'),
+('Hand Tools'),
+('Construction Machinery'),
+('Safety Equipment');
 
 INSERT INTO SubCategories (SubCategoryName, CategoryId)
-VALUES 
--- Structural Materials
-('Concrete', 1),                         -- 1
-('Structural Steel', 1),                -- 2
-('Bricks', 1),                          -- 3
-('Building Stone', 1),                  -- 4
-('Structural Timber', 1),               -- 5
+VALUES
+('Concrete', 1),
+('Structural Steel', 1),
+('Bricks', 1),
+('Building Stone', 1),
+('Structural Timber', 1),
+('Flooring Materials', 2),
+('Wall Coverings', 2),
+('Paints and Coatings', 2),
+('Ceiling Materials', 2),
+('Thermal Insulation', 3),
+('Waterproofing Materials', 3),
+('Sound Insulation', 3),
+('Electrical Systems', 4),
+('Plumbing Systems', 4),
+('HVAC Systems', 4),
+('Wooden Furniture', 5),
+('Decorative Materials', 5),
+('Sanitary Equipment', 5),
+('Foundation Materials', 6),
+('Roofing Materials', 6),
+('Door and Window Materials', 6),
+('Mixing & Plastering Tools', 7),
+('Measuring & Alignment Tools', 7),
+('Cutting & Assembly Tools', 7),
+('Auxiliary Tools', 7),
+('Concrete Machinery', 8),
+('Earthmoving Equipment', 8),
+('Lifting Equipment', 8),
+('Steel Processing Equipment', 8),
+('Finishing Machinery', 8),
+('Utility Machines', 8),
+('Head Protection', 9),
+('Eye & Face Protection', 9),
+('Hand Protection', 9),
+('Footwear', 9),
+('Body Protection', 9),
+('Fall Protection', 9),
+('Respiratory Protection', 9);
 
--- Finishing Materials
-('Flooring Materials', 2),              -- 6
-('Wall Coverings', 2),                  -- 7
-('Paints and Coatings', 2),             -- 8
-('Ceiling Materials', 2),               -- 9
-
--- Insulation & Waterproofing
-('Thermal Insulation', 3),              -- 10
-('Waterproofing Materials', 3),         -- 11
-('Sound Insulation', 3),                -- 12
-
--- Mechanical & Electrical
-('Electrical Systems', 4),              -- 13
-('Plumbing Systems', 4),                -- 14
-('HVAC Systems', 4),                    -- 15
-
--- Interior Decoration
-('Wooden Furniture', 5),                -- 16
-('Decorative Materials', 5),            -- 17
-('Sanitary Equipment', 5),              -- 18
-
--- Other Construction Materials
-('Foundation Materials', 6),            -- 19
-('Roofing Materials', 6),               -- 20
-('Door and Window Materials', 6),       -- 21
-
--- Hand Tools
-('Mixing & Plastering Tools', 7),       -- 22
-('Measuring & Alignment Tools', 7),     -- 23
-('Cutting & Assembly Tools', 7),        -- 24
-('Auxiliary Tools', 7),                 -- 25
-
--- Construction Machinery
-('Concrete Machinery', 8),              -- 26
-('Earthmoving Equipment', 8),           -- 27
-('Lifting Equipment', 8),               -- 28
-('Steel Processing Equipment', 8),      -- 29
-('Finishing Machinery', 8),             -- 30
-('Utility Machines', 8),                -- 31
-
--- Safety Equipment
-('Head Protection', 9),                 -- 32
-('Eye & Face Protection', 9),           -- 33
-('Hand Protection', 9),                 -- 34
-('Footwear', 9),                        -- 35
-('Body Protection', 9),                 -- 36
-('Fall Protection', 9),                 -- 37
-('Respiratory Protection', 9);          -- 38
-
-
-INSERT INTO MaterialStatus (StatusName)
-VALUES ('New'), ('Used'), ('Damaged'); -- 1, 2, 3
-
-
+INSERT INTO MaterialStatus (StatusId, StatusName) -- Explicitly set StatusId for alignment
+VALUES (1, 'New'), (2, 'Used'), (3, 'Damaged');
 
 INSERT INTO Materials (MaterialName, SubCategoryId, StatusId, Image, Description, Quantity, MinQuantity, Price)
 VALUES
@@ -541,12 +547,7 @@ VALUES
 ('Clay Roof Tile', 20, 1, 'clay-roof-tile.png', 'Traditional curved tile', 1500, 150, 15000),
 ('Metal Roofing Sheet', 20, 1, 'metal-roofing-sheet.png', 'Zinc-aluminum coated', 500, 50, 180000),
 ('Aluminum Sliding Door', 21, 1, 'aluminum-sliding-door.png', '2-panel glass door', 100, 10, 2450000),
-('uPVC Window 1x1m', 21, 1, 'upvc-window-1x1m.png', 'White-framed tilt window', 120, 12, 1350000);
-
-
-INSERT INTO Materials
-(MaterialName, SubCategoryId, StatusId, Image, Description, Quantity, MinQuantity, Price)
-VALUES
+('uPVC Window 1x1m', 21, 1, 'upvc-window-1x1m.png', 'White-framed tilt window', 120, 12, 1350000),
 ('trowel', 22, 1, 'trowel.png', 'Hand tool: used for mixing mortar, scooping materials, plastering.', 200, 20, 300000),
 ('measuring_tape', 23, 1, 'measuring_tape.png', 'Tools: tape measure, meter rule used for measuring lengths and checking alignment.', 150, 15, 200000),
 ('hammer', 24, 1, 'hammer.png', 'Hand tool: hammer used for knocking, assembling, repair.', 180, 20, 250000),
@@ -574,7 +575,6 @@ VALUES
 ('vibrator', 27, 1, 'vibrator.png', 'Vibrating machine: for leveling and compacting concrete surfaces.', 5, 1, 300000000),
 ('power_generator', 15, 1, 'power_generator.png', 'Generator: provides power for tools and machinery.', 4, 1, 250000000),
 ('tile_saw', 29, 1, 'tile_saw.png', 'Tile saw machine for cutting ceramic tiles/stones.', 3, 1, 400000000),
--- Safety equipment --
 ('hard_hat', 32, 1, 'hard_hat.png', 'Safety helmet to protect head from falling objects.', 100, 20, 200000),
 ('safety_glasses', 33, 1, 'safety_glasses.png', 'Protective eyewear against dust and debris.', 150, 30, 150000),
 ('work_gloves', 34, 1, 'work_gloves.png', 'Protective gloves against chemicals and sharp objects.', 200, 40, 80000),
@@ -583,226 +583,157 @@ VALUES
 ('safety_harness', 37, 1, 'safety_harness.png', 'Fall protection: harness for working at height.', 80, 10, 250000),
 ('respirator_mask', 38, 1, 'respirator_mask.png', 'Respiratory protection: mask against harmful environments.', 150, 30, 120000);
 
-
-
 INSERT INTO RequestStatus (StatusCode, Description)
-VALUES 
+VALUES
 ('Pending', 'Waiting for approval'),
 ('Approved', 'Approved by director'),
 ('Rejected', 'Request has been rejected'),
 ('Completed', 'Successfull');
 
-
 INSERT INTO RequestType (RequestTypeName)
-VALUES 
+VALUES
 ('Export'),
 ('Import'),
 ('Purchase'),
 ('Repair');
 
-
 -- Subtypes for Export (RequestTypeId = 1)
 INSERT INTO RequestSubType (RequestTypeId, SubTypeName) VALUES
-(1, 'For Construction'),         -- 1
-
-(1, 'For Equipment Repair');	-- 2
-
+(1, 'For Construction'),
+(1, 'For Equipment Repair');
 
 -- Subtypes for Import (RequestTypeId = 2)
 INSERT INTO RequestSubType (RequestTypeId, SubTypeName) VALUES
-(2, 'New Purchase'),	-- 3
-(2, 'Returned from Repair'),-- 4
-(2, 'Returned from Usage');-- 5
-
-SELECT RequestId, RequestTypeId, SubTypeId, Note, Status, RequestDate
-FROM RequestList
-WHERE SubTypeId IN (
-    SELECT SubTypeId FROM RequestSubType
-    WHERE SubTypeName = 'For Equipment Repair'
-)
-ORDER BY RequestId DESC;
-
+(2, 'New Purchase'),
+(2, 'Returned from Repair'),
+(2, 'Returned from Usage');
 
 -- ========================================
 -- 1. BẢNG REQUEST & DETAIL
 -- ========================================
 
-INSERT INTO RequestList 
-(RequestId, RequestedBy, RequestDate, RequestTypeId, SubTypeId, Note, Status, ApprovedBy, ApprovedDate, ApprovalNote, AssignedStaffId, ArrivalDate, IsTransferredToday, IsUpdated, IsCompleted)
+-- Allowing AUTO_INCREMENT to handle RequestId
+INSERT INTO RequestList
+(RequestedBy, RequestDate, RequestTypeId, SubTypeId, Note, Status, ApprovedBy, ApprovedDate, ApprovalNote, AssignedStaffId, ArrivalDate, IsTransferredToday, IsUpdated, IsCompleted)
 VALUES
--- Export (Approved)
-(3, 12, '2025-05-25 07:30:00', 1, 1, 'Export for foundation of Building A', 'Approved', 2, '2025-05-25 08:00:00', 'Approved on schedule', 5, '2025-05-25 09:00:00', FALSE, FALSE, FALSE),
-(4, 13, '2025-05-26 08:30:00', 1, 1, 'Export finishing materials to site B', 'Approved', 2, '2025-05-26 09:00:00', 'Export approved.', NULL, NULL, FALSE, FALSE, FALSE),
-(6, 5, NOW(), 1, 1, 'Export leftover cement', 'Rejected', 2, NOW(), 'Not needed. Keep for future use.', NULL, NULL, FALSE, FALSE, FALSE),
-(12, 5, '2025-06-15 10:30:00', 1, 1, 'Export granite stone to site D', 'Approved', 2, '2025-06-15 11:00:00', 'Site D confirmed.', 3, '2025-06-15 13:00:00', FALSE, FALSE, FALSE),
-(16, 9, '2025-06-17 10:20:00', 1, 1, 'Export timber for site C', 'Approved', 2, '2025-06-17 10:50:00', 'Export confirmed.', NULL, NULL, FALSE, FALSE, FALSE),
-(19, 12, '2025-06-19 08:00:00', 1, 2, 'Export wall tiles to branch B', 'Pending', NULL, NULL, NULL, NULL, NULL, FALSE, FALSE, FALSE),
-
--- Purchase (Pending)
-(5, 4, NOW(), 3, NULL, 'Purchase office air conditioners', 'Pending', NULL, NULL, NULL, 7, NULL, FALSE, FALSE, FALSE),
-(10, 14, '2025-05-29 10:00:00', 3, NULL, 'Propose purchase of office chairs', 'Pending', NULL, NULL, NULL, NULL, NULL, FALSE, FALSE, FALSE),
-(14, 7, '2025-06-16 09:30:00', 3, NULL, 'Purchase new safety helmets', 'Pending', NULL, NULL, NULL, NULL, NULL, FALSE, FALSE, FALSE),
-(18, 11, '2025-06-18 11:00:00', 3, NULL, 'Purchase fire extinguishers', 'Pending', NULL, NULL, NULL, NULL, NULL, FALSE, FALSE, FALSE),
-
--- Repair (Pending)
-(7, 6, NOW(), 4, NULL, 'Repair broken drill machine', 'Pending', NULL, NULL, NULL, NULL, NULL, FALSE, FALSE, FALSE),
-(9, 8, NOW(), 4, NULL, 'Repair water leakage at storage', 'Pending', NULL, NULL, NULL, NULL, NULL, FALSE, FALSE, FALSE),
-(13, 6, '2025-06-16 08:15:00', 4, NULL, 'Repair concrete cutter', 'Pending', NULL, NULL, NULL, 5, NULL, FALSE, FALSE, FALSE),
-(17, 10, '2025-06-18 09:00:00', 4, NULL, 'Repair lighting system', 'Pending', NULL, NULL, NULL, 6, NULL, FALSE, FALSE, FALSE);
-
-	
-
-
-
-SELECT 
-    rl.RequestId,
-    rl.RequestDate,
-    u1.FullName AS RequestedByName,
-    rt.RequestTypeName,
-    rst.SubTypeName,
-    rs.Description AS StatusDescription,
-    u2.FullName AS ApprovedByName,
-    rl.ApprovalNote,
-    rl.ArrivalDate
-FROM RequestList rl
-JOIN Users u1 ON rl.RequestedBy = u1.UserId
-JOIN RequestType rt ON rl.RequestTypeId = rt.RequestTypeId
-LEFT JOIN RequestSubType rst ON rl.SubTypeId = rst.SubTypeId
-LEFT JOIN Users u2 ON rl.ApprovedBy = u2.UserId
-LEFT JOIN RequestStatus rs ON rl.Status = rs.StatusCode
-ORDER BY rl.RequestDate DESC;
-
-
+(12, '2025-05-25 07:30:00', 1, 1, 'Export for foundation of Building A', 'Approved', 2, '2025-05-25 08:00:00', 'Approved on schedule', 5, '2025-05-25 09:00:00', FALSE, FALSE, FALSE),
+(13, '2025-05-26 08:30:00', 1, 1, 'Export finishing materials to site B', 'Approved', 2, '2025-05-26 09:00:00', 'Export approved.', NULL, NULL, FALSE, FALSE, FALSE),
+(5, NOW(), 1, 1, 'Export leftover cement', 'Rejected', 2, NOW(), 'Not needed. Keep for future use.', NULL, NULL, FALSE, FALSE, FALSE),
+(5, '2025-06-15 10:30:00', 1, 1, 'Export granite stone to site D', 'Approved', 2, '2025-06-15 11:00:00', 'Site D confirmed.', 3, '2025-06-15 13:00:00', FALSE, FALSE, FALSE),
+(9, '2025-06-17 10:20:00', 1, 1, 'Export timber for site C', 'Approved', 2, '2025-06-17 10:50:00', 'Export confirmed.', NULL, NULL, FALSE, FALSE, FALSE),
+(12, '2025-06-19 08:00:00', 1, 2, 'Export wall tiles to branch B', 'Pending', NULL, NULL, NULL, NULL, NULL, FALSE, FALSE, FALSE),
+(4, NOW(), 3, NULL, 'Purchase office air conditioners', 'Pending', NULL, NULL, NULL, 7, NULL, FALSE, FALSE, FALSE),
+(14, '2025-05-29 10:00:00', 3, NULL, 'Propose purchase of office chairs', 'Pending', NULL, NULL, NULL, NULL, NULL, FALSE, FALSE, FALSE),
+(7, '2025-06-16 09:30:00', 3, NULL, 'Purchase new safety helmets', 'Pending', NULL, NULL, NULL, NULL, NULL, FALSE, FALSE, FALSE),
+(11, '2025-06-18 11:00:00', 3, NULL, 'Purchase fire extinguishers', 'Pending', NULL, NULL, NULL, NULL, NULL, FALSE, FALSE, FALSE),
+(6, NOW(), 4, NULL, 'Repair broken drill machine', 'Pending', NULL, NULL, NULL, NULL, NULL, FALSE, FALSE, FALSE),
+(8, NOW(), 4, NULL, 'Repair water leakage at storage', 'Pending', NULL, NULL, NULL, NULL, NULL, FALSE, FALSE, FALSE),
+(6, '2025-06-16 08:15:00', 4, NULL, 'Repair concrete cutter', 'Pending', NULL, NULL, NULL, 5, NULL, FALSE, FALSE, FALSE),
+(10, '2025-06-18 09:00:00', 4, NULL, 'Repair lighting system', 'Pending', NULL, NULL, NULL, 6, NULL, FALSE, FALSE, FALSE);
 
 -- RequestDetail (đầy đủ vật tư cho từng RequestId)
+-- You'll need to re-map RequestId values here if you let AUTO_INCREMENT generate them.
+-- For simplicity, if running from scratch, you can clear and re-insert.
+-- Assuming the RequestIds will be 1-14 based on the order of insertion above
 INSERT INTO RequestDetail (RequestId, MaterialId, Quantity, ActualQuantity) VALUES
--- RequestId = 3 (Export)
-(3, 1, 20, 0),
-(3, 3, 10, 0),
-
--- RequestId = 4 (Export)
-(4, 11, 100, 0),
-(4, 13, 50, 0),
-
--- RequestId = 5 (Purchase)
-(5, 15, 3, 0),
-(5, 11, 150, 0),
-
--- RequestId = 6 (Export)
-(6, 16, 50, 0),
-
--- RequestId = 7 (Repair)
-(7, 17, 1, 0),
-(7, 3, 2, 0),
-
--- RequestId = 9 (Repair)
-(9, 19, 1, 0),
-
--- RequestId = 10 (Purchase)
-(10, 25, 5, 0),
-
--- RequestId = 12 (Export)
-(12, 7, 50, 0),
-
--- RequestId = 13 (Repair)
-(13, 3, 1, 0),
-
--- RequestId = 14 (Purchase)
-(14, 35, 20, 0),
-
--- RequestId = 16 (Export)
-(16, 9, 80, 0),
-
--- RequestId = 17 (Repair)
-(17, 26, 1, 0),
-
--- RequestId = 18 (Purchase)
-(18, 28, 30, 0),
-
--- RequestId = 19 (Export)
-(19, 13, 100, 0);
-
-
-
-
-
-
-
-
+(1, 1, 20, 0), -- RequestId = 1 (Export for foundation of Building A)
+(1, 3, 10, 0),
+(2, 11, 100, 0), -- RequestId = 2 (Export finishing materials to site B)
+(2, 13, 50, 0),
+(3, 16, 50, 0), -- RequestId = 3 (Export leftover cement - Rejected)
+(4, 7, 50, 0), -- RequestId = 4 (Export granite stone to site D)
+(5, 9, 80, 0), -- RequestId = 5 (Export timber for site C)
+(6, 13, 100, 0), -- RequestId = 6 (Export wall tiles to branch B)
+(7, 15, 3, 0), -- RequestId = 7 (Purchase office air conditioners)
+(7, 11, 150, 0),
+(8, 25, 5, 0), -- RequestId = 8 (Propose purchase of office chairs)
+(9, 35, 20, 0), -- RequestId = 9 (Purchase new safety helmets)
+(10, 28, 30, 0), -- RequestId = 10 (Purchase fire extinguishers)
+(11, 17, 1, 0), -- RequestId = 11 (Repair broken drill machine)
+(11, 3, 2, 0),
+(12, 19, 1, 0), -- RequestId = 12 (Repair water leakage at storage)
+(13, 3, 1, 0), -- RequestId = 13 (Repair concrete cutter)
+(14, 26, 1, 0); -- RequestId = 14 (Repair lighting system)
 
 -- ========================================
 -- 4. PHIẾU MUA HÀNG
 -- ========================================
-
+-- POId 1 is for RequestId 7
+-- POId 2 is for RequestId 10
+-- POId 3 is for RequestId 8
 INSERT INTO PurchaseOrderList (POId, RequestId, CreatedBy, CreatedDate, TotalPrice, Status, Note) VALUES
-(1, 5, 4, NOW(), 12180000, 'Pending', 'Purchase office air conditioners'),
-(2, 18, 11, NOW(), 6600000, 'Pending', 'Purchase fire extinguishers urgently'),
-(3, 10, 14, NOW(), 1260000, 'Pending', 'Propose purchase of office chairs');
-
+(1, 7, 4, NOW(), 12180000, 'Pending', 'Purchase office air conditioners'),
+(2, 10, 11, NOW(), 6600000, 'Pending', 'Purchase fire extinguishers urgently'),
+(3, 8, 14, NOW(), 1260000, 'Pending', 'Propose purchase of office chairs');
 
 INSERT INTO PurchaseOrderDetail (POId, MaterialId, Quantity, UnitPrice, Total) VALUES
 (1, 15, 3, 60000, 180000),
 (1, 11, 150, 80000, 12000000),
-
 (2, 28, 30, 220000, 6600000),
-
 (3, 25, 5, 12000, 60000),
-(3, 17, 10, 120000, 1200000); 
+(3, 17, 10, 120000, 1200000);
 
 -- ========================================
--- 5. SỬA CHỮA
+-- 5. SỬA CHỮA (No RepairOrderList inserts provided, keeping the table structure)
 -- ========================================
--- Ví dụ RequestId = 1, RepairedBy = 3
 
+-- Insert Functions based on layout.jsp menu structure with proper ModuleId and URL
+INSERT INTO Functions (FunctionName, Url, ModuleId) VALUES
+('User List', '/userlist', 1),
+('Reset Password Requests', '/reset-pass-list', 1),
+('Authorization Matrix', '/user-matrix', 1),
+('Material Inventory', '/materiallist', 2),
+('Create Request', '/createrequest', 3),
+('Warehouse Report', '/warehousereport', 3),
+('Request List', '/reqlist', 4),
+('Purchase Request List', '/purchase-request-list', 4),
+('My Requests', '/my-request', 4),
+('Task List', '/tasklist', 4),
+('Completed Tasks', '/completedTasks', 4),
+('Advanced Dashboard', '/advanced-dashboard', 5),
+('Dashboard', '/dashboard', 5);
 
+-- Insert RoleFunction permissions based on typical role responsibilities
+INSERT INTO RoleFunction (RoleId, FunctionId, IsActive) VALUES
+(1, (SELECT FunctionId FROM Functions WHERE FunctionName = 'User List'), 1),
+(1, (SELECT FunctionId FROM Functions WHERE FunctionName = 'Reset Password Requests'), 1),
+(1, (SELECT FunctionId FROM Functions WHERE FunctionName = 'Authorization Matrix'), 1),
+(1, (SELECT FunctionId FROM Functions WHERE FunctionName = 'Material Inventory'), 1),
+(1, (SELECT FunctionId FROM Functions WHERE FunctionName = 'Create Request'), 1),
+(1, (SELECT FunctionId FROM Functions WHERE FunctionName = 'Warehouse Report'), 1),
+(1, (SELECT FunctionId FROM Functions WHERE FunctionName = 'Request List'), 1),
+(1, (SELECT FunctionId FROM Functions WHERE FunctionName = 'Purchase Request List'), 1),
+(1, (SELECT FunctionId FROM Functions WHERE FunctionName = 'My Requests'), 1),
+(1, (SELECT FunctionId FROM Functions WHERE FunctionName = 'Task List'), 1),
+(1, (SELECT FunctionId FROM Functions WHERE FunctionName = 'Completed Tasks'), 1),
+(1, (SELECT FunctionId FROM Functions WHERE FunctionName = 'Advanced Dashboard'), 1),
+(1, (SELECT FunctionId FROM Functions WHERE FunctionName = 'Dashboard'), 1),
 
+(2, (SELECT FunctionId FROM Functions WHERE FunctionName = 'Material Inventory'), 1),
+(2, (SELECT FunctionId FROM Functions WHERE FunctionName = 'Create Request'), 1),
+(2, (SELECT FunctionId FROM Functions WHERE FunctionName = 'Warehouse Report'), 1),
+(2, (SELECT FunctionId FROM Functions WHERE FunctionName = 'My Requests'), 1),
+(2, (SELECT FunctionId FROM Functions WHERE FunctionName = 'Task List'), 1),
+(2, (SELECT FunctionId FROM Functions WHERE FunctionName = 'Dashboard'), 1),
 
+(3, (SELECT FunctionId FROM Functions WHERE FunctionName = 'Material Inventory'), 1),
+(3, (SELECT FunctionId FROM Functions WHERE FunctionName = 'Request List'), 1),
+(3, (SELECT FunctionId FROM Functions WHERE FunctionName = 'Purchase Request List'), 1),
+(3, (SELECT FunctionId FROM Functions WHERE FunctionName = 'My Requests'), 1),
+(3, (SELECT FunctionId FROM Functions WHERE FunctionName = 'Completed Tasks'), 1),
+(3, (SELECT FunctionId FROM Functions WHERE FunctionName = 'Advanced Dashboard'), 1),
+(3, (SELECT FunctionId FROM Functions WHERE FunctionName = 'Dashboard'), 1),
 
-  -- UserId = 1: Trần Quản Lý
-UPDATE Users
-SET DateOfBirth = '1978-04-12',
-    Gender      = 'Nam',
-    Address     = 'Hà Nội'
-WHERE UserId = 1;
+(4, (SELECT FunctionId FROM Functions WHERE FunctionName = 'Material Inventory'), 1),
+(4, (SELECT FunctionId FROM Functions WHERE FunctionName = 'Create Request'), 1),
+(4, (SELECT FunctionId FROM Functions WHERE FunctionName = 'My Requests'), 1),
+(4, (SELECT FunctionId FROM Functions WHERE FunctionName = 'Dashboard'), 1);
 
--- UserId = 2: Nguyễn Giám Đốc
-UPDATE Users
-SET DateOfBirth = '1975-09-30',
-    Gender      = 'Nam',
-    Address     = 'Hồ Chí Minh'
-WHERE UserId = 2;
-
--- Warehouse Staff (UserId 3–10)
-UPDATE Users SET DateOfBirth = '1990-01-15', Gender = 'Nam', Address = 'Đà Nẵng'      WHERE UserId = 3;
-UPDATE Users SET DateOfBirth = '1988-03-22', Gender = 'Nam', Address = 'Hải Phòng'     WHERE UserId = 4;
-UPDATE Users SET DateOfBirth = '1992-07-05', Gender = 'Nam', Address = 'Cần Thơ'        WHERE UserId = 5;
-UPDATE Users SET DateOfBirth = '1989-11-11', Gender = 'Nữ', Address = 'Bình Dương'      WHERE UserId = 6;  -- Trần Thị D
-UPDATE Users SET DateOfBirth = '1991-02-28', Gender = 'Nam', Address = 'Đồng Nai'       WHERE UserId = 7;
-UPDATE Users SET DateOfBirth = '1987-06-17', Gender = 'Nam', Address = 'Khánh Hòa'     WHERE UserId = 8;
-UPDATE Users SET DateOfBirth = '1993-12-01', Gender = 'Nữ', Address = 'Hải Dương'     WHERE UserId = 9;  -- Lý Thị G
-UPDATE Users SET DateOfBirth = '1994-05-20', Gender = 'Nam', Address = 'Bắc Ninh'        WHERE UserId = 10;
-
--- UserId = 11: Nguyễn Nhân Viên
-UPDATE Users
-SET DateOfBirth = '1990-10-10',
-    Gender      = 'Nam',
-    Address     = 'Quảng Ninh'
-WHERE UserId = 11;
-
--- Company Staff (UserId 12–21)
-UPDATE Users SET DateOfBirth = '1992-08-08', Gender = 'Nữ', Address = 'Thanh Hóa'     WHERE UserId = 12;  -- Ngô Thị I
-UPDATE Users SET DateOfBirth = '1986-04-04', Gender = 'Nam', Address = 'Nghệ An'       WHERE UserId = 13;
-UPDATE Users SET DateOfBirth = '1991-09-09', Gender = 'Nữ', Address = 'Bình Định'     WHERE UserId = 14;  -- Đặng Thị K
-UPDATE Users SET DateOfBirth = '1985-12-12', Gender = 'Nam', Address = 'Thừa Thiên Huế'WHERE UserId = 15;
-UPDATE Users SET DateOfBirth = '1993-03-03', Gender = 'Nữ', Address = 'Quảng Nam'      WHERE UserId = 16;  -- Cao Thị M
-UPDATE Users SET DateOfBirth = '1989-07-07', Gender = 'Nam', Address = 'Long An'        WHERE UserId = 17;
-UPDATE Users SET DateOfBirth = '1994-02-02', Gender = 'Nữ', Address = 'Hà Tĩnh'        WHERE UserId = 18;  -- Đỗ Thị O
-UPDATE Users SET DateOfBirth = '1987-05-05', Gender = 'Nam', Address = 'Kiên Giang'     WHERE UserId = 19;
-UPDATE Users SET DateOfBirth = '1990-11-11', Gender = 'Nữ', Address = 'Bình Phước'     WHERE UserId = 20;  -- Mai Thị Q
-UPDATE Users SET DateOfBirth = '1988-06-06', Gender = 'Nam', Address = 'Đắc Lắk'       WHERE UserId = 21;  -- Lương Văn R
-
-SELECT IS_NULLABLE 
-FROM INFORMATION_SCHEMA.COLUMNS 
-WHERE TABLE_NAME = 'RequestList' AND COLUMN_NAME = 'SubTypeId';
-
-
+-- Optional: Add some inactive permissions for testing status filter
+INSERT INTO RoleFunction (RoleId, FunctionId, IsActive) VALUES
+(2, (SELECT FunctionId FROM Functions WHERE FunctionName = 'User List'), 0),
+(2, (SELECT FunctionId FROM Functions WHERE FunctionName = 'Reset Password Requests'), 0),
+(2, (SELECT FunctionId FROM Functions WHERE FunctionName = 'Authorization Matrix'), 0),
+(4, (SELECT FunctionId FROM Functions WHERE FunctionName = 'Warehouse Report'), 0),
+(4, (SELECT FunctionId FROM Functions WHERE FunctionName = 'Request List'), 0),
+(4, (SELECT FunctionId FROM Functions WHERE FunctionName = 'Purchase Request List'), 0);
