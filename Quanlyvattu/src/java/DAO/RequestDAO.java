@@ -1028,6 +1028,72 @@ public class RequestDAO extends DBContext {
         }
     }
 
+    // Detect export for construction
+    private boolean isExportForConstruction(Connection conn, int requestId) throws SQLException {
+        String sql = """
+        SELECT 1
+        FROM RequestList r
+        JOIN RequestSubType s ON r.SubTypeId = s.SubTypeId
+        WHERE r.RequestId = ?
+          AND r.RequestTypeId = 1  -- Export
+          AND s.SubTypeName = 'For Construction'
+    """;
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, requestId);
+            ResultSet rs = ps.executeQuery();
+            return rs.next();
+        }
+    }
+
+    // Create import request for 'Returned from Usage' (SubTypeId = 5)
+    private void createImportReturnFromUsage(Connection conn, int exportRequestId, int approverId) throws SQLException {
+        // Step 1: Insert into RequestList with Approved status
+        String insertRequest = """
+        INSERT INTO RequestList (RequestTypeId, SubTypeId, RequestedBy, RequestDate, Status, Note, ApprovedBy, ApprovedDate)
+        SELECT 2, 5, RequestedBy, NOW(), 'Approved', CONCAT('Auto-created from Export Request ID ', RequestId), ?, NOW()
+        FROM RequestList WHERE RequestId = ?
+    """;
+        int newRequestId = -1;
+        try (PreparedStatement ps = conn.prepareStatement(insertRequest, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setInt(1, approverId);
+            ps.setInt(2, exportRequestId);
+            ps.executeUpdate();
+            ResultSet rs = ps.getGeneratedKeys();
+            if (rs.next()) {
+                newRequestId = rs.getInt(1);
+            }
+        }
+        // Step 2: Insert RequestDetail
+        if (newRequestId > 0) {
+            String insertDetails = """
+            INSERT INTO RequestDetail (RequestId, MaterialId, Quantity, ActualQuantity)
+            SELECT ?, MaterialId, ActualQuantity, 0
+            FROM RequestDetail
+            WHERE RequestId = ?
+        """;
+            try (PreparedStatement ps = conn.prepareStatement(insertDetails)) {
+                ps.setInt(1, newRequestId);
+                ps.setInt(2, exportRequestId);
+                ps.executeUpdate();
+            }
+        }
+    }
+
+    // Public wrapper for construction export completion
+    public void handleExportCompletionForConstruction(Connection conn, int exportRequestId, int approverId) throws SQLException {
+        if (isExportForConstruction(conn, exportRequestId)) {
+            String statusSql = "SELECT Status FROM RequestList WHERE RequestId = ?";
+            try (PreparedStatement ps = conn.prepareStatement(statusSql)) {
+                ps.setInt(1, exportRequestId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next() && "Completed".equalsIgnoreCase(rs.getString("Status"))) {
+                        createImportReturnFromUsage(conn, exportRequestId, approverId);
+                    }
+                }
+            }
+        }
+    }
+
     // Public wrapper to be called after export completion
     public void handleExportCompletionForRepair(Connection conn, int exportRequestId, int approverId) throws SQLException {
         // Only proceed if this is an export-for-repair and is completed
