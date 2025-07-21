@@ -207,7 +207,9 @@ session.setAttribute("errorMessage", "Request not found");
                 }
 
                 if (success) {
-                    requestDAO().updateStatusIfCompleted(conn, requestId);
+                    dao.updateStatusIfCompleted(conn, requestId);
+                    // Auto-create import request if export-for-repair is now completed
+                    dao.handleExportCompletionForRepair(conn, requestId, user.getUserId());
                 }
 
                 if (success) {

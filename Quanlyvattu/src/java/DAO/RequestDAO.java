@@ -334,7 +334,7 @@ public class RequestDAO extends DBContext {
         return list;
     }
 
-    public boolean createRequest(int requestedBy, int requestTypeId, String note, int projectId, List<RequestDetail> details) {
+    public boolean createRequest(int requestedBy, int requestTypeId, String note, Integer projectId, List<RequestDetail> details) {
         String sqlReq = "INSERT INTO requestlist (RequestedBy, RequestDate, RequestTypeId, Note, Status, ProjectId) VALUES (?, NOW(), ?, ?, 'Pending', ?)";
         String sqlDetail = "INSERT INTO requestdetail (RequestId, MaterialId, Quantity) VALUES (?, ?, ?)";
 
@@ -345,7 +345,11 @@ public class RequestDAO extends DBContext {
             stReq.setInt(1, requestedBy);
             stReq.setInt(2, requestTypeId);
             stReq.setString(3, note);
-            stReq.setInt(4, projectId); // ✅ thêm dòng này
+            if (projectId != null) {
+                stReq.setInt(4, projectId);
+            } else {
+                stReq.setNull(4, java.sql.Types.INTEGER);
+            }
             stReq.executeUpdate();
 
             ResultSet rs = stReq.getGeneratedKeys();
@@ -1024,6 +1028,24 @@ public class RequestDAO extends DBContext {
         }
     }
 
+    // Public wrapper to be called after export completion
+    public void handleExportCompletionForRepair(Connection conn, int exportRequestId, int approverId) throws SQLException {
+        // Only proceed if this is an export-for-repair and is completed
+        if (isExportForRepair(conn, exportRequestId)) {
+            // Check if the export request is now completed
+            String statusSql = "SELECT Status FROM RequestList WHERE RequestId = ?";
+            try (PreparedStatement ps = conn.prepareStatement(statusSql)) {
+                ps.setInt(1, exportRequestId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next() && "Completed".equalsIgnoreCase(rs.getString("Status"))) {
+                        createImportReturnFromRepair(conn, exportRequestId, approverId);
+                    }
+                }
+            }
+        }
+    }
+
+    // Original private method remains unchanged
     private void createImportReturnFromRepair(Connection conn, int exportRequestId, int approverId) throws SQLException {
         // Step 1: Insert into RequestList with Approved status
         String insertRequest = """

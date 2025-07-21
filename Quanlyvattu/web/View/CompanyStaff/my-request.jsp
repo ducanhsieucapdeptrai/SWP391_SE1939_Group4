@@ -48,13 +48,21 @@
     </form>
 
     <div class="flex items-center justify-between mb-4">
-        <a href="${pageContext.request.contextPath}/createrequest" class="inline-block px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors">
-            + Create Request
-        </a>
-        <a href="${pageContext.request.contextPath}/createRepairRequest" class="inline-block px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 transition-colors ml-2">
-            + Create Repair Request
-        </a>
-    </div> 
+        <c:if test="${sessionScope.userRole == 'Company Staff'}">
+            <a href="${pageContext.request.contextPath}/createrequest"
+               class="inline-block px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors">
+                + Create Request
+            </a>
+        </c:if>
+
+        <c:if test="${sessionScope.userRole == 'Warehouse Manager'}">
+            <a href="${pageContext.request.contextPath}/create-repair-request"
+               class="inline-block px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 transition-colors ml-2">
+                + Create Repair Request
+            </a>
+        </c:if>
+    </div>
+
 
     <c:if test="${empty myRequestList}">
         <div class="text-gray-500">You haven't submitted any requests yet.</div>

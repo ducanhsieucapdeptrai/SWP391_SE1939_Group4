@@ -52,7 +52,11 @@ public class CreateRepairReqServlet extends HttpServlet {
             String note = req.getParameter("note");
 
             // ✅ Đọc projectId từ form (bạn cần đảm bảo form có input name="projectId")
-            int projectId = Integer.parseInt(req.getParameter("projectId"));
+            Integer projectId = null;
+            String rawProjectId = req.getParameter("projectId");
+            if (rawProjectId != null && !rawProjectId.trim().isEmpty()) {
+                projectId = Integer.parseInt(rawProjectId);
+            }
 
             String[] materialIds = req.getParameterValues("materialId");
             String[] quantities = req.getParameterValues("quantity");

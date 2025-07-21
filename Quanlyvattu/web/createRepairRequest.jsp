@@ -22,7 +22,7 @@
                     </c:if>
 
                     <!-- Form -->
-                    <form method="post" action="createrequest" class="space-y-6">
+                    <form action="create-repair-request" method="post" class="space-y-6">
                         <!-- Request Type -->
                         <div>
                             <label class="block font-medium mb-1">Request Type</label>
