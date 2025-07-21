@@ -213,4 +213,19 @@ public class NotificationDAO extends DBContext {
                 "Nhiệm vụ '" + taskDescription + "' đã chuyển từ sắp tới sang đang thực hiện.",
                 "tasks", taskId, "TASK", "MEDIUM");
     }
+
+    // Gửi noti hệ thống: user A vừa tạo yêu cầu loại XYZ
+    public void createSystemRequestNotification(String fullName, String requestTypeName) throws SQLException {
+        String sql = "INSERT INTO Notifications (UserId, TypeId, Title, Message, Url, RelatedType, Priority, IsRead, CreatedAt) "
+                + "VALUES (NULL, 4, ?, ?, ?, ?, 'MEDIUM', FALSE, GETDATE())";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, "Yêu cầu mới");
+            ps.setString(2, fullName + " đã tạo yêu cầu loại \"" + requestTypeName + "\".");
+            ps.setString(3, "request-list");
+            ps.setString(4, "REQUEST");
+            ps.executeUpdate();
+        }
+    }
+
 }

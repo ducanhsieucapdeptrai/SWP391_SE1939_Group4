@@ -1305,4 +1305,18 @@ public class RequestDAO extends DBContext {
             e.printStackTrace();
         }
     }
+    // GIỮ HÀM CŨ - Tìm theo requestTypeId
+
+    public String getRequestTypeNameByTypeId(int typeId) throws SQLException {
+        String sql = "SELECT RequestTypeName FROM RequestType WHERE RequestTypeId = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, typeId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getString("RequestTypeName");
+            }
+        }
+        return null;
+    }
+
 }
