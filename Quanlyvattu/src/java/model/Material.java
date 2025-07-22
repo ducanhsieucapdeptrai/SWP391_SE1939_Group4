@@ -4,6 +4,8 @@ import java.sql.Timestamp;
 
 public class Material {
 
+    private int categoryId;
+
     private int materialId;
     private String materialName;
     private int subCategoryId;
@@ -22,9 +24,9 @@ public class Material {
     private Timestamp exportDate;
     private int importQuantity;
     private int exportQuantity;
-     private int categoryId;
 
-    public Material(int materialId, String materialName, int subCategoryId, int statusId, String image, String description, int quantity, int minQuantity, double price, Timestamp createdAt, Timestamp updatedAt, String categoryName, String subCategoryName, String statusName) {
+    public Material(int categoryId, int materialId, String materialName, int subCategoryId, int statusId, String image, String description, int quantity, int minQuantity, double price, Timestamp createdAt, Timestamp updatedAt, String categoryName, String subCategoryName, String statusName, Timestamp importDate, Timestamp exportDate, int importQuantity, int exportQuantity) {
+        this.categoryId = categoryId;
         this.materialId = materialId;
         this.materialName = materialName;
         this.subCategoryId = subCategoryId;
@@ -39,6 +41,10 @@ public class Material {
         this.categoryName = categoryName;
         this.subCategoryName = subCategoryName;
         this.statusName = statusName;
+        this.importDate = importDate;
+        this.exportDate = exportDate;
+        this.importQuantity = importQuantity;
+        this.exportQuantity = exportQuantity;
     }
  public Material(int materialId, int subCategoryId, String materialName, int quantity, int minQuantity) {
         this.materialId = materialId;
@@ -48,17 +54,11 @@ public class Material {
         this.minQuantity = minQuantity;
     }
 
-    public Material(int materialId, int subCategoryId, String materialName, int quantity) {
-        this.materialId = materialId;
-        this.materialName = materialName;
-        this.subCategoryId = subCategoryId;
-        this.quantity = quantity;
-    }
+   
 
-    
     public Material() {
     }
-    
+
     // Getters and Setters for new fields
     public Timestamp getImportDate() {
         return importDate;
@@ -66,6 +66,14 @@ public class Material {
 
     public void setImportDate(Timestamp importDate) {
         this.importDate = importDate;
+    }
+
+    public int getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(int categoryId) {
+        this.categoryId = categoryId;
     }
 
     public Timestamp getExportDate() {
@@ -204,24 +212,14 @@ public class Material {
         this.statusName = statusName;
     }
     
-    public int getCategoryId() {
-        return categoryId;
-    }
-
-    public void setCategoryId(int categoryId) {
-        this.categoryId = categoryId;
-    }
+   
     // Alias methods for JSP compatibility
     public Timestamp getCreatedDate() {
         return getCreatedAt();
-}
+    }
 
     public Timestamp getLastUpdatedDate() {
         return getUpdatedAt();
+    }
+
 }
-
-
-   
-}
-
-

@@ -28,9 +28,12 @@
                     <select name="requestType" class="px-3 py-2 border rounded w-48">
                         <option value="">All</option>
                         <c:forEach var="type" items="${requestTypes}">
-                            <option value="${type}" ${type == filterType ? 'selected' : ''}>${type}</option>
+                            <c:if test="${type == 'Export' || type == 'Import'}">
+                                <option value="${type}" ${type == filterType ? 'selected' : ''}>${type}</option>
+                            </c:if>
                         </c:forEach>
                     </select>
+
                 </div>
                 <div>
                     <label class="block font-semibold mb-1">Requested By:</label>
@@ -55,7 +58,6 @@
                 </a>
             </form>
 
-            <!-- FILTER VIEW BUTTONS -->
             <!-- FILTER VIEW BUTTONS -->
             <c:if test="${sessionScope.userRole != 'Warehouse Staff'}">
                 <div class="mb-6 flex gap-4">

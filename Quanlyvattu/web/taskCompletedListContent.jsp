@@ -32,7 +32,6 @@
             <input type="date" name="finishDate" value="${finishDate}" class="rounded border-gray-300 px-3 py-2" />
         </div>
 
-        <!-- Sort By dropdown -->
         <div class="flex flex-col">
             <label class="font-medium text-gray-700 mb-1">Sort By:</label>
             <select name="sortBy" class="rounded border-gray-300 px-3 py-2">
@@ -63,6 +62,7 @@
                     <th class="px-4 py-2">ID</th>
                     <th class="px-4 py-2">Request Type</th>
                     <th class="px-4 py-2">Created Date</th>
+                    <th class="px-4 py-2">Finish Date</th>
                     <th class="px-4 py-2">Note</th>
                     <th class="px-4 py-2">Detail</th>
                 </tr>
@@ -76,10 +76,13 @@
                             <fmt:formatDate value="${r.requestDate}" pattern="dd/MM/yyyy HH:mm" />
                         </td>
                         <td class="px-4 py-2 text-gray-600">
+                            <fmt:formatDate value="${r.finishedDate}" pattern="dd/MM/yyyy HH:mm" />
+                        </td>
+                        <td class="px-4 py-2 text-gray-600">
                             <c:out value="${r.note}" default="-" />
                         </td>
                         <td class="px-4 py-2">
-                            <a href="taskUpdate?requestId=${r.requestId}" 
+                            <a href="warehousereport?requestId=${r.requestId}" 
                                class="inline-block bg-blue-600 text-white text-xs font-semibold px-3 py-1 rounded hover:bg-blue-700 transition">
                                 Here
                             </a>
@@ -89,7 +92,7 @@
 
                 <c:if test="${empty completedList}">
                     <tr>
-                        <td colspan="5" class="text-center text-gray-500 py-4">
+                        <td colspan="6" class="text-center text-gray-500 py-4">
                             No completed tasks found.
                         </td>
                     </tr>
@@ -98,10 +101,8 @@
         </table>
     </div>
 
-    <!-- Pagination: Always shown -->
+    <!-- Pagination -->
     <div class="mt-8 flex justify-between items-center text-sm text-gray-700">
-
-        <!-- Showing X - Y of Z -->
         <div>
             Showing
             <c:out value="${(currentPage - 1) * pageSize + 1}" /> -
@@ -109,12 +110,10 @@
             of ${totalRecords} results
         </div>
 
-        <!-- Page X of Y -->
         <div class="text-gray-800 font-medium">
             Page ${currentPage} of ${totalPages}
         </div>
 
-        <!-- Prev / Next Buttons -->
         <div class="flex space-x-2">
             <!-- Prev -->
             <form method="get" action="completedTasks">
@@ -129,7 +128,7 @@
                            ${currentPage == 1 ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed' 
                                               : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'}"
                     ${currentPage == 1 ? 'disabled' : ''}>
-                    � Prev
+                    ? Prev
                 </button>
             </form>
 
@@ -146,7 +145,7 @@
                            ${currentPage == totalPages ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed' 
                                                        : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'}"
                     ${currentPage == totalPages ? 'disabled' : ''}>
-                    Next �
+                    Next ?
                 </button>
             </form>
         </div>

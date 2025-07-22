@@ -368,5 +368,49 @@ public List<Project> getFilteredProjectsPaged(String projectName, String manager
 
     return list;
 }
+public boolean isProjectNameExists(String projectName) {
+    String sql = "SELECT COUNT(*) FROM Project WHERE ProjectName = ? AND IsDeleted = 0";
+    try (Connection conn = new DBContext().getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setString(1, projectName);
+        try (ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1) > 0;    
+            }
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return false;
+}
+public List<Project> getAllActiveProjects() {
+    List<Project> list = new ArrayList<>();
+    String sql = "SELECT p.*, u.FullName AS ManagerName FROM Project p LEFT JOIN Users u ON p.ManagerId = u.UserId WHERE p.Status = 'Active'";
+
+    try (Connection conn = getNewConnection();
+         PreparedStatement ps = conn.prepareStatement(sql);
+         ResultSet rs = ps.executeQuery()) {
+
+        while (rs.next()) {
+            Project p = new Project();
+            p.setProjectId(rs.getInt("ProjectId"));
+            p.setProjectName(rs.getString("ProjectName"));
+            p.setDescription(rs.getString("Description"));
+            p.setStartDate(rs.getDate("StartDate"));
+            p.setEndDate(rs.getDate("EndDate"));
+            p.setManagerId(rs.getInt("ManagerId"));
+            p.setStatus(rs.getString("Status"));
+            p.setAttachmentPath(rs.getString("AttachmentPath"));
+            p.setManagerName(rs.getString("ManagerName"));
+            list.add(p);
+        }
+
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+
+    return list;
+}
+
 
 }

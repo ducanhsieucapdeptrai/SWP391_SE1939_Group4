@@ -24,11 +24,7 @@ public class MyRequestServlet extends HttpServlet {
             return;
         }
 
-        if (!AuthorizationHelper.hasAnyRole(request, "Company Staff", "Warehouse Manager", "Warehouse Staff")) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied.");
-            return;
-        }
-
+        
         HttpSession session = request.getSession();
         int userId = (int) session.getAttribute("userId");
 

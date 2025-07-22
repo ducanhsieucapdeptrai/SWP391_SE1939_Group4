@@ -24,7 +24,6 @@ import java.util.List;
 public class ProjectServlet extends HttpServlet {
 
     private final ProjectDAO projectDAO = new ProjectDAO();
-    private final UserDAO userDAO = new UserDAO();
 
     private boolean isAuthorized(HttpServletRequest request) {
         HttpSession session = request.getSession();
@@ -107,25 +106,27 @@ public class ProjectServlet extends HttpServlet {
     }
 
     private void handleForm(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+        throws ServletException, IOException {
 
-        String idRaw = request.getParameter("id");
-        Project project = null;
+    String idRaw = request.getParameter("id");
+    Project project = null;
 
-        if (idRaw != null) {
-            try {
-                int id = Integer.parseInt(idRaw);
-                project = projectDAO.getProjectById(id);
-            } catch (NumberFormatException ignored) {}
-        }
-
-        List<Users> managers = userDAO.getUsersByRoleNames(List.of("Warehouse Manager", "Director"));
-
-        request.setAttribute("project", project);
-        request.setAttribute("managers", managers);
-        request.setAttribute("pageContent", "/projectForm.jsp");
-        request.getRequestDispatcher("/layout/layout.jsp").forward(request, response);
+    if (idRaw != null) {
+        try {
+            int id = Integer.parseInt(idRaw);
+            project = projectDAO.getProjectById(id);
+        } catch (NumberFormatException ignored) {}
     }
+
+    // ✅ Sửa ở đây: tạo UserDAO tại chỗ, không dùng biến class-level
+    List<Users> managers = new UserDAO().getUsersByRoleNames(List.of("Warehouse Manager", "Director"));
+
+    request.setAttribute("project", project);
+    request.setAttribute("managers", managers);
+    request.setAttribute("pageContent", "/projectForm.jsp");
+    request.getRequestDispatcher("/layout/layout.jsp").forward(request, response);
+}
+
 
     private void handleDelete(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
@@ -140,82 +141,104 @@ public class ProjectServlet extends HttpServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+protected void doPost(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException {
 
-        if (!isAuthorized(request)) {
-            response.sendRedirect("dashboard");
-            return;
-        }
+    if (!isAuthorized(request)) {
+        response.sendRedirect("dashboard");
+        return;
+    }
 
-        request.setCharacterEncoding("UTF-8");
-        String idRaw = request.getParameter("projectId");
+    request.setCharacterEncoding("UTF-8");
+    String idRaw = request.getParameter("projectId");
 
-        try {
-            String name = request.getParameter("projectName");
-            String desc = request.getParameter("description");
-            Date startDate = Date.valueOf(request.getParameter("startDate"));
-            Date endDate = Date.valueOf(request.getParameter("endDate"));
-            int managerId = Integer.parseInt(request.getParameter("managerId"));
-            String status = request.getParameter("status");
+    try {
+        String name = request.getParameter("projectName");
+        String desc = request.getParameter("description");
+        Date startDate = Date.valueOf(request.getParameter("startDate"));
+        Date endDate = Date.valueOf(request.getParameter("endDate"));
+        int managerId = Integer.parseInt(request.getParameter("managerId"));
+        String status = request.getParameter("status");
 
-            Project p;
-            boolean isEdit = idRaw != null && !idRaw.isEmpty();
-            if (isEdit) {
-                int id = Integer.parseInt(idRaw);
-                p = projectDAO.getProjectById(id);
-                if (p == null) p = new Project();
-                p.setProjectId(id);
-            } else {
-                p = new Project();
-            }
+        boolean isEdit = idRaw != null && !idRaw.isEmpty();
 
+        // ✅ Kiểm tra trùng tên khi tạo mới
+        if (!isEdit && projectDAO.isProjectNameExists(name)) {
+            request.setAttribute("error", "Project name already exists.");
+            // Giữ lại dữ liệu đã nhập để load lại form
+            Project p = new Project();
             p.setProjectName(name);
             p.setDescription(desc);
             p.setStartDate(startDate);
             p.setEndDate(endDate);
             p.setManagerId(managerId);
             p.setStatus(status);
+            request.setAttribute("project", p);
 
-            Part filePart = request.getPart("attachment");
-            if (filePart != null && filePart.getSize() > 0) {
-                String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString().replaceAll("\\s+", "_");
+            List<Users> managers = new UserDAO().getUsersByRoleNames(List.of("Warehouse Manager", "Director"));
+            request.setAttribute("managers", managers);
+            request.setAttribute("pageContent", "/projectForm.jsp");
+            request.getRequestDispatcher("/layout/layout.jsp").forward(request, response);
+            return;
+        }
 
-                if (!fileName.isEmpty()) {
-                    String uploadDir = getServletContext().getRealPath("/uploads");
-                    Files.createDirectories(Paths.get(uploadDir));
+        Project p;
+        if (isEdit) {
+            int id = Integer.parseInt(idRaw);
+            p = projectDAO.getProjectById(id);
+            if (p == null) p = new Project();
+            p.setProjectId(id);
+        } else {
+            p = new Project();
+        }
 
-                    String savedFileName = System.currentTimeMillis() + "_" + fileName;
-                    String savedPath = "uploads/" + savedFileName;
-                    filePart.write(uploadDir + File.separator + savedFileName);
+        p.setProjectName(name);
+        p.setDescription(desc);
+        p.setStartDate(startDate);
+        p.setEndDate(endDate);
+        p.setManagerId(managerId);
+        p.setStatus(status);
 
-                    if (isEdit && p.getAttachmentPath() != null) {
-                        String oldPath = getServletContext().getRealPath("/") + p.getAttachmentPath();
-                        File oldFile = new File(oldPath);
-                        if (oldFile.exists()) {
-                            oldFile.delete();
-                        }
+        Part filePart = request.getPart("attachment");
+        if (filePart != null && filePart.getSize() > 0) {
+            String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString().replaceAll("\\s+", "_");
+
+            if (!fileName.isEmpty()) {
+                String uploadDir = getServletContext().getRealPath("/uploads");
+                Files.createDirectories(Paths.get(uploadDir));
+
+                String savedFileName = System.currentTimeMillis() + "_" + fileName;
+                String savedPath = "uploads/" + savedFileName;
+                filePart.write(uploadDir + File.separator + savedFileName);
+
+                if (isEdit && p.getAttachmentPath() != null) {
+                    String oldPath = getServletContext().getRealPath("/") + p.getAttachmentPath();
+                    File oldFile = new File(oldPath);
+                    if (oldFile.exists()) {
+                        oldFile.delete();
                     }
-
-                    p.setAttachmentPath(savedPath);
                 }
-            } else {
-                if (!isEdit) {
-                    p.setAttachmentPath(null);
-                }
-            }
 
-            if (isEdit) {
-                projectDAO.updateProject(p);
-                response.sendRedirect("projectDetail?id=" + p.getProjectId());
-            } else {
-                projectDAO.insertProject(p);
-                response.sendRedirect("project");
+                p.setAttachmentPath(savedPath);
             }
+        } else {
+            if (!isEdit) {
+                p.setAttachmentPath(null);
+            }
+        }
 
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (isEdit) {
+            projectDAO.updateProject(p);
+            response.sendRedirect("projectDetail?id=" + p.getProjectId());
+        } else {
+            projectDAO.insertProject(p);
             response.sendRedirect("project");
         }
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        response.sendRedirect("project");
     }
+}
+
 }

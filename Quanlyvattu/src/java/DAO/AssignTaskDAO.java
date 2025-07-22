@@ -412,112 +412,115 @@ public class AssignTaskDAO extends DBContext {
     }
 
     public List<RequestList> getOngoingTasksTodayFiltered(String type, String requestedBy, String requestDate) {
-        List<RequestList> list = new ArrayList<>();
+    List<RequestList> list = new ArrayList<>();
 
-        StringBuilder sql = new StringBuilder("""
-        SELECT rl.*, 
-               u1.FullName AS RequestedByName,
-               u2.FullName AS ApprovedByName,
-               rt.RequestTypeName,
-               rst.SubTypeName
-        FROM RequestList rl
-        JOIN Users u1 ON rl.RequestedBy = u1.UserId
-        LEFT JOIN Users u2 ON rl.ApprovedBy = u2.UserId
-        JOIN RequestType rt ON rl.RequestTypeId = rt.RequestTypeId
-        LEFT JOIN RequestSubType rst ON rl.SubTypeId = rst.SubTypeId
-        WHERE rl.Status = 'Approved'
-          AND rl.IsTransferredToday = TRUE
-          AND rl.IsCompleted = FALSE
-    """);
+    StringBuilder sql = new StringBuilder("""
+    SELECT rl.*, 
+           u1.FullName AS RequestedByName,
+           u2.FullName AS ApprovedByName,
+           rt.RequestTypeName,
+           rst.SubTypeName
+    FROM RequestList rl
+    JOIN Users u1 ON rl.RequestedBy = u1.UserId
+    LEFT JOIN Users u2 ON rl.ApprovedBy = u2.UserId
+    JOIN RequestType rt ON rl.RequestTypeId = rt.RequestTypeId
+    LEFT JOIN RequestSubType rst ON rl.SubTypeId = rst.SubTypeId
+    WHERE rl.Status = 'Approved'
+      AND rl.IsTransferredToday = TRUE
+      AND rl.IsCompleted = FALSE
+      AND rt.RequestTypeId IN (1, 2)
+""");
 
-        List<Object> params = new ArrayList<>();
-        if (type != null && !type.isEmpty()) {
-            sql.append(" AND rt.RequestTypeName = ?");
-            params.add(type);
-        }
-        if (requestedBy != null && !requestedBy.isEmpty()) {
-            sql.append(" AND u1.FullName LIKE ?");
-            params.add("%" + requestedBy + "%");
-        }
-        if (requestDate != null && !requestDate.isEmpty()) {
-            sql.append(" AND DATE(rl.RequestDate) = ?");
-            params.add(requestDate);
-        }
-
-        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
-            for (int i = 0; i < params.size(); i++) {
-                ps.setObject(i + 1, params.get(i));
-            }
-
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                RequestList r = mapResultSetToRequestList(rs);
-                r.setRequestedByName(rs.getString("RequestedByName"));
-                r.setApprovedByName(rs.getString("ApprovedByName"));
-                r.setRequestTypeName(rs.getString("RequestTypeName"));
-                r.setSubTypeName(rs.getString("SubTypeName"));
-                list.add(r);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return list;
+    List<Object> params = new ArrayList<>();
+    if (type != null && !type.isEmpty()) {
+        sql.append(" AND rt.RequestTypeName = ?");
+        params.add(type);
+    }
+    if (requestedBy != null && !requestedBy.isEmpty()) {
+        sql.append(" AND u1.FullName LIKE ?");
+        params.add("%" + requestedBy + "%");
+    }
+    if (requestDate != null && !requestDate.isEmpty()) {
+        sql.append(" AND DATE(rl.RequestDate) = ?");
+        params.add(requestDate);
     }
 
-    public List<RequestList> getUpcomingTasksFiltered(String type, String requestedBy, String requestDate) {
-        List<RequestList> list = new ArrayList<>();
-
-        StringBuilder sql = new StringBuilder("""
-        SELECT rl.*, 
-               u1.FullName AS RequestedByName,
-               u2.FullName AS ApprovedByName,
-               rt.RequestTypeName,
-               rst.SubTypeName
-        FROM RequestList rl
-        JOIN Users u1 ON rl.RequestedBy = u1.UserId
-        LEFT JOIN Users u2 ON rl.ApprovedBy = u2.UserId
-        JOIN RequestType rt ON rl.RequestTypeId = rt.RequestTypeId
-        LEFT JOIN RequestSubType rst ON rl.SubTypeId = rst.SubTypeId
-        WHERE rl.Status = 'Approved'
-          AND rl.IsTransferredToday = FALSE
-          AND rl.IsCompleted = FALSE
-    """);
-
-        List<Object> params = new ArrayList<>();
-        if (type != null && !type.isEmpty()) {
-            sql.append(" AND rt.RequestTypeName = ?");
-            params.add(type);
-        }
-        if (requestedBy != null && !requestedBy.isEmpty()) {
-            sql.append(" AND u1.FullName LIKE ?");
-            params.add("%" + requestedBy + "%");
-        }
-        if (requestDate != null && !requestDate.isEmpty()) {
-            sql.append(" AND DATE(rl.RequestDate) = ?");
-            params.add(requestDate);
+    try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        for (int i = 0; i < params.size(); i++) {
+            ps.setObject(i + 1, params.get(i));
         }
 
-        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
-            for (int i = 0; i < params.size(); i++) {
-                ps.setObject(i + 1, params.get(i));
-            }
-
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                RequestList r = mapResultSetToRequestList(rs);
-                r.setRequestedByName(rs.getString("RequestedByName"));
-                r.setApprovedByName(rs.getString("ApprovedByName"));
-                r.setRequestTypeName(rs.getString("RequestTypeName"));
-                r.setSubTypeName(rs.getString("SubTypeName"));
-                list.add(r);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        ResultSet rs = ps.executeQuery();
+        while (rs.next()) {
+            RequestList r = mapResultSetToRequestList(rs);
+            r.setRequestedByName(rs.getString("RequestedByName"));
+            r.setApprovedByName(rs.getString("ApprovedByName"));
+            r.setRequestTypeName(rs.getString("RequestTypeName"));
+            r.setSubTypeName(rs.getString("SubTypeName"));
+            list.add(r);
         }
-
-        return list;
+    } catch (Exception e) {
+        e.printStackTrace();
     }
+
+    return list;
+}
+
+public List<RequestList> getUpcomingTasksFiltered(String type, String requestedBy, String requestDate) {
+    List<RequestList> list = new ArrayList<>();
+
+    StringBuilder sql = new StringBuilder("""
+    SELECT rl.*, 
+           u1.FullName AS RequestedByName,
+           u2.FullName AS ApprovedByName,
+           rt.RequestTypeName,
+           rst.SubTypeName
+    FROM RequestList rl
+    JOIN Users u1 ON rl.RequestedBy = u1.UserId
+    LEFT JOIN Users u2 ON rl.ApprovedBy = u2.UserId
+    JOIN RequestType rt ON rl.RequestTypeId = rt.RequestTypeId
+    LEFT JOIN RequestSubType rst ON rl.SubTypeId = rst.SubTypeId
+    WHERE rl.Status = 'Approved'
+      AND rl.IsTransferredToday = FALSE
+      AND rl.IsCompleted = FALSE
+      AND rt.RequestTypeId IN (1, 2)
+""");
+
+    List<Object> params = new ArrayList<>();
+    if (type != null && !type.isEmpty()) {
+        sql.append(" AND rt.RequestTypeName = ?");
+        params.add(type);
+    }
+    if (requestedBy != null && !requestedBy.isEmpty()) {
+        sql.append(" AND u1.FullName LIKE ?");
+        params.add("%" + requestedBy + "%");
+    }
+    if (requestDate != null && !requestDate.isEmpty()) {
+        sql.append(" AND DATE(rl.RequestDate) = ?");
+        params.add(requestDate);
+    }
+
+    try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        for (int i = 0; i < params.size(); i++) {
+            ps.setObject(i + 1, params.get(i));
+        }
+
+        ResultSet rs = ps.executeQuery();
+        while (rs.next()) {
+            RequestList r = mapResultSetToRequestList(rs);
+            r.setRequestedByName(rs.getString("RequestedByName"));
+            r.setApprovedByName(rs.getString("ApprovedByName"));
+            r.setRequestTypeName(rs.getString("RequestTypeName"));
+            r.setSubTypeName(rs.getString("SubTypeName"));
+            list.add(r);
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+
+    return list;
+}
+
 
     public List<String> getAllRequesterNames() {
         List<String> names = new ArrayList<>();

@@ -1,7 +1,7 @@
 package model;
 
 /**
- * 
+ *
  * @author anhdu
  */
 public class RequestDetail {
@@ -9,14 +9,24 @@ public class RequestDetail {
     private int requestId;
     private int materialId;
     private int quantity;
-    
-    
+    private String note;
+
     private String materialName;
     private double price;
     private String image;
     private String description;
     private String subCategoryName;
     private String categoryName;
+
+    private Material material;
+
+    public Material getMaterial() {
+        return material;
+    }
+
+    public void setMaterial(Material material) {
+        this.material = material;
+    }
 
     public RequestDetail() {
     }
@@ -26,15 +36,17 @@ public class RequestDetail {
         this.materialId = materialId;
         this.quantity = quantity;
     }
-public RequestDetail(int materialId, int quantity, String materialName) {
+
+    public RequestDetail(int requestId, int materialId, int quantity, String note) {
+        this.requestId = requestId;
         this.materialId = materialId;
         this.quantity = quantity;
-        this.materialName = materialName;
+        this.note = note;
     }
-    
-    public RequestDetail(int requestId, int materialId, int quantity, String materialName, 
-                        double price, String image, String description, String subCategoryName, 
-                        String categoryName) {
+
+    public RequestDetail(int requestId, int materialId, int quantity, String materialName,
+            double price, String image, String description, String subCategoryName,
+            String categoryName, String note) {
         this.requestId = requestId;
         this.materialId = materialId;
         this.quantity = quantity;
@@ -44,12 +56,9 @@ public RequestDetail(int materialId, int quantity, String materialName) {
         this.description = description;
         this.subCategoryName = subCategoryName;
         this.categoryName = categoryName;
+        this.note = note;
     }
 
-   public RequestDetail(int materialId, int quantity) {
-        this.materialId = materialId;
-        this.quantity = quantity;
-    }
     public int getRequestId() {
         return requestId;
     }
@@ -74,7 +83,14 @@ public RequestDetail(int materialId, int quantity, String materialName) {
         this.quantity = quantity;
     }
 
-    
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
+    }
+
     public String getMaterialName() {
         return materialName;
     }
@@ -123,7 +139,6 @@ public RequestDetail(int materialId, int quantity, String materialName) {
         this.categoryName = categoryName;
     }
 
-    
     public double getTotalValue() {
         return quantity * price;
     }

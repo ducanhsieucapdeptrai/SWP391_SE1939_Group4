@@ -13,22 +13,35 @@ import java.sql.Timestamp;
 public class Notification {
 
     private int notificationId;
-    private int userId;
+    private Integer userId;
+    private int typeId;
+    private String typeName;
+    private String title;
     private String message;
-    private Timestamp createdAt;
+    private String url;
+    private Integer relatedId;
+    private String relatedType;
+    private String priority;
     private boolean isRead;
-    private int requestId;
+    private String createdAt; // hoặc String createdAtFormatted
 
+// + các getter/setter tương ứng
     public Notification() {
     }
 
-    public Notification(int notificationId, int userId, String message, Timestamp createdAt, boolean isRead, int requestId) {
+    public Notification(int notificationId, Integer userId, int typeId, String typeName, String title, String message, String url, Integer  relatedId, String relatedType, String priority, boolean isRead, String createdAt) {
         this.notificationId = notificationId;
         this.userId = userId;
+        this.typeId = typeId;
+        this.typeName = typeName;
+        this.title = title;
         this.message = message;
-        this.createdAt = createdAt;
+        this.url = url;
+        this.relatedId = relatedId;
+        this.relatedType = relatedType;
+        this.priority = priority;
         this.isRead = isRead;
-        this.requestId = requestId;
+        this.createdAt = createdAt;
     }
 
     public int getNotificationId() {
@@ -39,12 +52,38 @@ public class Notification {
         this.notificationId = notificationId;
     }
 
-    public int getUserId() {
+    public Integer getUserId() {
         return userId;
     }
 
-    public void setUserId(int userId) {
+    public void setUserId(Integer userId) {
         this.userId = userId;
+    }
+
+  
+
+    public int getTypeId() {
+        return typeId;
+    }
+
+    public void setTypeId(int typeId) {
+        this.typeId = typeId;
+    }
+
+    public String getTypeName() {
+        return typeName;
+    }
+
+    public void setTypeName(String typeName) {
+        this.typeName = typeName;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public String getMessage() {
@@ -55,12 +94,36 @@ public class Notification {
         this.message = message;
     }
 
-    public Timestamp getCreatedAt() {
-        return createdAt;
+    public String getUrl() {
+        return url;
     }
 
-    public void setCreatedAt(Timestamp createdAt) {
-        this.createdAt = createdAt;
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public int getRelatedId() {
+        return relatedId;
+    }
+
+    public void setRelatedId(Integer  relatedId) {
+        this.relatedId = relatedId;
+    }
+
+    public String getRelatedType() {
+        return relatedType;
+    }
+
+    public void setRelatedType(String relatedType) {
+        this.relatedType = relatedType;
+    }
+
+    public String getPriority() {
+        return priority;
+    }
+
+    public void setPriority(String priority) {
+        this.priority = priority;
     }
 
     public boolean isIsRead() {
@@ -71,12 +134,12 @@ public class Notification {
         this.isRead = isRead;
     }
 
-    public int getRequestId() {
-        return requestId;
+    public String getCreatedAt() {
+        return createdAt;
     }
 
-    public void setRequestId(int requestId) {
-        this.requestId = requestId;
+    public void setCreatedAt(String createdAt) {
+        this.createdAt = createdAt;
     }
 
     

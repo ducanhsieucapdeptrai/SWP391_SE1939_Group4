@@ -36,7 +36,8 @@ public class RequestDetailDAO {
                         rs.getString("Image"),
                         rs.getString("Description"),
                         rs.getString("SubCategoryName"),
-                        rs.getString("CategoryName")
+                        rs.getString("CategoryName"),
+                        ""
                 );
                 list.add(detail);
             }

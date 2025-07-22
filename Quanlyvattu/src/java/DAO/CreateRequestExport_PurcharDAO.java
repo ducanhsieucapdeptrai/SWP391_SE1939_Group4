@@ -171,53 +171,63 @@ public class CreateRequestExport_PurcharDAO extends DBContext {
         return list;
     }
 
-    public int createRequest(int userId, int typeId, Integer subTypeId, String note, List<RequestDetail> details) {
-        String sqlRequest = "INSERT INTO RequestList (RequestedBy, RequestTypeId, SubTypeId, Note, Status, RequestDate) "
-                + "VALUES (?, ?, ?, ?, 'Pending', CURRENT_TIMESTAMP)";
-        String sqlDetail = "INSERT INTO RequestDetail (RequestId, MaterialId, Quantity) VALUES (?, ?, ?)";
-        
-        int requestId = -1;
-        try (Connection conn = getConnection()) {
-            conn.setAutoCommit(false);
-            try {
-                // Insert request
-                PreparedStatement stReq = conn.prepareStatement(sqlRequest, Statement.RETURN_GENERATED_KEYS);
-                stReq.setInt(1, userId);
-                stReq.setInt(2, typeId);
-                // Handle nullable subTypeId for Purchase requests
-                if (subTypeId != null) {
-                    stReq.setInt(3, subTypeId);
-                } else {
-                    stReq.setNull(3, java.sql.Types.INTEGER);
-                }
-                stReq.setString(4, note);
-                stReq.executeUpdate();
+    public int createRequest(int userId, int typeId, Integer subTypeId, String note, List<RequestDetail> details, Integer projectId) {
+    String sqlRequest = "INSERT INTO RequestList (RequestedBy, RequestTypeId, SubTypeId, Note, Status, RequestDate, ProjectId) "
+            + "VALUES (?, ?, ?, ?, 'Pending', CURRENT_TIMESTAMP, ?)";
+    String sqlDetail = "INSERT INTO RequestDetail (RequestId, MaterialId, Quantity) VALUES (?, ?, ?)";
 
-                // Get generated request ID
-                ResultSet rs = stReq.getGeneratedKeys();
-                if (rs.next()) {
-                    requestId = rs.getInt(1);
-                    
-                    // Insert details
-                    PreparedStatement stDet = conn.prepareStatement(sqlDetail);
-                    for (RequestDetail detail : details) {
-                        stDet.setInt(1, requestId);
-                        stDet.setInt(2, detail.getMaterialId());
-                        stDet.setInt(3, detail.getQuantity());
-                        stDet.addBatch();
-                    }
-                    stDet.executeBatch();
-                }
-                
-                conn.commit();
-            } catch (SQLException e) {
-                conn.rollback();
-                throw e;
+    int requestId = -1;
+    try (Connection conn = getConnection()) {
+        conn.setAutoCommit(false);
+        try {
+            // Insert request
+            PreparedStatement stReq = conn.prepareStatement(sqlRequest, Statement.RETURN_GENERATED_KEYS);
+            stReq.setInt(1, userId);
+            stReq.setInt(2, typeId);
+
+            if (subTypeId != null) {
+                stReq.setInt(3, subTypeId);
+            } else {
+                stReq.setNull(3, java.sql.Types.INTEGER);
             }
+
+            stReq.setString(4, note);
+
+            // Set projectId (nullable)
+            if (projectId != null) {
+                stReq.setInt(5, projectId);
+            } else {
+                stReq.setNull(5, java.sql.Types.INTEGER);
+            }
+
+            stReq.executeUpdate();
+
+            // Get generated request ID
+            ResultSet rs = stReq.getGeneratedKeys();
+            if (rs.next()) {
+                requestId = rs.getInt(1);
+
+                // Insert details
+                PreparedStatement stDet = conn.prepareStatement(sqlDetail);
+                for (RequestDetail detail : details) {
+                    stDet.setInt(1, requestId);
+                    stDet.setInt(2, detail.getMaterialId());
+                    stDet.setInt(3, detail.getQuantity());
+                    stDet.addBatch();
+                }
+                stDet.executeBatch();
+            }
+
+            conn.commit();
         } catch (SQLException e) {
-            e.printStackTrace();
-            return -1;
+            conn.rollback();
+            throw e;
         }
-        return requestId;
+    } catch (SQLException e) {
+        e.printStackTrace();
+        return -1;
     }
+    return requestId;
+}
+
 }

@@ -4,13 +4,14 @@ import DAO.PurchaseOrderDAO;
 import DAO.RequestDAO;
 import Helper.AuthorizationHelper;
 import jakarta.servlet.*;
+import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 import model.PurchaseOrderDetail;
 import model.RequestList;
 
 import java.io.IOException;
 import java.util.List;
-
+@WebServlet("/create-purchase-order")
 public class CreatePurchaseOrderServlet extends HttpServlet {
 
     @Override
