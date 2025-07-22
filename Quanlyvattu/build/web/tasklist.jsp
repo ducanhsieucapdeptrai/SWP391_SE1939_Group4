@@ -59,7 +59,6 @@
             </form>
 
             <!-- FILTER VIEW BUTTONS -->
-            <!-- FILTER VIEW BUTTONS -->
             <c:if test="${sessionScope.userRole != 'Warehouse Staff'}">
                 <div class="mb-6 flex gap-4">
                     <form action="tasklist" method="get">

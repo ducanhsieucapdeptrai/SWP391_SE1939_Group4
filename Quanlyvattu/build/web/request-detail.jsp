@@ -315,7 +315,7 @@
                 </c:otherwise>
             </c:choose>
         </div>
-        <c:if test="${(requestInfo.status == 'Pending' || requestInfo.status == 'P') && (sessionScope.userRole == 'Director' || sessionScope.userRole == 'Warehouse Manager')}">
+        <c:if test="${(requestInfo.status == 'Pending' || requestInfo.status == 'P') && (sessionScope.userRole == 'Director' )}">
             <div class="flex justify-end gap-4 mt-6">
                 <button onclick="redirectToApprovePage(${requestInfo.requestId})"
                         class="action-button px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shadow-sm">

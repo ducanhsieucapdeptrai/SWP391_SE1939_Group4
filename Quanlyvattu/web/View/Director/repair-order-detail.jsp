@@ -59,7 +59,7 @@
 
     <div class="flex justify-between items-center">
         <a href="${pageContext.request.contextPath}/repair-request-list" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Back</a>
-        <c:if test="${ro.status == 'Pending'}">
+        <c:if test="${ro.status == 'Pending' and sessionScope.userRole == 'Director'}">
             <form method="post" action="repair-order-detail" class="flex gap-3">
                 <input type="hidden" name="roId" value="${ro.roId}">
                 <button type="submit" name="action" value="approve"

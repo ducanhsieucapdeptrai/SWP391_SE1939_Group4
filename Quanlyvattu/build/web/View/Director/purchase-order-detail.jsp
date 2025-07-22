@@ -64,7 +64,7 @@
 
     <div class="flex justify-between items-center">
         <a href="purchase-request-list" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Back</a>
-        <c:if test="${po.status == 'Pending'}">
+        <c:if test="${po.status == 'Pending' and sessionScope.userRole == 'Director'}">
             <form method="post" action="purchase-order-detail" class="flex gap-3">
                 <input type="hidden" name="poId" value="${po.poId}">
                 <button type="submit" name="action" value="approve"

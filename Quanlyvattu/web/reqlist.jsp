@@ -78,27 +78,9 @@
                     + Create Request
                 </a>
                     
-                <a href="${pageContext.request.contextPath}/create-repair-request" class="inline-block px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors">
-                    + Create Repair Request
-                </a>
+               
 
-                <c:choose>
-                    <c:when test="${filterType == 'Purchase'}">
-                        <form action="reqlist" method="get">
-                            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 ml-auto">
-                                Show Material Request List
-                            </button>
-                        </form>
-                    </c:when>
-                    <c:otherwise>
-                        <form action="reqlist" method="get">
-                            <input type="hidden" name="requestType" value="Purchase" />
-                            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 ml-auto">
-                                Show Purchase Requests
-                            </button>
-                        </form>
-                    </c:otherwise>
-                </c:choose>
+               
 
 
                 <form action="reqlist" method="get">
