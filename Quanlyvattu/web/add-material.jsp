@@ -18,6 +18,7 @@
 
     <!-- Add Material Form -->
     <form action="${pageContext.request.contextPath}/material-add" method="post" enctype="multipart/form-data" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+        <!-- Material Name -->
         <div class="mb-4">
             <label class="block text-gray-700 text-sm font-bold mb-2" for="materialName">
                 Material Name
@@ -48,24 +49,10 @@
             <select class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
                     id="subCategoryId" name="subCategoryId" required>
                 <option value="">Select Subcategory</option>
-                <%-- Options will be populated by JavaScript --%>
             </select>
         </div>
 
-        <!-- Status Dropdown -->
-        <div class="mb-4">
-            <label class="block text-gray-700 text-sm font-bold mb-2" for="statusId">
-                Status
-            </label>
-            <select class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
-                    id="statusId" name="statusId" required>
-                <option value="">Select Status</option>
-                <c:forEach var="status" items="${statuses}">
-                    <option value="${status.statusId}">${status.statusName}</option>
-                </c:forEach>
-            </select>
-        </div>
-
+        <!-- Image Upload -->
         <div class="mb-4">
             <label class="block text-gray-700 text-sm font-bold mb-2" for="image">
                 Image
@@ -74,6 +61,7 @@
                    id="image" name="image" type="file" accept="image/*">
         </div>
 
+        <!-- Description -->
         <div class="mb-4">
             <label class="block text-gray-700 text-sm font-bold mb-2" for="description">
                 Description
@@ -82,32 +70,7 @@
                       id="description" name="description" placeholder="Enter material description"></textarea>
         </div>
 
-        <div class="grid grid-cols-2 gap-4">
-            <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2" for="quantity">
-                    Quantity
-                </label>
-                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
-                       id="quantity" name="quantity" type="number" min="0" placeholder="Enter quantity" required>
-            </div>
-
-            <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2" for="minQuantity">
-                    Minimum Quantity
-                </label>
-                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
-                       id="minQuantity" name="minQuantity" type="number" min="0" placeholder="Enter minimum quantity" required>
-            </div>
-        </div>
-
-        <div class="mb-4">
-            <label class="block text-gray-700 text-sm font-bold mb-2" for="price">
-                Price
-            </label>
-            <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
-                   id="price" name="price" type="number" step="0.01" min="0" placeholder="Enter price" required>
-        </div>
-
+        <!-- Action Buttons -->
         <div class="flex items-center justify-between">
             <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" 
                     type="submit">
@@ -120,25 +83,19 @@
     </form>
 </div>
 
+<!-- Script for dynamic subcategory filtering -->
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // Subcategory data is now passed as a JSON string from the servlet for robustness
         const subcategories = <c:out value="${subcategoriesJson}" escapeXml="false" />;
-
         const categorySelect = document.getElementById('categoryId');
         const subcategorySelect = document.getElementById('subCategoryId');
 
         function updateSubcategories() {
             const selectedCategoryId = categorySelect.value;
-            
-            // Clear existing options
             subcategorySelect.innerHTML = '<option value="">Select Subcategory</option>';
-            
+
             if (selectedCategoryId) {
-                // Filter subcategories based on the selected category
                 const filteredSubcategories = subcategories.filter(sub => sub.categoryId == selectedCategoryId);
-                
-                // Add new options to the subcategory dropdown
                 filteredSubcategories.forEach(sub => {
                     const option = document.createElement('option');
                     option.value = sub.id;
@@ -148,10 +105,7 @@
             }
         }
 
-        // Add event listener to the category dropdown
         categorySelect.addEventListener('change', updateSubcategories);
-        
-        // Initial population on page load
-        updateSubcategories();
+        updateSubcategories(); // Populate on page load
     });
 </script>

@@ -45,7 +45,9 @@ INSERT INTO Functions (FunctionName, Url, ModuleId) VALUES
 ('Reset Password Requests', '/reset-pass-list', 1),
 ('Authorization Matrix', '/user-matrix', 1),
 ('Request password reset', '/request-new-password', 1),
-('Assign user roles', NULL, 1);
+('Assign user roles', NULL, 1),
+('Add User', '/add-user', 1);
+
 
 
 -- Module 2: Material Management
@@ -56,6 +58,7 @@ INSERT INTO Functions (FunctionName, Url, ModuleId) VALUES
 ('Add Category/Subcategory', '/add-category' , 2),
 ('Delete material', NULL, 2),
 ('Edit Material Information', '/editmaterial', 2);
+
 
 
 -- Module 3: Import/Export
@@ -73,7 +76,16 @@ INSERT INTO Functions (FunctionName, Url, ModuleId) VALUES
 ('Completed Tasks', '/completedTasks', 4),
 ('View Request Detail', '/request-detail', 4),
 ('View Purchase Order Detail', '/purchase-order-detail', 4),
-('View Repair Order Detail', '/repair-order-detail', 4)
+('View Repair Order Detail', '/repair-order-detail', 4),
+('Approve Request Form', '/approve-request', 4),
+('Reject Request', '/approveandrejectrequest', 4),
+('Approve Request', '/approveandrejectrequest', 4),
+('Create PO button', '/create-purchase-order', 4),
+('Create PO', '/create-po', 4),
+('View Project', '/project', 4)
+
+
+
 
 
 ;
@@ -113,7 +125,8 @@ INSERT INTO RoleFunction (RoleId, FunctionId)
 SELECT 3, FunctionId FROM Functions WHERE FunctionName IN (
     'Material Inventory', 'Request List', 'Purchase Request List',
     'Repair Order List', 'My Requests', 'Completed Tasks',
-    'Advanced Dashboard', 'Dashboard'
+    'Advanced Dashboard', 'Dashboard','User List','Approve Request','View Repair Order Detail','View Request Detail','View Purchase Order Detail','View Request Detail'
+    'Create PO','Approve Request Form','View Project'
 );
 
 -- Gán quyền cho Company Staff

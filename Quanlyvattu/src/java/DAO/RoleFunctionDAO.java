@@ -219,7 +219,7 @@ public class RoleFunctionDAO extends DBContext {
                     "JOIN Functions f ON rf.FunctionId = f.FunctionId " +
                     "WHERE rf.RoleId = ? AND f.Url = ? AND rf.IsActive = 1";
         
-        try (Connection conn = new DBContext().getConnection(); 
+        try (Connection conn = new DBContext().getNewConnection(); 
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, roleId);
             ps.setString(2, functionUrl);

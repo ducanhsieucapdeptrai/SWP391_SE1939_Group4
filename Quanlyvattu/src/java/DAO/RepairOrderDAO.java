@@ -308,7 +308,7 @@ WHERE d.ROId = ?
         ResultSet rs = null;
 
         try {
-            // ✅ LẤY CONNECTION MỚI để tránh dùng cái đã đóng
+            // ✅ LẤY CONNECTION MỚI
             conn = getNewConnection();
             conn.setAutoCommit(false);
             log.append("🔌 Connection opened via getNewConnection()<br/>");
@@ -366,7 +366,7 @@ WHERE d.ROId = ?
                 log.append("⚠ Rollback Exception: ").append(e.getMessage()).append("<br/>");
             }
         } finally {
-            // Đóng kết nối và tài nguyên bình thường
+            // Chỉ đóng ps và rs, KHÔNG đóng conn
             try {
                 if (rs != null) {
                     rs.close();
@@ -388,14 +388,12 @@ WHERE d.ROId = ?
             } catch (Exception e) {
                 log.append("⚠ psDetail close: ").append(e.getMessage()).append("<br/>");
             }
-            try {
-                if (conn != null) {
-                    conn.setAutoCommit(true);
-                }
-                conn.close();
-            } catch (Exception e) {
-                log.append("⚠ conn close: ").append(e.getMessage()).append("<br/>");
-            }
+
+            // ❌ KHÔNG đóng conn, KHÔNG reset autoCommit
+            // if (conn != null) {
+            //     conn.setAutoCommit(true);
+            //     conn.close();
+            // }
         }
 
         return false;

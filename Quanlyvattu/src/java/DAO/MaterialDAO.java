@@ -239,16 +239,7 @@ public class MaterialDAO extends DBContext {
     /**
      * Helper method to close database resources
      */
-    private void closeResources(ResultSet rs, Statement stmt, Connection conn) {
-        try {
-            if (rs != null && !rs.isClosed()) rs.close();
-            if (stmt != null && !stmt.isClosed()) stmt.close();
-            if (conn != null && !conn.isClosed()) conn.close();
-        } catch (SQLException e) {
-            System.err.println("Error closing database resources: " + e.getMessage());
-        }
-    }
-
+    
     // Thêm vật tư mới
     public boolean addMaterial(Material material) {
         String sql = """
