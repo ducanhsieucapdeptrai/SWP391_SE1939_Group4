@@ -13,6 +13,7 @@ import jakarta.servlet.http.*;
 
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -41,7 +42,7 @@ public class TaskUpdateServlet extends HttpServlet {
 
         String requestIdStr = request.getParameter("requestId");
         if (requestIdStr == null || requestIdStr.isEmpty()) {
-            response.sendRedirect("tasklist.jsp");
+            response.sendRedirect(request.getContextPath() + "/tasklist");
             return;
         }
 
@@ -50,11 +51,12 @@ public class TaskUpdateServlet extends HttpServlet {
 
             List<RequestDetailItem> items = requestDAO.getRequestDetails(requestId);
             if (items.isEmpty()) {
-                request.setAttribute("errorMessage", "Request not found or has no details");
-                request.setAttribute("pageContent", "tasklist.jsp");
-                request.getRequestDispatcher("layout/layout.jsp").forward(request, response);
+                session.setAttribute("errorMessage", "Request not found or has no details");
+                response.sendRedirect(request.getContextPath() + "/tasklist");
                 return;
             }
+
+            session.setAttribute("originalItems", items);
 
             List<String> incompleteItems = new ArrayList<>();
             for (RequestDetailItem item : items) {
@@ -64,12 +66,22 @@ public class TaskUpdateServlet extends HttpServlet {
             }
 
             List<TaskLog> taskLogs = taskLogDAO.getGroupedTaskLogsByRequestId(conn, requestId);
-
             RequestList requestInfo = requestDAO.getRequestById(requestId);
-            if (requestInfo != null) {
-                request.setAttribute("createdBy", requestInfo.getRequestedByName());
-                request.setAttribute("createdAt", requestInfo.getRequestDate());
+
+            if (requestInfo == null) {
+                session.setAttribute("errorMessage", "Request not found.");
+                response.sendRedirect(request.getContextPath() + "/tasklist");
+                return;
             }
+
+            if ("Pending".equalsIgnoreCase(requestInfo.getStatus())) {
+                session.setAttribute("errorMessage", "This request is still pending and cannot be processed.");
+                response.sendRedirect(request.getContextPath() + "/tasklist");
+                return;
+            }
+
+            request.setAttribute("createdBy", requestInfo.getRequestedByName());
+            request.setAttribute("createdAt", requestInfo.getRequestDate());
 
             String successMessage = (String) session.getAttribute("successMessage");
             String errorMessage = (String) session.getAttribute("errorMessage");
@@ -95,9 +107,8 @@ public class TaskUpdateServlet extends HttpServlet {
 
         } catch (NumberFormatException | SQLException e) {
             e.printStackTrace();
-            request.setAttribute("errorMessage", "Error loading request details");
-            request.setAttribute("pageContent", "tasklist.jsp");
-            request.getRequestDispatcher("layout/layout.jsp").forward(request, response);
+            session.setAttribute("errorMessage", "Error loading request details");
+            response.sendRedirect(request.getContextPath() + "/tasklist");
         }
     }
 
@@ -117,7 +128,7 @@ public class TaskUpdateServlet extends HttpServlet {
         String requestIdStr = request.getParameter("requestId");
 
         if (requestIdStr == null || requestIdStr.isEmpty()) {
-            response.sendRedirect("tasklist.jsp");
+            response.sendRedirect(request.getContextPath() + "/tasklist");
             return;
         }
 
@@ -132,7 +143,7 @@ public class TaskUpdateServlet extends HttpServlet {
 
         } catch (NumberFormatException e) {
             e.printStackTrace();
-            response.sendRedirect("tasklist.jsp");
+            response.sendRedirect(request.getContextPath() + "/tasklist");
         }
     }
 
@@ -216,13 +227,16 @@ public class TaskUpdateServlet extends HttpServlet {
                 boolean success = updateStockAndQuantities(conn, requestId, materialIds, actualQuantities, requestType);
 
                 if (success) {
+                    String slipCode = taskLogDAO.generateSlipCode(conn);
+
                     success = taskLogDAO.insertTaskLogWithDetails(
-                        conn,
-                        requestId,
-                        requestTypeId,
-                        user.getUserId(),
-                        materialIds,
-                        actualQuantities
+                            conn,
+                            requestId,
+                            requestTypeId,
+                            user.getUserId(),
+                            parsed.materialIds,
+                            parsed.actualQuantities,
+                            slipCode
                     );
                 }
 
@@ -255,7 +269,7 @@ public class TaskUpdateServlet extends HttpServlet {
                                              String requestType) throws SQLException {
 
         String updateDetailSql = "UPDATE RequestDetail SET ActualQuantity = ActualQuantity + ? WHERE RequestId = ? AND MaterialId = ?";
-        try (var detailStmt = conn.prepareStatement(updateDetailSql)) {
+        try (PreparedStatement detailStmt = conn.prepareStatement(updateDetailSql)) {
             for (int i = 0; i < materialIds.size(); i++) {
                 detailStmt.setInt(1, quantities.get(i));
                 detailStmt.setInt(2, requestId);
@@ -265,25 +279,32 @@ public class TaskUpdateServlet extends HttpServlet {
             detailStmt.executeBatch();
         }
 
-        String stockSql;
         if ("Import".equalsIgnoreCase(requestType)) {
-            stockSql = "UPDATE Materials SET Quantity = Quantity + ? WHERE MaterialId = ?";
-        } else {
-            stockSql = "UPDATE Materials SET Quantity = Quantity - ? WHERE MaterialId = ? AND Quantity >= ?";
-        }
-
-        try (var stockStmt = conn.prepareStatement(stockSql)) {
-            for (int i = 0; i < materialIds.size(); i++) {
-                stockStmt.setInt(1, quantities.get(i));
-                stockStmt.setInt(2, materialIds.get(i));
-                if ("Export".equalsIgnoreCase(requestType)) {
-                    stockStmt.setInt(3, quantities.get(i));
+            String stockSql = "UPDATE Materials SET Quantity = Quantity + ? WHERE MaterialId = ?";
+            try (PreparedStatement stockStmt = conn.prepareStatement(stockSql)) {
+                for (int i = 0; i < materialIds.size(); i++) {
+                    stockStmt.setInt(1, quantities.get(i));
+                    stockStmt.setInt(2, materialIds.get(i));
+                    stockStmt.addBatch();
                 }
-                stockStmt.addBatch();
+                int[] results = stockStmt.executeBatch();
+                for (int result : results) {
+                    if (result <= 0) return false;
+                }
             }
-            int[] results = stockStmt.executeBatch();
-            for (int result : results) {
-                if (result <= 0) return false;
+        } else {
+            String stockSql = "UPDATE Materials SET Quantity = Quantity - ? WHERE MaterialId = ? AND Quantity >= ?";
+            try (PreparedStatement stockStmt = conn.prepareStatement(stockSql)) {
+                for (int i = 0; i < materialIds.size(); i++) {
+                    stockStmt.setInt(1, quantities.get(i));
+                    stockStmt.setInt(2, materialIds.get(i));
+                    stockStmt.setInt(3, quantities.get(i));
+                    stockStmt.addBatch();
+                }
+                int[] results = stockStmt.executeBatch();
+                for (int result : results) {
+                    if (result <= 0) return false;
+                }
             }
         }
 
@@ -315,5 +336,47 @@ public class TaskUpdateServlet extends HttpServlet {
             request.getSession().setAttribute("errorMessage", "Error generating slip");
             response.sendRedirect("taskUpdate?requestId=" + requestId);
         }
+    }
+
+    public static class ParsedSlipData {
+        public List<RequestDetailItem> items;
+        public List<Integer> materialIds = new ArrayList<>();
+        public List<Integer> actualQuantities = new ArrayList<>();
+        public boolean hasValidData = false;
+        public List<String> exceededMaterials = new ArrayList<>();
+        public List<String> stockExceededMaterials = new ArrayList<>();
+        public List<String> invalidQuantities = new ArrayList<>();
+    }
+
+    public static ParsedSlipData parseSlipInput(HttpServletRequest request, int requestId, String requestType, RequestDAO requestDAO) throws SQLException {
+        ParsedSlipData data = new ParsedSlipData();
+        data.items = requestDAO.getRequestDetails(requestId);
+
+        for (RequestDetailItem item : data.items) {
+            String actualQtyStr = request.getParameter("actualQty_" + item.getMaterialId());
+            if (actualQtyStr != null && !actualQtyStr.trim().isEmpty()) {
+                try {
+                    int actualQty = Integer.parseInt(actualQtyStr.trim());
+                    if (actualQty > 0) {
+                        int remainingQty = item.getQuantity() - item.getActualQuantity();
+
+                        if ("Export".equalsIgnoreCase(requestType) && actualQty > item.getStockQuantity()) {
+                            data.stockExceededMaterials.add(item.getMaterialName());
+                        }
+                        if (actualQty > remainingQty) {
+                            data.exceededMaterials.add(item.getMaterialName());
+                        }
+
+                        data.materialIds.add(item.getMaterialId());
+                        data.actualQuantities.add(actualQty);
+                        data.hasValidData = true;
+                    }
+                } catch (NumberFormatException e) {
+                    data.invalidQuantities.add(item.getMaterialName());
+                }
+            }
+        }
+
+        return data;
     }
 }

@@ -54,4 +54,25 @@ public class AuthorizationHelper {
         }
         return false;
     }
+    
+   
+    public static boolean hasPermission(HttpServletRequest request, String functionUrl) {
+        HttpSession session = request.getSession(false);
+        if (session == null) {
+            return false;
+        }
+
+        Users user = (Users) session.getAttribute("currentUser");
+        if (user == null || user.getRole() == null) {
+            return false;
+        }
+
+        try {
+            DAO.RoleFunctionDAO dao = new DAO.RoleFunctionDAO();
+            return dao.hasPermission(user.getRole().getRoleId(), functionUrl);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

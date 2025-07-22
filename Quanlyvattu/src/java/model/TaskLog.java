@@ -9,7 +9,7 @@ public class TaskLog {
     private int requestTypeId;
     private int staffId;
     private Timestamp createdAt;
-
+    private String slipCode;
     private String staffName;
     private String requestTypeName;
 
@@ -38,4 +38,13 @@ public class TaskLog {
 
     public List<TaskSlipDetail> getSlipDetails() { return slipDetails; }
     public void setSlipDetails(List<TaskSlipDetail> slipDetails) { this.slipDetails = slipDetails; }
+    
+    public String getSlipCode() {
+        return slipCode;
+    }
+
+    public void setSlipCode(String slipCode) {
+        this.slipCode = slipCode;
+}
+
 }

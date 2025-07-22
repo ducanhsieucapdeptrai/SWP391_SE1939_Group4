@@ -7,9 +7,17 @@ package model;
 public class Functions {
     private int functionId;
     private String functionName;
+    private String url;
     private int moduleId;
     
     public Functions() {}
+    
+    public Functions(int functionId, String functionName, String url, int moduleId) {
+        this.functionId = functionId;
+        this.functionName = functionName;
+        this.url = url;
+        this.moduleId = moduleId;
+    }
     
     public Functions(int functionId, String functionName, int moduleId) {
         this.functionId = functionId;
@@ -39,5 +47,13 @@ public class Functions {
     
     public void setModuleId(int moduleId) {
         this.moduleId = moduleId;
+    }
+    
+    public String getUrl() {
+        return url;
+    }
+    
+    public void setUrl(String url) {
+        this.url = url;
     }
 }

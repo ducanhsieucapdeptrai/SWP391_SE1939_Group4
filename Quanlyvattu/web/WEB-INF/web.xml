@@ -82,6 +82,15 @@
         <url-pattern>/calendar-data</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>InventoryStatisticServlet</servlet-name>
+        <servlet-class>controller.statistic.InventoryStatisticServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>InventoryStatisticServlet</servlet-name>
+        <url-pattern>/inventory-statistics</url-pattern>
+    </servlet-mapping>
+
     <welcome-file-list>
         <welcome-file>index.jsp</welcome-file>
     </welcome-file-list>
