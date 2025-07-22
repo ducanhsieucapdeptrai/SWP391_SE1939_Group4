@@ -7,6 +7,7 @@ import jakarta.servlet.http.*;
 import java.io.IOException;
 import java.util.List;
 import model.RequestList;
+import model.Users;
 
 @WebServlet("/reqlist")
 public class ReqListServlet extends HttpServlet {
@@ -79,6 +80,13 @@ public class ReqListServlet extends HttpServlet {
         request.setAttribute("startPage", startPage);
         request.setAttribute("endPage", endPage);
         request.setAttribute("baseParams", baseParams.toString());
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            Users currentUser = (Users) session.getAttribute("currentUser");
+            if (currentUser != null && currentUser.getRole() != null) {
+                request.setAttribute("userRole", currentUser.getRole().getRoleName());
+            }
+        }
 
         request.setAttribute("pageContent", "/reqlist.jsp");
         request.getRequestDispatcher("/layout/layout.jsp").forward(request, response);
