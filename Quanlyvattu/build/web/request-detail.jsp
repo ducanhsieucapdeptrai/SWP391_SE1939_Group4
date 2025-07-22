@@ -1,3 +1,4 @@
+<%@page import="Helper.AuthorizationHelper"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
@@ -8,6 +9,8 @@
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<%@ page import="Helper.AuthorizationHelper" %>
+<%@ page import="jakarta.servlet.http.HttpServletRequest" %>
 
 <style>
     .material-image {
@@ -315,18 +318,24 @@
                 </c:otherwise>
             </c:choose>
         </div>
-        <c:if test="${(requestInfo.status == 'Pending') && (sessionScope.userRole == 'Director' )}">
+        <c:if test="${(requestInfo.status == 'Pending')}">
             <div class="flex justify-end gap-4 mt-6">
+                <% if (AuthorizationHelper.hasPermission(request, "/approve-request")) { %>  
                 <button onclick="redirectToApprovePage(${requestInfo.requestId})"
                         class="action-button px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shadow-sm">
                     <i class="fas fa-check mr-2"></i>
                     Approve
                 </button>
+                <% }%>
+                <% if (AuthorizationHelper.hasPermission(request, "/approveandrejectrequest")) { %>  
+
                 <button onclick="confirmReject(${requestInfo.requestId})"
                         class="action-button px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors shadow-sm">
                     <i class="fas fa-times mr-2"></i>
                     Reject
                 </button>
+                <% }%>
+
             </div>
         </c:if>
     </div>

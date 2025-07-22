@@ -1,12 +1,17 @@
 package controller.general;
 
 import DAO.MaterialDAO;
+import com.google.gson.Gson;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
 import model.Material;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import model.Category;
+import model.SubCategory;
 
 @WebServlet(urlPatterns = {"/editmaterial", "/updatematerial"})
 public class EditMaterialServlet extends HttpServlet {
@@ -25,10 +30,24 @@ public class EditMaterialServlet extends HttpServlet {
         try {
             int id = Integer.parseInt(idRaw);
             MaterialDAO dao = new MaterialDAO();
+
             Material material = dao.getMaterialById(id);
+            List<Category> categories = dao.getAllCategories();  // Giống bên add
+            List<SubCategory> subcategories = dao.getAllSubcategories(); // ✅ Chính xác
 
             if (material != null) {
+                // Convert subcategories -> JSON để dùng trong script
+                String subJson = new Gson().toJson(
+                        subcategories.stream().map(sub -> Map.of(
+                        "id", sub.getSubCategoryId(),
+                        "name", sub.getSubCategoryName(),
+                        "categoryId", sub.getCategoryId()
+                )).toList()
+                );
+
                 request.setAttribute("material", material);
+                request.setAttribute("categories", categories);
+                request.setAttribute("subcategoriesJson", subJson);
                 request.setAttribute("pageContent", "/EditMaterial.jsp");
                 request.getRequestDispatcher("/layout/layout.jsp").forward(request, response);
 
@@ -46,49 +65,35 @@ public class EditMaterialServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
-        // Xử lý cập nhật material
+
         try {
             String materialIdStr = request.getParameter("materialId");
             String materialName = request.getParameter("materialName");
             String subCategoryIdStr = request.getParameter("subCategoryId");
-            String statusIdStr = request.getParameter("statusId");
-            String quantityStr = request.getParameter("quantity");
-            String minQuantityStr = request.getParameter("minQuantity");
-            String priceStr = request.getParameter("price");
+            String unit = request.getParameter("unit");
             String description = request.getParameter("description");
 
-            // Validate required fields
-            if (materialIdStr == null || materialName == null || materialName.trim().isEmpty()) {
-                request.setAttribute("error", "Vui lòng điền đầy đủ thông tin bắt buộc");
+            if (materialIdStr == null || materialName == null || materialName.trim().isEmpty()
+                    || subCategoryIdStr == null || unit == null || unit.trim().isEmpty()) {
+                request.setAttribute("error", "Vui lòng điền đầy đủ thông tin");
                 doGet(request, response);
                 return;
             }
 
             int materialId = Integer.parseInt(materialIdStr);
             int subCategoryId = Integer.parseInt(subCategoryIdStr);
-            int statusId = Integer.parseInt(statusIdStr);
-            int quantity = Integer.parseInt(quantityStr);
-            int minQuantity = Integer.parseInt(minQuantityStr);
-            double price = Double.parseDouble(priceStr);
 
-            // Tạo object Material để update
             Material material = new Material();
             material.setMaterialId(materialId);
             material.setMaterialName(materialName);
             material.setSubCategoryId(subCategoryId);
-            material.setStatusId(statusId);
-            material.setQuantity(quantity);
-            material.setMinQuantity(minQuantity);
-            material.setPrice(price);
+            material.setUnit(unit);
             material.setDescription(description);
 
-            // Cập nhật vào database
             MaterialDAO dao = new MaterialDAO();
-            boolean success = dao.updateMaterial(material);
+            boolean success = dao.updateMaterialBasicInfo(material);
 
             if (success) {
-                // Redirect về material detail hoặc list
                 response.sendRedirect("materialdetail?id=" + materialId);
             } else {
                 request.setAttribute("error", "Cập nhật thất bại. Vui lòng thử lại.");
@@ -104,4 +109,5 @@ public class EditMaterialServlet extends HttpServlet {
             doGet(request, response);
         }
     }
+
 }

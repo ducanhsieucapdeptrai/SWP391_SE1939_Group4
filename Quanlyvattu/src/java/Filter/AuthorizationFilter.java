@@ -21,7 +21,7 @@ public class AuthorizationFilter implements Filter {
         "/login", "/logout", "/logout.jsp", "/change_password.jsp", 
         "/css/", "/js/", "/assets/", "/images/", "/favicon.ico",
         "/error", "/403.jsp", "/404.jsp", "/500.jsp",
-        "/layout/", "/WEB-INF/", "/META-INF/","/add-user"
+        "/layout/", "/WEB-INF/", "/META-INF/","/request-detail","/add-user"
     );
     
     // URLs that require login but no specific permission

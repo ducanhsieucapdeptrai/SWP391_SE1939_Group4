@@ -45,7 +45,9 @@ INSERT INTO Functions (FunctionName, Url, ModuleId) VALUES
 ('Reset Password Requests', '/reset-pass-list', 1),
 ('Authorization Matrix', '/user-matrix', 1),
 ('Request password reset', '/request-new-password', 1),
-('Assign user roles', NULL, 1);
+('Assign user roles', NULL, 1),
+('Add User', '/add-user', 1);
+
 
 
 -- Module 2: Material Management
@@ -56,6 +58,7 @@ INSERT INTO Functions (FunctionName, Url, ModuleId) VALUES
 ('Add Category/Subcategory', '/add-category' , 2),
 ('Delete material', NULL, 2),
 ('Edit Material Information', '/editmaterial', 2);
+
 
 
 -- Module 3: Import/Export
@@ -73,7 +76,16 @@ INSERT INTO Functions (FunctionName, Url, ModuleId) VALUES
 ('Completed Tasks', '/completedTasks', 4),
 ('View Request Detail', '/request-detail', 4),
 ('View Purchase Order Detail', '/purchase-order-detail', 4),
-('View Repair Order Detail', '/repair-order-detail', 4)
+('View Repair Order Detail', '/repair-order-detail', 4),
+('Approve Request Form', '/approve-request', 4),
+('Reject Request', '/approveandrejectrequest', 4),
+('Approve Request', '/approveandrejectrequest', 4),
+('Create PO button', '/create-purchase-order', 4),
+('Create PO', '/create-po', 4),
+('View Project', '/project', 4)
+
+
+
 
 
 ;
@@ -113,7 +125,8 @@ INSERT INTO RoleFunction (RoleId, FunctionId)
 SELECT 3, FunctionId FROM Functions WHERE FunctionName IN (
     'Material Inventory', 'Request List', 'Purchase Request List',
     'Repair Order List', 'My Requests', 'Completed Tasks',
-    'Advanced Dashboard', 'Dashboard'
+    'Advanced Dashboard', 'Dashboard','User List','Approve Request','View Repair Order Detail','View Request Detail','View Purchase Order Detail','View Request Detail'
+    'Create PO','Approve Request Form','View Project'
 );
 
 -- Gán quyền cho Company Staff
@@ -273,6 +286,7 @@ CREATE TABLE Materials (
     Description TEXT,
     Quantity INT DEFAULT 0,
     MinQuantity INT DEFAULT 0,
+    Unit VARCHAR(50) DEFAULT 'unit',
     Price DOUBLE,
     CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
     UpdatedAt DATETIME,
@@ -359,7 +373,25 @@ VALUES
 ('safety_harness', 37, 1, 'safety_harness.png', 'Fall protection: harness for working at height.', 80, 10, 250000),
 ('respirator_mask', 38, 1, 'respirator_mask.png', 'Respiratory protection: mask against harmful environments.', 150, 30, 120000);
 
+UPDATE Materials SET Unit = 'm³' WHERE MaterialName LIKE '%Concrete%';
+UPDATE Materials SET Unit = 'pcs' WHERE MaterialName LIKE '%Brick%' OR MaterialName LIKE '%Tile%';
+UPDATE Materials SET Unit = 'kg' WHERE MaterialName LIKE '%Paint%' OR MaterialName LIKE '%Coating%';
+UPDATE Materials SET Unit = 'm' WHERE MaterialName LIKE '%Pipe%' OR MaterialName LIKE '%Cable%';
+UPDATE Materials SET Unit = 'set' WHERE MaterialName LIKE '%Toilet Bowl%' OR MaterialName LIKE '%Cabinet%';
+UPDATE Materials SET Unit = 'roll' WHERE MaterialName LIKE '%Wallpaper Roll%' OR MaterialName LIKE '%Glass Wool%';
+UPDATE Materials SET Unit = 'sheet' WHERE MaterialName LIKE '%Board%' OR MaterialName LIKE '%Panel%';
+UPDATE Materials SET Unit = 'unit' WHERE Unit = 'unit'; -- fallback cho những cái chưa rõ
 
+CREATE TABLE MaterialInventory (
+    InventoryId INT AUTO_INCREMENT PRIMARY KEY,
+    MaterialId INT,
+    StatusId INT, -- 1: New, 2: Used, 3: Damaged
+    Quantity INT DEFAULT 0,
+    LastUpdated DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (MaterialId) REFERENCES Materials(MaterialId),
+    FOREIGN KEY (StatusId) REFERENCES MaterialStatus(StatusId),
+    UNIQUE (MaterialId, StatusId) -- Mỗi vật tư + trạng thái chỉ có 1 dòng
+);
 
 
 CREATE TABLE Project (

@@ -67,6 +67,7 @@
         <c:if test="${po.status == 'Pending' and sessionScope.userRole == 'Director'}">
             <form method="post" action="purchase-order-detail" class="flex gap-3">
                 <input type="hidden" name="poId" value="${po.poId}">
+                
                 <button type="submit" name="action" value="approve"
                         class="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded shadow">Approve</button>
                 <button type="submit" name="action" value="reject"

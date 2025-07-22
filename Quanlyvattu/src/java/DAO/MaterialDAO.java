@@ -53,14 +53,15 @@ public class MaterialDAO extends DBContext {
     public List<Material> getMaterialsByPage(int offset, int pageSize) {
         List<Material> list = new ArrayList<>();
         String sql = """
-            SELECT m.*, s.StatusName, sc.SubCategoryName, c.CategoryName, c.CategoryId
-            FROM Materials m
-            JOIN MaterialStatus s ON m.StatusId = s.StatusId
-            JOIN SubCategories sc ON m.SubCategoryId = sc.SubCategoryId
-            JOIN Categories c ON sc.CategoryId = c.CategoryId
-            ORDER BY m.MaterialId
-            LIMIT ? OFFSET ?
-        """;
+        SELECT m.MaterialId, m.MaterialName, m.Quantity, m.Image, m.Unit,
+               m.SubCategoryId, sc.SubCategoryName,
+               c.CategoryId, c.CategoryName
+        FROM Materials m
+        JOIN SubCategories sc ON m.SubCategoryId = sc.SubCategoryId
+        JOIN Categories c ON sc.CategoryId = c.CategoryId
+        ORDER BY m.MaterialId
+        LIMIT ? OFFSET ?
+    """;
 
         try (Connection conn = getNewConnection(); PreparedStatement st = conn.prepareStatement(sql)) {
             st.setInt(1, pageSize);
@@ -70,19 +71,13 @@ public class MaterialDAO extends DBContext {
                 Material m = new Material();
                 m.setMaterialId(rs.getInt("MaterialId"));
                 m.setMaterialName(rs.getString("MaterialName"));
-                m.setSubCategoryId(rs.getInt("SubCategoryId"));
-                m.setStatusId(rs.getInt("StatusId"));
-                m.setImage(rs.getString("Image"));
-                m.setDescription(rs.getString("Description"));
                 m.setQuantity(rs.getInt("Quantity"));
-                m.setMinQuantity(rs.getInt("MinQuantity"));
-                m.setPrice(rs.getDouble("Price"));
-                m.setCreatedAt(rs.getTimestamp("CreatedAt"));
-                m.setUpdatedAt(rs.getTimestamp("UpdatedAt"));
-                m.setStatusName(rs.getString("StatusName"));
+                m.setImage(rs.getString("Image"));
+                m.setUnit(rs.getString("Unit"));
+                m.setSubCategoryId(rs.getInt("SubCategoryId"));
                 m.setSubCategoryName(rs.getString("SubCategoryName"));
-                m.setCategoryName(rs.getString("CategoryName"));
                 m.setCategoryId(rs.getInt("CategoryId"));
+                m.setCategoryName(rs.getString("CategoryName"));
                 list.add(m);
             }
         } catch (SQLException e) {
@@ -165,13 +160,13 @@ public class MaterialDAO extends DBContext {
 
     public Material getMaterialById(int id) {
         String sql = """
-            SELECT m.*, s.StatusName, sc.SubCategoryName, c.CategoryName, c.CategoryId
-            FROM Materials m
-            JOIN MaterialStatus s ON m.StatusId = s.StatusId
-            JOIN SubCategories sc ON m.SubCategoryId = sc.SubCategoryId
-            JOIN Categories c ON sc.CategoryId = c.CategoryId
-            WHERE m.MaterialId = ?
-        """;
+        SELECT m.*, s.StatusName, sc.SubCategoryName, c.CategoryName, c.CategoryId
+        FROM Materials m
+        JOIN MaterialStatus s ON m.StatusId = s.StatusId
+        JOIN SubCategories sc ON m.SubCategoryId = sc.SubCategoryId
+        JOIN Categories c ON sc.CategoryId = c.CategoryId
+        WHERE m.MaterialId = ?
+    """;
 
         try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
@@ -190,6 +185,7 @@ public class MaterialDAO extends DBContext {
                 m.setPrice(rs.getDouble("Price"));
                 m.setCreatedAt(rs.getTimestamp("CreatedAt"));
                 m.setUpdatedAt(rs.getTimestamp("UpdatedAt"));
+                m.setUnit(rs.getString("Unit")); // ✅ Thêm dòng này
                 m.setStatusName(rs.getString("StatusName"));
                 m.setSubCategoryName(rs.getString("SubCategoryName"));
                 m.setCategoryName(rs.getString("CategoryName"));
@@ -200,6 +196,29 @@ public class MaterialDAO extends DBContext {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public boolean updateMaterialBasicInfo(Material material) throws SQLException {
+        String sql = "UPDATE Materials SET MaterialName = ?, SubCategoryId = ?, Unit = ?, Description = ?, UpdatedAt = NOW() WHERE MaterialId = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, material.getMaterialName());
+            ps.setInt(2, material.getSubCategoryId());
+            ps.setString(3, material.getUnit());
+            ps.setString(4, material.getDescription());
+            ps.setInt(5, material.getMaterialId());
+            return ps.executeUpdate() > 0;
+        }
+    }
+
+    public void updateMaterialQuantity(int materialId, int quantity) throws SQLException {
+        String sql = "UPDATE Materials SET Quantity = ?, UpdatedAt = NOW() WHERE MaterialId = ?";
+
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, quantity);
+            ps.setInt(2, materialId);
+            ps.executeUpdate();
+        }
     }
 
     public boolean updateMaterial(Material m) {
@@ -229,13 +248,17 @@ public class MaterialDAO extends DBContext {
         return false;
     }
 
+    /**
+     * Helper method to close database resources
+     */
+    // Thêm vật tư mới
     public boolean addMaterial(Material material) {
         String sql = """
-            INSERT INTO Materials 
-            (MaterialName, SubCategoryId, StatusId, Image, Description, 
-             Quantity, MinQuantity, Price, CreatedAt, UpdatedAt) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-        """;
+    INSERT INTO Materials 
+    (MaterialName, SubCategoryId, StatusId, Image, Description, 
+     Quantity, MinQuantity, Price, Unit, CreatedAt, UpdatedAt) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+""";
 
         try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, material.getMaterialName());
@@ -245,8 +268,8 @@ public class MaterialDAO extends DBContext {
             ps.setString(5, material.getDescription());
             ps.setInt(6, material.getQuantity());
             ps.setInt(7, material.getMinQuantity());
-            ps.setDouble(8, material.getPrice());
-
+            ps.setDouble(8, material.getPrice()); // Đảm bảo thêm giá
+            ps.setString(9, material.getUnit()); // thêm dòng nà
             int rowsAffected = ps.executeUpdate();
             if (rowsAffected > 0) {
                 try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
@@ -267,7 +290,7 @@ public class MaterialDAO extends DBContext {
         List<Category> categories = new ArrayList<>();
         String sql = "SELECT CategoryId, CategoryName FROM Categories ORDER BY CategoryName";
 
-        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 Category c = new Category();
                 c.setCategoryId(rs.getInt("CategoryId"));

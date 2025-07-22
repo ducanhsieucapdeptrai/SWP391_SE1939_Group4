@@ -1,5 +1,7 @@
 <%@ page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ page import="Helper.AuthorizationHelper" %>
+<%@ page import="jakarta.servlet.http.HttpServletRequest" %>
 <!DOCTYPE html>
 <html>
     <head>
@@ -77,10 +79,10 @@
                 <a href="${pageContext.request.contextPath}/createrequest" class="inline-block px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors">
                     + Create Request
                 </a>
-                    
-               
 
-               
+
+
+
 
 
                 <form action="reqlist" method="get">
@@ -124,9 +126,14 @@
                             <td class="border border-gray-300 px-3 py-2">${r.status}</td>
                             <td class="border border-gray-300 px-3 py-2">${r.approvedByName}</td>
                             <td class="border border-gray-300 px-3 py-2">${r.approvalNote}</td>
+                            <% if (AuthorizationHelper.hasPermission(request, "/request-detail")) { %>
                             <td class="border border-gray-300 px-3 py-2">
                                 <a href="${pageContext.request.contextPath}/request-detail?id=${r.requestId}" class="text-blue-600 hover:underline">Detail</a>
                             </td>
+                            <% } else { %>
+                            <td class="border border-gray-300 px-3 py-2 text-gray-400 italic">No access</td>
+                            <% } %>
+
                         </tr>
                     </c:forEach>
                 </tbody>

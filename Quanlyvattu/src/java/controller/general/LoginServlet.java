@@ -83,6 +83,7 @@ public class LoginServlet extends HttpServlet {
             session.setAttribute("userName", user.getFullName());
             session.setAttribute("userRole", user.getRole() != null ? user.getRole().getRoleName() : "Unknown");
             session.setAttribute("userImage", user.getUserImage());
+            session.setMaxInactiveInterval(3600); // giữ đăng nhập 1 tiếng
 
             if ("on".equals(request.getParameter("remember"))) {
                 Cookie cookie = new Cookie("rememberedEmail", email);

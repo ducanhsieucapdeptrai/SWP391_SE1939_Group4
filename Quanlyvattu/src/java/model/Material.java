@@ -5,7 +5,7 @@ import java.sql.Timestamp;
 public class Material {
 
     private int categoryId;
-
+    private String unit;
     private int materialId;
     private String materialName;
     private int subCategoryId;
@@ -25,8 +25,15 @@ public class Material {
     private int importQuantity;
     private int exportQuantity;
 
-    public Material(int categoryId, int materialId, String materialName, int subCategoryId, int statusId, String image, String description, int quantity, int minQuantity, double price, Timestamp createdAt, Timestamp updatedAt, String categoryName, String subCategoryName, String statusName, Timestamp importDate, Timestamp exportDate, int importQuantity, int exportQuantity) {
+ 
+  
+
+    public Material() {
+    }
+
+    public Material(int categoryId, String unit, int materialId, String materialName, int subCategoryId, int statusId, String image, String description, int quantity, int minQuantity, double price, Timestamp createdAt, Timestamp updatedAt, String categoryName, String subCategoryName, String statusName, Timestamp importDate, Timestamp exportDate, int importQuantity, int exportQuantity) {
         this.categoryId = categoryId;
+        this.unit = unit;
         this.materialId = materialId;
         this.materialName = materialName;
         this.subCategoryId = subCategoryId;
@@ -46,17 +53,13 @@ public class Material {
         this.importQuantity = importQuantity;
         this.exportQuantity = exportQuantity;
     }
- public Material(int materialId, int subCategoryId, String materialName, int quantity, int minQuantity) {
-        this.materialId = materialId;
-        this.materialName = materialName;
-        this.subCategoryId = subCategoryId;
-        this.quantity = quantity;
-        this.minQuantity = minQuantity;
+
+    public String getUnit() {
+        return unit;
     }
 
-   
-
-    public Material() {
+    public void setUnit(String unit) {
+        this.unit = unit;
     }
 
     // Getters and Setters for new fields
@@ -211,8 +214,7 @@ public class Material {
     public void setStatusName(String statusName) {
         this.statusName = statusName;
     }
-    
-   
+
     // Alias methods for JSP compatibility
     public Timestamp getCreatedDate() {
         return getCreatedAt();

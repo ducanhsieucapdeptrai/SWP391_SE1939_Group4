@@ -11,8 +11,8 @@ import java.util.*;
 public class TaskLogDAO extends DBContext {
 
     public boolean insertTaskLogWithDetails(Connection conn, int requestId, int requestTypeId, int staffId,
-            List<Integer> materialIds, List<Integer> quantities,
-            String slipCode) throws SQLException {
+                                            List<Integer> materialIds, List<Integer> quantities,
+                                            String slipCode) throws SQLException {
         String insertLogSql = "INSERT INTO TaskLog (RequestId, RequestTypeId, StaffId, SlipCode) VALUES (?, ?, ?, ?)";
         try (PreparedStatement ps = conn.prepareStatement(insertLogSql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setInt(1, requestId);
@@ -21,9 +21,7 @@ public class TaskLogDAO extends DBContext {
             ps.setString(4, slipCode);
 
             int affectedRows = ps.executeUpdate();
-            if (affectedRows == 0) {
-                return false;
-            }
+            if (affectedRows == 0) return false;
 
             try (ResultSet rs = ps.getGeneratedKeys()) {
                 if (rs.next()) {
@@ -39,9 +37,7 @@ public class TaskLogDAO extends DBContext {
                         }
                         int[] results = detailStmt.executeBatch();
                         for (int r : results) {
-                            if (r <= 0) {
-                                return false;
-                            }
+                            if (r <= 0) return false;
                         }
                         return true;
                     }
@@ -62,13 +58,14 @@ public class TaskLogDAO extends DBContext {
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, taskId);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                TaskSlipDetail d = new TaskSlipDetail();
-                d.setMaterialId(rs.getInt("MaterialId"));
-                d.setQuantity(rs.getInt("Quantity"));
-                d.setMaterialName(rs.getString("MaterialName"));
-                details.add(d);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    TaskSlipDetail d = new TaskSlipDetail();
+                    d.setMaterialId(rs.getInt("MaterialId"));
+                    d.setQuantity(rs.getInt("Quantity"));
+                    d.setMaterialName(rs.getString("MaterialName"));
+                    details.add(d);
+                }
             }
         }
 
@@ -77,69 +74,70 @@ public class TaskLogDAO extends DBContext {
 
     public TaskLog getLatestTaskLogByRequestId(Connection conn, int requestId) throws SQLException {
         String sql = """
-        SELECT tl.TaskId, tl.RequestId, tl.RequestTypeId, tl.StaffId, tl.CreatedAt,
-               tl.SlipCode,
-               u.FullName AS StaffName, rt.RequestTypeName
-        FROM TaskLog tl
-        JOIN Users u ON tl.StaffId = u.UserId
-        JOIN RequestList rl ON tl.RequestId = rl.RequestId
-        JOIN RequestSubType rst ON rl.SubTypeId = rst.SubTypeId
-        JOIN RequestType rt ON rst.RequestTypeId = rt.RequestTypeId
-        WHERE tl.RequestId = ?
-        ORDER BY tl.CreatedAt DESC
-        LIMIT 1
-    """;
+            SELECT tl.TaskId, tl.RequestId, tl.RequestTypeId, tl.StaffId, tl.CreatedAt,
+                   tl.SlipCode,
+                   u.FullName AS StaffName, rt.RequestTypeName
+            FROM TaskLog tl
+            JOIN Users u ON tl.StaffId = u.UserId
+            JOIN RequestList rl ON tl.RequestId = rl.RequestId
+            JOIN RequestSubType rst ON rl.SubTypeId = rst.SubTypeId
+            JOIN RequestType rt ON rst.RequestTypeId = rt.RequestTypeId
+            WHERE tl.RequestId = ?
+            ORDER BY tl.CreatedAt DESC
+            LIMIT 1
+        """;
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, requestId);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                TaskLog log = new TaskLog();
-                int taskId = rs.getInt("TaskId");
-                log.setTaskId(taskId);
-                log.setRequestId(rs.getInt("RequestId"));
-                log.setRequestTypeId(rs.getInt("RequestTypeId"));
-                log.setStaffId(rs.getInt("StaffId"));
-                log.setCreatedAt(rs.getTimestamp("CreatedAt"));
-                log.setSlipCode(rs.getString("SlipCode")); // ✅ Thêm dòng này
-                log.setStaffName(rs.getString("StaffName"));
-                log.setRequestTypeName(rs.getString("RequestTypeName"));
-                log.setSlipDetails(getSlipDetailsByTaskId(conn, taskId));
-                return log;
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    TaskLog log = new TaskLog();
+                    int taskId = rs.getInt("TaskId");
+                    log.setTaskId(taskId);
+                    log.setRequestId(rs.getInt("RequestId"));
+                    log.setRequestTypeId(rs.getInt("RequestTypeId"));
+                    log.setStaffId(rs.getInt("StaffId"));
+                    log.setCreatedAt(rs.getTimestamp("CreatedAt"));
+                    log.setSlipCode(rs.getString("SlipCode"));
+                    log.setStaffName(rs.getString("StaffName"));
+                    log.setRequestTypeName(rs.getString("RequestTypeName"));
+                    log.setSlipDetails(getSlipDetailsByTaskId(conn, taskId));
+                    return log;
+                }
             }
         }
-
         return null;
     }
 
     public TaskLog getTaskLogByTaskId(Connection conn, int taskId) throws SQLException {
         String sql = """
-        SELECT tl.TaskId, tl.RequestId, tl.RequestTypeId, tl.StaffId, tl.CreatedAt,
-               tl.SlipCode,
-               u.FullName AS StaffName, rt.RequestTypeName
-        FROM TaskLog tl
-        JOIN Users u ON tl.StaffId = u.UserId
-        JOIN RequestList rl ON tl.RequestId = rl.RequestId
-        JOIN RequestSubType rst ON rl.SubTypeId = rst.SubTypeId
-        JOIN RequestType rt ON rst.RequestTypeId = rt.RequestTypeId
-        WHERE tl.TaskId = ?
-    """;
+            SELECT tl.TaskId, tl.RequestId, tl.RequestTypeId, tl.StaffId, tl.CreatedAt,
+                   tl.SlipCode,
+                   u.FullName AS StaffName, rt.RequestTypeName
+            FROM TaskLog tl
+            JOIN Users u ON tl.StaffId = u.UserId
+            JOIN RequestList rl ON tl.RequestId = rl.RequestId
+            JOIN RequestSubType rst ON rl.SubTypeId = rst.SubTypeId
+            JOIN RequestType rt ON rst.RequestTypeId = rt.RequestTypeId
+            WHERE tl.TaskId = ?
+        """;
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, taskId);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                TaskLog log = new TaskLog();
-                log.setTaskId(taskId);
-                log.setRequestId(rs.getInt("RequestId"));
-                log.setRequestTypeId(rs.getInt("RequestTypeId"));
-                log.setStaffId(rs.getInt("StaffId"));
-                log.setCreatedAt(rs.getTimestamp("CreatedAt"));
-                log.setSlipCode(rs.getString("SlipCode")); // ✅ Thêm dòng này
-                log.setStaffName(rs.getString("StaffName"));
-                log.setRequestTypeName(rs.getString("RequestTypeName"));
-                log.setSlipDetails(getSlipDetailsByTaskId(conn, taskId));
-                return log;
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    TaskLog log = new TaskLog();
+                    log.setTaskId(taskId);
+                    log.setRequestId(rs.getInt("RequestId"));
+                    log.setRequestTypeId(rs.getInt("RequestTypeId"));
+                    log.setStaffId(rs.getInt("StaffId"));
+                    log.setCreatedAt(rs.getTimestamp("CreatedAt"));
+                    log.setSlipCode(rs.getString("SlipCode"));
+                    log.setStaffName(rs.getString("StaffName"));
+                    log.setRequestTypeName(rs.getString("RequestTypeName"));
+                    log.setSlipDetails(getSlipDetailsByTaskId(conn, taskId));
+                    return log;
+                }
             }
         }
 
@@ -149,34 +147,35 @@ public class TaskLogDAO extends DBContext {
     public List<TaskLog> getGroupedTaskLogsByRequestId(Connection conn, int requestId) throws SQLException {
         List<TaskLog> taskLogs = new ArrayList<>();
         String sql = """
-        SELECT tl.TaskId, tl.RequestId, tl.RequestTypeId, tl.StaffId, tl.CreatedAt,
-               tl.SlipCode,
-               u.FullName AS StaffName, rt.RequestTypeName
-        FROM TaskLog tl
-        JOIN Users u ON tl.StaffId = u.UserId
-        JOIN RequestList rl ON tl.RequestId = rl.RequestId
-        JOIN RequestSubType rst ON rl.SubTypeId = rst.SubTypeId
-        JOIN RequestType rt ON rst.RequestTypeId = rt.RequestTypeId
-        WHERE tl.RequestId = ?
-        ORDER BY tl.CreatedAt DESC
-    """;
+            SELECT tl.TaskId, tl.RequestId, tl.RequestTypeId, tl.StaffId, tl.CreatedAt,
+                   tl.SlipCode,
+                   u.FullName AS StaffName, rt.RequestTypeName
+            FROM TaskLog tl
+            JOIN Users u ON tl.StaffId = u.UserId
+            JOIN RequestList rl ON tl.RequestId = rl.RequestId
+            JOIN RequestSubType rst ON rl.SubTypeId = rst.SubTypeId
+            JOIN RequestType rt ON rst.RequestTypeId = rt.RequestTypeId
+            WHERE tl.RequestId = ?
+            ORDER BY tl.CreatedAt DESC
+        """;
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, requestId);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                TaskLog log = new TaskLog();
-                int taskId = rs.getInt("TaskId");
-                log.setTaskId(taskId);
-                log.setRequestId(rs.getInt("RequestId"));
-                log.setRequestTypeId(rs.getInt("RequestTypeId"));
-                log.setStaffId(rs.getInt("StaffId"));
-                log.setCreatedAt(rs.getTimestamp("CreatedAt"));
-                log.setStaffName(rs.getString("StaffName"));
-                log.setRequestTypeName(rs.getString("RequestTypeName"));
-                log.setSlipCode(rs.getString("SlipCode")); // ✅ THÊM DÒNG NÀY
-                log.setSlipDetails(getSlipDetailsByTaskId(conn, taskId));
-                taskLogs.add(log);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    TaskLog log = new TaskLog();
+                    int taskId = rs.getInt("TaskId");
+                    log.setTaskId(taskId);
+                    log.setRequestId(rs.getInt("RequestId"));
+                    log.setRequestTypeId(rs.getInt("RequestTypeId"));
+                    log.setStaffId(rs.getInt("StaffId"));
+                    log.setCreatedAt(rs.getTimestamp("CreatedAt"));
+                    log.setStaffName(rs.getString("StaffName"));
+                    log.setRequestTypeName(rs.getString("RequestTypeName"));
+                    log.setSlipCode(rs.getString("SlipCode"));
+                    log.setSlipDetails(getSlipDetailsByTaskId(conn, taskId));
+                    taskLogs.add(log);
+                }
             }
         }
 
@@ -194,7 +193,7 @@ public class TaskLogDAO extends DBContext {
             try (ResultSet rs = ps.executeQuery()) {
                 int nextNumber = 1;
                 if (rs.next()) {
-                    String lastCode = rs.getString(1); // SLP-2025-000123
+                    String lastCode = rs.getString(1);
                     if (lastCode != null) {
                         String[] parts = lastCode.split("-");
                         nextNumber = Integer.parseInt(parts[2]) + 1;
@@ -206,12 +205,11 @@ public class TaskLogDAO extends DBContext {
     }
 
     public List<TaskLog> getGroupedTaskLogsByRequestId(int requestId) {
-        try (Connection conn = new DBContext().getNewConnection()) {
+        try (Connection conn = getConnection()) {
             return getGroupedTaskLogsByRequestId(conn, requestId);
         } catch (SQLException e) {
             e.printStackTrace();
             return new ArrayList<>();
         }
     }
-
 }

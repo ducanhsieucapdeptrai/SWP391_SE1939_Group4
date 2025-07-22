@@ -153,23 +153,19 @@
                     <div class="info-table">
                         <p><span class="label"># Material ID:</span> #${m.materialId}</p>
                         <p><span class="label">Category:</span> ${m.categoryName} → ${m.subCategoryName}</p>
-                        <p><span class="label">Price:</span> <span class="price">
-                                <fmt:formatNumber value="${m.price}" type="currency"  groupingUsed="true" currencySymbol=""/>
-                                đ
-                            </span></p>
-                        <p><span class="label">Current Stock:</span> <span class="stock-dot"></span>${m.quantity} units</p>
-                        <p><span class="label">Minimum Stock:</span> ${m.minQuantity} units</p>
-                        <p><span class="label">Created Date:</span> <fmt:formatDate value="${m.createdAt}" pattern="dd/MM/yyyy HH:mm"/></p>
-                        <p><span class="label">Last Updated:</span> <fmt:formatDate value="${m.updatedAt}" pattern="dd/MM/yyyy HH:mm"/></p>
-                        <p><span class="label">Status:</span> ${m.statusName}</p>
+                        <p><span class="label">Current Stock:</span> <span class="stock-dot"></span>${m.quantity} ${m.unit}</p>
                     </div>
+
 
                     <!-- Nút Back và Edit -->
                     <div>
                         <a href="${pageContext.request.contextPath}/materiallist?page=${currentPage}&category=${selectedCategory}&subcategory=${selectedSubcategory}&name=${searchName}" class="btn-back">
                             &larr; Back to Materials
                         </a>
-                        <a href="${pageContext.request.contextPath}/editmaterial?materialId=${m.materialId}" class="btn-edit">✏️ Edit</a>
+                        <a href="${pageContext.request.contextPath}/editmaterial?materialId=${m.materialId}" class="btn-edit">✏️ Edit Infomation </a>
+                        <a href="${pageContext.request.contextPath}/inventory-check?materialId=${m.materialId}" class="btn-edit" style="background-color: #00b894;">
+                            📦 Inventory Check
+                        </a>
                     </div>
                 </div>
             </div>

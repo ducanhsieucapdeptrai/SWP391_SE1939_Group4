@@ -1,173 +1,125 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Edit Material</title>
-        <style>
-            body {
-                font-family: "Segoe UI", sans-serif;
-                margin: 0;
-                background: #f4f6fc;
-            }
+<head>
+    <title>Edit Material</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+<div class="container mx-auto px-4 py-8">
+    <h2 class="text-2xl font-semibold mb-6 text-purple-600">Edit Material</h2>
 
-            .header {
-                background: linear-gradient(90deg, #7b2ff7, #f107a3);
-                color: white;
-                padding: 30px;
-                border-radius: 10px 10px 0 0;
-            }
+    <c:if test="${not empty error}">
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+            ${error}
+        </div>
+    </c:if>
 
-            .header h1 {
-                margin: 0;
-                font-size: 30px;
-                display: flex;
-                align-items: center;
-                gap: 10px;
-            }
+    <form action="${pageContext.request.contextPath}/updatematerial" method="post" enctype="multipart/form-data"
+          class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+        <!-- Hidden field -->
+        <input type="hidden" name="materialId" value="${material.materialId}" />
 
-            .detail-grid {
-                display: grid;
-                grid-template-columns: 1fr 1.5fr;
-                gap: 30px;
-                background: white;
-                padding: 30px;
-                border-radius: 0 0 10px 10px;
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-                margin: 30px;
-            }
-
-            .detail-grid img {
-                max-width: 100%;
-                border-radius: 10px;
-            }
-
-            .image-container {
-                background: #f5f5f5;
-                border-radius: 10px;
-                height: 300px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 50px;
-                color: #ccc;
-            }
-
-            .detail-grid .info label {
-                display: block;
-                margin: 15px 0 5px;
-                font-weight: bold;
-            }
-
-            .detail-grid .info input,
-            .detail-grid .info textarea,
-            .detail-grid .info select {
-                width: 100%;
-                padding: 10px;
-                border: 1px solid #ccc;
-                border-radius: 6px;
-                box-sizing: border-box;
-            }
-
-            .actions {
-                text-align: center;
-                margin: 20px;
-            }
-
-            .actions button {
-                background-color: #7b2ff7;
-                color: white;
-                border: none;
-                padding: 10px 25px;
-                font-size: 16px;
-                border-radius: 6px;
-                cursor: pointer;
-                margin: 0 10px;
-            }
-
-            .actions button:hover {
-                background-color: #5e23b5;
-            }
-
-            .actions .cancel-btn {
-                background-color: #6c757d;
-            }
-
-            .actions .cancel-btn:hover {
-                background-color: #545b62;
-            }
-
-            .error {
-                color: red;
-                text-align: center;
-                margin: 10px;
-                padding: 10px;
-                background-color: #ffe6e6;
-                border: 1px solid #ff0000;
-                border-radius: 5px;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="header">
-            <h1>Edit Material</h1>
+        <!-- Image -->
+        <div class="mb-4 text-center">
+            <c:choose>
+                <c:when test="${not empty material.image}">
+                    <img src="${pageContext.request.contextPath}/assets/images/materials/${material.image}"
+                         alt="Material Image"
+                         class="mx-auto max-h-48 object-contain rounded" />
+                </c:when>
+                <c:otherwise>
+                    <span class="text-gray-400 text-6xl">&#128247;</span>
+                </c:otherwise>
+            </c:choose>
         </div>
 
-        <!-- Display error message if exists -->
-        <c:if test="${not empty error}">
-            <div class="error">${error}</div>
-        </c:if>
+        <!-- Name -->
+        <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2" for="materialName">Material Name</label>
+            <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                   id="materialName" name="materialName" type="text"
+                   value="${material.materialName}" required>
+        </div>
 
-        <!-- Fixed form action to match servlet mapping -->
-        <form action="updatematerial" method="post">
-            <div class="detail-grid">
-                <!-- Material Image -->
-                <div class="image-container">
-                    <c:choose>
-                        <c:when test="${not empty material.image}">
-                            <img src="${pageContext.request.contextPath}/assets/images/materials/${material.image}" 
-                                 alt="Material Image" 
-                                 style="max-width: 100%; max-height: 100%; object-fit: contain;">
-                        </c:when>
-                        <c:otherwise>
-                            <span>&#128247;</span>
-                        </c:otherwise>
-                    </c:choose>
-                </div>
+        <!-- Category -->
+        <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2" for="categoryId">Category</label>
+            <select class="shadow border rounded w-full py-2 px-3 text-gray-700 focus:outline-none focus:shadow-outline"
+                    id="categoryId" name="categoryId" required>
+                <option value="">Select Category</option>
+                <c:forEach var="cat" items="${categories}">
+                    <option value="${cat.categoryId}" ${cat.categoryId == material.categoryId ? 'selected' : ''}>
+                        ${cat.categoryName}
+                    </option>
+                </c:forEach>
+            </select>
+        </div>
 
-                <!-- Material Info Form -->
-                <div class="info">
-                    <!-- Hidden field for material ID -->
-                    <input type="hidden" name="materialId" value="${material.materialId}" />
+        <!-- Subcategory -->
+        <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2" for="subCategoryId">Subcategory</label>
+            <select class="shadow border rounded w-full py-2 px-3 text-gray-700 focus:outline-none focus:shadow-outline"
+                    id="subCategoryId" name="subCategoryId" required>
+                <option value="">Select Subcategory</option>
+            </select>
+        </div>
 
-                    <label for="materialName">Material Name</label>
-                    <input type="text" id="materialName" name="materialName" value="${material.materialName}" required />
+        <!-- Unit -->
+        <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2" for="unit">Unit</label>
+            <input class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                   id="unit" name="unit" type="text"
+                   value="${material.unit}" required>
+        </div>
 
-                    <label for="subCategoryId">Sub Category ID</label>
-                    <input type="number" id="subCategoryId" name="subCategoryId" value="${material.subCategoryId}" required />
+        <!-- Description -->
+        <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2" for="description">Description</label>
+            <textarea class="shadow border rounded w-full py-2 px-3 text-gray-700 focus:outline-none focus:shadow-outline"
+                      id="description" name="description" rows="4">${material.description}</textarea>
+        </div>
 
-                    <label for="statusId">Status ID</label>
-                    <input type="number" id="statusId" name="statusId" value="${material.statusId}" required />
+        <!-- Actions -->
+        <div class="flex items-center justify-between">
+            <button class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                    type="submit">Save Changes</button>
+            <a href="${pageContext.request.contextPath}/materiallist"
+               class="inline-block align-baseline font-bold text-sm text-gray-600 hover:text-black">
+                Cancel
+            </a>
+        </div>
+    </form>
+</div>
 
-                    <label for="quantity">Quantity</label>
-                    <input type="number" id="quantity" name="quantity" value="${material.quantity}" min="0" required />
+<!-- Script for dynamic subcategory filtering -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const subcategories = <c:out value="${subcategoriesJson}" escapeXml="false" />;
+        const categorySelect = document.getElementById('categoryId');
+        const subcategorySelect = document.getElementById('subCategoryId');
+        const selectedSubId = "${material.subCategoryId}";
 
-                    <label for="minQuantity">Minimum Quantity</label>
-                    <input type="number" id="minQuantity" name="minQuantity" value="${material.minQuantity}" min="0" required />
+        function updateSubcategories() {
+            const selectedCategoryId = categorySelect.value;
+            subcategorySelect.innerHTML = '<option value="">Select Subcategory</option>';
 
-                    <label for="price">Price</label>
-                    <input type="number" id="price" name="price" value="${material.price}" min="0" step="0.01" required />
+            if (selectedCategoryId) {
+                const filtered = subcategories.filter(sub => sub.categoryId == selectedCategoryId);
+                filtered.forEach(sub => {
+                    const option = document.createElement('option');
+                    option.value = sub.id;
+                    option.textContent = sub.name;
+                    if (sub.id == selectedSubId) option.selected = true;
+                    subcategorySelect.appendChild(option);
+                });
+            }
+        }
 
-                    <label for="description">Description</label>
-                    <textarea id="description" name="description" rows="4">${material.description}</textarea>
-                </div>
-            </div>
-
-            <div class="actions">
-                <button type="submit">Save Changes</button>
-                <button type="button" class="cancel-btn" onclick="window.history.back()">Cancel</button>
-            </div>
-        </form>
-    </body>
+        categorySelect.addEventListener('change', updateSubcategories);
+        updateSubcategories(); // Load initial
+    });
+</script>
+</body>
 </html>
