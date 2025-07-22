@@ -7,15 +7,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MaterialStatusDAO extends DBContext {
-    
+
     // Get all material statuses
     public List<MaterialStatus> getAllStatuses() throws SQLException {
         List<MaterialStatus> statuses = new ArrayList<>();
         String sql = "SELECT * FROM MaterialStatus ORDER BY StatusName";
-        
-        try (PreparedStatement st = connection.prepareStatement(sql);
-             ResultSet rs = st.executeQuery()) {
-            
+
+        try (Connection conn = getNewConnection(); PreparedStatement st = conn.prepareStatement(sql); ResultSet rs = st.executeQuery()) {
+
             while (rs.next()) {
                 MaterialStatus status = new MaterialStatus();
                 status.setStatusId(rs.getInt("StatusId"));
@@ -25,15 +24,15 @@ public class MaterialStatusDAO extends DBContext {
                 statuses.add(status);
             }
         }
-        
+
         return statuses;
     }
-    
+
     // Get status by ID
     public MaterialStatus getStatusById(int statusId) throws SQLException {
         String sql = "SELECT * FROM MaterialStatus WHERE StatusId = ?";
-        
-        try (PreparedStatement st = connection.prepareStatement(sql)) {
+
+        try (Connection conn = getNewConnection(); PreparedStatement st = conn.prepareStatement(sql)) {
             st.setInt(1, statusId);
             try (ResultSet rs = st.executeQuery()) {
                 if (rs.next()) {
@@ -46,10 +45,10 @@ public class MaterialStatusDAO extends DBContext {
                 }
             }
         }
-        
+
         return null;
     }
-    
+
     // Add other CRUD operations as needed
     // (create, update, delete methods would go here)
 }

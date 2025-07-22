@@ -17,13 +17,12 @@ public class HomepageDAO {
      * @return total number of materials
      */
     public int getTotalMaterialCount() {
-        int count = 0;
         String sql = "SELECT COUNT(*) FROM Materials";
 
-        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+        try (Connection conn = new DBContext().getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
 
             if (rs.next()) {
-                count = rs.getInt(1);
+                return rs.getInt(1);
             }
 
         } catch (SQLException e) {
@@ -31,7 +30,7 @@ public class HomepageDAO {
             e.printStackTrace();
         }
 
-        return count;
+        return 0;
     }
 
     /**
@@ -40,13 +39,12 @@ public class HomepageDAO {
      * @return total number of imports
      */
     public int getTotalImportCount() {
-        int count = 0;
         String sql = "SELECT COUNT(*) FROM ImportList";
 
-        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+        try (Connection conn = new DBContext().getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
 
             if (rs.next()) {
-                count = rs.getInt(1);
+                return rs.getInt(1);
             }
 
         } catch (SQLException e) {
@@ -54,7 +52,7 @@ public class HomepageDAO {
             e.printStackTrace();
         }
 
-        return count;
+        return 0;
     }
 
     /**
@@ -63,13 +61,12 @@ public class HomepageDAO {
      * @return total number of exports
      */
     public int getTotalExportCount() {
-        int count = 0;
         String sql = "SELECT COUNT(*) FROM ExportList";
 
-        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+        try (Connection conn = new DBContext().getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
 
             if (rs.next()) {
-                count = rs.getInt(1);
+                return rs.getInt(1);
             }
 
         } catch (SQLException e) {
@@ -77,7 +74,7 @@ public class HomepageDAO {
             e.printStackTrace();
         }
 
-        return count;
+        return 0;
     }
 
     /**
@@ -86,13 +83,12 @@ public class HomepageDAO {
      * @return total number of pending requests
      */
     public int getPendingRequestCount() {
-        int count = 0;
         String sql = "SELECT COUNT(*) FROM RequestList WHERE Status = 'Pending'";
 
-        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+        try (Connection conn = new DBContext().getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
 
             if (rs.next()) {
-                count = rs.getInt(1);
+                return rs.getInt(1);
             }
 
         } catch (SQLException e) {
@@ -100,12 +96,16 @@ public class HomepageDAO {
             e.printStackTrace();
         }
 
-        return count;
+        return 0;
     }
 
     /**
-     * Get today's sales count
+     * Get today's sales count (placeholder for future logic)
      *
      * @return today's sales count
      */
+    public int getTodaySalesCount() {
+        // TODO: Implement logic based on your business rule
+        return 0;
+    }
 }

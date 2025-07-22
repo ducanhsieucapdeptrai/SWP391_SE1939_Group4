@@ -16,7 +16,7 @@ public class SubCategoryDAO extends DBContext {
                 + "FROM SubCategories s JOIN Categories c ON s.CategoryId = c.CategoryId";
 
         try (
-                Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+                Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 SubCategory s = new SubCategory();
                 s.setSubCategoryId(rs.getInt("SubCategoryId"));

@@ -1,13 +1,5 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package DAO;
 
-/**
- *
- * @author thinh
- */
 import dal.DBContext;
 import model.PasswordResetRequest;
 
@@ -24,8 +16,8 @@ public class PasswordResetDAO extends DBContext {
                 + "JOIN Users u ON r.UserId = u.UserId "
                 + "WHERE r.Status = 'Pending' ORDER BY r.RequestedAt DESC";
 
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ResultSet rs = ps.executeQuery();
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+
             while (rs.next()) {
                 PasswordResetRequest pr = new PasswordResetRequest();
                 pr.setRequestId(rs.getInt("RequestId"));
@@ -46,21 +38,19 @@ public class PasswordResetDAO extends DBContext {
         String checkSql = "SELECT COUNT(*) FROM PasswordResetRequest WHERE UserId = ? AND Status = 'Pending'";
         String insertSql = "INSERT INTO PasswordResetRequest (UserId, RequestedAt, Status) VALUES (?, NOW(), 'Pending')";
 
-        try (Connection conn = getConnection()) {
+        try (Connection conn = getNewConnection()) {
+            try (PreparedStatement checkStmt = conn.prepareStatement(checkSql); PreparedStatement insertStmt = conn.prepareStatement(insertSql)) {
 
-            try (PreparedStatement checkStmt = conn.prepareStatement(checkSql)) {
                 checkStmt.setInt(1, userId);
-                ResultSet rs = checkStmt.executeQuery();
-                if (rs.next() && rs.getInt(1) > 0) {
-                    return false;
+                try (ResultSet rs = checkStmt.executeQuery()) {
+                    if (rs.next() && rs.getInt(1) > 0) {
+                        return false;
+                    }
                 }
-            }
 
-            try (PreparedStatement insertStmt = conn.prepareStatement(insertSql)) {
                 insertStmt.setInt(1, userId);
                 return insertStmt.executeUpdate() > 0;
             }
-
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
@@ -69,7 +59,7 @@ public class PasswordResetDAO extends DBContext {
 
     public boolean markAsProcessed(int requestId) {
         String sql = "UPDATE PasswordResetRequest SET Status = 'Processed' WHERE RequestId = ?";
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, requestId);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -77,5 +67,4 @@ public class PasswordResetDAO extends DBContext {
             return false;
         }
     }
-
 }

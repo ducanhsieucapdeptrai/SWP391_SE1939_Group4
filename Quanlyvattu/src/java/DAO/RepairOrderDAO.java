@@ -80,7 +80,7 @@ public class RepairOrderDAO extends DBContext {
 
     public boolean existsByRequestId(int requestId) {
         String sql = "SELECT 1 FROM RepairOrderList WHERE RequestId = ?";
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, requestId);
             try (ResultSet rs = ps.executeQuery()) {
                 return rs.next();
@@ -302,98 +302,57 @@ WHERE d.ROId = ?
         String insertRO = "INSERT INTO RepairOrderList (RequestId, CreatedBy, Note) VALUES (?, ?, ?)";
         String insertDetail = "INSERT INTO RepairOrderDetail (ROId, MaterialId, Quantity, UnitPrice, MNote) VALUES (?, ?, ?, ?, ?)";
 
-        Connection conn = null;
-        PreparedStatement psRO = null;
-        PreparedStatement psDetail = null;
-        ResultSet rs = null;
-
-        try {
-            // ✅ LẤY CONNECTION MỚI
-            conn = getNewConnection();
+        try (Connection conn = getNewConnection()) {
             conn.setAutoCommit(false);
             log.append("🔌 Connection opened via getNewConnection()<br/>");
 
-            psRO = conn.prepareStatement(insertRO, Statement.RETURN_GENERATED_KEYS);
-            psRO.setInt(1, requestInfo.getRequestId());
-            psRO.setInt(2, requestInfo.getRequestedBy());
-            psRO.setString(3, requestInfo.getNote() != null ? requestInfo.getNote() : "");
+            try (PreparedStatement psRO = conn.prepareStatement(insertRO, Statement.RETURN_GENERATED_KEYS)) {
+                psRO.setInt(1, requestInfo.getRequestId());
+                psRO.setInt(2, requestInfo.getRequestedBy());
+                psRO.setString(3, requestInfo.getNote() != null ? requestInfo.getNote() : "");
 
-            int affected = psRO.executeUpdate();
-            log.append("➡ Insert RepairOrderList affected rows: ").append(affected).append("<br/>");
+                int affected = psRO.executeUpdate();
+                log.append("➡ Insert RepairOrderList affected rows: ").append(affected).append("<br/>");
 
-            if (affected == 0) {
-                log.append("❌ Failed to insert RepairOrderList<br/>");
-                conn.rollback();
-                return false;
-            }
-
-            rs = psRO.getGeneratedKeys();
-            if (rs.next()) {
-                int roId = rs.getInt(1);
-                log.append("✅ Created ROId: ").append(roId).append("<br/>");
-
-                psDetail = conn.prepareStatement(insertDetail);
-                for (RepairOrderDetail detail : detailList) {
-                    log.append("📦 Inserting Detail → MaterialId=").append(detail.getMaterialId())
-                            .append(", Qty=").append(detail.getQuantity())
-                            .append(", Price=").append(detail.getUnitPrice())
-                            .append(", Note=").append(detail.getMnote()).append("<br/>");
-
-                    psDetail.setInt(1, roId);
-                    psDetail.setInt(2, detail.getMaterialId());
-                    psDetail.setInt(3, detail.getQuantity());
-                    psDetail.setDouble(4, detail.getUnitPrice());
-                    psDetail.setString(5, detail.getMnote());
-                    psDetail.addBatch();
+                if (affected == 0) {
+                    log.append("❌ Failed to insert RepairOrderList<br/>");
+                    conn.rollback();
+                    return false;
                 }
 
-                psDetail.executeBatch();
-                conn.commit();
-                log.append("✅ Transaction committed<br/>");
-                return true;
-            } else {
-                log.append("❌ No ROId returned from generated keys.<br/>");
-                conn.rollback();
-            }
+                try (ResultSet rs = psRO.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        int roId = rs.getInt(1);
+                        log.append("✅ Created ROId: ").append(roId).append("<br/>");
 
+                        try (PreparedStatement psDetail = conn.prepareStatement(insertDetail)) {
+                            for (RepairOrderDetail detail : detailList) {
+                                log.append("📦 Inserting Detail → MaterialId=").append(detail.getMaterialId())
+                                        .append(", Qty=").append(detail.getQuantity())
+                                        .append(", Price=").append(detail.getUnitPrice())
+                                        .append(", Note=").append(detail.getMnote()).append("<br/>");
+
+                                psDetail.setInt(1, roId);
+                                psDetail.setInt(2, detail.getMaterialId());
+                                psDetail.setInt(3, detail.getQuantity());
+                                psDetail.setDouble(4, detail.getUnitPrice());
+                                psDetail.setString(5, detail.getMnote());
+                                psDetail.addBatch();
+                            }
+
+                            psDetail.executeBatch();
+                            conn.commit();
+                            log.append("✅ Transaction committed<br/>");
+                            return true;
+                        }
+                    } else {
+                        log.append("❌ No ROId returned from generated keys.<br/>");
+                        conn.rollback();
+                    }
+                }
+            }
         } catch (Exception ex) {
             log.append("❌ Exception: ").append(ex.getMessage()).append("<br/>");
-            try {
-                if (conn != null) {
-                    conn.rollback();
-                }
-            } catch (Exception e) {
-                log.append("⚠ Rollback Exception: ").append(e.getMessage()).append("<br/>");
-            }
-        } finally {
-            // Chỉ đóng ps và rs, KHÔNG đóng conn
-            try {
-                if (rs != null) {
-                    rs.close();
-                }
-            } catch (Exception e) {
-                log.append("⚠ rs close: ").append(e.getMessage()).append("<br/>");
-            }
-            try {
-                if (psRO != null) {
-                    psRO.close();
-                }
-            } catch (Exception e) {
-                log.append("⚠ psRO close: ").append(e.getMessage()).append("<br/>");
-            }
-            try {
-                if (psDetail != null) {
-                    psDetail.close();
-                }
-            } catch (Exception e) {
-                log.append("⚠ psDetail close: ").append(e.getMessage()).append("<br/>");
-            }
-
-            // ❌ KHÔNG đóng conn, KHÔNG reset autoCommit
-            // if (conn != null) {
-            //     conn.setAutoCommit(true);
-            //     conn.close();
-            // }
         }
 
         return false;

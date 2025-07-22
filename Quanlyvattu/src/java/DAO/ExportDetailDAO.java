@@ -1,7 +1,9 @@
 package DAO;
 
 import dal.DBContext;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 public class ExportDetailDAO extends DBContext {
 
@@ -12,7 +14,7 @@ public class ExportDetailDAO extends DBContext {
             VALUES (?, ?, ?)
         """;
 
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, exportId);
             ps.setInt(2, materialId);
             ps.setInt(3, quantity);
