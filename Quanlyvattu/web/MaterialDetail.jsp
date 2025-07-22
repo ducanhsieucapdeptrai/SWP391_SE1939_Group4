@@ -163,6 +163,9 @@
                             &larr; Back to Materials
                         </a>
                         <a href="${pageContext.request.contextPath}/editmaterial?materialId=${m.materialId}" class="btn-edit">✏️ Edit Infomation </a>
+                        <a href="${pageContext.request.contextPath}/inventory-check?materialId=${m.materialId}" class="btn-edit" style="background-color: #00b894;">
+                            📦 Inventory Check
+                        </a>
                     </div>
                 </div>
             </div>

@@ -30,19 +30,20 @@ public class WarehouseReportDAO extends DBContext {
                 + "WHERE rl.RequestId = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, requestId);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                RequestList request = new RequestList();
-                request.setRequestId(rs.getInt("RequestId"));
-                request.setRequestedBy(rs.getInt("RequestedBy"));
-                request.setRequestedByName(rs.getString("RequestedByName"));
-                request.setRequestDate(rs.getTimestamp("RequestDate"));
-                request.setRequestType(new RequestType(rs.getInt("RequestTypeId"), rs.getString("RequestTypeName")));
-                request.setNote(rs.getString("Note"));
-                request.setStatus(rs.getString("Status"));
-                request.setStatusDescription(rs.getString("StatusDescription"));
-                request.setSubTypeName(rs.getString("SubTypeName"));
-                return request;
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    RequestList request = new RequestList();
+                    request.setRequestId(rs.getInt("RequestId"));
+                    request.setRequestedBy(rs.getInt("RequestedBy"));
+                    request.setRequestedByName(rs.getString("RequestedByName"));
+                    request.setRequestDate(rs.getTimestamp("RequestDate"));
+                    request.setRequestType(new RequestType(rs.getInt("RequestTypeId"), rs.getString("RequestTypeName")));
+                    request.setNote(rs.getString("Note"));
+                    request.setStatus(rs.getString("Status"));
+                    request.setStatusDescription(rs.getString("StatusDescription"));
+                    request.setSubTypeName(rs.getString("SubTypeName"));
+                    return request;
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -67,7 +68,7 @@ public class WarehouseReportDAO extends DBContext {
                     RequestDetailItem detail = new RequestDetailItem();
                     detail.setRequestId(rs.getInt("RequestId"));
                     detail.setMaterialId(rs.getInt("MaterialId"));
-                    detail.setMaterialName(rs.getString("MaterialName")); 
+                    detail.setMaterialName(rs.getString("MaterialName"));
                     detail.setQuantity(rs.getInt("Quantity"));
                     detail.setActualQuantity(rs.getInt("ActualQuantity"));
                     detail.setStockQuantity(rs.getInt("StockQuantity"));
@@ -92,22 +93,23 @@ public class WarehouseReportDAO extends DBContext {
                 + "WHERE tl.RequestId = ? ORDER BY tl.CreatedAt";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, requestId);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                TaskLog task = new TaskLog();
-                task.setTaskId(rs.getInt("TaskId"));
-                task.setRequestId(rs.getInt("RequestId"));
-                task.setRequestTypeId(rs.getInt("RequestTypeId"));
-                task.setRequestTypeName(rs.getString("RequestTypeName"));
-                task.setStaffId(rs.getInt("StaffId"));
-                task.setStaffName(rs.getString("StaffName"));
-                task.setCreatedAt(rs.getTimestamp("CreatedAt"));
-               
-                task.setSlipDetails(getSlipDetails(task.getTaskId()));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    TaskLog task = new TaskLog();
+                    task.setTaskId(rs.getInt("TaskId"));
+                    task.setRequestId(rs.getInt("RequestId"));
+                    task.setRequestTypeId(rs.getInt("RequestTypeId"));
+                    task.setRequestTypeName(rs.getString("RequestTypeName"));
+                    task.setStaffId(rs.getInt("StaffId"));
+                    task.setStaffName(rs.getString("StaffName"));
+                    task.setCreatedAt(rs.getTimestamp("CreatedAt"));
 
-                // Group by date (truncate time)
-                Date date = new Date(rs.getTimestamp("CreatedAt").getTime());
-                taskLogsByDate.computeIfAbsent(date, k -> new ArrayList<>()).add(task);
+                    task.setSlipDetails(getSlipDetails(task.getTaskId()));
+
+                    // Group by date (truncate time)
+                    Date date = new Date(rs.getTimestamp("CreatedAt").getTime());
+                    taskLogsByDate.computeIfAbsent(date, k -> new ArrayList<>()).add(task);
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -123,13 +125,14 @@ public class WarehouseReportDAO extends DBContext {
                 + "WHERE tsd.TaskId = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, taskId);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                TaskSlipDetail slip = new TaskSlipDetail();
-                slip.setMaterialId(rs.getInt("MaterialId"));
-                slip.setMaterialName(rs.getString("MaterialName"));
-                slip.setQuantity(rs.getInt("Quantity"));
-                slipDetails.add(slip);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    TaskSlipDetail slip = new TaskSlipDetail();
+                    slip.setMaterialId(rs.getInt("MaterialId"));
+                    slip.setMaterialName(rs.getString("MaterialName"));
+                    slip.setQuantity(rs.getInt("Quantity"));
+                    slipDetails.add(slip);
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();

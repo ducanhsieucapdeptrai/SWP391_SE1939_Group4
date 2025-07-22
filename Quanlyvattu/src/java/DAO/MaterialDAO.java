@@ -217,6 +217,17 @@ public class MaterialDAO extends DBContext {
         }
     }
 
+    public void updateMaterialQuantity(int materialId, int quantity) throws SQLException {
+        String sql = "UPDATE Materials SET Quantity = ?, UpdatedAt = NOW() WHERE MaterialId = ?";
+
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, quantity);
+            ps.setInt(2, materialId);
+            ps.executeUpdate();
+        }
+    }
+
     public boolean updateMaterial(Material m) {
         String sql = """
             UPDATE Materials

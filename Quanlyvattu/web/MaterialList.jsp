@@ -32,10 +32,26 @@
 %>
 
 <!-- Material List Page -->
+<div class="bg-white shadow rounded-xl p-6 mb-6">
+    <div class="flex items-start justify-between flex-col md:flex-row md:items-center">
+        <div>
+            <h2 class="text-2xl font-bold text-gray-800">📦 Inventory</h2>
+            <p class="text-gray-600 mt-1">Brief information of all materials</p>
+        </div>
+        <div class="mt-4 md:mt-0">
+            <p class="text-base md:text-lg text-gray-700 font-medium bg-blue-50 border border-blue-200 rounded-lg px-4 py-2">
+                📌 Please click <span class="text-blue-600 font-semibold">'View'</span> for inventory checking
+            </p>
+        </div>
+    </div>
+</div>
+
 <div id="materiallist-page" class="page">
+
     <div class="flex justify-between items-center mb-4">
+
         <form method="get" action="materiallist" class="grid grid-cols-4 gap-4 items-center mb-4 w-full">
-            <h2 class="col-span-4 text-2xl font-bold text-gray-800">Inventory</h2>
+
 
             <!-- Category -->
             <select name="category" id="category" class="border px-3 py-2 rounded-lg shadow-sm">
@@ -115,7 +131,7 @@
 
         <tbody>
             <% for (Material m : materials) {
-                    String code =   String.format("%04d", m.getMaterialId());
+                    String code = String.format("%04d", m.getMaterialId());
                     int inStock = m.getQuantity();
             %>
             <tr class="border-t hover:bg-gray-50">
@@ -129,7 +145,7 @@
                          onclick="showImage(this.src)" />
                 </td>
                 <td class="py-2 px-4"><%= m.getMaterialName()%></td>
-                <td class="py-2 px-4"><%= m.getUnit() != null ? m.getUnit() : "" %></td>
+                <td class="py-2 px-4"><%= m.getUnit() != null ? m.getUnit() : ""%></td>
 
                 <td class="py-2 px-4"><%= inStock%></td>
                 <td class="py-2 px-4">
