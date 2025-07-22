@@ -9,8 +9,7 @@
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<%@ page import="Helper.AuthorizationHelper" %>
-<%@ page import="jakarta.servlet.http.HttpServletRequest" %>
+
 
 <style>
     .material-image {
@@ -320,21 +319,17 @@
         </div>
         <c:if test="${(requestInfo.status == 'Pending')}">
             <div class="flex justify-end gap-4 mt-6">
-                <% if (AuthorizationHelper.hasPermission(request, "/approve-request")) { %>  
                 <button onclick="redirectToApprovePage(${requestInfo.requestId})"
                         class="action-button px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shadow-sm">
                     <i class="fas fa-check mr-2"></i>
                     Approve
                 </button>
-                <% }%>
-                <% if (AuthorizationHelper.hasPermission(request, "/approveandrejectrequest")) { %>  
 
                 <button onclick="confirmReject(${requestInfo.requestId})"
                         class="action-button px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors shadow-sm">
                     <i class="fas fa-times mr-2"></i>
                     Reject
                 </button>
-                <% }%>
 
             </div>
         </c:if>
@@ -376,12 +371,8 @@
             Swal.fire({
                 title: 'Reject this request?',
                 input: 'textarea',
-                inputLabel: 'Rejection Reason',
-                inputPlaceholder: 'Enter your reason...',
-                inputValidator: (value) => {
-                    if (!value.trim())
-                        return 'You must enter a reason to reject.';
-                },
+                inputLabel: 'Rejection Reason (optional)',
+                inputPlaceholder: 'Enter your reason (optional)...',
                 showCancelButton: true,
                 confirmButtonText: 'Reject',
                 cancelButtonText: 'Cancel',
@@ -392,10 +383,10 @@
                         form.method = 'POST';
                         form.action = 'approveandrejectrequest';
                         form.innerHTML = `
-                            <input type="hidden" name="requestId" value="${requestId}">
-                            <input type="hidden" name="reason" value="${reason}">
-                            <input type="hidden" name="action" value="reject">
-                        `;
+                    <input type="hidden" name="requestId" value="${requestId}">
+                    <input type="hidden" name="reason" value="${reason || ''}">
+                    <input type="hidden" name="action" value="reject">
+                `;
                         document.body.appendChild(form);
                         form.submit();
                         resolve();
@@ -403,4 +394,5 @@
                 }
             });
         }
+
     </script>

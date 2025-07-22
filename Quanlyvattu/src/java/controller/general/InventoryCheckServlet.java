@@ -6,6 +6,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 import model.Material;
+
 import java.io.IOException;
 import java.util.Map;
 
@@ -21,10 +22,7 @@ public class InventoryCheckServlet extends HttpServlet {
         MaterialInventoryDAO inventoryDAO = new MaterialInventoryDAO();
 
         try {
-            // Lấy thông tin vật tư
             Material material = materialDAO.getMaterialById(materialId);
-
-            // Lấy số lượng theo từng trạng thái (New, Used, Damaged)
             Map<String, Integer> inventoryMap = inventoryDAO.getInventoryByMaterialId(materialId);
 
             request.setAttribute("material", material);
@@ -34,7 +32,9 @@ public class InventoryCheckServlet extends HttpServlet {
             request.getRequestDispatcher("/layout/layout.jsp").forward(request, response);
         } catch (Exception e) {
             e.printStackTrace();
-            response.sendError(500, "Server Error");
+            request.setAttribute("errorMessage", "Lỗi khi tải thông tin vật tư: " + e.getMessage());
+            request.setAttribute("pageContent", "/inventory-check.jsp");
+            request.getRequestDispatcher("/layout/layout.jsp").forward(request, response);
         }
     }
 
@@ -43,29 +43,43 @@ public class InventoryCheckServlet extends HttpServlet {
             throws ServletException, IOException {
         try {
             int materialId = Integer.parseInt(request.getParameter("materialId"));
-            int newQty = Integer.parseInt(request.getParameter("newQty"));
-            int usedQty = Integer.parseInt(request.getParameter("usedQty"));
-            int damagedQty = Integer.parseInt(request.getParameter("damagedQty"));
+            int newQty = parseQuantitySafe(request.getParameter("newQty"));
+            int usedQty = parseQuantitySafe(request.getParameter("usedQty"));
+            int damagedQty = parseQuantitySafe(request.getParameter("damagedQty"));
 
             int total = newQty + usedQty + damagedQty;
+
+            System.out.println("==== Updating Inventory ====");
+            System.out.println("Material ID: " + materialId);
+            System.out.println("New Qty: " + newQty);
+            System.out.println("Used Qty: " + usedQty);
+            System.out.println("Damaged Qty: " + damagedQty);
+            System.out.println("Total: " + total);
 
             MaterialInventoryDAO inventoryDAO = new MaterialInventoryDAO();
             MaterialDAO materialDAO = new MaterialDAO();
 
-            // Cập nhật chi tiết kiểm kho theo trạng thái
             inventoryDAO.updateInventory(materialId, 1, newQty);      // StatusId 1: New
             inventoryDAO.updateInventory(materialId, 2, usedQty);     // StatusId 2: Used
             inventoryDAO.updateInventory(materialId, 3, damagedQty);  // StatusId 3: Damaged
 
-            // Cập nhật tổng tồn kho về bảng Materials
             materialDAO.updateMaterialQuantity(materialId, total);
 
-            // Redirect quay lại chi tiết
             response.sendRedirect("materialdetail?materialId=" + materialId);
         } catch (Exception e) {
             e.printStackTrace();
-            response.sendError(500, "Inventory update failed");
+            request.setAttribute("errorMessage", "Inventory update failed: " + e.getMessage());
+            request.setAttribute("pageContent", "/inventory-check.jsp");
+            request.getRequestDispatcher("/layout/layout.jsp").forward(request, response);
         }
     }
 
+    private int parseQuantitySafe(String param) {
+        try {
+            return (param != null && !param.trim().isEmpty()) ? Integer.parseInt(param.trim()) : 0;
+        } catch (NumberFormatException e) {
+            System.err.println("Invalid number format for quantity: " + param);
+            return 0;
+        }
+    }
 }

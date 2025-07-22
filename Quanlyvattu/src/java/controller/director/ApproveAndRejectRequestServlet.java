@@ -79,14 +79,16 @@ public class ApproveAndRejectRequestServlet extends HttpServlet {
 
         } else if ("reject".equalsIgnoreCase(action)) {
             String reason = request.getParameter("reason");
+
             if (reason == null || reason.trim().isEmpty()) {
-                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Rejection reason is required.");
+                System.out.println("⚠️ Reject failed: reason is missing");
+                request.setAttribute("errorMessage", "Rejection reason is required.");
+                request.getRequestDispatcher("request-detail?id=" + requestId).forward(request, response);
                 return;
             }
 
             dao.rejectRequest(requestId, reason.trim(), approvedBy);
             session.setAttribute("successMessage", "Request rejected successfully!");
-
         } else {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid action.");
             return;

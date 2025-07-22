@@ -1,15 +1,15 @@
-    package DAO;
+package DAO;
 
-    import dal.DBContext;
-    import model.Notification;
+import dal.DBContext;
+import model.Notification;
 
-    import java.sql.*;
-    import java.util.ArrayList;
-    import java.util.List;
-    import java.time.format.DateTimeFormatter;
-    import java.time.ZoneId;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.time.format.DateTimeFormatter;
+import java.time.ZoneId;
 
-    public class NotificationDAO extends DBContext {
+public class NotificationDAO extends DBContext {
 
     public void insertNotification(Integer userId, int typeId, String title, String message, String url,
             Integer relatedId, String relatedType, String priority) throws SQLException {
@@ -18,122 +18,28 @@
         try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             if (userId != null) {
                 ps.setInt(1, userId);
-                ResultSet rs = ps.executeQuery();
-                while (rs.next()) {
-                    list.add(mapResultSetToNotification(rs));
-                }
-            }
-            return list;
-        }
-
-        public List<Notification> getUnreadNotifications(int userId) throws SQLException {
-            List<Notification> list = new ArrayList<>();
-            String sql = "SELECT n.*, nt.TypeName AS NotificationTypeName FROM Notifications n "
-                    + "LEFT JOIN NotificationTypes nt ON n.TypeId = nt.TypeId "
-                    + "WHERE (n.UserId IS NULL OR n.UserId = ?) AND n.IsRead = FALSE "
-                    + "ORDER BY n.CreatedAt DESC";
-            try (PreparedStatement ps = connection.prepareStatement(sql)) {
-                ps.setInt(1, userId);
-                ResultSet rs = ps.executeQuery();
-                while (rs.next()) {
-                    list.add(mapResultSetToNotification(rs));
-                }
-            }
-            return list;
-        }
-
-        public int getUnreadCount(int userId) throws SQLException {
-            String sql = "SELECT COUNT(*) FROM Notifications WHERE (UserId = ? OR UserId IS NULL) AND IsRead = FALSE";
-            try (PreparedStatement ps = connection.prepareStatement(sql)) {
-                ps.setInt(1, userId);
-                ResultSet rs = ps.executeQuery();
-                if (rs.next()) {
-                    return rs.getInt(1);
-                }
-            }
-            return 0;
-        }
-
-        public void markAsRead(int notificationId) throws SQLException {
-            String sql = "UPDATE Notifications SET IsRead = TRUE WHERE NotificationId = ?";
-            try (PreparedStatement ps = connection.prepareStatement(sql)) {
-                ps.setInt(1, notificationId);
-                ps.executeUpdate();
-            }
-        }
-
-        public void markAllAsRead(int userId) throws SQLException {
-            String sql = "UPDATE Notifications SET IsRead = TRUE WHERE UserId = ? OR UserId IS NULL";
-            try (PreparedStatement ps = connection.prepareStatement(sql)) {
-                ps.setInt(1, userId);
-                ps.executeUpdate();
-            }
-        }
-
-        public List<Notification> getAllNotificationsForUser(int userId) throws SQLException {
-            List<Notification> list = new ArrayList<>();
-            String sql = "SELECT n.*, nt.TypeName AS NotificationTypeName FROM Notifications n "
-                    + "LEFT JOIN NotificationTypes nt ON n.TypeId = nt.TypeId "
-                    + "WHERE n.UserId = ? OR n.UserId IS NULL ORDER BY n.CreatedAt DESC";
-            try (PreparedStatement ps = connection.prepareStatement(sql)) {
-                ps.setInt(1, userId);
-                ResultSet rs = ps.executeQuery();
-                while (rs.next()) {
-                    list.add(mapResultSetToNotification(rs));
-                }
-            }
-            return list;
-        }
-
-        private Notification mapResultSetToNotification(ResultSet rs) throws SQLException {
-            Notification n = new Notification();
-
-            n.setNotificationId(rs.getInt("NotificationId"));
-
-            Object userIdObj = rs.getObject("UserId");
-            if (userIdObj != null) {
-                n.setUserId((Integer) userIdObj);
             } else {
-                n.setUserId(null);
+                ps.setNull(1, Types.INTEGER);
             }
 
-            n.setTypeId(rs.getInt("TypeId"));
-            n.setTypeName(rs.getString("NotificationTypeName"));
-            n.setTitle(rs.getString("Title"));
-            n.setMessage(rs.getString("Message"));
-            n.setUrl(rs.getString("Url"));
-
-            Object relatedIdObj = rs.getObject("RelatedId");
-            if (relatedIdObj != null) {
-                n.setRelatedId((Integer) relatedIdObj);
+            ps.setInt(2, typeId);
+            ps.setString(3, title);
+            ps.setString(4, message);
+            ps.setString(5, url);
+            if (relatedId != null) {
+                ps.setInt(6, relatedId);
             } else {
-                n.setRelatedId(null);
+                ps.setNull(6, Types.INTEGER);
             }
-
-            n.setRelatedType(rs.getString("RelatedType"));
-            n.setIsRead(rs.getBoolean("IsRead"));
-            n.setPriority(rs.getString("Priority"));
-
-            Timestamp timestamp = rs.getTimestamp("CreatedAt");
-            if (timestamp != null) {
-                String formatted = timestamp.toLocalDateTime()
-                        .atZone(ZoneId.systemDefault())
-                        .format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
-                n.setCreatedAt(formatted);
-            } else {
-                n.setCreatedAt("Không rõ thời gian");
-            }
-
-            return n;
+            ps.setString(7, relatedType);
+            ps.setString(8, priority != null ? priority : "MEDIUM");
+            ps.executeUpdate();
         }
+    }
 
-        // --- Các hàm tạo thông báo cụ thể ---
-        public void createCategoryNotification(String categoryName, boolean isSubCategory) throws SQLException {
-            int typeId = isSubCategory ? 2 : 1;
-            String title = isSubCategory ? "Danh mục con mới" : "Danh mục mới";
-            String message = (isSubCategory ? "Danh mục con '" : "Danh mục '") + categoryName + "' đã được thêm vào hệ thống.";
-            insertNotification(null, typeId, title, message, "catalog", null, "CATEGORY", "LOW");
-        }
+    public void insertNotification(Integer userId, String message, String url) throws SQLException {
+        insertNotification(userId, 12, "Thông báo hệ thống", message, url, null, "SYSTEM", "MEDIUM");
+    }
 
     public List<Notification> getAllNotifications(int userId) throws SQLException {
         List<Notification> list = new ArrayList<>();
@@ -148,7 +54,7 @@
                 }
             }
         }
-
+        return list;
     }
 
     public List<Notification> getUnreadNotifications(int userId) throws SQLException {
