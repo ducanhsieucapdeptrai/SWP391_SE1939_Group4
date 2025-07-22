@@ -94,7 +94,8 @@ INSERT INTO Functions (FunctionName, Url, ModuleId) VALUES
 -- Module 5: Reports
 INSERT INTO Functions (FunctionName, Url, ModuleId) VALUES
 ('Advanced Dashboard', '/advanced-dashboard', 5),
-('Dashboard', '/dashboard', 5);
+('Dashboard', '/dashboard', 5),
+('View Statistic', '/material-statistics', 5);
 
 
 
