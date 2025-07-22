@@ -120,6 +120,8 @@ public class AddMaterialServlet extends HttpServlet {
             int subCategoryId = Integer.parseInt(request.getParameter("subCategoryId"));
             int statusId = Integer.parseInt(request.getParameter("statusId"));
             int quantity = Integer.parseInt(request.getParameter("quantity"));
+            String unit = request.getParameter("unit");
+
             int minQuantity = Integer.parseInt(request.getParameter("minQuantity"));
             double price = Double.parseDouble(request.getParameter("price"));
             String description = request.getParameter("description");
@@ -169,6 +171,8 @@ public class AddMaterialServlet extends HttpServlet {
             material.setQuantity(quantity);
             material.setMinQuantity(minQuantity);
             material.setPrice(price);
+            material.setUnit(unit);
+
             material.setDescription(description);
             material.setImage(imagePath);
 

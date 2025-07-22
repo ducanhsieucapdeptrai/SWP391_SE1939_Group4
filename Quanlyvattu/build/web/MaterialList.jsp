@@ -99,6 +99,8 @@
                 <th class="py-3 px-4">Material&nbsp;ID</th>
                 <th class="py-3 px-4">Image</th>
                 <th class="py-3 px-4">Material&nbsp;Name</th>
+                <th class="py-3 px-4">Unit</th>
+
                 <th class="py-3 px-4">In&nbsp;Stock</th>
                 <th class="py-3 px-4">Action</th>
             </tr>
@@ -127,6 +129,8 @@
                          onclick="showImage(this.src)" />
                 </td>
                 <td class="py-2 px-4"><%= m.getMaterialName()%></td>
+                <td class="py-2 px-4"><%= m.getUnit() != null ? m.getUnit() : "" %></td>
+
                 <td class="py-2 px-4"><%= inStock%></td>
                 <td class="py-2 px-4">
                     <a href="materialdetail?id=<%= m.getMaterialId()%>&page=<%= currentPage%><%= baseParams%>" class="text-blue-600 hover:underline">View</a>

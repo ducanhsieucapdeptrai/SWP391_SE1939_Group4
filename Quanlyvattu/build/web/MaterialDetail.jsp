@@ -153,8 +153,7 @@
                     <div class="info-table">
                         <p><span class="label"># Material ID:</span> #${m.materialId}</p>
                         <p><span class="label">Category:</span> ${m.categoryName} → ${m.subCategoryName}</p>
-                        <p><span class="label">Current Stock:</span> <span class="stock-dot"></span>${m.quantity} units</p>
-                        <p><span class="label">Status:</span> ${m.statusName}</p>
+                        <p><span class="label">Current Stock:</span> <span class="stock-dot"></span>${m.quantity} ${m.unit}</p>
                     </div>
 
 
