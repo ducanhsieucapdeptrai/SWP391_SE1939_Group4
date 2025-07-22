@@ -4,6 +4,7 @@ import DAO.RoleDAO;
 import DAO.UserDAO;
 import Helper.ImageHelper;
 import Helper.AuthorizationHelper;
+import Helper.HashHelper;
 import jakarta.mail.*;
 import jakarta.mail.internet.*;
 import jakarta.servlet.ServletException;
@@ -107,7 +108,7 @@ public class AddUserServlet extends HttpServlet {
         user.setFullName(fullName);
         user.setEmail(email);
         user.setPhone(phone);
-        user.setPassword(password);
+        user.setPassword(HashHelper.sha256(password));
         user.setIsActive(isActive);
         user.setRoleId(roleId);
         user.setUserImage(fileName != null ? fileName : "");
