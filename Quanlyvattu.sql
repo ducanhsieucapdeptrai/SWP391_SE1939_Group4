@@ -46,7 +46,9 @@ INSERT INTO Functions (FunctionName, Url, ModuleId) VALUES
 ('Authorization Matrix', '/user-matrix', 1),
 ('Request password reset', '/request-new-password', 1),
 ('Assign user roles', NULL, 1),
+('View Notification', '/all-notifications', 1),
 ('Add User', '/add-user', 1);
+
 
 
 
@@ -57,8 +59,8 @@ INSERT INTO Functions (FunctionName, Url, ModuleId) VALUES
 ('Edit material information', '/materialdetail', 2),
 ('Add Category/Subcategory', '/add-category' , 2),
 ('Delete material', NULL, 2),
-('Edit Material Information', '/editmaterial', 2);
-
+('Edit Material Information', '/editmaterial', 2),
+('Inventory Check', '/inventory-check', 2);
 
 
 -- Module 3: Import/Export
@@ -372,6 +374,7 @@ VALUES
 ('protective_suit', 36, 1, 'protective_suit.png', 'Body protection suit against dust, chemicals.', 50, 10, 300000),
 ('safety_harness', 37, 1, 'safety_harness.png', 'Fall protection: harness for working at height.', 80, 10, 250000),
 ('respirator_mask', 38, 1, 'respirator_mask.png', 'Respiratory protection: mask against harmful environments.', 150, 30, 120000);
+UPDATE Materials SET Quantity = 0;
 
 UPDATE Materials SET Unit = 'm³' WHERE MaterialName LIKE '%Concrete%';
 UPDATE Materials SET Unit = 'pcs' WHERE MaterialName LIKE '%Brick%' OR MaterialName LIKE '%Tile%';

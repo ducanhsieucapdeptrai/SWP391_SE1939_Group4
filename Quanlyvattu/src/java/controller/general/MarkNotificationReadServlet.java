@@ -23,14 +23,17 @@ public class MarkNotificationReadServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
         String idStr = request.getParameter("id");
+
         if (idStr != null) {
             try {
                 int notificationId = Integer.parseInt(idStr);
                 NotificationDAO dao = new NotificationDAO();
-                dao.markAsRead(notificationId);
+                dao.markAsRead(notificationId);  // Marks a single notification as read
                 response.setStatus(HttpServletResponse.SC_OK);
             } catch (Exception e) {
+                e.printStackTrace();  // Recommended: log error
                 response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             }
         } else {

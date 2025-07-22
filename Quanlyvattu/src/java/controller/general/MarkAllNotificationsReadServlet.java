@@ -20,9 +20,11 @@ import model.Users;
  */
 @WebServlet("/mark-all-notifications-read")
 public class MarkAllNotificationsReadServlet extends HttpServlet {
+
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
         try {
             Users currentUser = (Users) request.getSession().getAttribute("currentUser");
             if (currentUser == null) {
@@ -31,9 +33,11 @@ public class MarkAllNotificationsReadServlet extends HttpServlet {
             }
 
             NotificationDAO dao = new NotificationDAO();
-            dao.markAllAsRead(currentUser.getUserId());
+            dao.markAllAsRead(currentUser.getUserId());  // Marks all user's notifications as read
             response.setStatus(HttpServletResponse.SC_OK);
+
         } catch (Exception e) {
+            e.printStackTrace();  // Recommended: log error
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
