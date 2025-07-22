@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Properties;
-import utils.HashUtil;
 
 @WebServlet("/add-user")
 @MultipartConfig(
@@ -60,7 +59,7 @@ public class AddUserServlet extends HttpServlet {
         int roleId = Integer.parseInt(request.getParameter("roleId"));
         boolean isActive = "1".equals(request.getParameter("status"));
 
-        if (!fullName.matches("^[A-Za-z\\s]{1,20}$")) {
+        if (!fullName.matches("^[A-Za-z\\s]{1,30}$")) {
             request.setAttribute("errorMessage", "Full name must be alphabetic only and max 20 characters.");
             doGet(request, response);
             return;
@@ -72,21 +71,13 @@ public class AddUserServlet extends HttpServlet {
             return;
         }
 
-        UserDAO dao = new UserDAO();
-        Users user = dao.getUserByEmail(email);
-        String storedPassword = user.getPassword();
-        String inputPassword = password;
-        if (inputPassword.length() < 6) {
-//            request.setAttribute("errorMessage", "Password must be at least 6 characters.");
-//            doGet(request, response);
-//            return;
-            String hashedInput = HashUtil.hashPassword(inputPassword);
-            if (hashedInput.equals(storedPassword)) {
+        if (password.length() < 6) {
             request.setAttribute("errorMessage", "Password must be at least 6 characters.");
             doGet(request, response);
             return;
-            }
         }
+
+        UserDAO dao = new UserDAO();
 
         if (dao.getUserByEmail(email) != null) {
             request.setAttribute("errorMessage", "Email already exists.");
@@ -113,7 +104,7 @@ public class AddUserServlet extends HttpServlet {
             return;
         }
 
-//        Users user = new Users();
+        Users user = new Users();
         user.setFullName(fullName);
         user.setEmail(email);
         user.setPhone(phone);
