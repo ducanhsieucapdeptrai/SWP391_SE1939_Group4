@@ -17,6 +17,7 @@
     }
 </style>
 
+<!-- Dropdown template để thêm vật tư mới -->
 <select id="materialSelectTemplate" class="hidden">
     <option disabled selected value="">-- Select Material --</option>
     <c:forEach var="material" items="${materialList}">
@@ -89,7 +90,7 @@
                 </table>
             </div>
 
-            <!-- Only show Add Material if requestTypeId == 3 -->
+            <!-- Chỉ hiển thị nếu là yêu cầu "Material Purchase" (id = 3) -->
             <c:if test="${requestInfo.requestTypeId == 3}">
                 <div class="mb-4">
                     <button type="button" onclick="addMaterialRow()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
@@ -144,7 +145,6 @@
 
         row.innerHTML = indexCell + materialCell + quantityCell + actionCell;
         tbody.appendChild(row);
-
         row.children[1].appendChild(clonedSelect);
     }
 </script>

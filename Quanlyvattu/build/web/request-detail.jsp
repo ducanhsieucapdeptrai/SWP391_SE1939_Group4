@@ -62,10 +62,12 @@
                 <p class="text-gray-600 mt-1">Complete information about this material request</p>
             </div>
             <div class="flex space-x-3">
-                <button onclick="history.back()" class="px-6 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors shadow-sm">
+                <button onclick="location.href = 'reqlist'" 
+                        class="px-6 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors shadow-sm">
                     <i class="fas fa-arrow-left mr-2"></i>
                     Back to Requests
                 </button>
+
 
             </div>
         </div>
@@ -401,5 +403,8 @@
                     form.submit();
                 }
             });
+        }
+        function redirectToApprovePage(requestId) {
+            window.location.href = 'approveandrejectrequest?requestId=' + requestId;
         }
     </script>
