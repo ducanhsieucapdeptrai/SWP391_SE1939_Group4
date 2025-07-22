@@ -24,7 +24,7 @@ public class MaterialDAO extends DBContext {
             JOIN MaterialStatus s ON m.StatusId = s.StatusId
         """;
 
-        try (PreparedStatement st = connection.prepareStatement(sql); ResultSet rs = st.executeQuery()) {
+        try (Connection conn = getNewConnection(); PreparedStatement st = conn.prepareStatement(sql); ResultSet rs = st.executeQuery()) {
             while (rs.next()) {
                 Material m = new Material();
                 m.setMaterialId(rs.getInt("MaterialId"));
@@ -35,13 +35,13 @@ public class MaterialDAO extends DBContext {
                 m.setDescription(rs.getString("Description"));
                 m.setQuantity(rs.getInt("Quantity"));
                 m.setMinQuantity(rs.getInt("MinQuantity"));
-                m.setPrice(rs.getDouble("Price")); // Đảm bảo lấy giá
+                m.setPrice(rs.getDouble("Price"));
                 m.setCreatedAt(rs.getTimestamp("CreatedAt"));
                 m.setUpdatedAt(rs.getTimestamp("UpdatedAt"));
                 m.setSubCategoryName(rs.getString("SubCategoryName"));
                 m.setCategoryName(rs.getString("CategoryName"));
                 m.setStatusName(rs.getString("StatusName"));
-                m.setCategoryId(rs.getInt("CategoryId")); // Đảm bảo bao gồm
+                m.setCategoryId(rs.getInt("CategoryId"));
                 list.add(m);
             }
         } catch (Exception e) {
@@ -50,7 +50,6 @@ public class MaterialDAO extends DBContext {
         return list;
     }
 
-    // Lấy vật tư phân trang
     public List<Material> getMaterialsByPage(int offset, int pageSize) {
         List<Material> list = new ArrayList<>();
         String sql = """
@@ -63,7 +62,7 @@ public class MaterialDAO extends DBContext {
             LIMIT ? OFFSET ?
         """;
 
-        try (PreparedStatement st = connection.prepareStatement(sql)) {
+        try (Connection conn = getNewConnection(); PreparedStatement st = conn.prepareStatement(sql)) {
             st.setInt(1, pageSize);
             st.setInt(2, offset);
             ResultSet rs = st.executeQuery();
@@ -77,13 +76,13 @@ public class MaterialDAO extends DBContext {
                 m.setDescription(rs.getString("Description"));
                 m.setQuantity(rs.getInt("Quantity"));
                 m.setMinQuantity(rs.getInt("MinQuantity"));
-                m.setPrice(rs.getDouble("Price")); // Đảm bảo lấy giá
+                m.setPrice(rs.getDouble("Price"));
                 m.setCreatedAt(rs.getTimestamp("CreatedAt"));
                 m.setUpdatedAt(rs.getTimestamp("UpdatedAt"));
                 m.setStatusName(rs.getString("StatusName"));
                 m.setSubCategoryName(rs.getString("SubCategoryName"));
                 m.setCategoryName(rs.getString("CategoryName"));
-                m.setCategoryId(rs.getInt("CategoryId")); // Đảm bảo bao gồm
+                m.setCategoryId(rs.getInt("CategoryId"));
                 list.add(m);
             }
         } catch (SQLException e) {
@@ -92,12 +91,9 @@ public class MaterialDAO extends DBContext {
         return list;
     }
 
-    // Lấy tổng số lượng vật tư
     public int getTotalMaterialCount() {
         String sql = "SELECT COUNT(*) FROM Materials";
-        try {
-            PreparedStatement st = connection.prepareStatement(sql);
-            ResultSet rs = st.executeQuery();
+        try (Connection conn = getNewConnection(); PreparedStatement st = conn.prepareStatement(sql); ResultSet rs = st.executeQuery()) {
             if (rs.next()) {
                 return rs.getInt(1);
             }
@@ -107,7 +103,6 @@ public class MaterialDAO extends DBContext {
         return 0;
     }
 
-    // Lọc vật tư
     public List<Material> searchMaterials(String category, String subcategory, String name) {
         List<Material> list = new ArrayList<>();
 
@@ -130,8 +125,7 @@ public class MaterialDAO extends DBContext {
             sql += " AND m.MaterialName LIKE ?";
         }
 
-        try {
-            PreparedStatement ps = connection.prepareStatement(sql);
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
             int idx = 1;
             if (category != null && !category.isEmpty()) {
@@ -155,7 +149,7 @@ public class MaterialDAO extends DBContext {
                 m.setDescription(rs.getString("Description"));
                 m.setQuantity(rs.getInt("Quantity"));
                 m.setMinQuantity(rs.getInt("MinQuantity"));
-                m.setPrice(rs.getDouble("Price")); // Đảm bảo lấy giá
+                m.setPrice(rs.getDouble("Price"));
                 m.setCreatedAt(rs.getTimestamp("CreatedAt"));
                 m.setUpdatedAt(rs.getTimestamp("UpdatedAt"));
                 m.setCategoryName(rs.getString("CategoryName"));
@@ -169,7 +163,6 @@ public class MaterialDAO extends DBContext {
         return list;
     }
 
-    // Lấy một vật tư theo ID
     public Material getMaterialById(int id) {
         String sql = """
             SELECT m.*, s.StatusName, sc.SubCategoryName, c.CategoryName, c.CategoryId
@@ -180,7 +173,7 @@ public class MaterialDAO extends DBContext {
             WHERE m.MaterialId = ?
         """;
 
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
             ResultSet rs = ps.executeQuery();
 
@@ -194,13 +187,13 @@ public class MaterialDAO extends DBContext {
                 m.setDescription(rs.getString("Description"));
                 m.setQuantity(rs.getInt("Quantity"));
                 m.setMinQuantity(rs.getInt("MinQuantity"));
-                m.setPrice(rs.getDouble("Price")); // Đảm bảo lấy giá
+                m.setPrice(rs.getDouble("Price"));
                 m.setCreatedAt(rs.getTimestamp("CreatedAt"));
                 m.setUpdatedAt(rs.getTimestamp("UpdatedAt"));
                 m.setStatusName(rs.getString("StatusName"));
                 m.setSubCategoryName(rs.getString("SubCategoryName"));
                 m.setCategoryName(rs.getString("CategoryName"));
-                m.setCategoryId(rs.getInt("CategoryId")); // Đảm bảo bao gồm
+                m.setCategoryId(rs.getInt("CategoryId"));
                 return m;
             }
         } catch (SQLException e) {
@@ -218,7 +211,7 @@ public class MaterialDAO extends DBContext {
             WHERE MaterialId = ?
         """;
 
-        try (PreparedStatement st = connection.prepareStatement(sql)) {
+        try (Connection conn = getNewConnection(); PreparedStatement st = conn.prepareStatement(sql)) {
             st.setString(1, m.getMaterialName());
             st.setInt(2, m.getSubCategoryId());
             st.setInt(3, m.getStatusId());
@@ -226,7 +219,7 @@ public class MaterialDAO extends DBContext {
             st.setString(5, m.getDescription());
             st.setInt(6, m.getQuantity());
             st.setInt(7, m.getMinQuantity());
-            st.setDouble(8, m.getPrice()); // Đảm bảo cập nhật giá
+            st.setDouble(8, m.getPrice());
             st.setInt(9, m.getMaterialId());
 
             return st.executeUpdate() > 0;
@@ -236,20 +229,6 @@ public class MaterialDAO extends DBContext {
         return false;
     }
 
-    /**
-     * Helper method to close database resources
-     */
-    private void closeResources(ResultSet rs, Statement stmt, Connection conn) {
-        try {
-            if (rs != null && !rs.isClosed()) rs.close();
-            if (stmt != null && !stmt.isClosed()) stmt.close();
-            if (conn != null && !conn.isClosed()) conn.close();
-        } catch (SQLException e) {
-            System.err.println("Error closing database resources: " + e.getMessage());
-        }
-    }
-
-    // Thêm vật tư mới
     public boolean addMaterial(Material material) {
         String sql = """
             INSERT INTO Materials 
@@ -258,7 +237,7 @@ public class MaterialDAO extends DBContext {
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
         """;
 
-        try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, material.getMaterialName());
             ps.setInt(2, material.getSubCategoryId());
             ps.setInt(3, material.getStatusId());
@@ -266,7 +245,7 @@ public class MaterialDAO extends DBContext {
             ps.setString(5, material.getDescription());
             ps.setInt(6, material.getQuantity());
             ps.setInt(7, material.getMinQuantity());
-            ps.setDouble(8, material.getPrice()); // Đảm bảo thêm giá
+            ps.setDouble(8, material.getPrice());
 
             int rowsAffected = ps.executeUpdate();
             if (rowsAffected > 0) {
@@ -288,9 +267,7 @@ public class MaterialDAO extends DBContext {
         List<Category> categories = new ArrayList<>();
         String sql = "SELECT CategoryId, CategoryName FROM Categories ORDER BY CategoryName";
 
-        try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 Category c = new Category();
                 c.setCategoryId(rs.getInt("CategoryId"));
@@ -307,9 +284,7 @@ public class MaterialDAO extends DBContext {
         List<SubCategory> subcategories = new ArrayList<>();
         String sql = "SELECT SubCategoryId, SubCategoryName, CategoryId FROM SubCategories ORDER BY SubCategoryName";
 
-        try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 SubCategory sub = new SubCategory();
                 sub.setSubCategoryId(rs.getInt("SubCategoryId"));
@@ -337,9 +312,7 @@ public class MaterialDAO extends DBContext {
             LIMIT 5
         """;
 
-        try (Connection conn = connection;
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 Material m = new Material();
                 m.setMaterialId(rs.getInt("MaterialId"));
@@ -351,7 +324,6 @@ public class MaterialDAO extends DBContext {
                 imports.add(m);
             }
         } catch (SQLException e) {
-            System.err.println("Error in getRecentImportMaterials: " + e.getMessage());
             e.printStackTrace();
         }
         return imports;
@@ -371,9 +343,7 @@ public class MaterialDAO extends DBContext {
             LIMIT 5
         """;
 
-        try (Connection conn = connection;
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 Material m = new Material();
                 m.setMaterialId(rs.getInt("MaterialId"));
@@ -385,7 +355,6 @@ public class MaterialDAO extends DBContext {
                 exports.add(m);
             }
         } catch (SQLException e) {
-            System.err.println("Error in getRecentExportMaterials: " + e.getMessage());
             e.printStackTrace();
         }
         return exports;
@@ -393,8 +362,7 @@ public class MaterialDAO extends DBContext {
 
     public void addCategory(String name) {
         String sql = "INSERT INTO Categories (CategoryName) VALUES (?)";
-        try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, name);
             ps.executeUpdate();
         } catch (SQLException e) {
@@ -404,8 +372,7 @@ public class MaterialDAO extends DBContext {
 
     public void addSubCategory(int categoryId, String subCategoryName) {
         String sql = "INSERT INTO SubCategories (SubCategoryName, CategoryId) VALUES (?, ?)";
-        try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, subCategoryName);
             ps.setInt(2, categoryId);
             ps.executeUpdate();

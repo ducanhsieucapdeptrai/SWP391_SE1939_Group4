@@ -15,7 +15,7 @@ public class NotificationDAO extends DBContext {
             Integer relatedId, String relatedType, String priority) throws SQLException {
         String sql = "INSERT INTO Notifications (UserId, TypeId, Title, Message, Url, RelatedId, RelatedType, Priority) "
                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             if (userId != null) {
                 ps.setInt(1, userId);
             } else {
@@ -46,11 +46,12 @@ public class NotificationDAO extends DBContext {
         String sql = "SELECT n.*, nt.TypeName AS NotificationTypeName FROM Notifications n "
                 + "LEFT JOIN NotificationTypes nt ON n.TypeId = nt.TypeId "
                 + "WHERE n.UserId IS NULL OR n.UserId = ? ORDER BY n.CreatedAt DESC";
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, userId);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                list.add(mapResultSetToNotification(rs));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(mapResultSetToNotification(rs));
+                }
             }
         }
         return list;
@@ -62,11 +63,12 @@ public class NotificationDAO extends DBContext {
                 + "LEFT JOIN NotificationTypes nt ON n.TypeId = nt.TypeId "
                 + "WHERE (n.UserId IS NULL OR n.UserId = ?) AND n.IsRead = FALSE "
                 + "ORDER BY n.CreatedAt DESC";
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, userId);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                list.add(mapResultSetToNotification(rs));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(mapResultSetToNotification(rs));
+                }
             }
         }
         return list;
@@ -74,11 +76,12 @@ public class NotificationDAO extends DBContext {
 
     public int getUnreadCount(int userId) throws SQLException {
         String sql = "SELECT COUNT(*) FROM Notifications WHERE (UserId = ? OR UserId IS NULL) AND IsRead = FALSE";
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, userId);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
             }
         }
         return 0;
@@ -86,7 +89,7 @@ public class NotificationDAO extends DBContext {
 
     public void markAsRead(int notificationId) throws SQLException {
         String sql = "UPDATE Notifications SET IsRead = TRUE WHERE NotificationId = ?";
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, notificationId);
             ps.executeUpdate();
         }
@@ -94,7 +97,7 @@ public class NotificationDAO extends DBContext {
 
     public void markAllAsRead(int userId) throws SQLException {
         String sql = "UPDATE Notifications SET IsRead = TRUE WHERE UserId = ? OR UserId IS NULL";
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, userId);
             ps.executeUpdate();
         }
@@ -105,11 +108,12 @@ public class NotificationDAO extends DBContext {
         String sql = "SELECT n.*, nt.TypeName AS NotificationTypeName FROM Notifications n "
                 + "LEFT JOIN NotificationTypes nt ON n.TypeId = nt.TypeId "
                 + "WHERE n.UserId = ? OR n.UserId IS NULL ORDER BY n.CreatedAt DESC";
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, userId);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                list.add(mapResultSetToNotification(rs));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(mapResultSetToNotification(rs));
+                }
             }
         }
         return list;
@@ -157,7 +161,6 @@ public class NotificationDAO extends DBContext {
         return n;
     }
 
-    // --- Các hàm tạo thông báo cụ thể ---
     public void createCategoryNotification(String categoryName, boolean isSubCategory) throws SQLException {
         int typeId = isSubCategory ? 2 : 1;
         String title = isSubCategory ? "Danh mục con mới" : "Danh mục mới";
@@ -214,12 +217,11 @@ public class NotificationDAO extends DBContext {
                 "tasks", taskId, "TASK", "MEDIUM");
     }
 
-    // Gửi noti hệ thống: user A vừa tạo yêu cầu loại XYZ
     public void createSystemRequestNotification(String fullName, String requestTypeName) throws SQLException {
         String sql = "INSERT INTO Notifications (UserId, TypeId, Title, Message, Url, RelatedType, Priority, IsRead, CreatedAt) "
                 + "VALUES (NULL, 4, ?, ?, ?, ?, 'MEDIUM', FALSE, GETDATE())";
 
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, "Yêu cầu mới");
             ps.setString(2, fullName + " đã tạo yêu cầu loại \"" + requestTypeName + "\".");
             ps.setString(3, "request-list");
@@ -227,5 +229,4 @@ public class NotificationDAO extends DBContext {
             ps.executeUpdate();
         }
     }
-
 }

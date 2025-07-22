@@ -206,7 +206,7 @@ public class TaskLogDAO extends DBContext {
     }
 
     public List<TaskLog> getGroupedTaskLogsByRequestId(int requestId) {
-        try (Connection conn = new DBContext().getConnection()) {
+        try (Connection conn = new DBContext().getNewConnection()) {
             return getGroupedTaskLogsByRequestId(conn, requestId);
         } catch (SQLException e) {
             e.printStackTrace();

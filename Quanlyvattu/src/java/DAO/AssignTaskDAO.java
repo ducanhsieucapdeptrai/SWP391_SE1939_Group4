@@ -233,35 +233,6 @@ public class AssignTaskDAO extends DBContext {
         }
         return types;
     }
-// Trong ApprovedRequestDAO hoặc RequestDAO
-
-    public RequestList getRequestById(int requestId) {
-        RequestList request = null;
-        String sql = "SELECT * FROM RequestList WHERE RequestId = ?";
-
-        DBContext db = new DBContext();
-
-        try (Connection conn = db.getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setInt(1, requestId);
-            ResultSet rs = ps.executeQuery();
-
-            if (rs.next()) {
-                request = new RequestList();
-                request.setRequestId(rs.getInt("RequestId"));
-                request.setRequestDate(rs.getDate("RequestDate"));
-                request.setRequestedBy(rs.getInt("RequesterId"));
-                request.setStatus(rs.getString("Status"));
-                request.setAssignedStaffId(rs.getInt("AssignedStaffId"));
-                // bổ sung các trường khác nếu có
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return request;
-    }
 
     public boolean assignRequestToStaff(int requestId, int staffId) {
         String sql = "UPDATE RequestList SET AssignedStaffId = ? WHERE RequestId = ? AND AssignedStaffId IS NULL";
@@ -276,24 +247,6 @@ public class AssignTaskDAO extends DBContext {
             e.printStackTrace();
         }
         return false;
-    }
-
-    public List<RequestList> getRequestsByAssignedStaff(int staffId) {
-        List<RequestList> list = new ArrayList<>();
-        String sql = "SELECT * FROM RequestList WHERE AssignedStaffId = ?";
-        DBContext db = new DBContext();
-        try (Connection conn = db.getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, staffId);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                RequestList r = new RequestList();
-                // set fields...
-                list.add(r);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return list;
     }
 
     public List<RequestList> getAllUnassignedApprovedRequests() {
@@ -412,9 +365,9 @@ public class AssignTaskDAO extends DBContext {
     }
 
     public List<RequestList> getOngoingTasksTodayFiltered(String type, String requestedBy, String requestDate) {
-    List<RequestList> list = new ArrayList<>();
+        List<RequestList> list = new ArrayList<>();
 
-    StringBuilder sql = new StringBuilder("""
+        StringBuilder sql = new StringBuilder("""
     SELECT rl.*, 
            u1.FullName AS RequestedByName,
            u2.FullName AS ApprovedByName,
@@ -431,45 +384,45 @@ public class AssignTaskDAO extends DBContext {
       AND rt.RequestTypeId IN (1, 2)
 """);
 
-    List<Object> params = new ArrayList<>();
-    if (type != null && !type.isEmpty()) {
-        sql.append(" AND rt.RequestTypeName = ?");
-        params.add(type);
-    }
-    if (requestedBy != null && !requestedBy.isEmpty()) {
-        sql.append(" AND u1.FullName LIKE ?");
-        params.add("%" + requestedBy + "%");
-    }
-    if (requestDate != null && !requestDate.isEmpty()) {
-        sql.append(" AND DATE(rl.RequestDate) = ?");
-        params.add(requestDate);
-    }
-
-    try (Connection conn = new DBContext().getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
-        for (int i = 0; i < params.size(); i++) {
-            ps.setObject(i + 1, params.get(i));
+        List<Object> params = new ArrayList<>();
+        if (type != null && !type.isEmpty()) {
+            sql.append(" AND rt.RequestTypeName = ?");
+            params.add(type);
+        }
+        if (requestedBy != null && !requestedBy.isEmpty()) {
+            sql.append(" AND u1.FullName LIKE ?");
+            params.add("%" + requestedBy + "%");
+        }
+        if (requestDate != null && !requestDate.isEmpty()) {
+            sql.append(" AND DATE(rl.RequestDate) = ?");
+            params.add(requestDate);
         }
 
-        ResultSet rs = ps.executeQuery();
-        while (rs.next()) {
-            RequestList r = mapResultSetToRequestList(rs);
-            r.setRequestedByName(rs.getString("RequestedByName"));
-            r.setApprovedByName(rs.getString("ApprovedByName"));
-            r.setRequestTypeName(rs.getString("RequestTypeName"));
-            r.setSubTypeName(rs.getString("SubTypeName"));
-            list.add(r);
+        try (Connection conn = new DBContext().getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                RequestList r = mapResultSetToRequestList(rs);
+                r.setRequestedByName(rs.getString("RequestedByName"));
+                r.setApprovedByName(rs.getString("ApprovedByName"));
+                r.setRequestTypeName(rs.getString("RequestTypeName"));
+                r.setSubTypeName(rs.getString("SubTypeName"));
+                list.add(r);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-    } catch (Exception e) {
-        e.printStackTrace();
+
+        return list;
     }
 
-    return list;
-}
+    public List<RequestList> getUpcomingTasksFiltered(String type, String requestedBy, String requestDate) {
+        List<RequestList> list = new ArrayList<>();
 
-public List<RequestList> getUpcomingTasksFiltered(String type, String requestedBy, String requestDate) {
-    List<RequestList> list = new ArrayList<>();
-
-    StringBuilder sql = new StringBuilder("""
+        StringBuilder sql = new StringBuilder("""
     SELECT rl.*, 
            u1.FullName AS RequestedByName,
            u2.FullName AS ApprovedByName,
@@ -486,41 +439,40 @@ public List<RequestList> getUpcomingTasksFiltered(String type, String requestedB
       AND rt.RequestTypeId IN (1, 2)
 """);
 
-    List<Object> params = new ArrayList<>();
-    if (type != null && !type.isEmpty()) {
-        sql.append(" AND rt.RequestTypeName = ?");
-        params.add(type);
-    }
-    if (requestedBy != null && !requestedBy.isEmpty()) {
-        sql.append(" AND u1.FullName LIKE ?");
-        params.add("%" + requestedBy + "%");
-    }
-    if (requestDate != null && !requestDate.isEmpty()) {
-        sql.append(" AND DATE(rl.RequestDate) = ?");
-        params.add(requestDate);
-    }
-
-    try (Connection conn = new DBContext().getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
-        for (int i = 0; i < params.size(); i++) {
-            ps.setObject(i + 1, params.get(i));
+        List<Object> params = new ArrayList<>();
+        if (type != null && !type.isEmpty()) {
+            sql.append(" AND rt.RequestTypeName = ?");
+            params.add(type);
+        }
+        if (requestedBy != null && !requestedBy.isEmpty()) {
+            sql.append(" AND u1.FullName LIKE ?");
+            params.add("%" + requestedBy + "%");
+        }
+        if (requestDate != null && !requestDate.isEmpty()) {
+            sql.append(" AND DATE(rl.RequestDate) = ?");
+            params.add(requestDate);
         }
 
-        ResultSet rs = ps.executeQuery();
-        while (rs.next()) {
-            RequestList r = mapResultSetToRequestList(rs);
-            r.setRequestedByName(rs.getString("RequestedByName"));
-            r.setApprovedByName(rs.getString("ApprovedByName"));
-            r.setRequestTypeName(rs.getString("RequestTypeName"));
-            r.setSubTypeName(rs.getString("SubTypeName"));
-            list.add(r);
+        try (Connection conn = new DBContext().getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                RequestList r = mapResultSetToRequestList(rs);
+                r.setRequestedByName(rs.getString("RequestedByName"));
+                r.setApprovedByName(rs.getString("ApprovedByName"));
+                r.setRequestTypeName(rs.getString("RequestTypeName"));
+                r.setSubTypeName(rs.getString("SubTypeName"));
+                list.add(r);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-    } catch (Exception e) {
-        e.printStackTrace();
+
+        return list;
     }
-
-    return list;
-}
-
 
     public List<String> getAllRequesterNames() {
         List<String> names = new ArrayList<>();

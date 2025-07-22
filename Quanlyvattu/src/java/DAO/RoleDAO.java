@@ -14,7 +14,7 @@ public class RoleDAO extends DBContext {
         List<Role> roles = new ArrayList<>();
         String sql = "SELECT * FROM Roles";
 
-        try (Connection conn = getConnection();
+        try (Connection conn = getNewConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
 
@@ -35,7 +35,7 @@ public class RoleDAO extends DBContext {
     // Lấy role theo ID
     public Role getRoleById(int roleId) {
         String sql = "SELECT * FROM Roles WHERE RoleId = ?";
-        try (Connection conn = getConnection();
+        try (Connection conn = getNewConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setInt(1, roleId);
@@ -54,7 +54,7 @@ public class RoleDAO extends DBContext {
     // Thêm role mới
     public boolean insertRole(Role role) {
         String sql = "INSERT INTO Roles (RoleId, RoleName) VALUES (?, ?)";
-        try (Connection conn = getConnection();
+        try (Connection conn = getNewConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setInt(1, role.getRoleId());
@@ -70,7 +70,7 @@ public class RoleDAO extends DBContext {
     // Cập nhật role
     public boolean updateRole(Role role) {
         String sql = "UPDATE Roles SET RoleName = ? WHERE RoleId = ?";
-        try (Connection conn = getConnection();
+        try (Connection conn = getNewConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, role.getRoleName());
@@ -86,7 +86,7 @@ public class RoleDAO extends DBContext {
     // Xóa role
     public boolean deleteRole(int roleId) {
         String sql = "DELETE FROM Roles WHERE RoleId = ?";
-        try (Connection conn = getConnection();
+        try (Connection conn = getNewConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setInt(1, roleId);

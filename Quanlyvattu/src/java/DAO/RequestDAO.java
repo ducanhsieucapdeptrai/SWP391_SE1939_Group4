@@ -19,21 +19,21 @@ public class RequestDAO extends DBContext {
     public RequestList getRequestById(int requestId) {
         RequestList request = null;
         String sql = """
-        SELECT r.RequestId, r.RequestDate, r.Note, r.Status,
-               rt.RequestTypeName, rs.Description AS StatusDescription,
-               u1.FullName AS RequestedByName,
-               u2.FullName AS ApprovedByName, r.ApprovedDate, r.ApprovalNote,
-               rst.SubTypeName
-        FROM RequestList r
-        JOIN RequestType rt ON r.RequestTypeId = rt.RequestTypeId
-        JOIN RequestStatus rs ON r.Status = rs.StatusCode
-        JOIN Users u1 ON r.RequestedBy = u1.UserId
-        LEFT JOIN Users u2 ON r.ApprovedBy = u2.UserId
-        LEFT JOIN RequestSubType rst ON r.SubTypeId = rst.SubTypeId
-        WHERE r.RequestId = ?
+    SELECT r.RequestId, r.RequestDate, r.Note, r.Status,
+           rt.RequestTypeName, rs.Description AS StatusDescription,
+           u1.FullName AS RequestedByName,
+           u2.FullName AS ApprovedByName, r.ApprovedDate, r.ApprovalNote,
+           rst.SubTypeName
+    FROM RequestList r
+    JOIN RequestType rt ON r.RequestTypeId = rt.RequestTypeId
+    JOIN RequestStatus rs ON r.Status = rs.StatusCode
+    JOIN Users u1 ON r.RequestedBy = u1.UserId
+    LEFT JOIN Users u2 ON r.ApprovedBy = u2.UserId
+    LEFT JOIN RequestSubType rst ON r.SubTypeId = rst.SubTypeId
+    WHERE r.RequestId = ?
     """;
 
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, requestId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -54,7 +54,6 @@ public class RequestDAO extends DBContext {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
         return request;
     }
 
@@ -74,7 +73,7 @@ public class RequestDAO extends DBContext {
         LEFT JOIN RequestSubType rst ON r.SubTypeId = rst.SubTypeId
     """;
 
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     RequestList r = new RequestList();
@@ -102,7 +101,7 @@ public class RequestDAO extends DBContext {
         List<RequestDetail> details = new ArrayList<>();
         String sql = "SELECT rd.MaterialId, rd.Quantity FROM RequestDetail rd WHERE rd.RequestId = ?";
 
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, requestId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -161,7 +160,7 @@ public class RequestDAO extends DBContext {
             }
         }
 
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
             for (int i = 0; i < params.size(); i++) {
                 ps.setObject(i + 1, params.get(i));
             }
@@ -192,30 +191,13 @@ public class RequestDAO extends DBContext {
         List<String> list = new ArrayList<>();
         String sql = "SELECT RequestTypeName FROM RequestType";
 
-        Connection conn = null;
-        try {
-            conn = getConnection();
-            if (conn == null || conn.isClosed()) {
-                conn = getConnection();
-            }
-            try (PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    list.add(rs.getString("RequestTypeName"));
-                }
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                list.add(rs.getString("RequestTypeName"));
             }
         } catch (SQLException e) {
             e.printStackTrace();
-        } finally {
-            // Đóng kết nối thủ công
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
         }
-
         return list;
     }
 
@@ -398,7 +380,7 @@ public class RequestDAO extends DBContext {
         ORDER BY r.RequestDate DESC
     """;
 
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, userId);
             ResultSet rs = ps.executeQuery();
 
@@ -440,7 +422,7 @@ public class RequestDAO extends DBContext {
         ORDER BY r.RequestDate DESC
     """;
 
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, userId);
             ps.setString(2, status);
             ResultSet rs = ps.executeQuery();
@@ -497,7 +479,7 @@ public class RequestDAO extends DBContext {
 
         sql.append(" ORDER BY r.RequestDate DESC ");
 
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
             int paramIndex = 1;
             ps.setInt(paramIndex++, userId);
 
@@ -582,7 +564,7 @@ public class RequestDAO extends DBContext {
             }
         }
 
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
             int index = 1;
             ps.setInt(index++, userId);
 
@@ -632,7 +614,7 @@ public class RequestDAO extends DBContext {
 
         sql.append(" ORDER BY r.RequestDate DESC LIMIT ? OFFSET ?");
 
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
             int index = 1;
             ps.setInt(index++, userId);
 
@@ -674,7 +656,7 @@ public class RequestDAO extends DBContext {
 
     public void assignImportTask(int requestId, int staffId) {
         String sql = "UPDATE ImportList SET HandledBy = ? WHERE RequestId = ?";
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, staffId);
             ps.setInt(2, requestId);
             ps.executeUpdate();
@@ -685,7 +667,7 @@ public class RequestDAO extends DBContext {
 
     public void assignExportTask(int requestId, int staffId) {
         String sql = "UPDATE ExportList SET HandledBy = ? WHERE RequestId = ?";
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, staffId);
             ps.setInt(2, requestId);
             ps.executeUpdate();
@@ -800,7 +782,7 @@ public class RequestDAO extends DBContext {
     public List<RequestList> getAssignedRequestsByStaffId(int staffId) {
         List<RequestList> list = new ArrayList<>();
         String sql = "SELECT * FROM RequestList WHERE Status = 'Approved' AND AssignedStaffId = ?";
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, staffId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -870,7 +852,7 @@ public class RequestDAO extends DBContext {
         String sql = "SELECT rt.RequestTypeName FROM RequestList rl "
                 + "JOIN RequestType rt ON rl.RequestTypeId = rt.RequestTypeId "
                 + "WHERE rl.RequestId = ?";
-        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (Connection conn = getNewConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, requestId);
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
@@ -964,22 +946,23 @@ public class RequestDAO extends DBContext {
                 + "JOIN RequestType rt ON rl.RequestTypeId = rt.RequestTypeId "
                 + "WHERE rd.RequestId = ?";
 
-        try (Connection conn = new DBContext().getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (Connection conn = getNewConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, requestId);
-            ResultSet rs = pstmt.executeQuery();
-            while (rs.next()) {
-                RequestDetailItem item = new RequestDetailItem();
-                item.setRequestId(rs.getInt("RequestId"));
-                item.setMaterialId(rs.getInt("MaterialId"));
-                item.setMaterialName(rs.getString("MaterialName"));
-                item.setRequestTypeName(rs.getString("RequestTypeName"));
-                item.setQuantity(rs.getInt("Quantity"));
-                item.setActualQuantity(rs.getInt("ActualQuantity"));
-                item.setNote(rs.getString("Note"));
-                item.setStatus(rs.getString("Status")); // ✅ thêm dòng này
-                item.setStockQuantity(rs.getInt("StockQuantity"));
-                item.setPrice(rs.getDouble("Price"));
-                items.add(item);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    RequestDetailItem item = new RequestDetailItem();
+                    item.setRequestId(rs.getInt("RequestId"));
+                    item.setMaterialId(rs.getInt("MaterialId"));
+                    item.setMaterialName(rs.getString("MaterialName"));
+                    item.setRequestTypeName(rs.getString("RequestTypeName"));
+                    item.setQuantity(rs.getInt("Quantity"));
+                    item.setActualQuantity(rs.getInt("ActualQuantity"));
+                    item.setNote(rs.getString("Note"));
+                    item.setStatus(rs.getString("Status"));
+                    item.setStockQuantity(rs.getInt("StockQuantity"));
+                    item.setPrice(rs.getDouble("Price"));
+                    items.add(item);
+                }
             }
         }
         return items;
@@ -987,7 +970,7 @@ public class RequestDAO extends DBContext {
 
     public boolean markRequestUpdated(int requestId) throws SQLException {
         String sql = "UPDATE RequestList SET IsUpdated = TRUE WHERE RequestId = ?";
-        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (Connection conn = getNewConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, requestId);
             return stmt.executeUpdate() > 0;
         }
@@ -1203,7 +1186,7 @@ public class RequestDAO extends DBContext {
 
         sql.append(" ORDER BY rl.RequestDate DESC LIMIT ? OFFSET ?");
 
-        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        try (Connection conn = new DBContext().getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
             int index = 1;
             if (type != null && !type.isEmpty()) {
                 ps.setString(index++, type);
@@ -1264,7 +1247,7 @@ public class RequestDAO extends DBContext {
             sql.append(" AND DATE(rl.RequestDate) = ?");
         }
 
-        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        try (Connection conn = new DBContext().getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
             int index = 1;
             if (type != null && !type.isEmpty()) {
                 ps.setString(index++, type);
@@ -1301,7 +1284,7 @@ public class RequestDAO extends DBContext {
             ORDER BY r.RequestDate DESC
         """;
 
-        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+        try (Connection conn = new DBContext().getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 RequestList req = new RequestList();
                 req.setRequestId(rs.getInt("RequestId"));
@@ -1385,7 +1368,7 @@ public class RequestDAO extends DBContext {
 
         sql.append(" LIMIT ?, ?");
 
-        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        try (Connection conn = new DBContext().getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
 
             int idx = 1;
             for (Object param : params) {
@@ -1447,7 +1430,7 @@ public class RequestDAO extends DBContext {
             params.add(finishDate);
         }
 
-        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        try (Connection conn = new DBContext().getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
 
             for (int i = 0; i < params.size(); i++) {
                 ps.setObject(i + 1, params.get(i));

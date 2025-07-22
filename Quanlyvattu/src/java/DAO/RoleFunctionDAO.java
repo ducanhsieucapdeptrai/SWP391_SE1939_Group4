@@ -14,7 +14,7 @@ public class RoleFunctionDAO extends DBContext {
     public List<Role> getAllRoles() throws Exception {
         List<Role> list = new ArrayList<>();
         String sql = "SELECT * FROM Roles";
-        try (Connection conn = new DBContext().getConnection(); 
+        try (Connection conn = new DBContext().getNewConnection(); 
              PreparedStatement ps = conn.prepareStatement(sql); 
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
@@ -27,7 +27,7 @@ public class RoleFunctionDAO extends DBContext {
     public List<Modules> getAllModules() throws Exception {
         List<Modules> list = new ArrayList<>();
         String sql = "SELECT * FROM Modules";
-        try (Connection conn = new DBContext().getConnection(); 
+        try (Connection conn = new DBContext().getNewConnection(); 
              PreparedStatement ps = conn.prepareStatement(sql); 
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
@@ -40,7 +40,7 @@ public class RoleFunctionDAO extends DBContext {
     public List<Functions> getAllFunctions() throws Exception {
         List<Functions> list = new ArrayList<>();
         String sql = "SELECT FunctionId, FunctionName, Url, ModuleId FROM Functions";
-        try (Connection conn = new DBContext().getConnection(); 
+        try (Connection conn = new DBContext().getNewConnection(); 
              PreparedStatement ps = conn.prepareStatement(sql); 
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
@@ -54,7 +54,7 @@ public class RoleFunctionDAO extends DBContext {
     public List<Functions> getFunctionsByModule(int moduleId) throws Exception {
         List<Functions> list = new ArrayList<>();
         String sql = "SELECT * FROM Functions WHERE ModuleId = ?";
-        try (Connection conn = new DBContext().getConnection(); 
+        try (Connection conn = new DBContext().getNewConnection(); 
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, moduleId);
             try (ResultSet rs = ps.executeQuery()) {
@@ -69,7 +69,7 @@ public class RoleFunctionDAO extends DBContext {
     public Set<String> getAllRoleFunctionPairs() throws Exception {
         Set<String> set = new HashSet<>();
         String sql = "SELECT RoleId, FunctionId FROM RoleFunction WHERE IsActive = 1";
-        try (Connection conn = new DBContext().getConnection(); 
+        try (Connection conn = new DBContext().getNewConnection(); 
              PreparedStatement ps = conn.prepareStatement(sql); 
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
@@ -84,7 +84,7 @@ public class RoleFunctionDAO extends DBContext {
         String updateActiveSQL = "UPDATE RoleFunction SET IsActive = 1 WHERE RoleId = ? AND FunctionId = ?";
         String insertSQL = "INSERT INTO RoleFunction (RoleId, FunctionId, IsActive) VALUES (?, ?, 1)";
         
-        try (Connection conn = new DBContext().getConnection()) {
+        try (Connection conn = new DBContext().getNewConnection()) {
             conn.setAutoCommit(false);
             try {
                 // Set all existing permissions to inactive (IsActive = 0)
@@ -135,7 +135,7 @@ public class RoleFunctionDAO extends DBContext {
         String updateSQL = "UPDATE RoleFunction SET IsActive = ? WHERE RoleId = ? AND FunctionId = ?";
         String insertSQL = "INSERT INTO RoleFunction (RoleId, FunctionId, IsActive) VALUES (?, ?, ?)";
         
-        try (Connection conn = new DBContext().getConnection()) {
+        try (Connection conn = new DBContext().getNewConnection()) {
             conn.setAutoCommit(false);
             try {
                 try (PreparedStatement updatePs = conn.prepareStatement(updateSQL);
@@ -180,7 +180,7 @@ public class RoleFunctionDAO extends DBContext {
         // Critical admin function IDs
         int[] criticalFunctionIds = {1, 2, 3};
         
-        try (Connection conn = new DBContext().getConnection();
+        try (Connection conn = new DBContext().getNewConnection();
              PreparedStatement ps = conn.prepareStatement(upsertSQL)) {
             
             for (int functionId : criticalFunctionIds) {
@@ -193,7 +193,7 @@ public class RoleFunctionDAO extends DBContext {
             String updateSQL = "UPDATE RoleFunction SET IsActive = 1 WHERE RoleId = ? AND FunctionId = ?";
             String insertSQL = "INSERT INTO RoleFunction (RoleId, FunctionId, IsActive) VALUES (?, ?, 1)";
             
-            try (Connection conn = new DBContext().getConnection()) {
+            try (Connection conn = new DBContext().getNewConnection()) {
                 for (int functionId : criticalFunctionIds) {
                     try (PreparedStatement updatePs = conn.prepareStatement(updateSQL)) {
                         updatePs.setInt(1, roleId);
@@ -219,7 +219,7 @@ public class RoleFunctionDAO extends DBContext {
                     "JOIN Functions f ON rf.FunctionId = f.FunctionId " +
                     "WHERE rf.RoleId = ? AND f.Url = ? AND rf.IsActive = 1";
         
-        try (Connection conn = new DBContext().getConnection(); 
+        try (Connection conn = new DBContext().getNewConnection(); 
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, roleId);
             ps.setString(2, functionUrl);
@@ -237,7 +237,7 @@ public class RoleFunctionDAO extends DBContext {
     public Set<Integer> getFunctionsByRole(int roleId) throws Exception {
         Set<Integer> functionIds = new HashSet<>();
         String sql = "SELECT FunctionId FROM RoleFunction WHERE RoleId = ? AND IsActive = 1";
-        try (Connection conn = new DBContext().getConnection(); 
+        try (Connection conn = new DBContext().getNewConnection(); 
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, roleId);
             try (ResultSet rs = ps.executeQuery()) {
@@ -261,7 +261,7 @@ public class RoleFunctionDAO extends DBContext {
             sql.append(" AND IsActive = ?");
         }
         
-        try (Connection conn = new DBContext().getConnection(); 
+        try (Connection conn = new DBContext().getNewConnection(); 
              PreparedStatement ps = conn.prepareStatement(sql.toString())) {
             
             int paramIndex = 1;
@@ -286,7 +286,7 @@ public class RoleFunctionDAO extends DBContext {
         String deleteSQL = "DELETE FROM RoleFunction WHERE RoleId = ?";
         String insertSQL = "INSERT INTO RoleFunction (RoleId, FunctionId, IsActive) VALUES (?, ?, 1)";
         
-        try (Connection conn = new DBContext().getConnection()) {
+        try (Connection conn = new DBContext().getNewConnection()) {
             conn.setAutoCommit(false);
             try {
                 // Delete existing permissions for this role only
@@ -323,7 +323,7 @@ public class RoleFunctionDAO extends DBContext {
         String sql = "SELECT f.FunctionId, f.FunctionName, f.Url, f.ModuleId, m.ModuleName " +
                     "FROM Functions f JOIN Modules m ON f.ModuleId = m.ModuleId " +
                     "ORDER BY m.ModuleName, f.FunctionName";
-        try (Connection conn = new DBContext().getConnection(); 
+        try (Connection conn = new DBContext().getNewConnection(); 
              PreparedStatement ps = conn.prepareStatement(sql); 
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {

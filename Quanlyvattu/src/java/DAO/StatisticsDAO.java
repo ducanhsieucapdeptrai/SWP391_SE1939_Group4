@@ -34,7 +34,7 @@ public class StatisticsDAO {
         ResultSet rs = null;
 
         try {
-            conn = dbContext.getConnection();
+            conn = dbContext.getNewConnection();
             
             String sql = "SELECT m.MaterialId, m.MaterialName, m.SubCategoryId, m.StatusId, m.Image, m.Description, " +
                          "m.Quantity, m.MinQuantity, m.Price, m.CreatedAt, m.UpdatedAt, ms.StatusName " +
@@ -90,7 +90,7 @@ public class StatisticsDAO {
         ResultSet rs = null;
 
         try {
-            conn = dbContext.getConnection();
+            conn = dbContext.getNewConnection();
             
             String sql = "SELECT ms.StatusName, COUNT(*) as count FROM Materials m " +
                          "JOIN MaterialStatus ms ON m.StatusId = ms.StatusId " +
@@ -132,7 +132,7 @@ public class StatisticsDAO {
         ResultSet rs = null;
 
         try {
-            conn = dbContext.getConnection();
+            conn = dbContext.getNewConnection();
             
             String sql = "SELECT c.CategoryName, COUNT(*) as count FROM Materials m " +
                          "JOIN SubCategories sc ON m.SubCategoryId = sc.SubCategoryId " +

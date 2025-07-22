@@ -39,7 +39,7 @@ public class StatisticDAO extends DBContext {
         if (endDate != null) sql.append("AND il.ImportDate <= ? ");
         sql.append("ORDER BY il.ImportDate DESC");
         
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
             int paramIndex = 1;
             
             if (materialIds != null && !materialIds.isEmpty()) {
@@ -97,7 +97,7 @@ public class StatisticDAO extends DBContext {
         if (endDate != null) sql.append("AND el.ExportDate <= ? ");
         sql.append("ORDER BY el.ExportDate DESC");
         
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
             int paramIndex = 1;
             
             if (materialIds != null && !materialIds.isEmpty()) {
@@ -147,7 +147,7 @@ public class StatisticDAO extends DBContext {
 
         sql.append("ORDER BY m.MaterialName");
 
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
             int paramIndex = 1;
 
             if (materialIds != null && !materialIds.isEmpty()) {
