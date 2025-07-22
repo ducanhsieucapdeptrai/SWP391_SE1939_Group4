@@ -59,8 +59,8 @@ public class AddUserServlet extends HttpServlet {
         int roleId = Integer.parseInt(request.getParameter("roleId"));
         boolean isActive = "1".equals(request.getParameter("status"));
 
-        if (!fullName.matches("^[A-Za-z\\s]{1,30}$")) {
-            request.setAttribute("errorMessage", "Full name must be alphabetic only and max 20 characters.");
+        if (!fullName.matches("^[\\p{L}\\s]{1,30}$")) {
+            request.setAttribute("errorMessage", "Full name can only contain letters (including accents) and max 30 characters.");
             doGet(request, response);
             return;
         }
