@@ -146,13 +146,14 @@ public class RequestDetailDAO {
     }
 
     public void rejectRequest(int requestId, String reason, int approvedBy) {
-        String sql = "UPDATE RequestList SET Status = ?, RejectionReason = ?, ApprovedBy = ?, ApprovedDate = CURRENT_TIMESTAMP WHERE RequestId = ?";
+        String sql = "UPDATE RequestList SET Status = ?, ApprovalNote = ?, ApprovedBy = ?, ApprovedDate = CURRENT_TIMESTAMP WHERE RequestId = ?";
         try (Connection conn = new DBContext().getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, "Rejected");
             ps.setString(2, reason);
             ps.setInt(3, approvedBy);
             ps.setInt(4, requestId);
-            ps.executeUpdate();
+            int rows = ps.executeUpdate();
+            System.out.println("Reject update result: " + rows + " rows affected.");
         } catch (Exception e) {
             System.out.println("Error in rejectRequest: " + e.getMessage());
             e.printStackTrace();

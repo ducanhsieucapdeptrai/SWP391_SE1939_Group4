@@ -45,7 +45,10 @@ public class ApproveAndRejectRequestServlet extends HttpServlet {
         RequestDetailDAO dao = new RequestDetailDAO();
 
         if ("approve".equalsIgnoreCase(action)) {
+            // Lấy note từ textarea name="note"
             String note = request.getParameter("note");
+            System.out.println("Approval note received: " + note); // Debug log
+
             String[] materialIds = request.getParameterValues("materialId[]");
             String[] quantities = request.getParameterValues("quantity[]");
 

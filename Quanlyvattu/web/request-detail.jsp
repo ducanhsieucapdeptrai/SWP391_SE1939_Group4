@@ -355,44 +355,51 @@
     </div>
 
     <script>
-        function redirectToApprovePage(requestId) {
-            window.location.href = 'approve-request?requestId=' + requestId;
-        }
-
-        function openRejectModal() {
-            document.getElementById("rejectModal").classList.remove("hidden");
-        }
-
-        function closeRejectModal() {
-            document.getElementById("rejectModal").classList.add("hidden");
-        }
-
         function confirmReject(requestId) {
             Swal.fire({
                 title: 'Reject this request?',
                 input: 'textarea',
-                inputLabel: 'Rejection Reason (optional)',
-                inputPlaceholder: 'Enter your reason (optional)...',
+                inputLabel: 'Rejection Reason (required)',
+                inputPlaceholder: 'Enter your reason...',
+                inputValidator: (value) => {
+                    if (!value || value.trim() === "") {
+                        return 'Reason for rejection is required!';
+                    }
+                },
                 showCancelButton: true,
                 confirmButtonText: 'Reject',
                 cancelButtonText: 'Cancel',
-                icon: 'warning',
-                preConfirm: (reason) => {
-                    return new Promise((resolve) => {
-                        const form = document.createElement('form');
-                        form.method = 'POST';
-                        form.action = 'approveandrejectrequest';
-                        form.innerHTML = `
-                    <input type="hidden" name="requestId" value="${requestId}">
-                    <input type="hidden" name="reason" value="${reason || ''}">
-                    <input type="hidden" name="action" value="reject">
-                `;
-                        document.body.appendChild(form);
-                        form.submit();
-                        resolve();
-                    });
+                icon: 'warning'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const reason = result.value.trim();
+
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = 'approveandrejectrequest';
+
+                    const requestInput = document.createElement('input');
+                    requestInput.type = 'hidden';
+                    requestInput.name = 'requestId';
+                    requestInput.value = requestId;
+
+                    const reasonInput = document.createElement('input');
+                    reasonInput.type = 'hidden';
+                    reasonInput.name = 'reason';
+                    reasonInput.value = reason;
+
+                    const actionInput = document.createElement('input');
+                    actionInput.type = 'hidden';
+                    actionInput.name = 'action';
+                    actionInput.value = 'reject';
+
+                    form.appendChild(requestInput);
+                    form.appendChild(reasonInput);
+                    form.appendChild(actionInput);
+
+                    document.body.appendChild(form);
+                    form.submit();
                 }
             });
         }
-
     </script>
