@@ -318,7 +318,7 @@
                 </c:otherwise>
             </c:choose>
         </div>
-        <c:if test="${(requestInfo.status == 'Pending' || requestInfo.status == 'P')}">
+        <c:if test="${(requestInfo.status == 'Pending')}">
             <div class="flex justify-end gap-4 mt-6">
                 <% if (AuthorizationHelper.hasPermission(request, "/approve-request")) { %>  
                 <button onclick="redirectToApprovePage(${requestInfo.requestId})"
@@ -361,7 +361,7 @@
 
     <script>
         function redirectToApprovePage(requestId) {
-            window.location.href = 'approve-request?requestId=' + requestId; // Or your servlet path, e.g., 'approveRequestServlet?requestId='
+            window.location.href = 'approve-request?requestId=' + requestId;
         }
 
         function openRejectModal() {

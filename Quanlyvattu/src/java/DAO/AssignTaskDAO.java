@@ -45,7 +45,7 @@ public class AssignTaskDAO extends DBContext {
             }
         }
 
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
             for (int i = 0; i < params.size(); i++) {
                 ps.setObject(i + 1, params.get(i));
             }
@@ -78,7 +78,7 @@ public class AssignTaskDAO extends DBContext {
         List<String> list = new ArrayList<>();
         String sql = "SELECT RequestTypeName FROM RequestType";
         DBContext db = new DBContext();
-        try (Connection conn = db.getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+        try (Connection conn = db.getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 list.add(rs.getString("RequestTypeName"));
             }
@@ -131,7 +131,7 @@ public class AssignTaskDAO extends DBContext {
             }
         }
 
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
             for (int i = 0; i < params.size(); i++) {
                 ps.setObject(i + 1, params.get(i));
             }
@@ -164,7 +164,7 @@ public class AssignTaskDAO extends DBContext {
     public boolean assignStaffToRequest(int requestId, int staffId) {
         String sql = "UPDATE Requests SET AssignedStaffId = ?, AssignedDate = GETDATE() WHERE RequestId = ?";
         DBContext db = new DBContext();
-        try (Connection conn = db.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = db.getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, staffId);
             ps.setInt(2, requestId);
             return ps.executeUpdate() > 0;
@@ -191,7 +191,7 @@ public class AssignTaskDAO extends DBContext {
 
         DBContext db = new DBContext();
 
-        try (Connection conn = db.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = db.getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, staffId);
             int index = 2;
             if (requestType != null && !requestType.isEmpty()) {
@@ -223,7 +223,7 @@ public class AssignTaskDAO extends DBContext {
         String sql = "SELECT RequestTypeName FROM RequestType";
         DBContext db = new DBContext();
 
-        try (Connection conn = db.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = db.getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 types.add(rs.getString("RequestTypeName"));
@@ -241,7 +241,7 @@ public class AssignTaskDAO extends DBContext {
 
         DBContext db = new DBContext();
 
-        try (Connection conn = db.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = db.getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setInt(1, requestId);
             ResultSet rs = ps.executeQuery();
@@ -267,7 +267,7 @@ public class AssignTaskDAO extends DBContext {
         String sql = "UPDATE RequestList SET AssignedStaffId = ? WHERE RequestId = ? AND AssignedStaffId IS NULL";
         DBContext db = new DBContext();
 
-        try (Connection conn = db.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = db.getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, staffId);
             ps.setInt(2, requestId);
             int rowsAffected = ps.executeUpdate();
@@ -282,7 +282,7 @@ public class AssignTaskDAO extends DBContext {
         List<RequestList> list = new ArrayList<>();
         String sql = "SELECT * FROM RequestList WHERE AssignedStaffId = ?";
         DBContext db = new DBContext();
-        try (Connection conn = db.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = db.getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, staffId);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
@@ -301,7 +301,7 @@ public class AssignTaskDAO extends DBContext {
 
         String sql = "SELECT * FROM RequestList WHERE Status = 'Approved' AND AssignedStaffId IS NULL";
         DBContext db = new DBContext();
-        try (Connection conn = db.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = db.getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ResultSet rs = ps.executeQuery();
 
             while (rs.next()) {
@@ -336,7 +336,7 @@ public class AssignTaskDAO extends DBContext {
           AND DATE(rl.ArrivalDate) = CURDATE()
     """;
 
-        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+        try (Connection conn = new DBContext().getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
                 RequestList r = mapResultSetToRequestList(rs);
@@ -372,7 +372,7 @@ public class AssignTaskDAO extends DBContext {
           AND (rl.ArrivalDate IS NULL OR DATE(rl.ArrivalDate) > CURDATE())
     """;
 
-        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+        try (Connection conn = new DBContext().getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
                 RequestList r = mapResultSetToRequestList(rs);
@@ -445,7 +445,7 @@ public class AssignTaskDAO extends DBContext {
         params.add(requestDate);
     }
 
-    try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+    try (Connection conn = new DBContext().getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
         for (int i = 0; i < params.size(); i++) {
             ps.setObject(i + 1, params.get(i));
         }
@@ -500,7 +500,7 @@ public List<RequestList> getUpcomingTasksFiltered(String type, String requestedB
         params.add(requestDate);
     }
 
-    try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+    try (Connection conn = new DBContext().getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
         for (int i = 0; i < params.size(); i++) {
             ps.setObject(i + 1, params.get(i));
         }
@@ -531,7 +531,7 @@ public List<RequestList> getUpcomingTasksFiltered(String type, String requestedB
         ORDER BY u.FullName
     """;
         DBContext db = new DBContext();
-        try (Connection conn = db.getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+        try (Connection conn = db.getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 names.add(rs.getString("FullName"));
             }
@@ -543,7 +543,7 @@ public List<RequestList> getUpcomingTasksFiltered(String type, String requestedB
 
     public void updateIsTransferredToday(int requestId, boolean isTransferred) {
         String sql = "UPDATE RequestList SET IsTransferredToday = ? WHERE RequestId = ?";
-        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = new DBContext().getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setBoolean(1, isTransferred);
             ps.setInt(2, requestId);
             ps.executeUpdate();
