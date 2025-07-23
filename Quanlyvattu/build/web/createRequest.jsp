@@ -19,64 +19,43 @@
     </div>
 
     <form id="frmRequest" action="createrequest" method="post">
-        <!-- Type & SubType -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Request Type:</label>
-                <select id="typeId" name="typeId" required class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
-                    <option value="">--Select Type--</option>
-                    <c:forEach var="t" items="${types}">
-                        <c:if test="${t.requestTypeId != 2 && t.requestTypeId != 4}">
-                            <option value="${t.requestTypeId}">${t.requestTypeName}</option>
-                        </c:if>
-                    </c:forEach>
-                </select>
-            </div>
-            <div>
-                <!-- SubType hiển thị cứng nếu Type là Export -->
-                <c:choose>
-                    <c:when test="${param.typeId == '1'}">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">SubType:</label>
-                        <input type="hidden" name="subTypeId" value="1" />
-                        <input type="text" value="For Construction" readonly
-                               class="w-full px-3 py-2 bg-gray-100 border rounded-md" />
-                    </c:when>
-                    <c:otherwise>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">SubType:</label>
-                        <select id="subTypeId" name="subTypeId" required
-                                class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
-                            <option value="1" data-type="1">For Construction</option>
-                            <option value="2" data-type="1">For Equipment Repair</option>
-                        </select>
-                    </c:otherwise>
-                </c:choose>
-
-            </div>
+        <!-- Request Type -->
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Request Type:</label>
+            <select id="typeId" name="typeId" required class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+                <option value="">--Select Type--</option>
+                <c:forEach var="t" items="${types}">
+                    <c:if test="${t.requestTypeId != 2 && t.requestTypeId != 4}">
+                        <option value="${t.requestTypeId}">${t.requestTypeName}</option>
+                    </c:if>
+                </c:forEach>
+            </select>
         </div>
 
-        <!-- Force subtype = For Construction when Export selected -->
+        <!-- SubType Section -->
+        <div id="subtypeWrapper" style="display: none;" class="mt-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2">SubType:</label>
+            <input type="hidden" name="subTypeId" value="1" />
+            <input type="text" value="For Construction" readonly class="w-full px-3 py-2 bg-gray-100 border rounded-md" />
+        </div>
 
-
-        <!-- Material selection only -->
-        <div class="mb-6">
+        <!-- Material Dropdown -->
+        <div class="mb-6 mt-6">
             <label class="block text-sm font-medium text-gray-700 mb-2">Material:</label>
             <select id="materialId" class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
                 <option value="">--Select--</option>
                 <c:forEach var="m" items="${materials}">
-                    <option value="${m.materialId}" data-name="${m.materialName}" data-img="${m.image}" data-stock="${m.quantity}">
+                    <option value="${m.materialId}"
+                            data-name="${m.materialName}"
+                            data-img="${pageContext.request.contextPath}/assets/images/materials/${m.image}"
+                            data-stock="${m.quantity}">
                         ${m.materialName}
                     </option>
                 </c:forEach>
-
-                <c:if test="${empty materials}">
-                    <div class="bg-yellow-100 text-yellow-800 p-3 mb-4 rounded">⚠️ Materials list is empty</div>
-                </c:if>
-
             </select>
         </div>
-        <div>Material list size: ${fn:length(materials)}</div>
 
-        <!-- Stock & Quantity -->
+        <!-- Stock + Quantity -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end mb-6">
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Stock:</label>
@@ -91,7 +70,7 @@
             </div>
         </div>
 
-        <!-- Selected Materials Table -->
+        <!-- Table -->
         <div class="mb-6">
             <h3 class="text-lg font-medium text-gray-800 mb-4">Selected Materials</h3>
             <div class="overflow-x-auto border border-gray-200 rounded-lg">
@@ -106,13 +85,13 @@
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
-                        <!-- Filled via JS -->
+                        <!-- JS will populate rows -->
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <!-- Project dropdown -->
+        <!-- Project -->
         <div class="mb-6">
             <label class="block text-sm font-medium text-gray-700 mb-2">Project:</label>
             <select name="projectId" id="projectId" class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
@@ -126,19 +105,90 @@
         <!-- Note -->
         <div class="mb-6">
             <label class="block text-sm font-medium text-gray-700 mb-2">Note:</label>
-            <textarea name="note" id="note" rows="3" class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 resize-vertical"></textarea>
+            <textarea name="note" rows="3" class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 resize-vertical"></textarea>
         </div>
 
         <!-- Submit -->
         <div class="text-center">
-            <button type="submit" id="btnCreate" class="bg-blue-500 hover:bg-blue-600 text-white px-8 py-3 rounded-md font-medium">Create Request</button>
+            <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-8 py-3 rounded-md font-medium">Create Request</button>
         </div>
     </form>
-    <div class="mb-4 p-4 border bg-yellow-50">
-        <strong>Debug Materials List:</strong>
-        <c:forEach var="m" items="${materials}">
-            <div>${m.materialId} - ${m.materialName}</div>
-        </c:forEach>
-    </div>
-
 </div>
+
+<!-- ✅ JS -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const typeSelect = document.getElementById("typeId");
+        const subtypeWrapper = document.getElementById("subtypeWrapper");
+        const btnAdd = document.getElementById("btnAdd");
+        const tblBody = document.querySelector("#tblItems tbody");
+        const materialSelect = document.getElementById("materialId");
+        const quantityInput = document.getElementById("quantity");
+        const stockInput = document.getElementById("stock");
+        let counter = 1;
+
+        // Show Subtype
+        typeSelect.addEventListener("change", function () {
+            subtypeWrapper.style.display = (this.value === "1") ? "block" : "none";
+        });
+
+        if (typeSelect.value === "1") {
+            subtypeWrapper.style.display = "block";
+        }
+
+        // Show stock
+        materialSelect.addEventListener("change", function () {
+            const selected = this.options[this.selectedIndex];
+            const stock = selected.getAttribute("data-stock");
+            stockInput.value = stock || "";
+        });
+
+        // Add material
+        btnAdd.addEventListener("click", function () {
+            const selected = materialSelect.options[materialSelect.selectedIndex];
+            const materialId = selected.value;
+            const materialName = selected.getAttribute("data-name");
+            const materialImg = selected.getAttribute("data-img");
+            const quantity = quantityInput.value;
+
+            if (!materialId || !quantity || quantity <= 0) {
+                alert("Please select a material and enter a valid quantity.");
+                return;
+            }
+
+            const existing = tblBody.querySelector(`tr[data-id="${materialId}"]`);
+            if (existing) {
+                alert("This material is already added.");
+                return;
+            }
+
+            const row = document.createElement("tr");
+            row.setAttribute("data-id", materialId);
+            row.innerHTML =
+                '<td class="px-6 py-3">' + counter + '</td>' +
+                '<td class="px-6 py-3"><img src="' + materialImg + '" class="w-10 h-10 object-cover"></td>' +
+                '<td class="px-6 py-3">' + materialName + '</td>' +
+                '<td class="px-6 py-3">' + quantity + '</td>' +
+                '<td class="px-6 py-3"><button type="button" class="text-red-600 remove-btn">Remove</button></td>' +
+                '<input type="hidden" name="materialId[]" value="' + materialId + '">' +
+                '<input type="hidden" name="quantity[]" value="' + quantity + '">';
+            tblBody.appendChild(row);
+            counter++;
+        });
+
+        // Remove row
+        tblBody.addEventListener("click", function (e) {
+            if (e.target.classList.contains("remove-btn")) {
+                const row = e.target.closest("tr");
+                row.remove();
+
+                // Re-index STT
+                let i = 1;
+                tblBody.querySelectorAll("tr").forEach(tr => {
+                    tr.children[0].textContent = i++;
+                });
+                counter = i;
+            }
+        });
+    });
+</script>
