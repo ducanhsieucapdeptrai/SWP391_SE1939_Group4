@@ -15,7 +15,7 @@
                     <i class="fas fa-chart-pie text-green-600 text-2xl"></i>
                 </div>
                 <h3 class="text-lg font-semibold mb-2">Statistics</h3>
-                <p class="text-gray-600 mb-4">Xem thống kê chi tiết về nhập, xuất, tồn kho vật tư.</p>
+                <p class="text-gray-600 mb-4">View detailed statistics on material import, export, and inventory.</p>
                 <a href="${pageContext.request.contextPath}/material-statistics" class="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg transition duration-300">
                     View Statistics
                 </a>
