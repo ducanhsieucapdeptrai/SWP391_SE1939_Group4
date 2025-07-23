@@ -406,6 +406,7 @@ CREATE TABLE Project (
     EndDate DATE,
     ManagerId INT,
     IsDeleted BOOLEAN DEFAULT 0,
+    AttachmentPath VARCHAR(255),
     Status VARCHAR(50) DEFAULT 'Active',
     FOREIGN KEY (ManagerId) REFERENCES Users(UserId)
 );
