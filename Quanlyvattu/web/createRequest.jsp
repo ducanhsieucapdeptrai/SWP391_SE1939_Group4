@@ -19,7 +19,7 @@
   <!-- Header with Back button -->
   <div class="flex justify-between items-center mb-6">
     <h2 class="text-xl font-semibold text-gray-800">Create Request</h2>
-    <a href="${pageContext.request.contextPath}/reqlist" class="text-blue-600 hover:text-blue-800 flex items-center">
+    <a href="javascript:history.back()" class="text-blue-600 hover:text-blue-800 flex items-center">
       <i class="fas fa-arrow-left mr-2"></i> Back
     </a>
   </div>
