@@ -48,10 +48,7 @@ protected void doGet(HttpServletRequest request, HttpServletResponse response)
     // Fetch paginated and filtered/sorted users and total count
     List<Users> userList = userDAO.getUsers(searchQuery, roleId, status, sortBy, sortOrder, page, pageSize);
     int totalUsers = userDAO.getUserCount(searchQuery, roleId, status);
-    int totalPages = totalUsers > 0 ? (int) Math.ceil((double) totalUsers / pageSize) : 1;
-
-    // Debug logging
-    System.out.println("DEBUG UserList - totalUsers: " + totalUsers + ", pageSize: " + pageSize + ", totalPages: " + totalPages + ", currentPage: " + page);
+    int totalPages = (int) Math.ceil((double) totalUsers / pageSize);
 
     // Fetch all roles for the dropdowns/labels
     List<Role> roleList = userDAO.getAllRoles();
@@ -61,8 +58,6 @@ protected void doGet(HttpServletRequest request, HttpServletResponse response)
     request.setAttribute("roleList", roleList);
     request.setAttribute("currentPage", page);
     request.setAttribute("totalPages", totalPages);
-    request.setAttribute("totalUsers", totalUsers);
-    request.setAttribute("pageSize", pageSize);
     request.setAttribute("searchQuery", searchQuery);
     request.setAttribute("roleId", roleId);
     request.setAttribute("status", status);
