@@ -132,8 +132,14 @@ public class StatisticDAO extends DBContext {
         List<Statistic> statistics = new ArrayList<>();
         StringBuilder sql = new StringBuilder();
         sql.append("""
-            SELECT m.MaterialId, m.MaterialName, m.Quantity as CurrentStock
+            SELECT m.MaterialId, m.MaterialName, m.Quantity as CurrentStock,
+                   COALESCE(SUM(id.Quantity), 0) as TotalImported,
+                   COALESCE(SUM(ed.Quantity), 0) as TotalExported
             FROM Materials m
+            LEFT JOIN ImportDetail id ON m.MaterialId = id.MaterialId
+            LEFT JOIN ImportList il ON id.ImportId = il.ImportId
+            LEFT JOIN ExportDetail ed ON m.MaterialId = ed.MaterialId
+            LEFT JOIN ExportList el ON ed.ExportId = el.ExportId
             WHERE 1=1
         """);
 
@@ -144,6 +150,17 @@ public class StatisticDAO extends DBContext {
                .append(")");
         }
 
+        // Add date filters for import/export
+        if (startDate != null) {
+            sql.append(" AND (il.ImportDate IS NULL OR il.ImportDate >= ?)");
+            sql.append(" AND (el.ExportDate IS NULL OR el.ExportDate >= ?)");
+        }
+        if (endDate != null) {
+            sql.append(" AND (il.ImportDate IS NULL OR il.ImportDate <= ?)");
+            sql.append(" AND (el.ExportDate IS NULL OR el.ExportDate <= ?)");
+        }
+
+        sql.append(" GROUP BY m.MaterialId, m.MaterialName, m.Quantity");
         sql.append(" ORDER BY m.MaterialName");
 
         try (Connection conn = getNewConnection();
@@ -154,15 +171,29 @@ public class StatisticDAO extends DBContext {
                 for (Integer id : materialIds) ps.setInt(paramIndex++, id);
             }
 
+            // Set date parameters (twice each for import and export)
+            if (startDate != null) {
+                ps.setTimestamp(paramIndex++, new java.sql.Timestamp(startDate.getTime()));
+                ps.setTimestamp(paramIndex++, new java.sql.Timestamp(startDate.getTime()));
+            }
+            if (endDate != null) {
+                ps.setTimestamp(paramIndex++, new java.sql.Timestamp(endDate.getTime()));
+                ps.setTimestamp(paramIndex++, new java.sql.Timestamp(endDate.getTime()));
+            }
+
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     Statistic stat = new Statistic();
                     stat.setMaterialId(rs.getInt("MaterialId"));
                     stat.setMaterialName(rs.getString("MaterialName"));
                     stat.setFinalStock(rs.getInt("CurrentStock"));
-                    stat.setInitialStock(0);
-                    stat.setTotalImported(0);
-                    stat.setTotalExported(0);
+                    stat.setTotalImported(rs.getInt("TotalImported"));
+                    stat.setTotalExported(rs.getInt("TotalExported"));
+
+                    // Calculate initial stock: Current - Imported + Exported
+                    int initialStock = stat.getFinalStock() - stat.getTotalImported() + stat.getTotalExported();
+                    stat.setInitialStock(Math.max(0, initialStock)); // Ensure non-negative
+
                     statistics.add(stat);
                 }
             }
