@@ -1,7 +1,6 @@
-// CreateRequestServlet.java
 package controller.general;
 
-import DAO.CreateRequestExport_PurcharDAO;
+import DAO.CreateRepairRequestDAO;
 import DAO.ProjectDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -12,21 +11,20 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-@WebServlet("/createrequest")
-public class CreateRequestServlet extends HttpServlet {
+@WebServlet("/create-repair-request")
+public class CreateRepairRequestServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
         try {
-            CreateRequestExport_PurcharDAO dao = new CreateRequestExport_PurcharDAO();
-            List<RequestType> types = dao.getAllRequestTypes();
-            List<Material> materials = dao.getAllMaterials();
             ProjectDAO projectDAO = new ProjectDAO();
             List<Project> projectList = projectDAO.getAllActiveProjects();
 
-            request.setAttribute("types", types);
+            CreateRepairRequestDAO dao = new CreateRepairRequestDAO();
+            List<Material> materials = dao.getAllMaterials();
+
             request.setAttribute("materials", materials);
             request.setAttribute("projectList", projectList);
             System.out.println("Loaded materials count: " + materials.size());
@@ -35,7 +33,7 @@ public class CreateRequestServlet extends HttpServlet {
                 request.setAttribute("message", "Request created successfully!");
             }
 
-            request.setAttribute("pageContent", "/createRequest.jsp");
+            request.setAttribute("pageContent", "/createRepairRequest.jsp");
             request.getRequestDispatcher("/layout/layout.jsp").forward(request, response);
 
         } catch (Exception e) {
@@ -55,36 +53,9 @@ public class CreateRequestServlet extends HttpServlet {
             return;
         }
 
-        // ✅ Nếu chỉ là submit do chọn type → bỏ qua xử lý insert
-        String action = request.getParameter("action");
-        if ("previewType".equals(action)) {
-            try {
-                CreateRequestExport_PurcharDAO dao = new CreateRequestExport_PurcharDAO();
-                List<RequestType> types = dao.getAllRequestTypes();
-                List<Material> materials = dao.getAllMaterials();
-                ProjectDAO projectDAO = new ProjectDAO();
-                List<Project> projectList = projectDAO.getAllActiveProjects();
-
-                request.setAttribute("types", types);
-                request.setAttribute("materials", materials);
-                request.setAttribute("projectList", projectList);
-
-                request.setAttribute("pageContent", "/createRequest.jsp");
-                request.getRequestDispatcher("/layout/layout.jsp").forward(request, response);
-                return;
-            } catch (Exception e) {
-                e.printStackTrace();
-                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                return;
-            }
-        }
-
-        // ✅ Nếu là submit thực sự → xử lý như cũ
         try {
-            int typeId = Integer.parseInt(request.getParameter("typeId"));
-            int subTypeId = (typeId == 1) ? 1 : Integer.parseInt(request.getParameter("subTypeId"));
+            int typeId = 4; // Repair
             String note = request.getParameter("note");
-
             String projectRaw = request.getParameter("projectId");
             Integer projectId = (projectRaw != null && !projectRaw.isEmpty()) ? Integer.parseInt(projectRaw) : null;
 
@@ -103,11 +74,11 @@ public class CreateRequestServlet extends HttpServlet {
                 details.add(detail);
             }
 
-            CreateRequestExport_PurcharDAO dao = new CreateRequestExport_PurcharDAO();
-            int requestId = dao.createRequest(userId, typeId, subTypeId, note, details, projectId);
+            CreateRepairRequestDAO dao = new CreateRepairRequestDAO();
+            int requestId = dao.createRepairRequest(userId, typeId, note, details, projectId);
 
             if (requestId > 0) {
-                response.sendRedirect("createrequest?success=1");
+                response.sendRedirect("create-repair-request?success=1");
             } else {
                 request.setAttribute("error", "Failed to create request");
                 doGet(request, response);

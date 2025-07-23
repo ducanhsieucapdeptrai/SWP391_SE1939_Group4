@@ -1,4 +1,3 @@
-<%@page import="Helper.AuthorizationHelper"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
@@ -67,7 +66,6 @@
                     <i class="fas fa-arrow-left mr-2"></i>
                     Back to Requests
                 </button>
-
 
             </div>
         </div>
@@ -319,7 +317,7 @@
                 </c:otherwise>
             </c:choose>
         </div>
-        <c:if test="${(requestInfo.status == 'Pending')}">
+        <c:if test="${requestInfo.status == 'Pending' and sessionScope.userRole == 'Director'}">
             <div class="flex justify-end gap-4 mt-6">
                 <button onclick="redirectToApprovePage(${requestInfo.requestId})"
                         class="action-button px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shadow-sm">
@@ -332,9 +330,12 @@
                     <i class="fas fa-times mr-2"></i>
                     Reject
                 </button>
-
             </div>
         </c:if>
+        <p>Role: ${sessionScope.userRole}</p>
+
+
+
     </div>
 
 

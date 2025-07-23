@@ -1,8 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
-<%@ page import="Helper.AuthorizationHelper" %>
-<%@ page import="jakarta.servlet.http.HttpServletRequest" %>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <div class="max-w-5xl mx-auto bg-white rounded-lg shadow p-6">
@@ -68,14 +66,12 @@
 
         <div class="flex justify-end gap-4">
             <!-- Submit button -->
-                            <% if (AuthorizationHelper.hasPermission(request, "/create-po")) { %>
 
             <button type="button"
                     onclick="confirmSubmit()"
                     class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg shadow">
                 Submit Purchase Order
             </button>
-                                                        <% } %>
 
             <!-- Cancel button -->
             <button type="button"

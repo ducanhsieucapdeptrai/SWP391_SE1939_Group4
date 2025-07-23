@@ -27,11 +27,6 @@
 
         <div class="p-6">
             <h1 class="text-2xl font-bold mb-6">All Requests</h1>
-            <c:if test="${filterType == 'Purchase'}">
-                <div class="text-sm text-gray-600 mb-2 italic">
-                    Currently showing: <strong>Purchase Requests</strong>
-                </div>
-            </c:if>
 
             <!-- FORM FILTER -->
             <form action="reqlist" method="get" class="mb-6 flex flex-wrap gap-4 items-end">
@@ -75,13 +70,18 @@
 
             <!-- NÚT CREATE + SHOW ALL TRÊN CÙNG 1 DÒNG -->
             <div class="flex items-center justify-between mb-4">
-                <c:if test="${userRole == 'Warehouse Staff' || userRole == 'Company Staff' || userRole == 'Warehouse Manager'}">
+                <c:if test="${userRole == 'Warehouse Staff' || userRole == 'Warehouse Manager'}">
+                    <a href="${pageContext.request.contextPath}/create-repair-request" 
+                       class="inline-block px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors">
+                        + Create Request
+                    </a>
+                </c:if>
+                <c:if test="${userRole == 'Company Staff' }">
                     <a href="${pageContext.request.contextPath}/createrequest" 
                        class="inline-block px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors">
                         + Create Request
                     </a>
                 </c:if>
-
 
 
 
