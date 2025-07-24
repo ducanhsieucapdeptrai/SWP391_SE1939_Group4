@@ -6,7 +6,7 @@ public class PurchaseOrderDetail {
     private int materialId;
     private String materialName;
     private int quantity;
-    private double price;
+    private double unitPrice;
     private double total;
 
     public int getPoId() {
@@ -41,12 +41,12 @@ public class PurchaseOrderDetail {
         this.quantity = quantity;
     }
 
-    public double getPrice() {
-        return price;
+    public double getUnitPrice() {
+        return unitPrice;
     }
 
-    public void setPrice(double price) {
-        this.price = price;
+    public void setUnitPrice(double unitPrice) {
+        this.unitPrice = unitPrice;
     }
 
     public double getTotal() {

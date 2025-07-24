@@ -336,7 +336,7 @@ public class UserDAO extends DBContext {
 
     public boolean addUser(Users user) {
         String sql = "INSERT INTO Users (FullName, UserImage, Email, Phone, Password, RoleId, IsActive) VALUES (?, ?, ?, ?, ?, ?, ?)";
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, user.getFullName());
             ps.setString(2, user.getUserImage());
             ps.setString(3, user.getEmail());

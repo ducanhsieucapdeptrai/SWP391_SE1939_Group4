@@ -16,14 +16,12 @@ public class CreateRequestExport_PurcharDAO extends DBContext {
         String sql = "SELECT RequestTypeId, RequestTypeName FROM RequestType";
 
         try (Connection conn = getNewConnection(); PreparedStatement st = conn.prepareStatement(sql); ResultSet rs = st.executeQuery()) {
-
             while (rs.next()) {
                 RequestType type = new RequestType();
                 type.setRequestTypeId(rs.getInt("RequestTypeId"));
                 type.setRequestTypeName(rs.getString("RequestTypeName"));
                 list.add(type);
             }
-
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -33,10 +31,13 @@ public class CreateRequestExport_PurcharDAO extends DBContext {
 
     public List<Material> getAllMaterials() {
         List<Material> list = new ArrayList<>();
-        String sql = "SELECT MaterialId, MaterialName, SubCategoryId, StatusId, Image, Description, Quantity, MinQuantity, Unit, Price FROM Materials";
+        String sql = """
+            SELECT MaterialId, MaterialName, SubCategoryId, StatusId,
+                   Image, Description, Quantity, Unit
+            FROM Materials
+        """;
 
         try (Connection conn = getNewConnection(); PreparedStatement st = conn.prepareStatement(sql); ResultSet rs = st.executeQuery()) {
-
             while (rs.next()) {
                 Material m = new Material();
                 m.setMaterialId(rs.getInt("MaterialId"));
@@ -46,12 +47,9 @@ public class CreateRequestExport_PurcharDAO extends DBContext {
                 m.setImage(rs.getString("Image"));
                 m.setDescription(rs.getString("Description"));
                 m.setQuantity(rs.getInt("Quantity"));
-                m.setMinQuantity(rs.getInt("MinQuantity"));
                 m.setUnit(rs.getString("Unit"));
-                m.setPrice(rs.getDouble("Price"));
                 list.add(m);
             }
-
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -64,8 +62,8 @@ public class CreateRequestExport_PurcharDAO extends DBContext {
 
         String sqlRequest = """
             INSERT INTO RequestList 
-            (RequestedBy, RequestTypeId, SubTypeId, Note, Status, RequestDate, ProjectId) 
-            VALUES (?, ?, ?, ?, 'Pending', CURRENT_TIMESTAMP, ?)
+            (RequestedBy, RequestTypeId, Note, Status, RequestDate, ProjectId) 
+            VALUES (?, ?, ?, 'Pending', CURRENT_TIMESTAMP, ?)
         """;
 
         String sqlDetail = "INSERT INTO RequestDetail (RequestId, MaterialId, Quantity) VALUES (?, ?, ?)";
@@ -78,19 +76,12 @@ public class CreateRequestExport_PurcharDAO extends DBContext {
             try (PreparedStatement stReq = conn.prepareStatement(sqlRequest, Statement.RETURN_GENERATED_KEYS)) {
                 stReq.setInt(1, userId);
                 stReq.setInt(2, typeId);
-
-                if (subTypeId != null) {
-                    stReq.setInt(3, subTypeId);
-                } else {
-                    stReq.setNull(3, Types.INTEGER);
-                }
-
-                stReq.setString(4, note);
+                stReq.setString(3, note);
 
                 if (projectId != null) {
-                    stReq.setInt(5, projectId);
+                    stReq.setInt(4, projectId);
                 } else {
-                    stReq.setNull(5, Types.INTEGER);
+                    stReq.setNull(4, Types.INTEGER);
                 }
 
                 stReq.executeUpdate();

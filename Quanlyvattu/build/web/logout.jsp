@@ -57,8 +57,8 @@
 </head>
 <body>
     <div class="logout-message">
-        <h2>✓ Đăng xuất thành công!</h2>
-        <p>Bạn sẽ được chuyển hướng đến trang đăng nhập trong giây lát...</p>
+        <h2>Logged out successfully!</h2>
+        <p>You will be redirected to the login page in a moment...</p>
         <div class="spinner"></div>
     </div>
     

@@ -1,9 +1,5 @@
 package model;
 
-/**
- *
- * @author anhdu
- */
 public class RequestDetail {
 
     private int requestId;
@@ -12,7 +8,6 @@ public class RequestDetail {
     private String note;
 
     private String materialName;
-    private double price;
     private String image;
     private String description;
     private String subCategoryName;
@@ -45,13 +40,12 @@ public class RequestDetail {
     }
 
     public RequestDetail(int requestId, int materialId, int quantity, String materialName,
-            double price, String image, String description, String subCategoryName,
+            String image, String description, String subCategoryName,
             String categoryName, String note) {
         this.requestId = requestId;
         this.materialId = materialId;
         this.quantity = quantity;
         this.materialName = materialName;
-        this.price = price;
         this.image = image;
         this.description = description;
         this.subCategoryName = subCategoryName;
@@ -99,14 +93,6 @@ public class RequestDetail {
         this.materialName = materialName;
     }
 
-    public double getPrice() {
-        return price;
-    }
-
-    public void setPrice(double price) {
-        this.price = price;
-    }
-
     public String getImage() {
         return image;
     }
@@ -137,9 +123,5 @@ public class RequestDetail {
 
     public void setCategoryName(String categoryName) {
         this.categoryName = categoryName;
-    }
-
-    public double getTotalValue() {
-        return quantity * price;
     }
 }

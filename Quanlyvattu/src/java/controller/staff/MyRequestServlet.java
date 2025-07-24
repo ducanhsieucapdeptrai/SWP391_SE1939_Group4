@@ -19,12 +19,11 @@ public class MyRequestServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        if (!AuthorizationHelper.isLoggedIn(request)) {
-            response.sendRedirect("login.jsp");
+        if (!AuthorizationHelper.hasAnyRole(request, "Accountant", "Warehouse Staff", "Company Staff")) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied.");
             return;
         }
 
-        
         HttpSession session = request.getSession();
         int userId = (int) session.getAttribute("userId");
 

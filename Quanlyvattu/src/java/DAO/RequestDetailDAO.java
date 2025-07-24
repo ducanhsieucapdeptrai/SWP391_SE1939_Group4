@@ -13,17 +13,18 @@ public class RequestDetailDAO {
 
     public List<RequestDetail> getRequestDetailsByRequestId(int requestId) {
         List<RequestDetail> list = new ArrayList<>();
-        String sql = "SELECT rd.RequestId, rd.MaterialId, rd.Quantity, "
-                + "m.MaterialName, m.Price, m.Image, m.Description, "
-                + "sc.SubCategoryName, c.CategoryName "
-                + "FROM RequestDetail rd "
-                + "JOIN Materials m ON rd.MaterialId = m.MaterialId "
-                + "JOIN SubCategories sc ON m.SubCategoryId = sc.SubCategoryId "
-                + "JOIN Categories c ON sc.CategoryId = c.CategoryId "
-                + "WHERE rd.RequestId = ?";
+        String sql = """
+            SELECT rd.RequestId, rd.MaterialId, rd.Quantity,
+                   m.MaterialName, m.Image, m.Description,
+                   sc.SubCategoryName, c.CategoryName
+            FROM RequestDetail rd
+            JOIN Materials m ON rd.MaterialId = m.MaterialId
+            JOIN SubCategories sc ON m.SubCategoryId = sc.SubCategoryId
+            JOIN Categories c ON sc.CategoryId = c.CategoryId
+            WHERE rd.RequestId = ?
+        """;
 
         try (Connection conn = new DBContext().getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-
             ps.setInt(1, requestId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -32,17 +33,15 @@ public class RequestDetailDAO {
                             rs.getInt("MaterialId"),
                             rs.getInt("Quantity"),
                             rs.getString("MaterialName"),
-                            rs.getDouble("Price"),
                             rs.getString("Image"),
                             rs.getString("Description"),
                             rs.getString("SubCategoryName"),
                             rs.getString("CategoryName"),
-                            ""
+                            "" // Không có price nên không tính totalValue
                     );
                     list.add(detail);
                 }
             }
-
         } catch (Exception e) {
             System.out.println("Error in getRequestDetailsByRequestId: " + e.getMessage());
             e.printStackTrace();
@@ -51,14 +50,16 @@ public class RequestDetailDAO {
     }
 
     public RequestList getRequestById(int requestId) {
-        String sql = "SELECT r.RequestId, r.RequestedBy, u.FullName, r.RequestTypeId, rt.RequestTypeName, "
-                + "r.SubTypeId, rst.SubTypeName, "
-                + "r.RequestDate, r.Status, r.Note, r.ApprovedBy, r.ApprovedDate, r.ApprovalNote "
-                + "FROM RequestList r "
-                + "JOIN Users u ON r.RequestedBy = u.UserId "
-                + "JOIN RequestType rt ON r.RequestTypeId = rt.RequestTypeId "
-                + "LEFT JOIN RequestSubType rst ON r.SubTypeId = rst.SubTypeId "
-                + "WHERE r.RequestId = ?";
+        String sql = """
+            SELECT r.RequestId, r.RequestedBy, u.FullName, r.RequestTypeId, rt.RequestTypeName,
+                   r.RequestDate, r.Status, r.Note, r.ApprovedBy, r.ApprovedDate, r.ApprovalNote,
+                   u2.FullName AS ApprovedByName
+            FROM RequestList r
+            JOIN Users u ON r.RequestedBy = u.UserId
+            JOIN RequestType rt ON r.RequestTypeId = rt.RequestTypeId
+            LEFT JOIN Users u2 ON r.ApprovedBy = u2.UserId
+            WHERE r.RequestId = ?
+        """;
 
         try (Connection conn = new DBContext().getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, requestId);
@@ -70,15 +71,13 @@ public class RequestDetailDAO {
                     req.setRequestedByName(rs.getString("FullName"));
                     req.setRequestTypeId(rs.getInt("RequestTypeId"));
                     req.setRequestTypeName(rs.getString("RequestTypeName"));
-
-                    req.setSubTypeName(rs.getString("SubTypeName"));
-
                     req.setRequestDate(rs.getTimestamp("RequestDate"));
                     req.setStatus(rs.getString("Status"));
                     req.setNote(rs.getString("Note"));
                     req.setApprovedBy(rs.getInt("ApprovedBy"));
                     req.setApprovedDate(rs.getTimestamp("ApprovedDate"));
                     req.setApprovalNote(rs.getString("ApprovalNote"));
+                    req.setApprovedByName(rs.getString("ApprovedByName"));
                     return req;
                 }
             }
@@ -92,14 +91,12 @@ public class RequestDetailDAO {
     public String getRequestStatus(int requestId) {
         String sql = "SELECT Status FROM RequestList WHERE RequestId = ?";
         try (Connection conn = new DBContext().getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-
             ps.setInt(1, requestId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     return rs.getString("Status");
                 }
             }
-
         } catch (Exception e) {
             System.out.println("Error in getRequestStatus: " + e.getMessage());
             e.printStackTrace();
@@ -111,7 +108,15 @@ public class RequestDetailDAO {
         try (Connection conn = new DBContext().getNewConnection()) {
             conn.setAutoCommit(false);
 
-            String updateRequest = "UPDATE RequestList SET Status = 'Approved', ApprovalNote = ?, ApprovedBy = ?, ApprovedDate = CURRENT_TIMESTAMP WHERE RequestId = ?";
+            String updateRequest = """
+                UPDATE RequestList
+                SET Status = 'Approved',
+                    ApprovalNote = ?,
+                    ApprovedBy = ?,
+                    ApprovedDate = CURRENT_TIMESTAMP
+                WHERE RequestId = ?
+            """;
+
             try (PreparedStatement ps = conn.prepareStatement(updateRequest)) {
                 ps.setString(1, note);
                 ps.setInt(2, approvedBy);
@@ -121,11 +126,13 @@ public class RequestDetailDAO {
 
             String checkSql = "SELECT COUNT(*) FROM RequestDetail WHERE RequestId = ? AND MaterialId = ?";
             String insertSql = "INSERT INTO RequestDetail (RequestId, MaterialId, Quantity) VALUES (?, ?, ?)";
+
             try (PreparedStatement checkStmt = conn.prepareStatement(checkSql); PreparedStatement insertStmt = conn.prepareStatement(insertSql)) {
 
                 for (RequestDetail detail : newDetails) {
                     checkStmt.setInt(1, requestId);
                     checkStmt.setInt(2, detail.getMaterialId());
+
                     try (ResultSet rs = checkStmt.executeQuery()) {
                         if (rs.next() && rs.getInt(1) == 0) {
                             insertStmt.setInt(1, requestId);
@@ -140,18 +147,26 @@ public class RequestDetailDAO {
             }
 
             conn.commit();
-        } catch (Exception ex) {
-            ex.printStackTrace();
+        } catch (Exception e) {
+            System.out.println("Error in approveRequest: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
     public void rejectRequest(int requestId, String reason, int approvedBy) {
-        String sql = "UPDATE RequestList SET Status = ?, ApprovalNote = ?, ApprovedBy = ?, ApprovedDate = CURRENT_TIMESTAMP WHERE RequestId = ?";
+        String sql = """
+            UPDATE RequestList
+            SET Status = 'Rejected',
+                ApprovalNote = ?,
+                ApprovedBy = ?,
+                ApprovedDate = CURRENT_TIMESTAMP
+            WHERE RequestId = ?
+        """;
+
         try (Connection conn = new DBContext().getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, "Rejected");
-            ps.setString(2, reason);
-            ps.setInt(3, approvedBy);
-            ps.setInt(4, requestId);
+            ps.setString(1, reason);
+            ps.setInt(2, approvedBy);
+            ps.setInt(3, requestId);
             int rows = ps.executeUpdate();
             System.out.println("Reject update result: " + rows + " rows affected.");
         } catch (Exception e) {
@@ -163,7 +178,6 @@ public class RequestDetailDAO {
     public boolean checkMaterialInRequest(int requestId, int materialId) {
         String sql = "SELECT COUNT(*) FROM RequestDetail WHERE RequestId = ? AND MaterialId = ?";
         try (Connection conn = new DBContext().getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-
             ps.setInt(1, requestId);
             ps.setInt(2, materialId);
             try (ResultSet rs = ps.executeQuery()) {
@@ -171,8 +185,8 @@ public class RequestDetailDAO {
                     return rs.getInt(1) > 0;
                 }
             }
-
         } catch (Exception e) {
+            System.out.println("Error in checkMaterialInRequest: " + e.getMessage());
             e.printStackTrace();
         }
         return false;
@@ -186,6 +200,7 @@ public class RequestDetailDAO {
             ps.setInt(3, quantity);
             ps.executeUpdate();
         } catch (Exception e) {
+            System.out.println("Error in insertMaterialToRequest: " + e.getMessage());
             e.printStackTrace();
         }
     }

@@ -101,23 +101,25 @@
                                                 let html = <li class="px-4 py-2 font-semibold text-gray-600 bg-gray-100">${title}</li>;
                                                 items.forEach(n => {
                                                     html +=
-                                                            <li class="px-4 py-2 hover:bg-gray-100 text-sm cursor-pointer flex items-start">
-                                <a href="${n.url}" class="block flex-1"
-                                
+                                                                                                    <li class="px-4 py-2 hover:bg-gray-100 text-sm cursor-pointer flex items-start">
+                                   <a href="${n.url}" class="block flex-1"
+                        
                                 onclick="mark
-                                        AsRead(${n.notificationId}, '${n.url}'); return false;">
+                        AsRead(${n.notificationId}, '${n.url}');
+                                return false;
+                                ">
+                        
+                        
+                        
                                 
                                 
                                 
-                                        
-                                        
-                                        
-                                            <div class="font-semibold text-black">\${n.title || 'Thông báo'}</div>
-                                            <div class="text-gray-700">\${n.message}</div>
-                                            <div class="text-xs text-gray-500">\${formatTimeAgo(n.createdAt)}</div>
-                                            </a>
-                                            \${!n.isRead ? '<span class="mt-2 w-2 h-2 bg-blue-600 rounded-full flex-shrink-0 ml-2"></span>' : ''}
-                                                </li>;
+                                       <div class="font-semibold text-black">\${n.title || 'Thông báo'}</div>
+                                       <div class="text-gray-700">\${n.message}</div>
+                                       <div class="text-xs text-gray-500">\${formatTimeAgo(n.createdAt)}</div>
+                                   </a>
+                                   \${!n.isRead ? '<span class="mt-2 w-2 h-2 bg-blue-600 rounded-full flex-shrink-0 ml-2"></span>' : ''}
+                               </li>;
                                                 });
                                                 return html;
                                             };
@@ -169,18 +171,18 @@
                                         countSpan.classList.toggle('hidden', unreadCount === 0);
                                         countSpan.textContent = unreadCount;
                                     });
-                                    </script>
-                                    <!-- User Menu -->
-                                    <div class="relative ml-4">
-                                        <button id="userMenuBtn" class="flex items-center focus:outline-none">
-                                            <img src="${pageContext.request.contextPath}/assets/images/UserImage/${sessionScope.userImage}" alt="Avatar" class="w-10 h-10 rounded-full border border-white shadow">
-                                        </button>
-                                        <div id="userMenu" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-md py-1 z-50 hidden">
-                                            <a href="${pageContext.request.contextPath}/user-detail?id=${sessionScope.userId}" class="block px-4 py-2 text-black hover:bg-gray-100">Profile</a>
-                                            <a href="${pageContext.request.contextPath}/change_password.jsp" class="block px-4 py-2 text-black hover:bg-gray-100">Change password</a>
-                                            <a href="${pageContext.request.contextPath}/logout.jsp" class="block px-4 py-2 text-black hover:bg-gray-100">Logout</a>
-                                        </div>
-                                    </div>
+                            </script>
+                            <!-- User Menu -->
+                            <div class="relative ml-4">
+                                <button id="userMenuBtn" class="flex items-center focus:outline-none">
+                                    <img src="${pageContext.request.contextPath}/assets/images/UserImage/${sessionScope.userImage}" alt="Avatar" class="w-10 h-10 rounded-full border border-white shadow">
+                                </button>
+                                <div id="userMenu" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-md py-1 z-50 hidden">
+                                    <a href="${pageContext.request.contextPath}/user-detail?id=${sessionScope.userId}" class="block px-4 py-2 text-black hover:bg-gray-100">Profile</a>
+                                    <a href="${pageContext.request.contextPath}/change_password.jsp" class="block px-4 py-2 text-black hover:bg-gray-100">Change password</a>
+                                    <a href="${pageContext.request.contextPath}/logout.jsp" class="block px-4 py-2 text-black hover:bg-gray-100">Logout</a>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </header>
@@ -274,6 +276,32 @@
 
                                     <li class="mb-2"><a href="${pageContext.request.contextPath}/my-request" class="flex items-center px-4 py-2 rounded hover:bg-gray-700"><i class="fas fa-envelope-open-text mr-2"></i> My Request</a></li>
                                     </c:if>
+
+                                <c:if test="${sessionScope.userRole == 'Accountant'}">
+                                    <!-- All Request -->
+                                    <li class="mb-1">
+                                        <a href="${pageContext.request.contextPath}/reqlist"
+                                           class="block px-3 py-2 rounded hover:bg-gray-600 text-gray-300 hover:text-white">
+                                            <i class="fas fa-user-plus mr-2"></i> All Request
+                                        </a>
+                                    </li>
+
+                                    <!-- Purchase Order -->
+                                    <li class="mb-1">
+                                        <a href="${pageContext.request.contextPath}/purchase-order"
+                                           class="block px-3 py-2 rounded hover:bg-gray-600 text-gray-300 hover:text-white">
+                                            <i class="fas fa-file-invoice-dollar mr-2"></i> Purchase Orders
+                                        </a>
+                                    </li>
+
+                                    <!-- Repair Order -->
+                                    <li class="mb-1">
+                                        <a href="${pageContext.request.contextPath}/repair-order-list"
+                                           class="block px-3 py-2 rounded hover:bg-gray-600 text-gray-300 hover:text-white">
+                                            <i class="fas fa-tools mr-2"></i> Repair Orders
+                                        </a>
+                                    </li>
+                                </c:if>
 
                                 <li><a href="advanced-dashboard" class="flex items-center px-4 py-2 rounded hover:bg-gray-700"><i class="fas fa-clipboard-list mr-2"></i> More</a></li>
                             </ul>

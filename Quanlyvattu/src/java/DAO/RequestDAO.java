@@ -19,18 +19,16 @@ public class RequestDAO extends DBContext {
     public RequestList getRequestById(int requestId) {
         RequestList request = null;
         String sql = """
-    SELECT r.RequestId, r.RequestDate, r.Note, r.Status,
-           rt.RequestTypeName, rs.Description AS StatusDescription,
-           u1.FullName AS RequestedByName,
-           u2.FullName AS ApprovedByName, r.ApprovedDate, r.ApprovalNote,
-           rst.SubTypeName
-    FROM RequestList r
-    JOIN RequestType rt ON r.RequestTypeId = rt.RequestTypeId
-    JOIN RequestStatus rs ON r.Status = rs.StatusCode
-    JOIN Users u1 ON r.RequestedBy = u1.UserId
-    LEFT JOIN Users u2 ON r.ApprovedBy = u2.UserId
-    LEFT JOIN RequestSubType rst ON r.SubTypeId = rst.SubTypeId
-    WHERE r.RequestId = ?
+        SELECT r.RequestId, r.RequestDate, r.Note, r.Status,
+               rt.RequestTypeName, rs.Description AS StatusDescription,
+               u1.FullName AS RequestedByName,
+               u2.FullName AS ApprovedByName, r.ApprovedDate, r.ApprovalNote
+        FROM RequestList r
+        JOIN RequestType rt ON r.RequestTypeId = rt.RequestTypeId
+        JOIN RequestStatus rs ON r.Status = rs.StatusCode
+        JOIN Users u1 ON r.RequestedBy = u1.UserId
+        LEFT JOIN Users u2 ON r.ApprovedBy = u2.UserId
+        WHERE r.RequestId = ?
     """;
 
         try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -48,7 +46,6 @@ public class RequestDAO extends DBContext {
                     request.setApprovedByName(rs.getString("ApprovedByName"));
                     request.setApprovedDate(rs.getTimestamp("ApprovedDate"));
                     request.setApprovalNote(rs.getString("ApprovalNote"));
-                    request.setSubTypeName(rs.getString("SubTypeName"));
                 }
             }
         } catch (SQLException e) {
@@ -300,10 +297,7 @@ public class RequestDAO extends DBContext {
                 m.setImage(rs.getString("Image"));
                 m.setDescription(rs.getString("Description"));
                 m.setQuantity(rs.getInt("Quantity"));
-                m.setMinQuantity(rs.getInt("MinQuantity"));
-                m.setPrice(rs.getDouble("Price"));
                 m.setCreatedAt(rs.getTimestamp("CreatedAt"));
-                m.setUpdatedAt(rs.getTimestamp("UpdatedAt"));
                 m.setCategoryName(rs.getString("CategoryName"));
                 m.setSubCategoryName(rs.getString("SubCategoryName"));
                 m.setStatusName(rs.getString("StatusName"));
@@ -1160,15 +1154,13 @@ public class RequestDAO extends DBContext {
                u1.FullName AS requestedByName,
                u2.FullName AS approvedByName,
                rt.RequestTypeName,
-               rs.Description AS statusDescription,
-               rst.SubTypeName
+               rs.Description AS statusDescription
         FROM RequestList rl
         LEFT JOIN Users u1 ON rl.RequestedBy = u1.UserId
         LEFT JOIN Users u2 ON rl.ApprovedBy = u2.UserId
         LEFT JOIN RequestType rt ON rl.RequestTypeId = rt.RequestTypeId
         LEFT JOIN RequestStatus rs ON rl.Status = rs.StatusCode
-        LEFT JOIN RequestSubType rst ON rl.SubTypeId = rst.SubTypeId
-        WHERE rt.RequestTypeName IN ('Export', 'Purchase', 'Repair')
+        WHERE 1 = 1
     """);
 
         if (type != null && !type.isEmpty()) {
@@ -1187,6 +1179,7 @@ public class RequestDAO extends DBContext {
         sql.append(" ORDER BY rl.RequestDate DESC LIMIT ? OFFSET ?");
 
         try (Connection conn = new DBContext().getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
             int index = 1;
             if (type != null && !type.isEmpty()) {
                 ps.setString(index++, type);
@@ -1215,7 +1208,7 @@ public class RequestDAO extends DBContext {
                 r.setStatus(rs.getString("Status"));
                 r.setRequestTypeName(rs.getString("RequestTypeName"));
                 r.setStatusDescription(rs.getString("statusDescription"));
-                r.setSubTypeName(rs.getString("SubTypeName"));
+                // ❌ Không còn SubTypeName vì đã xoá bảng
                 list.add(r);
             }
         } catch (Exception e) {
@@ -1231,7 +1224,7 @@ public class RequestDAO extends DBContext {
         FROM RequestList rl
         LEFT JOIN Users u1 ON rl.RequestedBy = u1.UserId
         LEFT JOIN RequestType rt ON rl.RequestTypeId = rt.RequestTypeId
-        WHERE rt.RequestTypeName IN ('Export', 'Purchase', 'Repair')
+        WHERE 1 = 1
     """);
 
         if (type != null && !type.isEmpty()) {
@@ -1570,6 +1563,44 @@ public class RequestDAO extends DBContext {
                 p.setProjectId(rs.getInt("ProjectId"));
                 p.setProjectName(rs.getString("ProjectName"));
                 list.add(p);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public List<RequestList> getApprovedPurchaseRequestsWithoutPO() {
+        List<RequestList> list = new ArrayList<>();
+        String sql = """
+        SELECT r.RequestId, r.RequestDate, r.Note,
+               u1.FullName AS RequestedByName,
+               u2.FullName AS ApprovedByName,
+               r.ApprovedDate
+        FROM RequestList r
+        JOIN Users u1 ON r.RequestedBy = u1.UserId
+        JOIN Users u2 ON r.ApprovedBy = u2.UserId
+        JOIN RequestType rt ON r.RequestTypeId = rt.RequestTypeId
+        WHERE r.Status = 'Approved'
+          AND rt.RequestTypeName = 'Purchase'
+          AND NOT EXISTS (
+              SELECT 1 FROM PurchaseOrderList po WHERE po.RequestId = r.RequestId
+          )
+        ORDER BY r.RequestDate DESC
+        """;
+
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    RequestList r = new RequestList();
+                    r.setRequestId(rs.getInt("RequestId"));
+                    r.setRequestDate(rs.getTimestamp("RequestDate"));
+                    r.setNote(rs.getString("Note"));
+                    r.setRequestedByName(rs.getString("RequestedByName"));
+                    r.setApprovedByName(rs.getString("ApprovedByName"));
+                    r.setApprovedDate(rs.getTimestamp("ApprovedDate"));
+                    list.add(r);
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
