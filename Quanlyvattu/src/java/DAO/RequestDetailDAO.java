@@ -58,14 +58,16 @@ public class RequestDetailDAO {
     }
 
     public RequestList getRequestById(int requestId) {
-        String sql = "SELECT r.RequestId, r.RequestedBy, u.FullName, r.RequestTypeId, rt.RequestTypeName, "
-                + "r.SubTypeId, rst.SubTypeName, "
-                + "r.RequestDate, r.Status, r.Note, r.ApprovedBy, r.ApprovedDate, r.ApprovalNote "
-                + "FROM RequestList r "
-                + "JOIN Users u ON r.RequestedBy = u.UserId "
-                + "JOIN RequestType rt ON r.RequestTypeId = rt.RequestTypeId "
-                + "LEFT JOIN RequestSubType rst ON r.SubTypeId = rst.SubTypeId "
-                + "WHERE r.RequestId = ?";
+        String sql = """
+            SELECT r.RequestId, r.RequestedBy, u.FullName, r.RequestTypeId, rt.RequestTypeName,
+                   r.RequestDate, r.Status, r.Note, r.ApprovedBy, r.ApprovedDate, r.ApprovalNote,
+                   u2.FullName AS ApprovedByName
+            FROM RequestList r
+            JOIN Users u ON r.RequestedBy = u.UserId
+            JOIN RequestType rt ON r.RequestTypeId = rt.RequestTypeId
+            LEFT JOIN Users u2 ON r.ApprovedBy = u2.UserId
+            WHERE r.RequestId = ?
+        """;
 
         try (Connection conn = new DBContext().getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, requestId);
@@ -77,15 +79,13 @@ public class RequestDetailDAO {
                     req.setRequestedByName(rs.getString("FullName"));
                     req.setRequestTypeId(rs.getInt("RequestTypeId"));
                     req.setRequestTypeName(rs.getString("RequestTypeName"));
-
-                    req.setSubTypeName(rs.getString("SubTypeName"));
-
                     req.setRequestDate(rs.getTimestamp("RequestDate"));
                     req.setStatus(rs.getString("Status"));
                     req.setNote(rs.getString("Note"));
                     req.setApprovedBy(rs.getInt("ApprovedBy"));
                     req.setApprovedDate(rs.getTimestamp("ApprovedDate"));
                     req.setApprovalNote(rs.getString("ApprovalNote"));
+                    req.setApprovedByName(rs.getString("ApprovedByName"));
                     return req;
                 }
             }

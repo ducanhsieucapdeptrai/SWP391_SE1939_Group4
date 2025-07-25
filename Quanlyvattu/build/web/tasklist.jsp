@@ -61,24 +61,28 @@
             <!-- FILTER VIEW BUTTONS -->
             <c:if test="${sessionScope.userRole != 'Warehouse Staff'}">
                 <div class="mb-6 flex gap-4">
+                    <!-- Button for supplies that arrived today -->
                     <form action="tasklist" method="get">
                         <input type="hidden" name="view" value="ongoing" />
                         <button type="submit"
                                 class="px-4 py-2 rounded font-semibold transition-colors
                                 ${activeView == 'ongoing' || empty activeView ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-white text-blue-600 border border-blue-600 hover:bg-blue-50'}">
-                            Ongoing Tasks
+                            Supplies Arrived Today
                         </button>
                     </form>
+
+                    <!-- Button for supplies that have not yet arrived -->
                     <form action="tasklist" method="get">
                         <input type="hidden" name="view" value="upcoming" />
                         <button type="submit"
                                 class="px-4 py-2 rounded font-semibold transition-colors
                                 ${activeView == 'upcoming' ? 'bg-yellow-500 text-white hover:bg-yellow-600' : 'bg-white text-yellow-600 border border-yellow-500 hover:bg-yellow-50'}">
-                            Upcoming Tasks
+                            Supplies Not Yet Arrived
                         </button>
                     </form>
                 </div>
             </c:if>
+
 
 
             <!-- MAIN TABLE FORM -->
@@ -91,16 +95,15 @@
                             <th class="border border-gray-300 px-3 py-2">Date</th>
                             <th class="border border-gray-300 px-3 py-2">Request Type</th>
                             <th class="border border-gray-300 px-3 py-2">Note</th>
-                            <th class="border border-gray-300 px-3 py-2">Approved By</th>
-                            <th class="border border-gray-300 px-3 py-2">Approval Note</th>
+
                                 <c:if test="${sessionScope.userRole == 'Warehouse Manager'}">
 
                                 <c:if test="${activeView == 'upcoming'}">
-                                    <th class="border border-gray-300 px-3 py-2 text-center">IsTransfer</th>
+                                    <th class="border border-gray-300 px-3 py-2 text-center">Arrive Today</th>
                                     </c:if>
 
                                 <c:if test="${activeView == 'ongoing'}">
-                                    <th class="border border-gray-300 px-3 py-2 text-center">Revert Transfer</th>
+                                    <th class="border border-gray-300 px-3 py-2 text-center">Revert Arrival</th>
                                     </c:if>
                                 </c:if>
                             <th class="border border-gray-300 px-3 py-2">Action</th>
@@ -122,8 +125,7 @@
                                 </td>
 
                                 <td class="border border-gray-300 px-3 py-2">${r.note}</td>
-                                <td class="border border-gray-300 px-3 py-2">${r.approvedByName}</td>
-                                <td class="border border-gray-300 px-3 py-2">${r.approvalNote}</td>
+
 
                                 <!-- UPCOMING: hiển thị checkbox IsTransfer -->
                                 <c:if test="${sessionScope.userRole == 'Warehouse Manager'}">
