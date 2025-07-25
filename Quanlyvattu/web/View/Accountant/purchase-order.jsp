@@ -11,6 +11,14 @@
         <div class="container mx-auto px-4 py-6">
             <h1 class="text-2xl font-bold text-gray-800 mb-4">Approved Purchase Requests</h1>
 
+            <!-- Search Form -->
+            <form method="get" class="mb-4 flex flex-wrap gap-2 items-end">
+                <input type="text" name="searchName" placeholder="Search by Name" value="${searchName}" class="border rounded px-3 py-2" />
+                <input type="text" name="searchNote" placeholder="Search by Note" value="${searchNote}" class="border rounded px-3 py-2" />
+                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Search</button>
+                <a href="?" class="bg-gray-300 text-gray-800 px-4 py-2 rounded ml-2 hover:bg-gray-400">Reset Search</a>
+            </form>
+
             <c:if test="${empty requestList}">
                 <div class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded relative">
                     No approved requests found that require a purchase order.
@@ -53,6 +61,19 @@
                         </c:forEach>
                     </tbody>
                 </table>
+
+                <!-- Pagination -->
+                <div class="flex justify-center items-center gap-2 mt-4">
+                    <c:if test="${currentPage > 1}">
+                        <a href="?searchName=${searchName}&searchNote=${searchNote}&page=${currentPage - 1}"
+                           class="px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 font-bold text-lg flex items-center justify-center">&lt;</a>
+                    </c:if>
+                    <span class="px-3 py-1 bg-blue-600 text-white rounded font-bold text-lg">${currentPage}</span>
+                    <c:if test="${currentPage < totalPages}">
+                        <a href="?searchName=${searchName}&searchNote=${searchNote}&page=${currentPage + 1}"
+                           class="px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 font-bold text-lg flex items-center justify-center">&gt;</a>
+                    </c:if>
+                </div>
             </c:if>
         </div>
     </body>

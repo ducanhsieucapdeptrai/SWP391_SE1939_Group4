@@ -1633,4 +1633,92 @@ public class RequestDAO extends DBContext {
         return list;
     }
 
+    public List<RequestList> getApprovedPurchaseRequestsWithoutPO(String searchName, String searchNote, int offset, int pageSize) {
+        List<RequestList> list = new ArrayList<>();
+        StringBuilder sql = new StringBuilder("""
+        SELECT r.RequestId, r.RequestDate, r.Note,
+               u1.FullName AS RequestedByName,
+               u2.FullName AS ApprovedByName,
+               r.ApprovedDate
+        FROM RequestList r
+        JOIN Users u1 ON r.RequestedBy = u1.UserId
+        JOIN Users u2 ON r.ApprovedBy = u2.UserId
+        JOIN RequestType rt ON r.RequestTypeId = rt.RequestTypeId
+        WHERE r.Status = 'Approved'
+          AND rt.RequestTypeName = 'Purchase'
+          AND NOT EXISTS (
+              SELECT 1 FROM PurchaseOrderList po WHERE po.RequestId = r.RequestId
+          )
+    """);
+        List<Object> params = new ArrayList<>();
+        if (searchName != null && !searchName.trim().isEmpty()) {
+            sql.append(" AND u1.FullName LIKE ?");
+            params.add("%" + searchName.trim() + "%");
+        }
+        if (searchNote != null && !searchNote.trim().isEmpty()) {
+            sql.append(" AND r.Note LIKE ?");
+            params.add("%" + searchNote.trim() + "%");
+        }
+        sql.append(" ORDER BY r.RequestDate DESC LIMIT ? OFFSET ?");
+        params.add(pageSize);
+        params.add(offset);
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    RequestList r = new RequestList();
+                    r.setRequestId(rs.getInt("RequestId"));
+                    r.setRequestDate(rs.getTimestamp("RequestDate"));
+                    r.setNote(rs.getString("Note"));
+                    r.setRequestedByName(rs.getString("RequestedByName"));
+                    r.setApprovedByName(rs.getString("ApprovedByName"));
+                    r.setApprovedDate(rs.getTimestamp("ApprovedDate"));
+                    list.add(r);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public int countApprovedPurchaseRequestsWithoutPO(String searchName, String searchNote) {
+        StringBuilder sql = new StringBuilder("""
+        SELECT COUNT(*)
+        FROM RequestList r
+        JOIN Users u1 ON r.RequestedBy = u1.UserId
+        JOIN Users u2 ON r.ApprovedBy = u2.UserId
+        JOIN RequestType rt ON r.RequestTypeId = rt.RequestTypeId
+        WHERE r.Status = 'Approved'
+          AND rt.RequestTypeName = 'Purchase'
+          AND NOT EXISTS (
+              SELECT 1 FROM PurchaseOrderList po WHERE po.RequestId = r.RequestId
+          )
+    """);
+        List<Object> params = new ArrayList<>();
+        if (searchName != null && !searchName.trim().isEmpty()) {
+            sql.append(" AND u1.FullName LIKE ?");
+            params.add("%" + searchName.trim() + "%");
+        }
+        if (searchNote != null && !searchNote.trim().isEmpty()) {
+            sql.append(" AND r.Note LIKE ?");
+            params.add("%" + searchNote.trim() + "%");
+        }
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
 }
