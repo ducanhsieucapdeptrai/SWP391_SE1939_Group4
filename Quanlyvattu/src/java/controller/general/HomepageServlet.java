@@ -37,11 +37,9 @@ public class HomepageServlet extends HttpServlet {
 
             // Get recent material entries
             MaterialDAO materialDAO = new MaterialDAO();
-            List<Material> recentImports = materialDAO.getRecentImportMaterials();
-            List<Material> recentExports = materialDAO.getRecentExportMaterials();
+
             
-            request.setAttribute("recentImports", recentImports);
-            request.setAttribute("recentExports", recentExports);
+     
             request.setAttribute("totalMaterials", totalMaterials);
             request.setAttribute("totalImports", totalImports);
             request.setAttribute("totalExports", totalExports);

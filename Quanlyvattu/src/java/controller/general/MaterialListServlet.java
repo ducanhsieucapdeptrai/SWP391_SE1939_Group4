@@ -27,7 +27,9 @@ public class MaterialListServlet extends HttpServlet {
         if (pageParam != null) {
             try {
                 page = Integer.parseInt(pageParam);
-                if (page < 1) page = 1;
+                if (page < 1) {
+                    page = 1;
+                }
             } catch (NumberFormatException e) {
                 page = 1;
             }
@@ -45,15 +47,15 @@ public class MaterialListServlet extends HttpServlet {
         int totalCount;
 
         boolean isSearching = (category != null && !category.isEmpty())
-                            || (subcategory != null && !subcategory.isEmpty())
-                            || (name != null && !name.isEmpty());
+                || (subcategory != null && !subcategory.isEmpty())
+                || (name != null && !name.isEmpty());
 
         if (isSearching) {
             materials = dao.searchMaterials(category, subcategory, name);
             totalCount = materials.size();  // Không phân trang khi tìm kiếm
             request.setAttribute("isSearching", true);
         } else {
-            materials = dao.getMaterialsByPage(offset, pageSize);
+            materials = dao.getMaterialsByPage(offset, pageSize); // ✅ đã include Unit
             totalCount = dao.getTotalMaterialCount();
         }
 
@@ -90,6 +92,6 @@ public class MaterialListServlet extends HttpServlet {
 
     @Override
     public String getServletInfo() {
-        return "Hiển thị danh sách vật tư có phân trang và tìm kiếm";
+        return "Hiển thị danh sách vật tư có phân trang và tìm kiếm kèm đơn vị tính";
     }
 }

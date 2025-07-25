@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+=<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 
@@ -61,12 +61,11 @@
                 <p class="text-gray-600 mt-1">Complete information about this material request</p>
             </div>
             <div class="flex space-x-3">
-                <button onclick="location.href = 'reqlist'" 
+                <button onclick="history.back()" 
                         class="px-6 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors shadow-sm">
                     <i class="fas fa-arrow-left mr-2"></i>
-                    Back to Requests
+                    Back
                 </button>
-
             </div>
         </div>
     </div>
@@ -211,15 +210,13 @@
                                     <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 border">Material Info</th>
                                     <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 border">Category</th>
                                     <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 border">Quantity</th>
-                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 border">Unit Price</th>
-                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 border">Total Value</th>
                                     <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 border">Description</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-200 bg-white text-sm">
-                                <c:set var="totalValue" value="0" />
+                                <c:set var="totalQuantity" value="0" />
                                 <c:forEach var="detail" items="${requestDetails}" varStatus="status">
-                                    <c:set var="totalValue" value="${totalValue + detail.totalValue}" />
+                                    <c:set var="totalQuantity" value="${totalQuantity + detail.quantity}" />
                                     <tr class="hover:bg-gray-50">
                                         <td class="px-4 py-3 border font-medium">${status.index + 1}</td>
                                         <td class="px-4 py-3 border">
@@ -250,12 +247,6 @@
                                         <td class="px-4 py-3 border text-blue-600 font-semibold text-center">
                                             <span class="bg-blue-100 px-2 py-1 rounded">${detail.quantity}</span>
                                         </td>
-                                        <td class="px-4 py-3 border text-green-600 font-medium">
-                                            <fmt:formatNumber value="${detail.price}" type="number" groupingUsed="true"/>đ
-                                        </td>
-                                        <td class="px-4 py-3 border text-green-700 font-semibold">
-                                            <fmt:formatNumber value="${detail.totalValue}" type="number" groupingUsed="true"/>đ
-                                        </td>
                                         <td class="px-4 py-3 border text-gray-600">
                                             <c:choose>
                                                 <c:when test="${not empty detail.description}">
@@ -276,7 +267,7 @@
                         <h3 class="text-lg font-semibold mb-4 text-gray-800">
                             <i class="fas fa-chart-bar mr-2"></i>Request Summary
                         </h3>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6"><!-- Chỉnh lại từ 3 cột còn 2 cột -->
                             <div class="text-center p-4 bg-white rounded-lg shadow-sm">
                                 <div class="text-2xl font-bold text-blue-600 mb-1">
                                     <i class="fas fa-boxes text-blue-500"></i>
@@ -295,15 +286,6 @@
                                         <c:set var="totalQuantity" value="${totalQuantity + detail.quantity}" />
                                     </c:forEach>
                                     ${totalQuantity}
-                                </p>
-                            </div>
-                            <div class="text-center p-4 bg-white rounded-lg shadow-sm">
-                                <div class="text-2xl font-bold text-green-600 mb-1">
-                                    <i class="fas fa-dong-sign text-green-500"></i>
-                                </div>
-                                <h5 class="text-sm font-semibold text-gray-700 mb-1">Total Value</h5>
-                                <p class="text-2xl font-bold text-green-600">
-                                    <fmt:formatNumber value="${totalValue}" type="number" groupingUsed="true"/>đ
                                 </p>
                             </div>
                         </div>
@@ -332,10 +314,6 @@
                 </button>
             </div>
         </c:if>
-        <p>Role: ${sessionScope.userRole}</p>
-
-
-
     </div>
 
 

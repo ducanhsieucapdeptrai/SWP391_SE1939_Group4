@@ -145,7 +145,7 @@
                          onclick="showImage(this.src)" />
                 </td>
                 <td class="py-2 px-4"><%= m.getMaterialName()%></td>
-                <td class="py-2 px-4"><%= m.getUnit() != null ? m.getUnit() : ""%></td>
+                <td class="py-2 px-4"><%= m.getUnitName() != null ? m.getUnitName() : ""%></td>
 
                 <td class="py-2 px-4"><%= inStock%></td>
                 <td class="py-2 px-4">

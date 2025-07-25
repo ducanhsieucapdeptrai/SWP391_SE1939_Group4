@@ -56,7 +56,7 @@
     <!-- Ví dụ: Biểu đồ -->
     <div class="bg-white rounded-lg shadow-md p-4 mb-6">
         <h3 class="text-lg font-semibold mb-2">Material Flow Chart</h3>
-        
+
         <!-- Statistics Dashboard -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
             <!-- Total Material -->
@@ -71,7 +71,7 @@
                     <p class="text-xl font-bold">${totalMaterials}</p>
                 </div>
             </div>
-            
+
             <!-- Total Import -->
             <div class="bg-green-50 p-4 rounded-lg shadow flex items-center">
                 <div class="mr-4">
@@ -84,7 +84,7 @@
                     <p class="text-xl font-bold">${totalImports}</p>
                 </div>
             </div>
-            
+
             <!-- Total Export -->
             <div class="bg-indigo-50 p-4 rounded-lg shadow flex items-center">
                 <div class="mr-4">
@@ -97,12 +97,12 @@
                     <p class="text-xl font-bold">${totalExports}</p>
                 </div>
             </div>
-            
+
             <!-- Pending Requests -->
             <div class="bg-yellow-50 p-4 rounded-lg shadow flex items-center">
                 <div class="mr-4">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                 </div>
                 <div>
@@ -111,16 +111,10 @@
                 </div>
             </div>
         </div>
-        
-        <canvas id="materialChart" width="400" height="200"></canvas>
+
     </div>
 
-    <!-- Advanced Dashboard Button -->
-    <div class="text-center mb-6">
-        <a href="${pageContext.request.contextPath}/advanced-dashboard" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg inline-flex items-center transition duration-300">
-            <i class="fas fa-chart-line mr-2"></i> More Advanced Features
-        </a>
-    </div>
+
 
     <!-- FullCalendar Integration -->
     <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet' />
@@ -145,142 +139,148 @@
             <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
                 <form action="event-action" method="POST" class="mt-4">
                     <input type="hidden" name="action" value="add">
-                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                        <h3 class="text-lg leading-6 font-medium text-gray-900">Add New Event</h3>
-                        <div class="mt-4">
-                            <label for="eventType" class="block text-sm font-medium text-gray-700">Event Type</label>
-                            <select id="eventType" name="eventType" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
-                                <option>Appointment</option>
-                                <option>Work</option>
-                                <option>Business Trip</option>
-                                <option>Leave Request</option>
-                            </select>
+                        <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900">Add New Event</h3>
+                            <div class="mt-4">
+                                <label for="eventType" class="block text-sm font-medium text-gray-700">Event Type</label>
+                                <select id="eventType" name="eventType" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                                    <option>Appointment</option>
+                                    <option>Work</option>
+                                    <option>Business Trip</option>
+                                    <option>Leave Request</option>
+                                </select>
+                            </div>
+                            <div class="mt-4">
+                                <label for="title" class="block text-sm font-medium text-gray-700">Title</label>
+                                <input type="text" name="title" id="title" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" required>
+                            </div>
+                            <div class="mt-4">
+                                <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+                                <textarea id="description" name="description" rows="3" class="mt-1 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border border-gray-300 rounded-md"></textarea>
+                            </div>
+                            <div class="mt-4">
+                                <label for="startTime" class="block text-sm font-medium text-gray-700">Start Time</label>
+                                <input type="datetime-local" name="startTime" id="startTime" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" required>
+                            </div>
+                            <div class="mt-4">
+                                <label for="endTime" class="block text-sm font-medium text-gray-700">End Time</label>
+                                <input type="datetime-local" name="endTime" id="endTime" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                            </div>
                         </div>
-                        <div class="mt-4">
-                            <label for="title" class="block text-sm font-medium text-gray-700">Title</label>
-                            <input type="text" name="title" id="title" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" required>
+                        <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                            <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">
+                                Add Event
+                            </button>
+                            <button type="button" onclick="closeModal()" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                                Cancel
+                            </button>
                         </div>
-                        <div class="mt-4">
-                            <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
-                            <textarea id="description" name="description" rows="3" class="mt-1 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border border-gray-300 rounded-md"></textarea>
-                        </div>
-                        <div class="mt-4">
-                            <label for="startTime" class="block text-sm font-medium text-gray-700">Start Time</label>
-                            <input type="datetime-local" name="startTime" id="startTime" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" required>
-                        </div>
-                        <div class="mt-4">
-                            <label for="endTime" class="block text-sm font-medium text-gray-700">End Time</label>
-                            <input type="datetime-local" name="endTime" id="endTime" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
-                        </div>
-                    </div>
-                    <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                        <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">
-                            Add Event
-                        </button>
-                        <button type="button" onclick="closeModal()" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
-                            Cancel
-                        </button>
-                    </div>
                 </form>
             </div>
+
         </div>
     </div>
+    <!-- Advanced Dashboard Button -->
+    <div class="text-center mb-6">
+        <a href="${pageContext.request.contextPath}/advanced-dashboard" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg inline-flex items-center transition duration-300">
+            <i class="fas fa-chart-line mr-2"></i> More Advanced Features
+        </a>
+    </div>
+    <!-- Chart data preparation -->
+    <c:set var="chartLabelsJson" value="${chartLabels != null ? chartLabels : '[]'}" scope="request" />
+    <c:set var="chartDataJson" value="${chartData != null ? chartData : '[]'}" scope="request" />
 
-<!-- Chart data preparation -->
-<c:set var="chartLabelsJson" value="${chartLabels != null ? chartLabels : '[]'}" scope="request" />
-<c:set var="chartDataJson" value="${chartData != null ? chartData : '[]'}" scope="request" />
+    <!-- Scripts for Calendar and Chart -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+                                // Calendar Script
+                                document.addEventListener('DOMContentLoaded', function () {
+                                    var calendarEl = document.getElementById('calendar');
+                                    if (calendarEl) {
+                                        var calendar = new FullCalendar.Calendar(calendarEl, {
+                                            initialView: 'dayGridMonth',
+                                            headerToolbar: {
+                                                left: 'prev,next today',
+                                                center: 'title',
+                                                right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                                            },
+                                            events: 'calendar-data',
+                                            dateClick: function (info) {
+                                                calendar.changeView('timeGridDay', info.dateStr);
+                                            },
+                                            eventContent: function (arg) {
+                                                let bullet = document.createElement('div');
+                                                bullet.classList.add('w-2', 'h-2', 'bg-blue-500', 'rounded-full', 'inline-block', 'mr-1');
+                                                let title = document.createElement('div');
+                                                title.classList.add('inline-block', 'truncate');
+                                                title.innerText = arg.event.title;
+                                                let container = document.createElement('div');
+                                                container.appendChild(bullet);
+                                                container.appendChild(title);
+                                                return {domNodes: [container]};
+                                            },
+                                            eventClick: function (info) {
+                                                alert('Event: ' + info.event.title + '\n' + 'Description: ' + info.event.extendedProps.description);
+                                                // Here you can open a more detailed modal for viewing/editing the event
+                                            }
+                                        });
+                                        calendar.render();
+                                    }
+                                });
 
-<!-- Scripts for Calendar and Chart -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    // Calendar Script
-    document.addEventListener('DOMContentLoaded', function() {
-        var calendarEl = document.getElementById('calendar');
-        if(calendarEl) {
-            var calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'dayGridMonth',
-                headerToolbar: {
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
-                },
-                events: 'calendar-data',
-                dateClick: function(info) {
-                    calendar.changeView('timeGridDay', info.dateStr);
-                },
-                eventContent: function(arg) {
-                    let bullet = document.createElement('div');
-                    bullet.classList.add('w-2', 'h-2', 'bg-blue-500', 'rounded-full', 'inline-block', 'mr-1');
-                    let title = document.createElement('div');
-                    title.classList.add('inline-block', 'truncate');
-                    title.innerText = arg.event.title;
-                    let container = document.createElement('div');
-                    container.appendChild(bullet);
-                    container.appendChild(title);
-                    return { domNodes: [container] };
-                },
-                eventClick: function(info) {
-                    alert('Event: ' + info.event.title + '\n' + 'Description: ' + info.event.extendedProps.description);
-                    // Here you can open a more detailed modal for viewing/editing the event
-                }
-            });
-            calendar.render();
-        }
-    });
+                                function openAddEventModal() {
+                                    // Set current date and time as default for the modal
+                                    const now = new Date();
+                                    const year = now.getFullYear();
+                                    const month = (now.getMonth() + 1).toString().padStart(2, '0');
+                                    const day = now.getDate().toString().padStart(2, '0');
+                                    const hours = now.getHours().toString().padStart(2, '0');
+                                    const minutes = now.getMinutes().toString().padStart(2, '0');
+                                    document.getElementById('startTime').value = `${year}-${month}-${day}T${hours}:${minutes}`;
+                                            document.getElementById('addEventModal').classList.remove('hidden');
+                                        }
 
-    function openAddEventModal() {
-        // Set current date and time as default for the modal
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = (now.getMonth() + 1).toString().padStart(2, '0');
-        const day = now.getDate().toString().padStart(2, '0');
-        const hours = now.getHours().toString().padStart(2, '0');
-        const minutes = now.getMinutes().toString().padStart(2, '0');
-        document.getElementById('startTime').value = `${year}-${month}-${day}T${hours}:${minutes}`;
-        document.getElementById('addEventModal').classList.remove('hidden');
-    }
+                                        function closeModal() {
+                                            document.getElementById('addEventModal').classList.add('hidden');
+                                        }
 
-    function closeModal() {
-        document.getElementById('addEventModal').classList.add('hidden');
-    }
+                                        // Chart.js initialization
+                                        document.addEventListener('DOMContentLoaded', function () {
+                                            const ctx = document.getElementById('materialChart').getContext('2d');
 
-    // Chart.js initialization
-    document.addEventListener('DOMContentLoaded', function() {
-        const ctx = document.getElementById('materialChart').getContext('2d');
-        
-        let chartLabelsData = [];
-        let chartValuesData = [];
-        
-        try {
-            chartLabelsData = JSON.parse('${chartLabelsJson}');
-        } catch (e) {
-            console.error('Error parsing chart labels:', e);
-        }
-        
-        try {
-            chartValuesData = JSON.parse('${chartDataJson}');
-        } catch (e) {
-            console.error('Error parsing chart data:', e);
-        }
-        
-        const materialChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: chartLabelsData,
-                datasets: [{
-                    label: 'Materials',
-                    data: chartValuesData,
-                    backgroundColor: 'rgba(54, 162, 235, 0.6)'
-                }]
-            },
-           options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-    });
-</script>
+                                            let chartLabelsData = [];
+                                            let chartValuesData = [];
+
+                                            try {
+                                                chartLabelsData = JSON.parse('${chartLabelsJson}');
+                                            } catch (e) {
+                                                console.error('Error parsing chart labels:', e);
+                                            }
+
+                                            try {
+                                                chartValuesData = JSON.parse('${chartDataJson}');
+                                            } catch (e) {
+                                                console.error('Error parsing chart data:', e);
+                                            }
+
+                                            const materialChart = new Chart(ctx, {
+                                                type: 'bar',
+                                                data: {
+                                                    labels: chartLabelsData,
+                                                    datasets: [{
+                                                            label: 'Materials',
+                                                            data: chartValuesData,
+                                                            backgroundColor: 'rgba(54, 162, 235, 0.6)'
+                                                        }]
+                                                },
+                                                options: {
+                                                    responsive: true,
+                                                    scales: {
+                                                        y: {
+                                                            beginAtZero: true
+                                                        }
+                                                    }
+                                                }
+                                            });
+                                        });
+    </script>

@@ -56,8 +56,13 @@
             <label class="block text-gray-700 text-sm font-bold mb-2" for="unit">
                 Unit
             </label>
-            <input class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                   id="unit" name="unit" type="text" value="${material.unit}" placeholder="e.g. cái, kg, m³" required />
+            <select name="unitId" id="unitId" required class="...">
+                <option value="">Select Unit</option>
+                <c:forEach var="unit" items="${units}">
+                    <option value="${unit.unitId}">${unit.name}</option>
+                </c:forEach>
+            </select>
+
         </div>
 
         <!-- Image -->

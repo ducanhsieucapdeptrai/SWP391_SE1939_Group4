@@ -250,11 +250,19 @@
                                         </a>
                                         <ul id="reqSubmenu" class="hidden ml-4 mt-1">
                                             <li class="mb-1"><a href="${pageContext.request.contextPath}/reqlist" class="block px-3 py-2 rounded hover:bg-gray-600 text-gray-300 hover:text-white"><i class="fas fa-user-plus mr-2"></i> All Request</a></li>
+                                        </ul>
+                                    </li>
+
+                                    <li class="mb-1">
+                                        <a href="#" onclick="toggleSubmenu('orderSubmenu')" class="block px-4 py-2 rounded hover:bg-gray-700">
+                                            <i class="fas fa-tasks mr-2"></i> Orders
+                                            <i class="fas fa-chevron-down float-right"></i>
+                                        </a>
+                                        <ul id="orderSubmenu" class="hidden ml-4 mt-1">
                                             <li class="mb-1"><a href="${pageContext.request.contextPath}/purchase-request-list" class="block px-3 py-2 rounded hover:bg-gray-600 text-gray-300 hover:text-white"><i class="fas fa-shopping-cart mr-2"></i> Purchase Order Requests</a></li>
                                             <li class="mb-1"><a href="${pageContext.request.contextPath}/repair-request-list" class="block px-3 py-2 rounded hover:bg-gray-600 text-gray-300 hover:text-white"><i class="fas fa-shopping-cart mr-2"></i> Repair Order Requests</a></li>
                                         </ul>
                                     </li>
-
                                     <li class="mb-1">
                                         <a href="#" onclick="toggleSubmenu('taskSubmenu')" class="block px-4 py-2 rounded hover:bg-gray-700">
                                             <i class="fas fa-tasks mr-2"></i> Task
@@ -265,7 +273,6 @@
                                             <li class="mb-1"><a href="${pageContext.request.contextPath}/completedTasks" class="block px-3 py-2 rounded hover:bg-gray-600 text-gray-300 hover:text-white"><i class="fas fa-check-circle mr-2"></i> Completed Task</a></li>
                                         </ul>
                                     </li>
-                                    <li class="mb-2"><a href="${pageContext.request.contextPath}/project" class="flex items-center px-4 py-2 rounded hover:bg-gray-700"><i class="fas fa-boxes mr-2"></i> Project</a></li>
 
 
                                 </c:if>

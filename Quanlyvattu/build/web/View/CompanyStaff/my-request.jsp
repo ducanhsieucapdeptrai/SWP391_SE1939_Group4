@@ -49,7 +49,7 @@
 
     <div class="flex items-center justify-between mb-4">
         <c:if test="${userRole == 'Company Staff' }">
-            <a href="${pageContext.request.contextPath}/createrequest"
+            <a href="${pageContext.request.contextPath}/createexportpurchase"
                class="inline-block px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors">
                 + Create Request
             </a>

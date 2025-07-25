@@ -34,18 +34,7 @@ public class DashboardServlet extends HttpServlet {
         }
         
         // Fetch recent material entries
-        MaterialDAO materialDAO = new MaterialDAO();
-        try {
-            List<Material> recentImports = materialDAO.getRecentImportMaterials();
-            List<Material> recentExports = materialDAO.getRecentExportMaterials();
-            
-            request.setAttribute("recentImports", recentImports);
-            request.setAttribute("recentExports", recentExports);
-        } catch (Exception e) {
-            e.printStackTrace();
-            request.setAttribute("errorMessage", "Error loading recent material entries: " + e.getMessage());
-        }
-        
+       
         // Set the page content and forward to the layout
         request.setAttribute("pageContent", "/dashboard.jsp");
         request.getRequestDispatcher("/layout/layout.jsp").forward(request, response);

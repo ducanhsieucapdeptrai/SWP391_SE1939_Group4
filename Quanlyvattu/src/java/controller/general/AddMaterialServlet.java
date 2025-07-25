@@ -15,6 +15,7 @@ import DAO.MaterialDAO;
 import DAO.CategoryDAO;
 import DAO.MaterialStatusDAO;
 import DAO.NotificationDAO;
+import DAO.UnitDAO;
 import model.Category;
 import model.SubCategory;
 
@@ -29,6 +30,7 @@ import java.nio.file.StandardCopyOption;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.UUID;
+import model.Unit;
 
 @WebServlet(name = "AddMaterialServlet", urlPatterns = {"/material-add"})
 @MultipartConfig(fileSizeThreshold = 1024 * 1024 * 2, // 2MB
@@ -43,6 +45,9 @@ public class AddMaterialServlet extends HttpServlet {
         // Check if user is logged in
         HttpSession session = request.getSession(false);
         Users currentUser = (session != null) ? (Users) session.getAttribute("currentUser") : null;
+        UnitDAO unitDAO = new UnitDAO();
+        List<Unit> units = unitDAO.getAllUnits();
+        request.setAttribute("units", units);
 
         if (currentUser == null) {
             response.sendRedirect("login");
@@ -120,8 +125,7 @@ public class AddMaterialServlet extends HttpServlet {
             int subCategoryId = Integer.parseInt(request.getParameter("subCategoryId"));
             int statusId = Integer.parseInt(request.getParameter("statusId"));
             int quantity = Integer.parseInt(request.getParameter("quantity"));
-            String unit = request.getParameter("unit");
-
+            int unitId = Integer.parseInt(request.getParameter("unitId"));
             int minQuantity = Integer.parseInt(request.getParameter("minQuantity"));
             double price = Double.parseDouble(request.getParameter("price"));
             String description = request.getParameter("description");
@@ -171,7 +175,7 @@ public class AddMaterialServlet extends HttpServlet {
             material.setQuantity(quantity);
             material.setMinQuantity(minQuantity);
             material.setPrice(price);
-            material.setUnit(unit);
+            material.setUnitId(unitId);
 
             material.setDescription(description);
             material.setImage(imagePath);

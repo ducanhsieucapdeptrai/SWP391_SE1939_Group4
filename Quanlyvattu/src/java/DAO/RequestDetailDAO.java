@@ -13,38 +13,45 @@ public class RequestDetailDAO {
 
     public List<RequestDetail> getRequestDetailsByRequestId(int requestId) {
         List<RequestDetail> list = new ArrayList<>();
-        String sql = "SELECT rd.RequestId, rd.MaterialId, rd.Quantity, "
-                + "m.MaterialName, m.Price, m.Image, m.Description, "
-                + "sc.SubCategoryName, c.CategoryName "
-                + "FROM RequestDetail rd "
-                + "JOIN Materials m ON rd.MaterialId = m.MaterialId "
-                + "JOIN SubCategories sc ON m.SubCategoryId = sc.SubCategoryId "
-                + "JOIN Categories c ON sc.CategoryId = c.CategoryId "
-                + "WHERE rd.RequestId = ?";
+
+        String sql = """
+        SELECT 
+            rd.RequestId,
+            rd.MaterialId,
+            rd.Quantity,
+            m.MaterialName,
+            m.Image,
+            m.Description,
+            sc.SubCategoryName,
+            c.CategoryName
+        FROM RequestDetail rd
+        JOIN Materials m ON rd.MaterialId = m.MaterialId
+        LEFT JOIN SubCategories sc ON m.SubCategoryId = sc.SubCategoryId
+        LEFT JOIN Categories c ON sc.CategoryId = c.CategoryId
+        WHERE rd.RequestId = ?
+    """;
 
         try (Connection conn = new DBContext().getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setInt(1, requestId);
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    RequestDetail detail = new RequestDetail(
-                            rs.getInt("RequestId"),
-                            rs.getInt("MaterialId"),
-                            rs.getInt("Quantity"),
-                            rs.getString("MaterialName"),
-                            rs.getDouble("Price"),
-                            rs.getString("Image"),
-                            rs.getString("Description"),
-                            rs.getString("SubCategoryName"),
-                            rs.getString("CategoryName"),
-                            ""
-                    );
-                    list.add(detail);
-                }
-            }
+            ResultSet rs = ps.executeQuery();
 
+            while (rs.next()) {
+                RequestDetail detail = new RequestDetail();
+                detail.setRequestId(rs.getInt("RequestId"));
+                detail.setMaterialId(rs.getInt("MaterialId"));
+                detail.setQuantity(rs.getInt("Quantity"));
+
+                detail.setMaterialName(rs.getString("MaterialName"));
+                detail.setImage(rs.getString("Image"));
+                detail.setDescription(rs.getString("Description"));
+                detail.setSubCategoryName(rs.getString("SubCategoryName"));
+                detail.setCategoryName(rs.getString("CategoryName"));
+
+                // Nếu bạn không có giá thì không setPrice
+                list.add(detail);
+            }
         } catch (Exception e) {
-            System.out.println("Error in getRequestDetailsByRequestId: " + e.getMessage());
             e.printStackTrace();
         }
         return list;
