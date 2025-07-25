@@ -25,7 +25,7 @@ public class CreatePurchaseOrderServlet extends HttpServlet {
             return;
         }
 
-        if (!AuthorizationHelper.hasAnyRole(request, "Accountant")) {
+        if (!AuthorizationHelper.hasAnyRole(request, "Accountant", "Warehouse Staff", "Company Staff")) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied.");
             return;
         }

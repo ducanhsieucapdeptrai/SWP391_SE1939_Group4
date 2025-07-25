@@ -82,7 +82,7 @@
             </button>
 
             <button type="button"
-                    onclick="window.location.href = 'my-request'"
+                    onclick="window.location.href = '${pageContext.request.contextPath}/purchase-order'"
                     class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg shadow">
                 Cancel
             </button>

@@ -670,12 +670,13 @@ public class RequestDAO extends DBContext {
         }
     }
 
-    public List<RequestList> getPagedRequestsByUserFiltered(int userId, String status, String poStatus, String type, int offset, int limit) {
+    public List<RequestList> getPagedRequestsByUserFiltered(int userId, String status, String poStatus, String type, String note, int offset, int limit) {
         List<RequestList> list = new ArrayList<>();
         String sql = """
     SELECT r.*, rt.RequestTypeName,
            (SELECT COUNT(*) FROM PurchaseOrderList po WHERE po.RequestId = r.RequestId) AS POCount,
            (SELECT po.Status FROM PurchaseOrderList po WHERE po.RequestId = r.RequestId LIMIT 1) AS POStatus,
+           (SELECT po.POId FROM PurchaseOrderList po WHERE po.RequestId = r.RequestId LIMIT 1) AS POId,
            EXISTS (SELECT 1 FROM RepairOrderList ro WHERE ro.RequestId = r.RequestId) AS HasRO
     FROM RequestList r
     JOIN RequestType rt ON r.RequestTypeId = rt.RequestTypeId
@@ -692,6 +693,10 @@ public class RequestDAO extends DBContext {
             sql += " AND rt.RequestTypeName = ?";
         }
 
+        if (note != null && !note.trim().isEmpty()) {
+            sql += " AND r.Note LIKE ?";
+        }
+
         sql += " ORDER BY r.RequestDate DESC LIMIT ? OFFSET ?";
 
         try (Connection conn = getNewConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -705,6 +710,9 @@ public class RequestDAO extends DBContext {
             }
             if (type != null && !type.isEmpty()) {
                 stmt.setString(idx++, type);
+            }
+            if (note != null && !note.trim().isEmpty()) {
+                stmt.setString(idx++, "%" + note.trim() + "%"); // ⚠️ THIẾU DÒNG NÀY
             }
             stmt.setInt(idx++, limit);
             stmt.setInt(idx, offset);
@@ -722,6 +730,7 @@ public class RequestDAO extends DBContext {
                 r.setPoStatus(rs.getString("POStatus"));
                 r.setHasPO(rs.getInt("POCount") > 0);
                 r.setHasRO(rs.getBoolean("HasRO"));
+                r.setPOId(rs.getObject("POId") != null ? rs.getInt("POId") : null);
 
                 list.add(r);
             }
@@ -732,7 +741,7 @@ public class RequestDAO extends DBContext {
         return list;
     }
 
-    public int countRequestsByUserWithFilters(int userId, String status, String poStatus, String type) {
+    public int countRequestsByUserWithFilters(int userId, String status, String poStatus, String type, String note) {
         String sql = """
         SELECT COUNT(*) FROM RequestList r
         JOIN RequestType rt ON r.RequestTypeId = rt.RequestTypeId
@@ -748,6 +757,9 @@ public class RequestDAO extends DBContext {
         if (type != null && !type.isEmpty()) {
             sql += " AND rt.RequestTypeName = ?";
         }
+        if (note != null && !note.trim().isEmpty()) {
+            sql += " AND r.Note LIKE ?";
+        }
 
         try (Connection conn = getNewConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             int idx = 1;
@@ -760,6 +772,9 @@ public class RequestDAO extends DBContext {
             }
             if (type != null && !type.isEmpty()) {
                 stmt.setString(idx++, type);
+            }
+            if (note != null && !note.trim().isEmpty()) {
+                stmt.setString(idx++, "%" + note.trim() + "%");
             }
 
             ResultSet rs = stmt.executeQuery();

@@ -27,8 +27,6 @@ public class PurchaseOrderDAO extends DBContext {
                     d.setMaterialId(rs.getInt("MaterialId"));
                     d.setMaterialName(rs.getString("MaterialName"));
                     d.setQuantity(rs.getInt("Quantity"));
-
-                    // ✅ Accountant sẽ nhập UnitPrice sau, nên để mặc định 0
                     d.setUnitPrice(0);
                     d.setTotal(0);
                     list.add(d);
@@ -103,9 +101,12 @@ public class PurchaseOrderDAO extends DBContext {
     public PurchaseOrderList getPurchaseOrderById(int poId) {
         String sql = """
         SELECT p.POId, p.RequestId, p.CreatedBy, u.FullName AS CreatedByName,
-               p.CreatedDate, p.TotalPrice, p.Status, p.Note
+               p.CreatedDate, p.TotalPrice, p.Status, p.Note,
+               rl.RequestedBy, u2.FullName AS RequestedByName
         FROM PurchaseOrderList p
         JOIN Users u ON p.CreatedBy = u.UserId
+        JOIN RequestList rl ON p.RequestId = rl.RequestId
+        JOIN Users u2 ON rl.RequestedBy = u2.UserId
         WHERE p.POId = ?
     """;
         PurchaseOrderList po = null;
@@ -123,8 +124,8 @@ public class PurchaseOrderDAO extends DBContext {
                     po.setStatus(rs.getString("Status"));
                     po.setNote(rs.getString("Note"));
                     po.setCreatedByName(rs.getString("CreatedByName"));
-
-                    // Load chi tiết đơn hàng
+//                    po.setRequestedBy(rs.getInt("RequestedBy"));
+//                    po.setRequestedByName(rs.getString("RequestedByName"));
                     po.setDetails(getPODetails(poId));
                 }
             }

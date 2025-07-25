@@ -42,10 +42,12 @@
                                     <fmt:formatDate value="${req.approvedDate}" pattern="yyyy-MM-dd HH:mm" />
                                 </td>
                                 <td class="py-2 px-4 text-center">
-                                    <a href="${pageContext.request.contextPath}/create-purchase-order?requestId=${req.requestId}"
-                                       class="bg-green-500 hover:bg-green-600 text-white text-sm font-semibold py-1 px-3 rounded">
-                                        Create Purchase Order
-                                    </a>
+                                    <c:if test="${sessionScope.userRole == 'Accountant'}">
+                                        <a href="${pageContext.request.contextPath}/create-purchase-order?requestId=${req.requestId}"
+                                           class="bg-green-500 hover:bg-green-600 text-white text-sm font-semibold py-1 px-3 rounded">
+                                            Create Purchase Order
+                                        </a>
+                                    </c:if>
                                 </td>
                             </tr>
                         </c:forEach>
