@@ -23,11 +23,13 @@ public class RequestDetailDAO {
             m.Image,
             m.Description,
             sc.SubCategoryName,
-            c.CategoryName
+            c.CategoryName,
+            u.Name AS UnitName
         FROM RequestDetail rd
         JOIN Materials m ON rd.MaterialId = m.MaterialId
         LEFT JOIN SubCategories sc ON m.SubCategoryId = sc.SubCategoryId
         LEFT JOIN Categories c ON sc.CategoryId = c.CategoryId
+        JOIN Units u ON m.Unit_id = u.Unit_id
         WHERE rd.RequestId = ?
     """;
 
@@ -46,6 +48,7 @@ public class RequestDetailDAO {
                 detail.setDescription(rs.getString("Description"));
                 detail.setSubCategoryName(rs.getString("SubCategoryName"));
                 detail.setCategoryName(rs.getString("CategoryName"));
+                detail.setUnitName(rs.getString("UnitName"));
 
                 // Nếu bạn không có giá thì không setPrice
                 list.add(detail);

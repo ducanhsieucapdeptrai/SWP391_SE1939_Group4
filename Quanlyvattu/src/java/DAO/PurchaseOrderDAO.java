@@ -13,9 +13,10 @@ public class PurchaseOrderDAO extends DBContext {
     public List<PurchaseOrderDetail> getPurchasePreviewByRequest(int requestId) {
         List<PurchaseOrderDetail> list = new ArrayList<>();
         String sql = """
-        SELECT m.MaterialId, m.MaterialName, rd.Quantity
+        SELECT m.MaterialId, m.MaterialName, rd.Quantity, u.Name AS UnitName
         FROM RequestDetail rd
         JOIN Materials m ON rd.MaterialId = m.MaterialId
+        JOIN Units u ON m.Unit_id = u.Unit_id
         WHERE rd.RequestId = ?
     """;
 
@@ -29,6 +30,7 @@ public class PurchaseOrderDAO extends DBContext {
                     d.setQuantity(rs.getInt("Quantity"));
                     d.setUnitPrice(0);
                     d.setTotal(0);
+                    d.setUnitName(rs.getString("UnitName"));
                     list.add(d);
                 }
             }
@@ -139,9 +141,10 @@ public class PurchaseOrderDAO extends DBContext {
     public List<PurchaseOrderDetail> getPODetails(int poId) {
         List<PurchaseOrderDetail> list = new ArrayList<>();
         String sql = """
-        SELECT d.POId, d.MaterialId, m.MaterialName, d.Quantity, d.UnitPrice, d.Total
+        SELECT d.POId, d.MaterialId, m.MaterialName, d.Quantity, d.UnitPrice, d.Total, u.Name AS UnitName
         FROM PurchaseOrderDetail d
         JOIN Materials m ON d.MaterialId = m.MaterialId
+        JOIN Units u ON m.Unit_id = u.Unit_id
         WHERE d.POId = ?
     """;
 
@@ -156,6 +159,7 @@ public class PurchaseOrderDAO extends DBContext {
                     d.setQuantity(rs.getInt("Quantity"));
                     d.setUnitPrice(rs.getDouble("UnitPrice"));
                     d.setTotal(rs.getDouble("Total"));
+                    d.setUnitName(rs.getString("UnitName"));
                     list.add(d);
                 }
             }

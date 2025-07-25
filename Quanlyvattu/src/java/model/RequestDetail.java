@@ -12,6 +12,7 @@ public class RequestDetail {
     private String description;
     private String subCategoryName;
     private String categoryName;
+    private String unitName;
 
     private Material material;
 
@@ -123,5 +124,13 @@ public class RequestDetail {
 
     public void setCategoryName(String categoryName) {
         this.categoryName = categoryName;
+    }
+
+    public String getUnitName() {
+        return unitName;
+    }
+
+    public void setUnitName(String unitName) {
+        this.unitName = unitName;
     }
 }

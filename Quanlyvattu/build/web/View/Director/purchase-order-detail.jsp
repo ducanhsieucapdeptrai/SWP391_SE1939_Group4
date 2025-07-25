@@ -45,7 +45,9 @@
                     <tr class="hover:bg-gray-50">
                         <td class="border px-4 py-2">${i.index + 1}</td>
                         <td class="border px-4 py-2">${item.materialName}</td>
-                        <td class="border px-4 py-2 text-center">${item.quantity}</td>
+                        <td class="border px-4 py-2 text-center">
+                            ${item.quantity} <span>(${item.unitName})</span>
+                        </td>
                         <td class="border px-4 py-2 text-right">
                             <fmt:formatNumber value="${item.unitPrice}" type="number" groupingUsed="true" maxFractionDigits="0"/> VND
                         </td>

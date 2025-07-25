@@ -48,7 +48,7 @@ public class CreatePurchaseOrderServlet extends HttpServlet {
         request.setAttribute("detailList", detailList);
         request.setAttribute("requestId", requestId);
         request.setAttribute("senderName", senderName);
-        request.setAttribute("pageContent", "/View/CompanyStaff/purchase-order-form.jsp");
+        request.setAttribute("pageContent", "/View/Accountant/purchase-order-form.jsp");
         request.getRequestDispatcher("/layout/layout.jsp").forward(request, response);
     }
 
@@ -114,7 +114,7 @@ public class CreatePurchaseOrderServlet extends HttpServlet {
         request.setAttribute("detailList", detailList);
         request.setAttribute("requestId", requestId);
         request.setAttribute("senderName", senderName);
-        request.setAttribute("pageContent", "/View/CompanyStaff/purchase-order-form.jsp");
+        request.setAttribute("pageContent", "/View/Accountant/purchase-order-form.jsp");
         request.getRequestDispatcher("/layout/layout.jsp").forward(request, response);
     }
 }

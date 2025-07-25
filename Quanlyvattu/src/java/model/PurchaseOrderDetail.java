@@ -8,6 +8,7 @@ public class PurchaseOrderDetail {
     private int quantity;
     private double unitPrice;
     private double total;
+    private String unitName;
 
     public int getPoId() {
         return poId;
@@ -56,4 +57,7 @@ public class PurchaseOrderDetail {
     public void setTotal(double total) {
         this.total = total;
     }
+
+    public String getUnitName() { return unitName; }
+    public void setUnitName(String unitName) { this.unitName = unitName; }
 }

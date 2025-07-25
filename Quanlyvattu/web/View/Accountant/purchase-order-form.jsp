@@ -36,7 +36,9 @@
                         <tr class="hover:bg-gray-50">
                             <td class="p-2 border text-center">${loop.index + 1}</td>
                             <td class="p-2 border">${m.materialName}</td>
-                            <td class="p-2 border text-right" id="qty_${m.materialId}">${m.quantity}</td>
+                            <td class="p-2 border text-right" id="qty_${m.materialId}">
+                                ${m.quantity} <span>(${m.unitName})</span>
+                            </td>
                             <td class="p-2 border">
                                 <div class="flex justify-end">
                                     <div class="relative w-1/2">

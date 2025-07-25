@@ -21,8 +21,8 @@
 <select id="materialSelectTemplate" class="hidden">
     <option disabled selected value="">-- Select Material --</option>
     <c:forEach var="material" items="${materialList}">
-        <option value="${material.materialId}">
-            ${material.materialName} (in stock: ${material.quantity})
+        <option value="${material.materialId}" data-unit="${material.unitName}">
+            ${material.materialName} (${material.unitName}) (in stock: ${material.quantity})
         </option>
     </c:forEach>
 </select>
@@ -78,8 +78,10 @@
                                     <input type="hidden" name="materialId[]" value="${detail.materialId}" />
                                 </td>
                                 <td class="px-4 py-2">
-                                    <input type="number" name="quantity[]" value="${detail.quantity}" min="1"
-                                           class="w-24 border rounded px-2 py-1" />
+                                    <div class="flex items-center gap-1">
+                                        <input type="number" name="quantity[]" value="${detail.quantity}" min="1" class="w-24 border rounded px-2 py-1 text-right" />
+                                        <span>${detail.unitName}</span>
+                                    </div>
                                 </td>
                                 <td class="px-4 py-2 text-center text-gray-400">
                                     <i class="fas fa-lock" title="Fixed material"></i>
@@ -132,7 +134,10 @@
         const materialCell = `<td class="px-4 py-2"></td>`;
         const quantityCell = `
             <td class="px-4 py-2">
-                <input type="number" name="quantity[]" min="1" value="1" class="w-24 border rounded px-2 py-1" />
+                <div class="flex items-center gap-1">
+                    <input type="number" name="quantity[]" min="1" value="1" class="w-24 border rounded px-2 py-1 text-right" />
+                    <span class="unit-span"></span>
+                </div>
             </td>
         `;
         const actionCell = `
@@ -164,6 +169,20 @@
                 });
                 input.focus();
                 return false;
+            }
+        }
+    });
+
+    document.addEventListener('change', function(e) {
+        if (e.target && e.target.name === 'materialId[]') {
+            const select = e.target;
+            const selectedOption = select.options[select.selectedIndex];
+            const unit = selectedOption.getAttribute('data-unit') || '';
+            // Tìm span.unit-span cùng hàng để set text
+            const row = select.closest('tr');
+            if (row) {
+                const unitSpan = row.querySelector('.unit-span');
+                if (unitSpan) unitSpan.textContent = unit;
             }
         }
     });

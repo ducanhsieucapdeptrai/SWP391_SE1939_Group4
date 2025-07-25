@@ -240,7 +240,7 @@ public class UserDAO extends DBContext {
 
     public boolean updatePassword(String email, String hashedPassword) {
         String sql = "UPDATE Users SET Password = ? WHERE Email = ?";
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, hashedPassword);
             ps.setString(2, email.trim());
             return ps.executeUpdate() > 0;
