@@ -39,7 +39,7 @@
                             <td class="p-2 border text-right" id="qty_${m.materialId}">${m.quantity}</td>
                             <td class="p-2 border">
                                 <div class="flex justify-end">
-                                    <div class="relative w-1/2"> <%-- 1/2 chiều rộng td --%>
+                                    <div class="relative w-1/2">
                                         <input type="number"
                                                name="unitPrice_${m.materialId}"
                                                id="unitPrice_${m.materialId}"
@@ -101,6 +101,33 @@
                 confirmButtonText: 'OK'
             });
             return;
+        }
+
+        // Validate unit price for each material
+        const inputs = document.querySelectorAll('input[name^="unitPrice_"]');
+        for (const input of inputs) {
+            const value = input.value.trim();
+            const price = parseFloat(value);
+            if (value === "" || isNaN(price)) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Missing Price',
+                    text: 'Please enter the unit price for all materials.',
+                    confirmButtonText: 'OK'
+                });
+                input.focus();
+                return;
+            }
+            if (price <= 0) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid Price',
+                    text: 'Unit price must be greater than 0.',
+                    confirmButtonText: 'OK'
+                });
+                input.focus();
+                return;
+            }
         }
 
         Swal.fire({

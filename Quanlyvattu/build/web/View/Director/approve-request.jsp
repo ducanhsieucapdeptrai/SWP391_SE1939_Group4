@@ -147,4 +147,24 @@
         tbody.appendChild(row);
         row.children[1].appendChild(clonedSelect);
     }
+
+    // Validate số lượng chỉ được nhập số nguyên dương, không được nhập chữ
+    document.getElementById('approveForm').addEventListener('submit', function(e) {
+        const qtyInputs = document.querySelectorAll('input[name="quantity[]"]');
+        for (const input of qtyInputs) {
+            const value = input.value.trim();
+            // Kiểm tra: không rỗng, là số nguyên dương, không chứa ký tự lạ
+            if (value === '' || isNaN(value) || !/^[0-9]+$/.test(value) || parseInt(value, 10) <= 0) {
+                e.preventDefault();
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid Quantity',
+                    text: 'Quantity must be a positive integer and cannot contain letters or special characters.',
+                    confirmButtonText: 'OK'
+                });
+                input.focus();
+                return false;
+            }
+        }
+    });
 </script>
