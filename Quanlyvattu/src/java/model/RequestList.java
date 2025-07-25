@@ -102,8 +102,6 @@ public class RequestList {
         this.roStatus = roStatus;
     }
 
-   
-
     // ==== GETTERS & SETTERS ====
     public int getRequestId() {
         return requestId;
@@ -280,6 +278,7 @@ public class RequestList {
     public void setIsTransferredToday(boolean isTransferredToday) {
         this.isTransferredToday = isTransferredToday;
     }
+
     public Date getFinishedDate() {
         return finishedDate;
     }
@@ -307,14 +306,26 @@ public class RequestList {
     public void setPoStatus(String poStatus) {
         this.poStatus = poStatus;
     }
+
     public void setFinishedDate(Date finishedDate) {
         this.finishedDate = finishedDate;
     }
+
     public int getProjectId() {
-    return projectId;
+        return projectId;
     }
 
     public void setProjectId(int projectId) {
         this.projectId = projectId;
+    }
+
+    private Integer POId;
+
+    public Integer getPOId() {
+        return POId;
+    }
+
+    public void setPOId(Integer POId) {
+        this.POId = POId;
     }
 }

@@ -1,22 +1,25 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <div class="p-6">
     <h2 class="text-2xl font-bold mb-4 text-center">My Requests</h2>
 
+    <!-- Filter Form -->
     <form class="mb-4 flex flex-wrap gap-4 items-end" method="get" action="my-request">
+        <!-- Type -->
         <div>
             <label for="typeFilter" class="block mb-1 font-medium">Type Request:</label>
             <select id="typeFilter" name="type" class="form-select w-48 p-2 rounded border border-gray-300">
                 <option value="" ${empty param.type ? "selected" : ""}>All</option>
-                <option value="Export" ${param.type == 'Export' ? "selected" : ""}>Export</option>
-                <option value="Import" ${param.type == 'Import' ? "selected" : ""}>Import</option>
-                <option value="Purchase" ${param.type == 'Purchase' ? "selected" : ""}>Purchase</option>
-                <option value="Repair" ${param.type == 'Repair' ? "selected" : ""}>Repair</option>
+                <c:forEach var="typeName" items="${requestTypes}">
+                    <option value="${typeName}" ${param.type == typeName ? "selected" : ""}>${typeName}</option>
+                </c:forEach>
             </select>
         </div>
 
+        <!-- Status -->
         <div>
             <label for="statusFilter" class="block mb-1 font-medium">Status Request:</label>
             <select id="statusFilter" name="status" class="form-select w-48 p-2 rounded border border-gray-300">
@@ -27,6 +30,7 @@
             </select>
         </div>
 
+        <!-- PO Status -->
         <div>
             <label for="poStatusFilter" class="block mb-1 font-medium">Purchase Order Status:</label>
             <select id="poStatusFilter" name="poStatus" class="form-select w-48 p-2 rounded border border-gray-300">
@@ -34,19 +38,30 @@
                 <option value="Pending" ${param.poStatus == 'Pending' ? "selected" : ""}>Pending</option>
                 <option value="Approved" ${param.poStatus == 'Approved' ? "selected" : ""}>Approved</option>
                 <option value="Rejected" ${param.poStatus == 'Rejected' ? "selected" : ""}>Rejected</option>
+                <option value="NotCreated" ${param.poStatus == 'NotCreated' ? "selected" : ""}>Not Created</option>
             </select>
         </div>
 
-        <button type="submit" class="bg-blue-600 hover:bg-blue-600 text-white px-4 py-2 rounded">
+        <!-- Note Filter -->
+        <div>
+            <label for="noteFilter" class="block mb-1 font-medium">Note:</label>
+            <input type="text"
+                   id="noteFilter"
+                   name="note"
+                   value="${fn:escapeXml(param.note)}"
+                   placeholder="e.g. Repair request for mixer"
+                   class="form-input w-64 p-2 rounded border border-gray-300" />
+        </div>
+
+        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
             Filter
         </button>
-        <div class="flex items-end">
-            <a href="my-request" class="text-center bg-blue-600 hover:bg-gray-400 text-white px-6 py-2 rounded w-full md:w-auto">
-                Show All Requests
-            </a>
-        </div>
+        <a href="my-request" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded">
+            Show All
+        </a>
     </form>
 
+    <!-- Create Request buttons -->
     <div class="flex items-center justify-between mb-4">
         <c:if test="${userRole == 'Company Staff' }">
             <a href="${pageContext.request.contextPath}/createexportpurchase"
@@ -54,21 +69,19 @@
                 + Create Request
             </a>
         </c:if>
-
-        <c:if test="${userRole == 'Warehouse Manager' }">
-            <a href="${pageContext.request.contextPath}/create-repair-request"
-               class="inline-block px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 transition-colors ml-2">
+        <c:if test="${userRole == 'Warehouse Manager'}">
+            <a href="create-repair-request" class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded">
                 + Create Repair Request
             </a>
         </c:if>
-
     </div>
 
-
+    <!-- If no requests -->
     <c:if test="${empty myRequestList}">
         <div class="text-gray-500">You haven't submitted any requests yet.</div>
     </c:if>
 
+    <!-- If there are requests -->
     <c:if test="${not empty myRequestList}">
         <div class="overflow-auto rounded shadow">
             <table class="min-w-full bg-white text-sm border border-gray-200">
@@ -80,7 +93,7 @@
                         <th class="p-3 text-left">Date</th>
                         <th class="p-3 text-left">Note</th>
                         <th class="p-3 text-left">Director Note</th>
-                        <th class="p-3 text-left">PO Status</th>
+                        <th class="p-3 text-left">Order Status</th>
                         <th class="p-3 text-left">Action</th>
                         <th class="p-3 text-left">Detail</th>
                     </tr>
@@ -103,16 +116,26 @@
                                 <td class="p-3">${req.approvalNote}</td>
                                 <td class="p-3">
                                     <c:choose>
+                                        <c:when test="${req.requestTypeName == 'Purchase'}">
+                                            <c:choose>
+                                                <c:when test="${empty req.poStatus}">
+                                                    <span class="px-2 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-600">Not Created</span>
+                                                </c:when>
+                                                <c:when test="${req.poStatus == 'Pending'}">
+                                                    <span class="px-2 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800">Pending</span>
+                                                </c:when>
+                                                <c:when test="${req.poStatus == 'Approved'}">
+                                                    <span class="px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">Approved</span>
+                                                </c:when>
+                                                <c:when test="${req.poStatus == 'Rejected'}">
+                                                    <span class="px-2 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800">Rejected</span>
+                                                </c:when>
+                                            </c:choose>
+                                        </c:when>
                                         <c:when test="${req.requestTypeName == 'Repair'}">
                                             <span class="px-2 py-1 rounded-full text-xs font-semibold
                                                   ${req.hasRO ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-600'}">
                                                 ${req.hasRO ? 'RO Created' : 'Pending'}
-                                            </span>
-                                        </c:when>
-                                        <c:when test="${req.requestTypeName == 'Purchase'}">
-                                            <span class="px-2 py-1 rounded-full text-xs font-semibold
-                                                  ${req.hasPO ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-600'}">
-                                                ${req.hasPO ? 'PO Created' : 'Pending'}
                                             </span>
                                         </c:when>
                                         <c:otherwise>
@@ -120,40 +143,13 @@
                                         </c:otherwise>
                                     </c:choose>
                                 </td>
-
                                 <td class="p-3">
-                                    <c:choose>
-                                        <c:when test="${req.status == 'Approved'}">
-                                            <c:choose>
-                                                <c:when test="${req.requestTypeName == 'Purchase' && !req.hasPO}">
-                                                    <form action="create-purchase-order" method="post">
-                                                        <input type="hidden" name="requestId" value="${req.requestId}" />
-                                                        <button class="btn text-xs bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded">
-                                                            Create PO
-                                                        </button>
-                                                    </form>
-                                                </c:when>
-                                                <c:when test="${req.requestTypeName == 'Repair' && !req.hasRO}">
-                                                    <form action="create-repair-order" method="post">
-                                                        <input type="hidden" name="requestId" value="${req.requestId}" />
-                                                        <button class="btn text-xs bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded">
-                                                            Create RO
-                                                        </button>
-                                                    </form>
-                                                </c:when>
-                                                <c:otherwise>
-                                                    <span class="text-gray-400 italic text-xs">-</span>
-                                                </c:otherwise>
-                                            </c:choose>
-                                        </c:when>
-                                        <c:otherwise>
-                                            <span class="text-gray-400 italic text-xs">-</span>
-                                        </c:otherwise>
-                                    </c:choose>
+                                    <c:if test="${req.requestTypeName == 'Purchase' && req.hasPO}">
+                                        <a href="purchase-order-detail?id=${req.POId}" class="text-indigo-600 hover:underline text-sm">
+                                            View PO
+                                        </a>
+                                    </c:if>
                                 </td>
-
-
-
                                 <td class="p-3">
                                     <a href="request-detail?id=${req.requestId}" class="text-blue-600 hover:underline text-sm">View</a>
                                 </td>
@@ -162,37 +158,37 @@
                     </tbody>
                 </table>
 
+                <!-- Pagination -->
                 <div class="mt-4 flex justify-center gap-2">
                     <c:if test="${currentPage > 1}">
-                        <a href="my-request?page=1&type=${param.type}&status=${param.status}&poStatus=${param.poStatus}" class="px-3 py-1 border rounded bg-white text-gray-700 hover:bg-gray-100">&laquo;</a>
-                        <a href="my-request?page=${currentPage - 1}&type=${param.type}&status=${param.status}&poStatus=${param.poStatus}" class="px-3 py-1 border rounded bg-white text-gray-700 hover:bg-gray-100">&lt;</a>
+                        <a href="my-request?page=1&type=${param.type}&status=${param.status}&poStatus=${param.poStatus}&note=${param.note}" class="px-3 py-1 border rounded bg-white text-gray-700 hover:bg-gray-100">&laquo;</a>
+                        <a href="my-request?page=${currentPage - 1}&type=${param.type}&status=${param.status}&poStatus=${param.poStatus}&note=${param.note}" class="px-3 py-1 border rounded bg-white text-gray-700 hover:bg-gray-100">&lt;</a>
                     </c:if>
-
                     <c:forEach begin="1" end="${totalPages}" var="i">
-                        <a href="my-request?page=${i}&type=${param.type}&status=${param.status}&poStatus=${param.poStatus}"
+                        <a href="my-request?page=${i}&type=${param.type}&status=${param.status}&poStatus=${param.poStatus}&note=${param.note}"
                            class="px-3 py-1 border rounded
                            ${i == currentPage ? 'bg-blue-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'}">
                             ${i}
                         </a>
                     </c:forEach>
-
                     <c:if test="${currentPage < totalPages}">
-                        <a href="my-request?page=${currentPage + 1}&type=${param.type}&status=${param.status}&poStatus=${param.poStatus}" class="px-3 py-1 border rounded bg-white text-gray-700 hover:bg-gray-100">&gt;</a>
-                        <a href="my-request?page=${totalPages}&type=${param.type}&status=${param.status}&poStatus=${param.poStatus}" class="px-3 py-1 border rounded bg-white text-gray-700 hover:bg-gray-100">&raquo;</a>
+                        <a href="my-request?page=${currentPage + 1}&type=${param.type}&status=${param.status}&poStatus=${param.poStatus}&note=${param.note}" class="px-3 py-1 border rounded bg-white text-gray-700 hover:bg-gray-100">&gt;</a>
+                        <a href="my-request?page=${totalPages}&type=${param.type}&status=${param.status}&poStatus=${param.poStatus}&note=${param.note}" class="px-3 py-1 border rounded bg-white text-gray-700 hover:bg-gray-100">&raquo;</a>
                     </c:if>
                 </div>
-
-                <c:if test="${param.roCreated == 'true'}">
-                    <script>
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Success!',
-                            text: 'Repair Order created successfully.',
-                            timer: 2000,
-                            showConfirmButton: false
-                        });
-                    </script>
-                </c:if>
             </div>
+        </c:if>
+
+        <!-- SweetAlert when RO created -->
+        <c:if test="${param.roCreated == 'true'}">
+            <script>
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: 'Repair Order created successfully.',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            </script>
         </c:if>
     </div>

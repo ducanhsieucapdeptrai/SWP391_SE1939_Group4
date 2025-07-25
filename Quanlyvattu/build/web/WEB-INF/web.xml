@@ -64,10 +64,6 @@
         <servlet-name>ApproveAndRejectRequestServlet</servlet-name>
         <url-pattern>/approveandrejectrequest</url-pattern>
     </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>CreatePurchaseOrderServlet</servlet-name>
-        <url-pattern>/create-po</url-pattern>
-    </servlet-mapping>
     <servlet>
         <servlet-name>EventActionServlet</servlet-name>
         <servlet-class>controller.calendar.EventActionServlet</servlet-class>

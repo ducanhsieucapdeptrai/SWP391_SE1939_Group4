@@ -173,9 +173,7 @@ public class AddMaterialServlet extends HttpServlet {
             material.setSubCategoryId(subCategoryId);
             material.setStatusId(statusId);
             material.setQuantity(quantity);
-            material.setMinQuantity(minQuantity);
-            material.setPrice(price);
-            material.setUnitId(unitId);
+            material.setUnit(unit);
 
             material.setDescription(description);
             material.setImage(imagePath);

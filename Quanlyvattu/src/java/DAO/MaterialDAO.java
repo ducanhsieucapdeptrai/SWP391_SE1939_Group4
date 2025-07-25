@@ -105,7 +105,6 @@ public class MaterialDAO extends DBContext {
 
     public List<Material> searchMaterials(String category, String subcategory, String name) {
         List<Material> list = new ArrayList<>();
-
         String sql = """
             SELECT m.*, c.CategoryName, sc.SubCategoryName, s.StatusName, u.Name AS UnitName
             FROM Materials m
@@ -127,7 +126,6 @@ public class MaterialDAO extends DBContext {
         }
 
         try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-
             int idx = 1;
             if (category != null && !category.isEmpty()) {
                 ps.setInt(idx++, Integer.parseInt(category));
@@ -182,7 +180,6 @@ public class MaterialDAO extends DBContext {
         try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
             ResultSet rs = ps.executeQuery();
-
             if (rs.next()) {
                 Material m = new Material();
                 m.setMaterialId(rs.getInt("MaterialId"));
@@ -261,6 +258,37 @@ public class MaterialDAO extends DBContext {
             st.setInt(8, m.getMaterialId());
 
             return st.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean addMaterial(Material material) {
+        String sql = """
+            INSERT INTO Materials 
+            (MaterialName, SubCategoryId, StatusId, Image, Description, 
+             Quantity, Unit) 
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """;
+
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setString(1, material.getMaterialName());
+            ps.setInt(2, material.getSubCategoryId());
+            ps.setInt(3, material.getStatusId());
+            ps.setString(4, material.getImage());
+            ps.setString(5, material.getDescription());
+            ps.setInt(6, material.getQuantity());
+            ps.setString(7, material.getUnit());
+            int rowsAffected = ps.executeUpdate();
+            if (rowsAffected > 0) {
+                try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        material.setMaterialId(generatedKeys.getInt(1));
+                        return true;
+                    }
+                }
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }

@@ -18,7 +18,7 @@ public class PurchaseOrderDetailServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        if (!AuthorizationHelper.hasAnyRole(request, "Director", "Warehouse Manager")) {
+        if (!AuthorizationHelper.hasAnyRole(request, "Director", "Warehouse Manager", "Company Staff")) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied.");
             return;
         }

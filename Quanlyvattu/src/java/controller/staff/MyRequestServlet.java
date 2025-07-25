@@ -13,24 +13,24 @@ import java.util.List;
 @WebServlet("/my-request")
 public class MyRequestServlet extends HttpServlet {
 
-    private static final int PAGE_SIZE = 5;
+    private static final int PAGE_SIZE = 7;
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        if (!AuthorizationHelper.isLoggedIn(request)) {
-            response.sendRedirect("login.jsp");
+        if (!AuthorizationHelper.hasAnyRole(request, "Accountant", "Warehouse Staff", "Company Staff")) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied.");
             return;
         }
 
-        
         HttpSession session = request.getSession();
         int userId = (int) session.getAttribute("userId");
 
         String statusFilter = request.getParameter("status");
         String poStatusFilter = request.getParameter("poStatus");
         String typeFilter = request.getParameter("type");
+        String noteFilter = request.getParameter("note");
 
         int page = 1;
         try {
@@ -42,7 +42,7 @@ public class MyRequestServlet extends HttpServlet {
         }
 
         RequestDAO dao = new RequestDAO();
-        int totalRecords = dao.countRequestsByUserWithFilters(userId, statusFilter, poStatusFilter, typeFilter);
+        int totalRecords = dao.countRequestsByUserWithFilters(userId, statusFilter, poStatusFilter, typeFilter, noteFilter);
         int totalPages = (int) Math.ceil((double) totalRecords / PAGE_SIZE);
 
         if (page < 1) {
@@ -53,7 +53,7 @@ public class MyRequestServlet extends HttpServlet {
         }
 
         int offset = (page - 1) * PAGE_SIZE;
-        List<RequestList> list = dao.getPagedRequestsByUserFiltered(userId, statusFilter, poStatusFilter, typeFilter, offset, PAGE_SIZE);
+        List<RequestList> list = dao.getPagedRequestsByUserFiltered(userId, statusFilter, poStatusFilter, typeFilter, noteFilter, offset, PAGE_SIZE);
 
         request.setAttribute("myRequestList", list);
         request.setAttribute("currentPage", page);
@@ -61,6 +61,11 @@ public class MyRequestServlet extends HttpServlet {
         request.setAttribute("statusFilter", statusFilter);
         request.setAttribute("poStatusFilter", poStatusFilter);
         request.setAttribute("typeFilter", typeFilter);
+        request.setAttribute("noteFilter", noteFilter);
+        
+        List<String> requestTypes = dao.getAllRequestTypes();
+        request.setAttribute("requestTypes", requestTypes);
+        
         request.setAttribute("pageContent", "/View/CompanyStaff/my-request.jsp");
         request.getRequestDispatcher("/layout/layout.jsp").forward(request, response);
     }

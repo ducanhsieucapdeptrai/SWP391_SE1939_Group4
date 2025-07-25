@@ -7,8 +7,7 @@
     <h2 class="text-2xl font-bold text-blue-800 mb-4">Purchase Order Detail - No.${po.poId}</h2>
 
     <div class="grid md:grid-cols-2 gap-4 text-sm mb-6">
-        <p><strong>Request ID:</strong> ${po.requestId}</p>
-        <p><strong>Created By:</strong> ${po.createdByName}</p>
+        <p><strong>Request Purchase Created By:</strong> ${po.createdByName}</p>
         <p><strong>Created Date:</strong>
             <fmt:formatDate value="${po.createdDate}" pattern="yyyy-MM-dd HH:mm"/>
         </p>
@@ -48,7 +47,7 @@
                         <td class="border px-4 py-2">${item.materialName}</td>
                         <td class="border px-4 py-2 text-center">${item.quantity}</td>
                         <td class="border px-4 py-2 text-right">
-                            <fmt:formatNumber value="${item.price}" type="number" groupingUsed="true" maxFractionDigits="0"/> VND
+                            <fmt:formatNumber value="${item.unitPrice}" type="number" groupingUsed="true" maxFractionDigits="0"/> VND
                         </td>
                         <td class="border px-4 py-2 text-right">
                             <fmt:formatNumber value="${item.total}" type="number" groupingUsed="true" maxFractionDigits="0"/> VND
@@ -63,7 +62,7 @@
     </div>
 
     <div class="flex justify-between items-center">
-        <a href="purchase-request-list" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Back</a>
+        <a href="javascript:history.back()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Back</a>
         <c:if test="${po.status == 'Pending' and sessionScope.userRole == 'Director'}">
             <form method="post" action="purchase-order-detail" class="flex gap-3">
                 <input type="hidden" name="poId" value="${po.poId}">

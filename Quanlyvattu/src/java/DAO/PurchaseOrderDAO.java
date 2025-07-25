@@ -13,24 +13,22 @@ public class PurchaseOrderDAO extends DBContext {
     public List<PurchaseOrderDetail> getPurchasePreviewByRequest(int requestId) {
         List<PurchaseOrderDetail> list = new ArrayList<>();
         String sql = """
-            SELECT m.MaterialId, m.MaterialName, m.Price, rd.Quantity,
-                   (m.Price * rd.Quantity) AS Total
-            FROM RequestDetail rd
-            JOIN Materials m ON rd.MaterialId = m.MaterialId
-            WHERE rd.RequestId = ?
-        """;
+        SELECT m.MaterialId, m.MaterialName, rd.Quantity
+        FROM RequestDetail rd
+        JOIN Materials m ON rd.MaterialId = m.MaterialId
+        WHERE rd.RequestId = ?
+    """;
 
         try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-
             ps.setInt(1, requestId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     PurchaseOrderDetail d = new PurchaseOrderDetail();
                     d.setMaterialId(rs.getInt("MaterialId"));
                     d.setMaterialName(rs.getString("MaterialName"));
-                    d.setPrice(rs.getDouble("Price"));
                     d.setQuantity(rs.getInt("Quantity"));
-                    d.setTotal(rs.getDouble("Total"));
+                    d.setUnitPrice(0);
+                    d.setTotal(0);
                     list.add(d);
                 }
             }
@@ -74,7 +72,7 @@ public class PurchaseOrderDAO extends DBContext {
             ps.setInt(1, poId);
             ps.setInt(2, detail.getMaterialId());
             ps.setInt(3, detail.getQuantity());
-            ps.setDouble(4, detail.getPrice());
+            ps.setDouble(4, detail.getUnitPrice());
             ps.setDouble(5, detail.getTotal());
             ps.executeUpdate();
 
@@ -103,9 +101,12 @@ public class PurchaseOrderDAO extends DBContext {
     public PurchaseOrderList getPurchaseOrderById(int poId) {
         String sql = """
         SELECT p.POId, p.RequestId, p.CreatedBy, u.FullName AS CreatedByName,
-               p.CreatedDate, p.TotalPrice, p.Status, p.Note
+               p.CreatedDate, p.TotalPrice, p.Status, p.Note,
+               rl.RequestedBy, u2.FullName AS RequestedByName
         FROM PurchaseOrderList p
         JOIN Users u ON p.CreatedBy = u.UserId
+        JOIN RequestList rl ON p.RequestId = rl.RequestId
+        JOIN Users u2 ON rl.RequestedBy = u2.UserId
         WHERE p.POId = ?
     """;
         PurchaseOrderList po = null;
@@ -123,8 +124,8 @@ public class PurchaseOrderDAO extends DBContext {
                     po.setStatus(rs.getString("Status"));
                     po.setNote(rs.getString("Note"));
                     po.setCreatedByName(rs.getString("CreatedByName"));
-
-                    // Load chi tiết đơn hàng
+//                    po.setRequestedBy(rs.getInt("RequestedBy"));
+//                    po.setRequestedByName(rs.getString("RequestedByName"));
                     po.setDetails(getPODetails(poId));
                 }
             }
@@ -153,7 +154,7 @@ public class PurchaseOrderDAO extends DBContext {
                     d.setMaterialId(rs.getInt("MaterialId"));
                     d.setMaterialName(rs.getString("MaterialName"));
                     d.setQuantity(rs.getInt("Quantity"));
-                    d.setPrice(rs.getDouble("UnitPrice"));
+                    d.setUnitPrice(rs.getDouble("UnitPrice"));
                     d.setTotal(rs.getDouble("Total"));
                     list.add(d);
                 }
@@ -166,32 +167,32 @@ public class PurchaseOrderDAO extends DBContext {
     }
 
     public boolean updateStatus(int poId, String status, int approvedBy) {
-    String sql = """
+        String sql = """
         UPDATE PurchaseOrderList
         SET Status = ?, ApprovedBy = ?, ApprovedDate = CURRENT_TIMESTAMP
         WHERE POId = ?
     """;
 
-    try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-        ps.setString(1, status);
-        ps.setInt(2, approvedBy);
-        ps.setInt(3, poId);
-        boolean updated = ps.executeUpdate() > 0;
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, status);
+            ps.setInt(2, approvedBy);
+            ps.setInt(3, poId);
+            boolean updated = ps.executeUpdate() > 0;
 
-        // ✅ Nếu duyệt thì tạo mới Import Request
-        if (updated && "Approved".equalsIgnoreCase(status)) {
-            PurchaseOrderList po = getPurchaseOrderById(poId);
-            if (po != null) {
-                po.setApprovedBy(approvedBy); // Gán để truyền vào insert
-                createImportRequestFromPO(po);
+            // ✅ Nếu duyệt thì tạo mới Import Request
+            if (updated && "Approved".equalsIgnoreCase(status)) {
+                PurchaseOrderList po = getPurchaseOrderById(poId);
+                if (po != null) {
+                    po.setApprovedBy(approvedBy); // Gán để truyền vào insert
+                    createImportRequestFromPO(po);
+                }
             }
+            return updated;
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-        return updated;
-    } catch (SQLException e) {
-        e.printStackTrace();
+        return false;
     }
-    return false;
-}
 
     public List<PurchaseOrderList> getFilteredPurchaseOrdersPaged(String status, String createdDate, String createdByName, int offset, int pageSize) {
         List<PurchaseOrderList> list = new ArrayList<>();
@@ -300,7 +301,7 @@ public class PurchaseOrderDAO extends DBContext {
     }
 
     public boolean createImportRequestFromPO(PurchaseOrderList po) {
-    String insertRequestSql = """
+        String insertRequestSql = """
         INSERT INTO RequestList (
             RequestedBy, RequestDate, RequestTypeId, SubTypeId, Note, 
             Status, ApprovedBy, ApprovedDate
@@ -308,57 +309,57 @@ public class PurchaseOrderDAO extends DBContext {
         VALUES (?, CURRENT_TIMESTAMP, ?, ?, ?, 'Approved', ?, CURRENT_TIMESTAMP)
     """;
 
-    String insertDetailSql = """
+        String insertDetailSql = """
         INSERT INTO RequestDetail (RequestId, MaterialId, Quantity, ActualQuantity)
         VALUES (?, ?, ?, 0)
     """;
 
-    try (Connection conn = getNewConnection()) {
-        conn.setAutoCommit(false);
+        try (Connection conn = getNewConnection()) {
+            conn.setAutoCommit(false);
 
-        if (po == null || po.getDetails() == null || po.getDetails().isEmpty()) {
-            return false;
-        }
+            if (po == null || po.getDetails() == null || po.getDetails().isEmpty()) {
+                return false;
+            }
 
-        int requestId = 0;
-        try (PreparedStatement ps = conn.prepareStatement(insertRequestSql, Statement.RETURN_GENERATED_KEYS)) {
-            ps.setInt(1, po.getCreatedBy());     // RequestedBy
-            ps.setInt(2, 2);                     // RequestTypeId = 2 (Import)
-            ps.setInt(3, 1);                     // SubTypeId = 1 (New Purchase)
-            ps.setString(4, po.getNote());       // Note
-            ps.setInt(5, po.getApprovedBy());    // ApprovedBy
+            int requestId = 0;
+            try (PreparedStatement ps = conn.prepareStatement(insertRequestSql, Statement.RETURN_GENERATED_KEYS)) {
+                ps.setInt(1, po.getCreatedBy());     // RequestedBy
+                ps.setInt(2, 2);                     // RequestTypeId = 2 (Import)
+                ps.setInt(3, 1);                     // SubTypeId = 1 (New Purchase)
+                ps.setString(4, po.getNote());       // Note
+                ps.setInt(5, po.getApprovedBy());    // ApprovedBy
 
-            ps.executeUpdate();
-            try (ResultSet rs = ps.getGeneratedKeys()) {
-                if (rs.next()) {
-                    requestId = rs.getInt(1);
+                ps.executeUpdate();
+                try (ResultSet rs = ps.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        requestId = rs.getInt(1);
+                    }
                 }
             }
-        }
 
-        if (requestId == 0) {
-            conn.rollback();
-            return false;
-        }
-
-        try (PreparedStatement psDetail = conn.prepareStatement(insertDetailSql)) {
-            for (PurchaseOrderDetail d : po.getDetails()) {
-                psDetail.setInt(1, requestId);
-                psDetail.setInt(2, d.getMaterialId());
-                psDetail.setInt(3, d.getQuantity());
-                psDetail.addBatch();
+            if (requestId == 0) {
+                conn.rollback();
+                return false;
             }
-            psDetail.executeBatch();
+
+            try (PreparedStatement psDetail = conn.prepareStatement(insertDetailSql)) {
+                for (PurchaseOrderDetail d : po.getDetails()) {
+                    psDetail.setInt(1, requestId);
+                    psDetail.setInt(2, d.getMaterialId());
+                    psDetail.setInt(3, d.getQuantity());
+                    psDetail.addBatch();
+                }
+                psDetail.executeBatch();
+            }
+
+            conn.commit();
+            return true;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
 
-        conn.commit();
-        return true;
-
-    } catch (SQLException e) {
-        e.printStackTrace();
+        return false;
     }
-
-    return false;
-}
 
 }

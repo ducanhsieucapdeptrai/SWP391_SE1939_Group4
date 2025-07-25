@@ -32,7 +32,6 @@ public class RequestDetailDAO {
     """;
 
         try (Connection conn = new DBContext().getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-
             ps.setInt(1, requestId);
             ResultSet rs = ps.executeQuery();
 
@@ -99,14 +98,12 @@ public class RequestDetailDAO {
     public String getRequestStatus(int requestId) {
         String sql = "SELECT Status FROM RequestList WHERE RequestId = ?";
         try (Connection conn = new DBContext().getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-
             ps.setInt(1, requestId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     return rs.getString("Status");
                 }
             }
-
         } catch (Exception e) {
             System.out.println("Error in getRequestStatus: " + e.getMessage());
             e.printStackTrace();
@@ -118,7 +115,15 @@ public class RequestDetailDAO {
         try (Connection conn = new DBContext().getNewConnection()) {
             conn.setAutoCommit(false);
 
-            String updateRequest = "UPDATE RequestList SET Status = 'Approved', ApprovalNote = ?, ApprovedBy = ?, ApprovedDate = CURRENT_TIMESTAMP WHERE RequestId = ?";
+            String updateRequest = """
+                UPDATE RequestList
+                SET Status = 'Approved',
+                    ApprovalNote = ?,
+                    ApprovedBy = ?,
+                    ApprovedDate = CURRENT_TIMESTAMP
+                WHERE RequestId = ?
+            """;
+
             try (PreparedStatement ps = conn.prepareStatement(updateRequest)) {
                 ps.setString(1, note);
                 ps.setInt(2, approvedBy);
@@ -128,11 +133,13 @@ public class RequestDetailDAO {
 
             String checkSql = "SELECT COUNT(*) FROM RequestDetail WHERE RequestId = ? AND MaterialId = ?";
             String insertSql = "INSERT INTO RequestDetail (RequestId, MaterialId, Quantity) VALUES (?, ?, ?)";
+
             try (PreparedStatement checkStmt = conn.prepareStatement(checkSql); PreparedStatement insertStmt = conn.prepareStatement(insertSql)) {
 
                 for (RequestDetail detail : newDetails) {
                     checkStmt.setInt(1, requestId);
                     checkStmt.setInt(2, detail.getMaterialId());
+
                     try (ResultSet rs = checkStmt.executeQuery()) {
                         if (rs.next() && rs.getInt(1) == 0) {
                             insertStmt.setInt(1, requestId);
@@ -147,18 +154,26 @@ public class RequestDetailDAO {
             }
 
             conn.commit();
-        } catch (Exception ex) {
-            ex.printStackTrace();
+        } catch (Exception e) {
+            System.out.println("Error in approveRequest: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
     public void rejectRequest(int requestId, String reason, int approvedBy) {
-        String sql = "UPDATE RequestList SET Status = ?, ApprovalNote = ?, ApprovedBy = ?, ApprovedDate = CURRENT_TIMESTAMP WHERE RequestId = ?";
+        String sql = """
+            UPDATE RequestList
+            SET Status = 'Rejected',
+                ApprovalNote = ?,
+                ApprovedBy = ?,
+                ApprovedDate = CURRENT_TIMESTAMP
+            WHERE RequestId = ?
+        """;
+
         try (Connection conn = new DBContext().getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, "Rejected");
-            ps.setString(2, reason);
-            ps.setInt(3, approvedBy);
-            ps.setInt(4, requestId);
+            ps.setString(1, reason);
+            ps.setInt(2, approvedBy);
+            ps.setInt(3, requestId);
             int rows = ps.executeUpdate();
             System.out.println("Reject update result: " + rows + " rows affected.");
         } catch (Exception e) {
@@ -170,7 +185,6 @@ public class RequestDetailDAO {
     public boolean checkMaterialInRequest(int requestId, int materialId) {
         String sql = "SELECT COUNT(*) FROM RequestDetail WHERE RequestId = ? AND MaterialId = ?";
         try (Connection conn = new DBContext().getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-
             ps.setInt(1, requestId);
             ps.setInt(2, materialId);
             try (ResultSet rs = ps.executeQuery()) {
@@ -178,8 +192,8 @@ public class RequestDetailDAO {
                     return rs.getInt(1) > 0;
                 }
             }
-
         } catch (Exception e) {
+            System.out.println("Error in checkMaterialInRequest: " + e.getMessage());
             e.printStackTrace();
         }
         return false;
@@ -193,6 +207,7 @@ public class RequestDetailDAO {
             ps.setInt(3, quantity);
             ps.executeUpdate();
         } catch (Exception e) {
+            System.out.println("Error in insertMaterialToRequest: " + e.getMessage());
             e.printStackTrace();
         }
     }
