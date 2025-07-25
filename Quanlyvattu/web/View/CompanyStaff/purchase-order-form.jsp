@@ -150,7 +150,7 @@
         });
 
         setTimeout(() => {
-            window.location.href = 'my-request';
+            window.location.href = 'purchase-order';
         }, 2000);
     </script>
 </c:if>

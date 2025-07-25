@@ -4,6 +4,8 @@ import java.sql.Timestamp;
 
 public class Material {
 
+    private int categoryId;
+    private String unit;
     private int materialId;
     private String materialName;
     private int subCategoryId;
@@ -11,10 +13,10 @@ public class Material {
     private String image;
     private String description;
     private int quantity;
-    private String unit;
+    private int minQuantity;
+    private double price;
     private Timestamp createdAt;
-
-    private int categoryId;
+    private Timestamp updatedAt;
     private String categoryName;
     private String subCategoryName;
     private String statusName;
@@ -42,6 +44,78 @@ public class Material {
     }
 
     public Material() {
+    }
+
+    public Material(int categoryId, String unit, int materialId, String materialName, int subCategoryId, int statusId, String image, String description, int quantity, int minQuantity, double price, Timestamp createdAt, Timestamp updatedAt, String categoryName, String subCategoryName, String statusName, Timestamp importDate, Timestamp exportDate, int importQuantity, int exportQuantity) {
+        this.categoryId = categoryId;
+        this.unit = unit;
+        this.materialId = materialId;
+        this.materialName = materialName;
+        this.subCategoryId = subCategoryId;
+        this.statusId = statusId;
+        this.image = image;
+        this.description = description;
+        this.quantity = quantity;
+        this.minQuantity = minQuantity;
+        this.price = price;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.categoryName = categoryName;
+        this.subCategoryName = subCategoryName;
+        this.statusName = statusName;
+        this.importDate = importDate;
+        this.exportDate = exportDate;
+        this.importQuantity = importQuantity;
+        this.exportQuantity = exportQuantity;
+    }
+
+    public String getUnit() {
+        return unit;
+    }
+
+    public void setUnit(String unit) {
+        this.unit = unit;
+    }
+
+    // Getters and Setters for new fields
+    public Timestamp getImportDate() {
+        return importDate;
+    }
+
+    public void setImportDate(Timestamp importDate) {
+        this.importDate = importDate;
+    }
+
+    public int getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(int categoryId) {
+        this.categoryId = categoryId;
+    }
+
+    public Timestamp getExportDate() {
+        return exportDate;
+    }
+
+    public void setExportDate(Timestamp exportDate) {
+        this.exportDate = exportDate;
+    }
+
+    public int getImportQuantity() {
+        return importQuantity;
+    }
+
+    public void setImportQuantity(int importQuantity) {
+        this.importQuantity = importQuantity;
+    }
+
+    public int getExportQuantity() {
+        return exportQuantity;
+    }
+
+    public void setExportQuantity(int exportQuantity) {
+        this.exportQuantity = exportQuantity;
     }
 
     public int getMaterialId() {
@@ -100,12 +174,20 @@ public class Material {
         this.quantity = quantity;
     }
 
-    public String getUnit() {
-        return unit;
+    public int getMinQuantity() {
+        return minQuantity;
     }
 
-    public void setUnit(String unit) {
-        this.unit = unit;
+    public void setMinQuantity(int minQuantity) {
+        this.minQuantity = minQuantity;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
     }
 
     public Timestamp getCreatedAt() {
@@ -116,12 +198,12 @@ public class Material {
         this.createdAt = createdAt;
     }
 
-    public int getCategoryId() {
-        return categoryId;
+    public Timestamp getUpdatedAt() {
+        return updatedAt;
     }
 
-    public void setCategoryId(int categoryId) {
-        this.categoryId = categoryId;
+    public void setUpdatedAt(Timestamp updatedAt) {
+        this.updatedAt = updatedAt;
     }
 
     public String getCategoryName() {
@@ -147,41 +229,14 @@ public class Material {
     public void setStatusName(String statusName) {
         this.statusName = statusName;
     }
-    private int importQuantity;
-    private Timestamp importDate;
-    private int exportQuantity;
-    private Timestamp exportDate;
 
-    public int getImportQuantity() {
-        return importQuantity;
+    // Alias methods for JSP compatibility
+    public Timestamp getCreatedDate() {
+        return getCreatedAt();
     }
 
-    public void setImportQuantity(int importQuantity) {
-        this.importQuantity = importQuantity;
-    }
-
-    public Timestamp getImportDate() {
-        return importDate;
-    }
-
-    public void setImportDate(Timestamp importDate) {
-        this.importDate = importDate;
-    }
-
-    public int getExportQuantity() {
-        return exportQuantity;
-    }
-
-    public void setExportQuantity(int exportQuantity) {
-        this.exportQuantity = exportQuantity;
-    }
-
-    public Timestamp getExportDate() {
-        return exportDate;
-    }
-
-    public void setExportDate(Timestamp exportDate) {
-        this.exportDate = exportDate;
+    public Timestamp getLastUpdatedDate() {
+        return getUpdatedAt();
     }
 
 }

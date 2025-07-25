@@ -133,8 +133,11 @@ public class RequestDetailDAO {
 
             String checkSql = "SELECT COUNT(*) FROM RequestDetail WHERE RequestId = ? AND MaterialId = ?";
             String insertSql = "INSERT INTO RequestDetail (RequestId, MaterialId, Quantity) VALUES (?, ?, ?)";
+            String updateSql = "UPDATE RequestDetail SET Quantity = ? WHERE RequestId = ? AND MaterialId = ?";
 
-            try (PreparedStatement checkStmt = conn.prepareStatement(checkSql); PreparedStatement insertStmt = conn.prepareStatement(insertSql)) {
+            try (PreparedStatement checkStmt = conn.prepareStatement(checkSql);
+                 PreparedStatement insertStmt = conn.prepareStatement(insertSql);
+                 PreparedStatement updateStmt = conn.prepareStatement(updateSql)) {
 
                 for (RequestDetail detail : newDetails) {
                     checkStmt.setInt(1, requestId);
@@ -142,15 +145,22 @@ public class RequestDetailDAO {
 
                     try (ResultSet rs = checkStmt.executeQuery()) {
                         if (rs.next() && rs.getInt(1) == 0) {
+                            // Insert nếu chưa có
                             insertStmt.setInt(1, requestId);
                             insertStmt.setInt(2, detail.getMaterialId());
                             insertStmt.setInt(3, detail.getQuantity());
                             insertStmt.addBatch();
+                        } else {
+                            // Update nếu đã có
+                            updateStmt.setInt(1, detail.getQuantity());
+                            updateStmt.setInt(2, requestId);
+                            updateStmt.setInt(3, detail.getMaterialId());
+                            updateStmt.addBatch();
                         }
                     }
                 }
-
                 insertStmt.executeBatch();
+                updateStmt.executeBatch();
             }
 
             conn.commit();
