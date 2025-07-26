@@ -19,7 +19,7 @@ public class MyRequestServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        if (!AuthorizationHelper.hasAnyRole(request, "Accountant", "Warehouse Staff", "Company Staff")) {
+        if (!AuthorizationHelper.hasAnyRole(request, "Warehouse Staff", "Company Staff", "Warehouse Manager")) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied.");
             return;
         }
