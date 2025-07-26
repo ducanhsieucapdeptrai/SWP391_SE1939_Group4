@@ -15,7 +15,7 @@ public class UserDAO extends DBContext {
         Users user = null;
         String sql = "SELECT u.*, r.RoleName FROM Users u JOIN Roles r ON u.RoleId = r.RoleId WHERE u.Email = ?";
 
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, email);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -63,19 +63,19 @@ public class UserDAO extends DBContext {
     }
 
     public Users getUserById(int id) {
-        String sql = "SELECT * FROM users WHERE userId = ?";
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        String sql = "SELECT * FROM Users WHERE UserId = ?";
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     Users user = new Users();
-                    user.setUserId(rs.getInt("userId"));
-                    user.setFullName(rs.getString("fullName"));
-                    user.setEmail(rs.getString("email"));
-                    user.setPhone(rs.getString("phone"));
-                    user.setUserImage(rs.getString("userImage"));
-                    user.setRoleId(rs.getInt("roleId"));
-                    user.setIsActive(rs.getBoolean("isActive"));
+                    user.setUserId(rs.getInt("UserId"));
+                    user.setFullName(rs.getString("FullName"));
+                    user.setEmail(rs.getString("Email"));
+                    user.setPhone(rs.getString("Phone"));
+                    user.setUserImage(rs.getString("UserImage"));
+                    user.setRoleId(rs.getInt("RoleId"));
+                    user.setIsActive(rs.getBoolean("IsActive"));
                     return user;
                 }
             }
@@ -87,16 +87,16 @@ public class UserDAO extends DBContext {
 
     public List<Users> getUsers(String searchQuery, int roleId, int status, String sortBy, String sortOrder, int page, int pageSize) {
         List<Users> list = new ArrayList<>();
-        StringBuilder sql = new StringBuilder("SELECT * FROM users WHERE 1=1");
+        StringBuilder sql = new StringBuilder("SELECT * FROM Users WHERE 1=1");
 
         if (searchQuery != null && !searchQuery.trim().isEmpty()) {
-            sql.append(" AND (fullName LIKE ? OR email LIKE ?)");
+            sql.append(" AND (FullName LIKE ? OR Email LIKE ?)");
         }
         if (roleId > 0) {
-            sql.append(" AND roleId = ?");
+            sql.append(" AND RoleId = ?");
         }
         if (status != -1) {
-            sql.append(" AND isActive = ?");
+            sql.append(" AND IsActive = ?");
         }
 
         if (sortBy != null && !sortBy.isEmpty()) {
@@ -107,7 +107,11 @@ public class UserDAO extends DBContext {
 
         sql.append(" LIMIT ? OFFSET ?");
 
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        // Debug logging
+        System.out.println("DEBUG getUsers - SQL: " + sql.toString());
+        System.out.println("DEBUG getUsers - searchQuery: " + searchQuery + ", roleId: " + roleId + ", status: " + status + ", page: " + page + ", pageSize: " + pageSize);
+
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
             int paramIndex = 1;
             if (searchQuery != null && !searchQuery.trim().isEmpty()) {
                 ps.setString(paramIndex++, "%" + searchQuery + "%");
@@ -125,11 +129,11 @@ public class UserDAO extends DBContext {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     Users user = new Users();
-                    user.setUserId(rs.getInt("userId"));
-                    user.setFullName(rs.getString("fullName"));
-                    user.setEmail(rs.getString("email"));
-                    user.setRoleId(rs.getInt("roleId"));
-                    user.setIsActive(rs.getBoolean("isActive"));
+                    user.setUserId(rs.getInt("UserId"));
+                    user.setFullName(rs.getString("FullName"));
+                    user.setEmail(rs.getString("Email"));
+                    user.setRoleId(rs.getInt("RoleId"));
+                    user.setIsActive(rs.getBoolean("IsActive"));
                     list.add(user);
                 }
             }
@@ -141,19 +145,23 @@ public class UserDAO extends DBContext {
 
     public int getUserCount(String searchQuery, int roleId, int status) {
         int count = 0;
-        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM users WHERE 1=1");
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM Users WHERE 1=1");
 
         if (searchQuery != null && !searchQuery.trim().isEmpty()) {
-            sql.append(" AND (fullName LIKE ? OR email LIKE ?)");
+            sql.append(" AND (FullName LIKE ? OR Email LIKE ?)");
         }
         if (roleId > 0) {
-            sql.append(" AND roleId = ?");
+            sql.append(" AND RoleId = ?");
         }
         if (status != -1) {
-            sql.append(" AND isActive = ?");
+            sql.append(" AND IsActive = ?");
         }
 
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+        // Debug logging
+        System.out.println("DEBUG getUserCount - SQL: " + sql.toString());
+        System.out.println("DEBUG getUserCount - searchQuery: " + searchQuery + ", roleId: " + roleId + ", status: " + status);
+
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql.toString())) {
             int paramIndex = 1;
             if (searchQuery != null && !searchQuery.trim().isEmpty()) {
                 ps.setString(paramIndex++, "%" + searchQuery + "%");
@@ -169,9 +177,11 @@ public class UserDAO extends DBContext {
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     count = rs.getInt(1);
+                    System.out.println("DEBUG getUserCount - count result: " + count);
                 }
             }
         } catch (SQLException e) {
+            System.out.println("DEBUG getUserCount - SQLException: " + e.getMessage());
             e.printStackTrace();
         }
         return count;
@@ -179,15 +189,15 @@ public class UserDAO extends DBContext {
 
     public List<Users> getAllUsers() {
         List<Users> list = new ArrayList<>();
-        String sql = "SELECT * FROM users";
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+        String sql = "SELECT * FROM Users";
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 Users user = new Users();
-                user.setUserId(rs.getInt("userId"));
-                user.setFullName(rs.getString("fullName"));
-                user.setEmail(rs.getString("email"));
-                user.setRoleId(rs.getInt("roleId"));
-                user.setIsActive(rs.getBoolean("isActive"));
+                user.setUserId(rs.getInt("UserId"));
+                user.setFullName(rs.getString("FullName"));
+                user.setEmail(rs.getString("Email"));
+                user.setRoleId(rs.getInt("RoleId"));
+                user.setIsActive(rs.getBoolean("IsActive"));
                 list.add(user);
             }
         } catch (SQLException e) {
@@ -198,7 +208,7 @@ public class UserDAO extends DBContext {
 
     public boolean deleteUserById(int userId) {
         String sql = "DELETE FROM Users WHERE UserId = ?";
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, userId);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -209,12 +219,12 @@ public class UserDAO extends DBContext {
 
     public List<Role> getAllRoles() {
         List<Role> list = new ArrayList<>();
-        String sql = "SELECT * FROM roles";
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+        String sql = "SELECT * FROM Roles";
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 Role role = new Role();
-                role.setRoleId(rs.getInt("roleId"));
-                role.setRoleName(rs.getString("roleName"));
+                role.setRoleId(rs.getInt("RoleId"));
+                role.setRoleName(rs.getString("RoleName"));
                 list.add(role);
             }
         } catch (SQLException e) {
@@ -225,7 +235,7 @@ public class UserDAO extends DBContext {
 
     public String getRoleName(int roleId) {
         String sql = "SELECT RoleName FROM Roles WHERE RoleId = ?";
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, roleId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -252,8 +262,8 @@ public class UserDAO extends DBContext {
     }
 
     public boolean updateUserRoleAndStatus(int userId, int roleId, boolean isActive) {
-        String sql = "UPDATE users SET roleId = ?, isActive = ? WHERE userId = ?";
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        String sql = "UPDATE Users SET RoleId = ?, IsActive = ? WHERE UserId = ?";
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, roleId);
             ps.setBoolean(2, isActive);
             ps.setInt(3, userId);
@@ -266,17 +276,17 @@ public class UserDAO extends DBContext {
 
     private Users extractUserFromResultSet(ResultSet rs) throws SQLException {
         Users user = new Users();
-        user.setUserId(rs.getInt("UserID"));
+        user.setUserId(rs.getInt("UserId"));
         user.setFullName(rs.getString("FullName"));
         user.setUserImage(rs.getString("UserImage"));
         user.setEmail(rs.getString("Email"));
         user.setPhone(rs.getString("Phone"));
         user.setPassword(rs.getString("Password"));
-        user.setRoleId(rs.getInt("RoleID"));
+        user.setRoleId(rs.getInt("RoleId"));
         user.setIsActive(rs.getBoolean("IsActive"));
 
         Role role = new Role();
-        role.setRoleId(rs.getInt("RoleID"));
+        role.setRoleId(rs.getInt("RoleId"));
         role.setRoleName(rs.getString("RoleName"));
         user.setRole(role);
 
@@ -285,7 +295,7 @@ public class UserDAO extends DBContext {
 
     public Users getUserByEmailAndPhone(String email, String phone) {
         String sql = "SELECT u.*, r.RoleName FROM Users u JOIN Roles r ON u.RoleId = r.RoleId WHERE u.Email = ? AND u.Phone = ?";
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, email);
             ps.setString(2, phone);
             try (ResultSet rs = ps.executeQuery()) {
@@ -301,7 +311,7 @@ public class UserDAO extends DBContext {
 
     public boolean insertPasswordResetRequest(int userId) {
         String sql = "INSERT INTO PasswordResetRequest (UserId) VALUES (?)";
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, userId);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -312,7 +322,7 @@ public class UserDAO extends DBContext {
 
     public Users getUserByPhone(String phone) {
         String sql = "SELECT * FROM Users WHERE Phone = ?";
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, phone);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -361,7 +371,7 @@ public class UserDAO extends DBContext {
         String placeholders = String.join(",", java.util.Collections.nCopies(roleNames.size(), "?"));
         String sql = "SELECT u.*, r.RoleName FROM Users u JOIN Roles r ON u.RoleId = r.RoleId WHERE r.RoleName IN (" + placeholders + ")";
 
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = getNewConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             for (int i = 0; i < roleNames.size(); i++) {
                 ps.setString(i + 1, roleNames.get(i));
             }
